@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>win32/fnmatch.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1871.html'>win32</a>/fnmatch.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L59'>[^]</a><a href='#L153'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L59' title='Defined at 59.'>fnmatch</a></li>
+<li><a href='#L153' title='Defined at 153.'>rangematch</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * Copyright (c) 1989, 1993, 1994</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> *      The Regents of the University of California.  All rights reserved.</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> *</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * This code is derived from software contributed to Berkeley by</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * Guido van Rossum.</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> *</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * Redistribution and use in source and binary forms, with or without</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * modification, are permitted provided that the following conditions</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * are met:</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * 1. Redistributions of source code must retain the above copyright</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> *    notice, this list of conditions and the following disclaimer.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * 2. Redistributions in binary form must reproduce the above copyright</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> *    notice, this list of conditions and the following disclaimer in the</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *    documentation and/or other materials provided with the distribution.</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * 3. All advertising materials mentioning features or use of this software</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> *    must display the following acknowledgement:</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *      This product includes software developed by the University of</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> *      California, Berkeley and its contributors.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * 4. Neither the name of the University nor the names of its contributors</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> *    may be used to endorse or promote products derived from this software</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *    without specific prior written permission.</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * SUCH DAMAGE.</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * From FreeBSD fnmatch.c 1.11</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * $Id$</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> */</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/3833.html' title='Multiple used in 5 places.'>LIBC_SCCS</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../Y/25150.html' title='Multiple used in 19 places.'>lint</a>)
+<a id='L41' name='L41'></a>  41 <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <a href='../Y/35458.html' title='Multiple used in 2 places.'>sccsid</a>[] = "@(#)fnmatch.c   8.2 (Berkeley) 4/16/94";
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#endif</em> <em class='comment'>/* LIBC_SCCS and not lint */</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <em class='comment'>/*</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * Function fnmatch() as specified in POSIX 1003.2-1992, section B.6.</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * Compares a filename or pathname to a pattern.</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> */</em>
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#include</em> &lt;ctype.h&gt;
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#include</em> "<a href='1593.html'>fnmatch.h</a>"
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#define</em> <a href='../R/1724.html' title='Multiple referred from 45 places.'>EOS</a>     '\0'
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/1592.html#L153' title='Defined at 153 in win32/fnmatch.c.'>rangematch</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <strong class='reserved'>char</strong>, <strong class='reserved'>int</strong>);
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../R/19083.html' title='Multiple referred from 28 places.'>fnmatch</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L60' name='L60'></a>  60 <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a>;
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>char</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a>;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>for</strong> (<a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a> = <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>;;)
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>switch</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>++) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>case</strong> <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>:
+<a id='L67' name='L67'></a>  67                         <strong class='reserved'>if</strong> ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L48' title='Defined at 48 in win32/fnmatch.h.'>FNM_LEADING_DIR</a>) &amp;&amp; *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == '/')
+<a id='L68' name='L68'></a>  68                                 <strong class='reserved'>return</strong> (0);
+<a id='L69' name='L69'></a>  69                         <strong class='reserved'>return</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a> ? 0 : <a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>case</strong> '?':
+<a id='L71' name='L71'></a>  71                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>)
+<a id='L72' name='L72'></a>  72                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L73' name='L73'></a>  73                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == '/' &amp;&amp; (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>))
+<a id='L74' name='L74'></a>  74                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L75' name='L75'></a>  75                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == '.' &amp;&amp; (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L47' title='Defined at 47 in win32/fnmatch.h.'>FNM_PERIOD</a>) &amp;&amp;
+<a id='L76' name='L76'></a>  76                             (<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a> ||
+<a id='L77' name='L77'></a>  77                             ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>) &amp;&amp; *(<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> - 1) == '/')))
+<a id='L78' name='L78'></a>  78                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L79' name='L79'></a>  79                         ++<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>;
+<a id='L80' name='L80'></a>  80                         <strong class='reserved'>break</strong>;
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>case</strong> '*':
+<a id='L82' name='L82'></a>  82                         <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>;
+<a id='L83' name='L83'></a>  83                         <em class='comment'>/* Collapse multiple stars. */</em>
+<a id='L84' name='L84'></a>  84                         <strong class='reserved'>while</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == '*')
+<a id='L85' name='L85'></a>  85                                 <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *++<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>;
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == '.' &amp;&amp; (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L47' title='Defined at 47 in win32/fnmatch.h.'>FNM_PERIOD</a>) &amp;&amp;
+<a id='L88' name='L88'></a>  88                             (<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a> ||
+<a id='L89' name='L89'></a>  89                             ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>) &amp;&amp; *(<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> - 1) == '/')))
+<a id='L90' name='L90'></a>  90                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92                         <em class='comment'>/* Optimize for pattern with * at end or before /. */</em>
+<a id='L93' name='L93'></a>  93                         <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>)
+<a id='L94' name='L94'></a>  94                                 <strong class='reserved'>if</strong> (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>)
+<a id='L95' name='L95'></a>  95                                         <strong class='reserved'>return</strong> ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L48' title='Defined at 48 in win32/fnmatch.h.'>FNM_LEADING_DIR</a>) ||
+<a id='L96' name='L96'></a>  96                                             <a href='../Y/37559.html' title='Multiple used in 192 places.'>strchr</a>(<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, '/') == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> ?
+<a id='L97' name='L97'></a>  97                                             0 : <a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L98' name='L98'></a>  98                                 <strong class='reserved'>else</strong>
+<a id='L99' name='L99'></a>  99                                         <strong class='reserved'>return</strong> (0);
+<a id='L100' name='L100'></a> 100                         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == '/' &amp;&amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>) <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                                 <strong class='reserved'>if</strong> ((<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> = <a href='../Y/37559.html' title='Multiple used in 192 places.'>strchr</a>(<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, '/')) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L102' name='L102'></a> 102                                         <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L103' name='L103'></a> 103                                 <strong class='reserved'>break</strong>;
+<a id='L104' name='L104'></a> 104                         <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106                         <em class='comment'>/* General case, use recursion. */</em>
+<a id='L107' name='L107'></a> 107                         <strong class='reserved'>while</strong> ((<a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a> = *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>) != <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>) <em class='brace'>{</em>
+<a id='L108' name='L108'></a> 108                                 <strong class='reserved'>if</strong> (!<a href='../S/1592.html#L59' title='Defined at 59 in win32/fnmatch.c.'>fnmatch</a>(<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; ~<a href='../S/1593.html#L47' title='Defined at 47 in win32/fnmatch.h.'>FNM_PERIOD</a>))
+<a id='L109' name='L109'></a> 109                                         <strong class='reserved'>return</strong> (0);
+<a id='L110' name='L110'></a> 110                                 <strong class='reserved'>if</strong> (<a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a> == '/' &amp;&amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>)
+<a id='L111' name='L111'></a> 111                                         <strong class='reserved'>break</strong>;
+<a id='L112' name='L112'></a> 112                                 ++<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>;
+<a id='L113' name='L113'></a> 113                         <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114                         <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>case</strong> '[':
+<a id='L116' name='L116'></a> 116                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>)
+<a id='L117' name='L117'></a> 117                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L118' name='L118'></a> 118                         <strong class='reserved'>if</strong> (*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == '/' &amp;&amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L46' title='Defined at 46 in win32/fnmatch.h.'>FNM_PATHNAME</a>)
+<a id='L119' name='L119'></a> 119                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L120' name='L120'></a> 120                         <strong class='reserved'>if</strong> ((<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a> =
+<a id='L121' name='L121'></a> 121                             <a href='../S/1592.html#L153' title='Defined at 153 in win32/fnmatch.c.'>rangematch</a>(<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L122' name='L122'></a> 122                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L123' name='L123'></a> 123                         ++<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>;
+<a id='L124' name='L124'></a> 124                         <strong class='reserved'>break</strong>;
+<a id='L125' name='L125'></a> 125                 <strong class='reserved'>case</strong> '\\':
+<a id='L126' name='L126'></a> 126                         <strong class='reserved'>if</strong> (!(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L45' title='Defined at 45 in win32/fnmatch.h.'>FNM_NOESCAPE</a>)) <em class='brace'>{</em>
+<a id='L127' name='L127'></a> 127                                 <strong class='reserved'>if</strong> ((<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>++) == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>) <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128                                         <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = '\\';
+<a id='L129' name='L129'></a> 129                                         --<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>;
+<a id='L130' name='L130'></a> 130                                 <em class='brace'>}</em>
+<a id='L131' name='L131'></a> 131                         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132                         <em class='comment'>/* FALLTHROUGH */</em>
+<a id='L133' name='L133'></a> 133                 <strong class='reserved'>default</strong>:
+<a id='L134' name='L134'></a> 134                         <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>)
+<a id='L135' name='L135'></a> 135                                 ;
+<a id='L136' name='L136'></a> 136                         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L49' title='Defined at 49 in win32/fnmatch.h.'>FNM_CASEFOLD</a>) &amp;&amp;
+<a id='L137' name='L137'></a> 137                                  (<a href='../Y/38807.html' title='Multiple used in 46 places.'>tolower</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>) ==
+<a id='L138' name='L138'></a> 138                                   <a href='../Y/38807.html' title='Multiple used in 46 places.'>tolower</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)*<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>)))
+<a id='L139' name='L139'></a> 139                                 ;
+<a id='L140' name='L140'></a> 140                         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L50' title='Defined at 50 in win32/fnmatch.h.'>FNM_PREFIX_DIRS</a>) &amp;&amp; *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a> &amp;&amp;
+<a id='L141' name='L141'></a> 141                              (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == '/' &amp;&amp; <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> != <a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a> ||
+<a id='L142' name='L142'></a> 142                              <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> == <a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a>+1 &amp;&amp; *<a href='../Y/37714.html' title='Multiple used in 6 places.'>stringstart</a> == '/') )
+<a id='L143' name='L143'></a> 143                                 <strong class='reserved'>return</strong> (0);
+<a id='L144' name='L144'></a> 144                         <strong class='reserved'>else</strong>
+<a id='L145' name='L145'></a> 145                                 <strong class='reserved'>return</strong> (<a href='../S/1593.html#L43' title='Defined at 43 in win32/fnmatch.h.'>FNM_NOMATCH</a>);
+<a id='L146' name='L146'></a> 146                         <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>++;
+<a id='L147' name='L147'></a> 147                         <strong class='reserved'>break</strong>;
+<a id='L148' name='L148'></a> 148                 <em class='brace'>}</em>
+<a id='L149' name='L149'></a> 149         <em class='comment'>/* NOTREACHED */</em>
+<a id='L150' name='L150'></a> 150 <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *
+<a id='L153' name='L153'></a> 153 <a href='../R/25741.html' title='Multiple referred from 2 places.'>rangematch</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, <strong class='reserved'>char</strong> <a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a>, <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L154' name='L154'></a> 154 <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155         <strong class='reserved'>int</strong> <a href='../Y/28104.html' title='Multiple used in 3 places.'>negate</a>, <a href='../Y/29360.html' title='Multiple used in 67 places.'>ok</a>;
+<a id='L156' name='L156'></a> 156         <strong class='reserved'>char</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a>;
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158         <em class='comment'>/*</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'>         * A bracket expression starting with an unquoted circumflex</em>
+<a id='L160' name='L160'></a> 160 <em class='comment'>         * character produces unspecified results (IEEE 1003.2-1992,</em>
+<a id='L161' name='L161'></a> 161 <em class='comment'>         * 3.13.2).  This implementation treats it like '!', for</em>
+<a id='L162' name='L162'></a> 162 <em class='comment'>         * consistency with the regular expression syntax.</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'>         * J.T. Conklin (conklin@ngai.kaleida.com)</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'>         */</em>
+<a id='L165' name='L165'></a> 165         <strong class='reserved'>if</strong> ( (<a href='../Y/28104.html' title='Multiple used in 3 places.'>negate</a> = (*<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a> == '!' || *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a> == '^')) )
+<a id='L166' name='L166'></a> 166                 ++<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>;
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168         <strong class='reserved'>if</strong> (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L49' title='Defined at 49 in win32/fnmatch.h.'>FNM_CASEFOLD</a>)
+<a id='L169' name='L169'></a> 169                 <a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a> = <a href='../Y/38807.html' title='Multiple used in 46 places.'>tolower</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a>);
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171         <strong class='reserved'>for</strong> (<a href='../Y/29360.html' title='Multiple used in 67 places.'>ok</a> = 0; (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>++) != ']';) <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172                 <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == '\\' &amp;&amp; !(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L45' title='Defined at 45 in win32/fnmatch.h.'>FNM_NOESCAPE</a>))
+<a id='L173' name='L173'></a> 173                         <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>++;
+<a id='L174' name='L174'></a> 174                 <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>)
+<a id='L175' name='L175'></a> 175                         <strong class='reserved'>return</strong> (<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177                 <strong class='reserved'>if</strong> (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L49' title='Defined at 49 in win32/fnmatch.h.'>FNM_CASEFOLD</a>)
+<a id='L178' name='L178'></a> 178                         <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = <a href='../Y/38807.html' title='Multiple used in 46 places.'>tolower</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>);
+<a id='L179' name='L179'></a> 179 
+<a id='L180' name='L180'></a> 180                 <strong class='reserved'>if</strong> (*<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a> == '-'
+<a id='L181' name='L181'></a> 181                     &amp;&amp; (<a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> = *(<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>+1)) != <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a> &amp;&amp; <a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> != ']') <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182                         <a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a> += 2;
+<a id='L183' name='L183'></a> 183                         <strong class='reserved'>if</strong> (<a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> == '\\' &amp;&amp; !(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L45' title='Defined at 45 in win32/fnmatch.h.'>FNM_NOESCAPE</a>))
+<a id='L184' name='L184'></a> 184                                 <a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> = *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>++;
+<a id='L185' name='L185'></a> 185                         <strong class='reserved'>if</strong> (<a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> == <a href='../D/2010.html' title='Multiple defined in 2 places.'>EOS</a>)
+<a id='L186' name='L186'></a> 186                                 <strong class='reserved'>return</strong> (<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188                         <strong class='reserved'>if</strong> (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1593.html#L49' title='Defined at 49 in win32/fnmatch.h.'>FNM_CASEFOLD</a>)
+<a id='L189' name='L189'></a> 189                                 <a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a> = <a href='../Y/38807.html' title='Multiple used in 46 places.'>tolower</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a>);
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191                         <strong class='reserved'>if</strong> ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> &lt;= (<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a> &amp;&amp;
+<a id='L192' name='L192'></a> 192                             (<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a> &lt;= (<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)<a href='../Y/13134.html' title='Multiple used in 311 places.'>c2</a>)
+<a id='L193' name='L193'></a> 193                                 <a href='../Y/29360.html' title='Multiple used in 67 places.'>ok</a> = 1;
+<a id='L194' name='L194'></a> 194                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == <a href='../Y/38260.html' title='Multiple used in 122 places.'>test</a>)
+<a id='L195' name='L195'></a> 195                         <a href='../Y/29360.html' title='Multiple used in 67 places.'>ok</a> = 1;
+<a id='L196' name='L196'></a> 196         <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197         <strong class='reserved'>return</strong> (<a href='../Y/29360.html' title='Multiple used in 67 places.'>ok</a> == <a href='../Y/28104.html' title='Multiple used in 3 places.'>negate</a> ? <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> : <a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>);
+<a id='L198' name='L198'></a> 198 <em class='brace'>}</em>
+<a id='L199' name='L199'></a> 199 
+<a id='L200' name='L200'></a> 200 <em class='comment'>/*</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'> * Local variables:</em>
+<a id='L202' name='L202'></a> 202 <em class='comment'> * tab-width: 4</em>
+<a id='L203' name='L203'></a> 203 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'> * End:</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L59'>[^]</a><a href='#L153'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

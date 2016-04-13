@@ -1,0 +1,500 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/intl/resourcebundle/resourcebundle_class.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1773.html'>intl</a>/<a href='../files/1786.html'>resourcebundle</a>/resourcebundle_class.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L426'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L39' title='Defined at 39.'>ResourceBundle_object_destroy</a></li>
+<li><a href='#L56' title='Defined at 56.'>ResourceBundle_object_create</a></li>
+<li><a href='#L76' title='Defined at 76.'>resourcebundle_ctor</a></li>
+<li><a href='#L131' title='Defined at 131.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L159' title='Defined at 159.'>PHP_FUNCTION</a></li>
+<li><a href='#L170' title='Defined at 170.'>resourcebundle_array_fetch</a></li>
+<li><a href='#L224' title='Defined at 224.'>resourcebundle_array_get</a></li>
+<li><a href='#L236' title='Defined at 236.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L263' title='Defined at 263.'>resourcebundle_array_count</a></li>
+<li><a href='#L281' title='Defined at 281.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L307' title='Defined at 307.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L354' title='Defined at 354.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L381' title='Defined at 381.'>ZEND_BEGIN_ARG_INFO_EX</a></li>
+<li><a href='#L426' title='Defined at 426.'>resourcebundle_register_class</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | Authors: Hans-Peter Oeri (University of St.Gallen) &lt;hp@oeri.ch&gt;      |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> &lt;unicode/ures.h&gt;
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;unicode/uenum.h&gt;
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;<a href='1627.html'>zend.h</a>&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;<a href='1653.html'>Zend/zend_exceptions.h</a>&gt;
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;<a href='1681.html'>Zend/zend_interfaces.h</a>&gt;
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> &lt;<a href='1378.html'>php.h</a>&gt;
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='416.html'>php_intl.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='387.html'>intl_data.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='382.html'>intl_common.h</a>"
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='418.html'>resourcebundle/resourcebundle.h</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='422.html'>resourcebundle/resourcebundle_iterator.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='420.html'>resourcebundle/resourcebundle_class.h</a>"
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>static</strong> <a href='../S/1731.html#L79' title='Defined at 79 in Zend/zend_types.h.'>zend_object_handlers</a> <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <em class='comment'>/* {{{ ResourceBundle_object_dtor */</em>
+<a id='L39' name='L39'></a>  39 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/419.html#L446' title='Referred from 446 in ext/intl/resourcebundle/resourcebundle_class.c.'>ResourceBundle_object_destroy</a>( <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> )
+<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a> *<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> = <a href='../S/420.html#L35' title='Defined at 35 in ext/intl/resourcebundle/resourcebundle_class.h.'>php_intl_resourcebundle_fetch_object</a>(<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>);
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <em class='comment'>// only free local errors</em>
+<a id='L44' name='L44'></a>  44         <a href='../S/388.html#L90' title='Defined at 90 in ext/intl/intl_error.c.'>intl_error_reset</a>( <a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) );
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>if</strong> (<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a>) <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47                 <a href='../Y/39717.html' title='Multiple used in 2 places.'>ures_close</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> );
+<a id='L48' name='L48'></a>  48         <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>if</strong> (<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>) <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50                 <a href='../Y/39717.html' title='Multiple used in 2 places.'>ures_close</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a> );
+<a id='L51' name='L51'></a>  51         <em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52 <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>/* }}} */</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='comment'>/* {{{ ResourceBundle_object_create */</em>
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>static</strong> <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/419.html#L432' title='Referred from 432 in ext/intl/resourcebundle/resourcebundle_class.c.'>ResourceBundle_object_create</a>( <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a> )
+<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a> *<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> = <a href='../S/1629.html#L166' title='Defined at 166 in Zend/zend_alloc.h.'>ecalloc</a>( 1, <strong class='reserved'>sizeof</strong>(<a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a>) + <a href='../S/1704.html#L84' title='Defined at 84 in Zend/zend_objects_API.h.'>zend_object_properties_size</a>(<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>));
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <a href='../S/1701.html#L30' title='Defined at 30 in Zend/zend_objects.c.'>zend_object_std_init</a>( &amp;<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/43662.html' title='Multiple used in 7 places.'>zend</a>, <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a> );
+<a id='L63' name='L63'></a>  63         <a href='../S/1631.html#L1172' title='Defined at 1172 in Zend/zend_API.c.'>object_properties_init</a>( &amp;<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/43662.html' title='Multiple used in 7 places.'>zend</a>, <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>);
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65         <a href='../S/388.html#L76' title='Defined at 76 in ext/intl/intl_error.c.'>intl_error_init</a>( <a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) );
+<a id='L66' name='L66'></a>  66         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L67' name='L67'></a>  67         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/43662.html' title='Multiple used in 7 places.'>zend</a>.<a href='../Y/19687.html' title='Multiple used in 446 places.'>handlers</a> = &amp;<a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>;
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>return</strong> &amp;<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/43662.html' title='Multiple used in 7 places.'>zend</a>;
+<a id='L72' name='L72'></a>  72 <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>/* }}} */</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <em class='comment'>/* {{{ ResourceBundle_ctor */</em>
+<a id='L76' name='L76'></a>  76 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/25915.html' title='Multiple referred from 2 places.'>resourcebundle_ctor</a>(<a href='../S/1627.html#L58' title='Defined at 58 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAMETERS</a>, <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/23812.html' title='Multiple used in 8 places.'>is_constructor</a>)
+<a id='L77' name='L77'></a>  77 <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>;
+<a id='L79' name='L79'></a>  79         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>          <a href='../Y/13047.html' title='Multiple used in 5 places.'>bundlename_len</a> = 0;
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>;
+<a id='L81' name='L81'></a>  81         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>          <a href='../Y/25326.html' title='Multiple used in 19 places.'>locale_len</a> = 0;
+<a id='L82' name='L82'></a>  82         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a>       <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> = 1;
+<a id='L83' name='L83'></a>  83         <strong class='reserved'>int</strong>         <a href='../Y/44078.html' title='Multiple used in 8 places.'>zpp_flags</a> = <a href='../Y/23812.html' title='Multiple used in 8 places.'>is_constructor</a> ? <a href='../S/1632.html#L265' title='Defined at 265 in Zend/zend_API.h.'>ZEND_PARSE_PARAMS_THROW</a> : 0;
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a>                  *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> = <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>;
+<a id='L86' name='L86'></a>  86         <a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a> *<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> = <a href='../S/420.html#L38' title='Defined at 38 in ext/intl/resourcebundle/resourcebundle_class.h.'>Z_INTL_RESOURCEBUNDLE_P</a>( <a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> );
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         <a href='../S/388.html#L90' title='Defined at 90 in ext/intl/intl_error.c.'>intl_error_reset</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> );
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L941' title='Defined at 941 in Zend/zend_API.c.'>zend_parse_parameters_ex</a>( <a href='../Y/44078.html' title='Multiple used in 8 places.'>zpp_flags</a>, <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "s!s!|b",
+<a id='L91' name='L91'></a>  91                 &amp;<a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>, &amp;<a href='../Y/25326.html' title='Multiple used in 19 places.'>locale_len</a>, &amp;<a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>, &amp;<a href='../Y/13047.html' title='Multiple used in 5 places.'>bundlename_len</a>, &amp;<a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L92' name='L92'></a>  92         <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L94' name='L94'></a>  94                         "resourcebundle_ctor: unable to parse input parameters", 0 );
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L96' name='L96'></a>  96         <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98         <a href='../S/387.html#L105' title='Defined at 105 in ext/intl/intl_data.h.'>INTL_CHECK_LOCALE_LEN_OR_FAILURE</a>(<a href='../Y/25326.html' title='Multiple used in 19 places.'>locale_len</a>);
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <strong class='reserved'>if</strong> (<a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                 <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> = <a href='../Y/23441.html' title='Multiple used in 17 places.'>intl_locale_get_default</a>();
+<a id='L102' name='L102'></a> 102         <em class='brace'>}</em>
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>if</strong> (<a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a>) <em class='brace'>{</em>
+<a id='L105' name='L105'></a> 105                 <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> = ures_open(<a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>));
+<a id='L106' name='L106'></a> 106         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L107' name='L107'></a> 107                 <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> = ures_openDirect(<a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>));
+<a id='L108' name='L108'></a> 108         <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110         <a href='../S/387.html#L77' title='Defined at 77 in ext/intl/intl_data.h.'>INTL_CTOR_CHECK_STATUS</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>, "resourcebundle_ctor: Cannot load libICU resource bundle");
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>if</strong> (!<a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> &amp;&amp; (<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) == <a href='../Y/7068.html' title='Multiple used in 3 places.'>U_USING_FALLBACK_WARNING</a> ||
+<a id='L113' name='L113'></a> 113                         <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) == <a href='../Y/7067.html' title='Multiple used in 3 places.'>U_USING_DEFAULT_WARNING</a>)) <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114                 <strong class='reserved'>char</strong> *<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>;
+<a id='L115' name='L115'></a> 115                 <a href='../S/388.html#L224' title='Defined at 224 in ext/intl/intl_error.c.'>intl_errors_set_code</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>));
+<a id='L116' name='L116'></a> 116                 <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>(&amp;<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 0, "resourcebundle_ctor: Cannot load libICU resource "
+<a id='L117' name='L117'></a> 117                                 "'%s' without fallback from %s to %s",
+<a id='L118' name='L118'></a> 118                                 <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a> ? <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a> : "(default data)", <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>,
+<a id='L119' name='L119'></a> 119                                 <a href='../Y/39724.html' title='Multiple used in 2 places.'>ures_getLocaleByType</a>(
+<a id='L120' name='L120'></a> 120                                         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a>, <a href='../Y/6770.html' title='Multiple used in 5 places.'>ULOC_ACTUAL_LOCALE</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>)));
+<a id='L121' name='L121'></a> 121                 <a href='../S/388.html#L213' title='Defined at 213 in ext/intl/intl_error.c.'>intl_errors_set_custom_msg</a>(<a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>), <a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 1);
+<a id='L122' name='L122'></a> 122                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>);
+<a id='L123' name='L123'></a> 123                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L124' name='L124'></a> 124         <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>/* }}} */</em>
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130 <em class='comment'>/* {{{ arginfo_resourcebundle__construct */</em>
+<a id='L131' name='L131'></a> 131 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11285.html' title='Multiple used in 3 places.'>arginfo_resourcebundle___construct</a>, 0, 0, 2 )
+<a id='L132' name='L132'></a> 132         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> )
+<a id='L133' name='L133'></a> 133         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a> )
+<a id='L134' name='L134'></a> 134         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> )
+<a id='L135' name='L135'></a> 135 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L136' name='L136'></a> 136 <em class='comment'>/* }}} */</em>
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138 <em class='comment'>/* {{{ proto void ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )</em>
+<a id='L139' name='L139'></a> 139 <em class='comment'> * ResourceBundle object constructor</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'> */</em>
+<a id='L141' name='L141'></a> 141 <a href='../D/8302.html' title='Multiple defined in 300 places.'>PHP_METHOD</a>( <a href='../Y/5467.html' title='Multiple used in 3 places.'>ResourceBundle</a>, <a href='../Y/7952.html' title='Multiple used in 180 places.'>__construct</a> )
+<a id='L142' name='L142'></a> 142 <em class='brace'>{</em>
+<a id='L143' name='L143'></a> 143         <a href='../S/1627.html#L331' title='Defined at 331 in Zend/zend.h.'>zend_error_handling</a> <a href='../Y/17059.html' title='Multiple used in 104 places.'>error_handling</a>;
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <a href='../S/1631.html#L4045' title='Defined at 4045 in Zend/zend_API.c.'>zend_replace_error_handling</a>(<a href='../S/1627.html#L324' title='Defined at 324 in Zend/zend.h.'>EH_THROW</a>, <a href='../Y/3497.html' title='Multiple used in 14 places.'>IntlException_ce_ptr</a>, &amp;<a href='../Y/17059.html' title='Multiple used in 104 places.'>error_handling</a>);
+<a id='L146' name='L146'></a> 146         <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a> = <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>();
+<a id='L147' name='L147'></a> 147         <strong class='reserved'>if</strong> (<a href='../S/419.html#L76' title='Defined at 76 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_ctor</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, 1) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L148' name='L148'></a> 148                 <strong class='reserved'>if</strong> (!<a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/17215.html' title='Multiple used in 684 places.'>exception</a>)) <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149                         <a href='../S/1652.html#L920' title='Defined at 920 in Zend/zend_exceptions.c.'>zend_throw_exception</a>(<a href='../Y/3497.html' title='Multiple used in 14 places.'>IntlException_ce_ptr</a>, "Constructor failed", 0);
+<a id='L150' name='L150'></a> 150                 <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151         <em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152         <a href='../S/1631.html#L4085' title='Defined at 4085 in Zend/zend_API.c.'>zend_restore_error_handling</a>(&amp;<a href='../Y/17059.html' title='Multiple used in 104 places.'>error_handling</a>);
+<a id='L153' name='L153'></a> 153 <em class='brace'>}</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'>/* }}} */</em>
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156 <em class='comment'>/* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'>proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'>*/</em>
+<a id='L159' name='L159'></a> 159 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>( <a href='../Y/34674.html' title='Multiple used in 4 places.'>resourcebundle_create</a> )
+<a id='L160' name='L160'></a> 160 <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161         <a href='../S/1632.html#L378' title='Defined at 378 in Zend/zend_API.h.'>object_init_ex</a>( <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> );
+<a id='L162' name='L162'></a> 162         <strong class='reserved'>if</strong> (<a href='../S/419.html#L76' title='Defined at 76 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_ctor</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, 0) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163                 <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L164' name='L164'></a> 164                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L165' name='L165'></a> 165         <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166 <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'>/* }}} */</em>
+<a id='L168' name='L168'></a> 168 
+<a id='L169' name='L169'></a> 169 <em class='comment'>/* {{{ resourcebundle_array_fetch */</em>
+<a id='L170' name='L170'></a> 170 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/25913.html' title='Multiple referred from 2 places.'>resourcebundle_array_fetch</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <strong class='reserved'>int</strong> <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a>)
+<a id='L171' name='L171'></a> 171 <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>     <a href='../Y/26426.html' title='Multiple used in 5 places.'>meindex</a> = 0;
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>char</strong> *      <a href='../Y/26427.html' title='Multiple used in 5 places.'>mekey</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L174' name='L174'></a> 174     <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a>    <a href='../S/800.html#L1002' title='Defined at 1002 in ext/mysqlnd/mysqlnd_structs.h.'>is_numeric</a> = 0;
+<a id='L175' name='L175'></a> 175         <strong class='reserved'>char</strong>         *<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>;
+<a id='L176' name='L176'></a> 176         <a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a> *<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>;
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178         <a href='../S/388.html#L90' title='Defined at 90 in ext/intl/intl_error.c.'>intl_error_reset</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> );
+<a id='L179' name='L179'></a> 179         <a href='../S/420.html#L42' title='Defined at 42 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_FETCH_OBJECT</a>;
+<a id='L180' name='L180'></a> 180 
+<a id='L181' name='L181'></a> 181         <strong class='reserved'>if</strong>(<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>) == <a href='../S/1731.html#L306' title='Defined at 306 in Zend/zend_types.h.'>IS_LONG</a>) <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182                 <a href='../S/800.html#L1002' title='Defined at 1002 in ext/mysqlnd/mysqlnd_structs.h.'>is_numeric</a> = 1;
+<a id='L183' name='L183'></a> 183                 <a href='../Y/26426.html' title='Multiple used in 5 places.'>meindex</a> = (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>)<a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>(<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>);
+<a id='L184' name='L184'></a> 184                 <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a> = <a href='../Y/39719.html' title='Multiple used in 2 places.'>ures_getByIndex</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a>, <a href='../Y/26426.html' title='Multiple used in 5 places.'>meindex</a>, <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) );
+<a id='L185' name='L185'></a> 185         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L186' name='L186'></a> 186                 <a href='../Y/26427.html' title='Multiple used in 5 places.'>mekey</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>);
+<a id='L187' name='L187'></a> 187                 <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a> = ures_getByKey(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a>, <a href='../Y/26427.html' title='Multiple used in 5 places.'>mekey</a>, <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) );
+<a id='L188' name='L188'></a> 188         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                 <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(<a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>), <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L190' name='L190'></a> 190                         "resourcebundle_get: index should be integer or string", 0);
+<a id='L191' name='L191'></a> 191                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L192' name='L192'></a> 192         <em class='brace'>}</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <a href='../S/388.html#L159' title='Defined at 159 in ext/intl/intl_error.c.'>intl_error_set_code</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) );
+<a id='L195' name='L195'></a> 195         <strong class='reserved'>if</strong> (<a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>))) <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196                 <strong class='reserved'>if</strong> (<a href='../S/800.html#L1002' title='Defined at 1002 in ext/mysqlnd/mysqlnd_structs.h.'>is_numeric</a>) <em class='brace'>{</em>
+<a id='L197' name='L197'></a> 197                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>( &amp;<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 0, "Cannot load resource element %d", <a href='../Y/26426.html' title='Multiple used in 5 places.'>meindex</a> );
+<a id='L198' name='L198'></a> 198                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L199' name='L199'></a> 199                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>( &amp;<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 0, "Cannot load resource element '%s'", <a href='../Y/26427.html' title='Multiple used in 5 places.'>mekey</a> );
+<a id='L200' name='L200'></a> 200                 <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201                 <a href='../S/388.html#L213' title='Defined at 213 in ext/intl/intl_error.c.'>intl_errors_set_custom_msg</a>( <a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>), <a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 1 );
+<a id='L202' name='L202'></a> 202                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>);
+<a id='L203' name='L203'></a> 203                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L204' name='L204'></a> 204         <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         <strong class='reserved'>if</strong> (!<a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> &amp;&amp; (<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) == <a href='../Y/7068.html' title='Multiple used in 3 places.'>U_USING_FALLBACK_WARNING</a> || <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>) == <a href='../Y/7067.html' title='Multiple used in 3 places.'>U_USING_DEFAULT_WARNING</a>)) <em class='brace'>{</em>
+<a id='L207' name='L207'></a> 207                 <a href='../Y/6738.html' title='Multiple used in 85 places.'>UErrorCode</a> <a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a>;
+<a id='L208' name='L208'></a> 208                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> = <a href='../Y/39724.html' title='Multiple used in 2 places.'>ures_getLocaleByType</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a>, <a href='../Y/6770.html' title='Multiple used in 5 places.'>ULOC_ACTUAL_LOCALE</a>, &amp;<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a> );
+<a id='L209' name='L209'></a> 209                 <strong class='reserved'>if</strong> (<a href='../S/800.html#L1002' title='Defined at 1002 in ext/mysqlnd/mysqlnd_structs.h.'>is_numeric</a>) <em class='brace'>{</em>
+<a id='L210' name='L210'></a> 210                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>( &amp;<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 0, "Cannot load element %d without fallback from to %s", <a href='../Y/26426.html' title='Multiple used in 5 places.'>meindex</a>, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> );
+<a id='L211' name='L211'></a> 211                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>( &amp;<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 0, "Cannot load element '%s' without fallback from to %s", <a href='../Y/26427.html' title='Multiple used in 5 places.'>mekey</a>, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a> );
+<a id='L213' name='L213'></a> 213                 <em class='brace'>}</em>
+<a id='L214' name='L214'></a> 214                 <a href='../S/388.html#L213' title='Defined at 213 in ext/intl/intl_error.c.'>intl_errors_set_custom_msg</a>( <a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>), <a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>, 1 );
+<a id='L215' name='L215'></a> 215                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/31349.html' title='Multiple used in 109 places.'>pbuf</a>);
+<a id='L216' name='L216'></a> 216                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L217' name='L217'></a> 217         <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219         <a href='../S/417.html#L27' title='Defined at 27 in ext/intl/resourcebundle/resourcebundle.c.'>resourcebundle_extract_value</a>( <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> );
+<a id='L220' name='L220'></a> 220 <em class='brace'>}</em>
+<a id='L221' name='L221'></a> 221 <em class='comment'>/* }}} */</em>
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223 <em class='comment'>/* {{{ resourcebundle_array_get */</em>
+<a id='L224' name='L224'></a> 224 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../S/419.html#L447' title='Referred from 447 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_get</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, <strong class='reserved'>int</strong> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>)
+<a id='L225' name='L225'></a> 225 <em class='brace'>{</em>
+<a id='L226' name='L226'></a> 226         <strong class='reserved'>if</strong>(<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L227' name='L227'></a> 227                 <a href='../S/1378.html#L288' title='Defined at 288 in main/php.h.'>php_error</a>( <a href='../S/1651.html#L25' title='Defined at 25 in Zend/zend_errors.h.'>E_ERROR</a>, "Cannot apply [] to ResourceBundle object" );
+<a id='L228' name='L228'></a> 228         <em class='brace'>}</em>
+<a id='L229' name='L229'></a> 229         <a href='../S/1731.html#L591' title='Defined at 591 in Zend/zend_types.h.'>ZVAL_NULL</a>(<a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>);
+<a id='L230' name='L230'></a> 230         <a href='../S/419.html#L170' title='Defined at 170 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_fetch</a>(<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, <a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>, 1);
+<a id='L231' name='L231'></a> 231         <strong class='reserved'>return</strong> <a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>;
+<a id='L232' name='L232'></a> 232 <em class='brace'>}</em>
+<a id='L233' name='L233'></a> 233 <em class='comment'>/* }}} */</em>
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235 <em class='comment'>/* {{{ arginfo_resourcebundle_get */</em>
+<a id='L236' name='L236'></a> 236 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11289.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get</a>, 0, 0, 1 )
+<a id='L237' name='L237'></a> 237         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a> )
+<a id='L238' name='L238'></a> 238         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> )
+<a id='L239' name='L239'></a> 239 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L240' name='L240'></a> 240 <em class='comment'>/* }}} */</em>
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242 <em class='comment'>/* {{{ proto mixed ResourceBundle::get( integer|string $resindex [, bool $fallback = true ] )</em>
+<a id='L243' name='L243'></a> 243 <em class='comment'> * proto mixed resourcebundle_get( ResourceBundle $rb, integer|string $resindex [, bool $fallback = true ] )</em>
+<a id='L244' name='L244'></a> 244 <em class='comment'> * Get resource identified by numerical index or key name.</em>
+<a id='L245' name='L245'></a> 245 <em class='comment'> */</em>
+<a id='L246' name='L246'></a> 246 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>( <a href='../Y/34675.html' title='Multiple used in 4 places.'>resourcebundle_get</a> )
+<a id='L247' name='L247'></a> 247 <em class='brace'>{</em>
+<a id='L248' name='L248'></a> 248         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a>   <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> = 1;
+<a id='L249' name='L249'></a> 249         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *          <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>;
+<a id='L250' name='L250'></a> 250         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *      <a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>;
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "Oz|b",    &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a>, &amp;<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, &amp;<a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L253' name='L253'></a> 253                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L254' name='L254'></a> 254                         "resourcebundle_get: unable to parse input params", 0);
+<a id='L255' name='L255'></a> 255                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L256' name='L256'></a> 256         <em class='brace'>}</em>
+<a id='L257' name='L257'></a> 257 
+<a id='L258' name='L258'></a> 258         <a href='../S/419.html#L170' title='Defined at 170 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_fetch</a>(<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/17556.html' title='Multiple used in 16 places.'>fallback</a>);
+<a id='L259' name='L259'></a> 259 <em class='brace'>}</em>
+<a id='L260' name='L260'></a> 260 <em class='comment'>/* }}} */</em>
+<a id='L261' name='L261'></a> 261 
+<a id='L262' name='L262'></a> 262 <em class='comment'>/* {{{ resourcebundle_array_count */</em>
+<a id='L263' name='L263'></a> 263 <strong class='reserved'>int</strong> <a href='../S/419.html#L448' title='Referred from 448 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_count</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> *<a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>)
+<a id='L264' name='L264'></a> 264 <em class='brace'>{</em>
+<a id='L265' name='L265'></a> 265         <a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a> *<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>;
+<a id='L266' name='L266'></a> 266         <a href='../S/420.html#L41' title='Defined at 41 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK</a>;
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268         <strong class='reserved'>if</strong> (<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L269' name='L269'></a> 269                 <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(&amp;<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L270' name='L270'></a> 270                                 "Found unconstructed ResourceBundle", 0);
+<a id='L271' name='L271'></a> 271                 <strong class='reserved'>return</strong> 0;
+<a id='L272' name='L272'></a> 272         <em class='brace'>}</em>
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274         *<a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a> = <a href='../Y/39725.html' title='Multiple used in 3 places.'>ures_getSize</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> );
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L277' name='L277'></a> 277 <em class='brace'>}</em>
+<a id='L278' name='L278'></a> 278 <em class='comment'>/* }}} */</em>
+<a id='L279' name='L279'></a> 279 
+<a id='L280' name='L280'></a> 280 <em class='comment'>/* {{{ arginfo_resourcebundle_count */</em>
+<a id='L281' name='L281'></a> 281 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11286.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_count</a>, 0, 0, 0 )
+<a id='L282' name='L282'></a> 282 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L283' name='L283'></a> 283 <em class='comment'>/* }}} */</em>
+<a id='L284' name='L284'></a> 284 
+<a id='L285' name='L285'></a> 285 <em class='comment'>/* {{{ proto int ResourceBundle::count()</em>
+<a id='L286' name='L286'></a> 286 <em class='comment'> * proto int resourcebundle_count( ResourceBundle $bundle )</em>
+<a id='L287' name='L287'></a> 287 <em class='comment'> * Get resources count</em>
+<a id='L288' name='L288'></a> 288 <em class='comment'> */</em>
+<a id='L289' name='L289'></a> 289 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>( <a href='../Y/34673.html' title='Multiple used in 4 places.'>resourcebundle_count</a> )
+<a id='L290' name='L290'></a> 290 <em class='brace'>{</em>
+<a id='L291' name='L291'></a> 291         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>                <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L292' name='L292'></a> 292         <a href='../S/420.html#L40' title='Defined at 40 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_INIT_VARS</a>;
+<a id='L293' name='L293'></a> 293 
+<a id='L294' name='L294'></a> 294         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "O", &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> ) <em class='brace'>{</em>
+<a id='L295' name='L295'></a> 295                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L296' name='L296'></a> 296                         "resourcebundle_count: unable to parse input params", 0);
+<a id='L297' name='L297'></a> 297                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L298' name='L298'></a> 298         <em class='brace'>}</em>
+<a id='L299' name='L299'></a> 299 
+<a id='L300' name='L300'></a> 300         <a href='../S/420.html#L42' title='Defined at 42 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_FETCH_OBJECT</a>;
+<a id='L301' name='L301'></a> 301 
+<a id='L302' name='L302'></a> 302         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/39725.html' title='Multiple used in 3 places.'>ures_getSize</a>( <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>-&gt;<a href='../Y/26421.html' title='Multiple used in 88 places.'>me</a> );
+<a id='L303' name='L303'></a> 303         <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>( <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> );
+<a id='L304' name='L304'></a> 304 <em class='brace'>}</em>
+<a id='L305' name='L305'></a> 305 
+<a id='L306' name='L306'></a> 306 <em class='comment'>/* {{{ arginfo_resourcebundle_getlocales */</em>
+<a id='L307' name='L307'></a> 307 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11295.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_getlocales</a>, 0, 0, 1 )
+<a id='L308' name='L308'></a> 308         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>( 0, <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a> )
+<a id='L309' name='L309'></a> 309 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L310' name='L310'></a> 310 <em class='comment'>/* }}} */</em>
+<a id='L311' name='L311'></a> 311 
+<a id='L312' name='L312'></a> 312 <em class='comment'>/* {{{ proto array ResourceBundle::getLocales( string $bundlename )</em>
+<a id='L313' name='L313'></a> 313 <em class='comment'> * proto array resourcebundle_locales( string $bundlename )</em>
+<a id='L314' name='L314'></a> 314 <em class='comment'> * Get available locales from ResourceBundle name</em>
+<a id='L315' name='L315'></a> 315 <em class='comment'> */</em>
+<a id='L316' name='L316'></a> 316 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>( <a href='../Y/34679.html' title='Multiple used in 4 places.'>resourcebundle_locales</a> )
+<a id='L317' name='L317'></a> 317 <em class='brace'>{</em>
+<a id='L318' name='L318'></a> 318         <strong class='reserved'>char</strong> * <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>;
+<a id='L319' name='L319'></a> 319         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>    <a href='../Y/13047.html' title='Multiple used in 5 places.'>bundlename_len</a> = 0;
+<a id='L320' name='L320'></a> 320         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../Y/16872.html' title='Multiple used in 2311 places.'>entry</a>;
+<a id='L321' name='L321'></a> 321         <strong class='reserved'>int</strong> <a href='../Y/16877.html' title='Multiple used in 130 places.'>entry_len</a>;
+<a id='L322' name='L322'></a> 322         <a href='../Y/6737.html' title='Multiple used in 4 places.'>UEnumeration</a> *<a href='../Y/22561.html' title='Multiple used in 5 places.'>icuenum</a>;
+<a id='L323' name='L323'></a> 323         <a href='../Y/6738.html' title='Multiple used in 85 places.'>UErrorCode</a>   <a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a> = <a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>;
+<a id='L324' name='L324'></a> 324 
+<a id='L325' name='L325'></a> 325         <a href='../S/388.html#L202' title='Defined at 202 in ext/intl/intl_error.c.'>intl_errors_reset</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> );
+<a id='L326' name='L326'></a> 326 
+<a id='L327' name='L327'></a> 327         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "s", &amp;<a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>, &amp;<a href='../Y/13047.html' title='Multiple used in 5 places.'>bundlename_len</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L328' name='L328'></a> 328         <em class='brace'>{</em>
+<a id='L329' name='L329'></a> 329                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L330' name='L330'></a> 330                         "resourcebundle_locales: unable to parse input params", 0);
+<a id='L331' name='L331'></a> 331                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L332' name='L332'></a> 332         <em class='brace'>}</em>
+<a id='L333' name='L333'></a> 333 
+<a id='L334' name='L334'></a> 334         <strong class='reserved'>if</strong>(<a href='../Y/13047.html' title='Multiple used in 5 places.'>bundlename_len</a> == 0) <em class='brace'>{</em>
+<a id='L335' name='L335'></a> 335                 <em class='comment'>// fetch default locales list</em>
+<a id='L336' name='L336'></a> 336                 <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L337' name='L337'></a> 337         <em class='brace'>}</em>
+<a id='L338' name='L338'></a> 338 
+<a id='L339' name='L339'></a> 339         <a href='../Y/22561.html' title='Multiple used in 5 places.'>icuenum</a> = <a href='../Y/39729.html' title='Multiple used in 2 places.'>ures_openAvailableLocales</a>( <a href='../Y/13046.html' title='Multiple used in 13 places.'>bundlename</a>, &amp;<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a> );
+<a id='L340' name='L340'></a> 340         <a href='../S/387.html#L49' title='Defined at 49 in ext/intl/intl_data.h.'>INTL_CHECK_STATUS</a>(<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a>, "Cannot fetch locales list");
+<a id='L341' name='L341'></a> 341 
+<a id='L342' name='L342'></a> 342         uenum_reset( <a href='../Y/22561.html' title='Multiple used in 5 places.'>icuenum</a>, &amp;<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a> );
+<a id='L343' name='L343'></a> 343         <a href='../S/387.html#L49' title='Defined at 49 in ext/intl/intl_data.h.'>INTL_CHECK_STATUS</a>(<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a>, "Cannot iterate locales list");
+<a id='L344' name='L344'></a> 344 
+<a id='L345' name='L345'></a> 345         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>( <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a> );
+<a id='L346' name='L346'></a> 346         <strong class='reserved'>while</strong> ((<a href='../Y/16872.html' title='Multiple used in 2311 places.'>entry</a> = <a href='../Y/39433.html' title='Multiple used in 2 places.'>uenum_next</a>( <a href='../Y/22561.html' title='Multiple used in 5 places.'>icuenum</a>, &amp;<a href='../Y/16877.html' title='Multiple used in 130 places.'>entry_len</a>, &amp;<a href='../Y/22562.html' title='Multiple used in 11 places.'>icuerror</a> ))) <em class='brace'>{</em>
+<a id='L347' name='L347'></a> 347                 <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>( <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, (<strong class='reserved'>char</strong> *) <a href='../Y/16872.html' title='Multiple used in 2311 places.'>entry</a>, <a href='../Y/16877.html' title='Multiple used in 130 places.'>entry_len</a>);
+<a id='L348' name='L348'></a> 348         <em class='brace'>}</em>
+<a id='L349' name='L349'></a> 349         <a href='../Y/39432.html' title='Multiple used in 4 places.'>uenum_close</a>( <a href='../Y/22561.html' title='Multiple used in 5 places.'>icuenum</a> );
+<a id='L350' name='L350'></a> 350 <em class='brace'>}</em>
+<a id='L351' name='L351'></a> 351 <em class='comment'>/* }}} */</em>
+<a id='L352' name='L352'></a> 352 
+<a id='L353' name='L353'></a> 353 <em class='comment'>/* {{{ arginfo_resourcebundle_get_error_code */</em>
+<a id='L354' name='L354'></a> 354 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11290.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get_error_code</a>, 0, 0, 0 )
+<a id='L355' name='L355'></a> 355 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L356' name='L356'></a> 356 <em class='comment'>/* }}} */</em>
+<a id='L357' name='L357'></a> 357 
+<a id='L358' name='L358'></a> 358 <em class='comment'>/* {{{ proto string ResourceBundle::getErrorCode( )</em>
+<a id='L359' name='L359'></a> 359 <em class='comment'> * proto string resourcebundle_get_error_code( ResourceBundle $bundle )</em>
+<a id='L360' name='L360'></a> 360 <em class='comment'> * Get text description for ResourceBundle's last error code.</em>
+<a id='L361' name='L361'></a> 361 <em class='comment'> */</em>
+<a id='L362' name='L362'></a> 362 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>( <a href='../Y/34676.html' title='Multiple used in 4 places.'>resourcebundle_get_error_code</a> )
+<a id='L363' name='L363'></a> 363 <em class='brace'>{</em>
+<a id='L364' name='L364'></a> 364         <a href='../S/420.html#L40' title='Defined at 40 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_INIT_VARS</a>;
+<a id='L365' name='L365'></a> 365 
+<a id='L366' name='L366'></a> 366         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "O",
+<a id='L367' name='L367'></a> 367                 &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L368' name='L368'></a> 368         <em class='brace'>{</em>
+<a id='L369' name='L369'></a> 369                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L370' name='L370'></a> 370                         "resourcebundle_get_error_code: unable to parse input params", 0 );
+<a id='L371' name='L371'></a> 371                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L372' name='L372'></a> 372         <em class='brace'>}</em>
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> = <a href='../S/420.html#L38' title='Defined at 38 in ext/intl/resourcebundle/resourcebundle_class.h.'>Z_INTL_RESOURCEBUNDLE_P</a>( <a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> );
+<a id='L375' name='L375'></a> 375 
+<a id='L376' name='L376'></a> 376         <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>));
+<a id='L377' name='L377'></a> 377 <em class='brace'>}</em>
+<a id='L378' name='L378'></a> 378 <em class='comment'>/* }}} */</em>
+<a id='L379' name='L379'></a> 379 
+<a id='L380' name='L380'></a> 380 <em class='comment'>/* {{{ arginfo_resourcebundle_get_error_message */</em>
+<a id='L381' name='L381'></a> 381 <a href='../R/13677.html' title='Multiple referred from 1840 places.'>ZEND_BEGIN_ARG_INFO_EX</a>( <a href='../Y/11292.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get_error_message</a>, 0, 0, 0 )
+<a id='L382' name='L382'></a> 382 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L383' name='L383'></a> 383 <em class='comment'>/* }}} */</em>
+<a id='L384' name='L384'></a> 384 
+<a id='L385' name='L385'></a> 385 <em class='comment'>/* {{{ proto string ResourceBundle::getErrorMessage( )</em>
+<a id='L386' name='L386'></a> 386 <em class='comment'> * proto string resourcebundle_get_error_message( ResourceBundle $bundle )</em>
+<a id='L387' name='L387'></a> 387 <em class='comment'> * Get text description for ResourceBundle's last error.</em>
+<a id='L388' name='L388'></a> 388 <em class='comment'> */</em>
+<a id='L389' name='L389'></a> 389 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>( <a href='../Y/34677.html' title='Multiple used in 4 places.'>resourcebundle_get_error_message</a> )
+<a id='L390' name='L390'></a> 390 <em class='brace'>{</em>
+<a id='L391' name='L391'></a> 391         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a>* <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L392' name='L392'></a> 392         <a href='../S/420.html#L40' title='Defined at 40 in ext/intl/resourcebundle/resourcebundle_class.h.'>RESOURCEBUNDLE_METHOD_INIT_VARS</a>;
+<a id='L393' name='L393'></a> 393 
+<a id='L394' name='L394'></a> 394         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "O",
+<a id='L395' name='L395'></a> 395                 &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L396' name='L396'></a> 396         <em class='brace'>{</em>
+<a id='L397' name='L397'></a> 397                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L398' name='L398'></a> 398                         "resourcebundle_get_error_message: unable to parse input params", 0 );
+<a id='L399' name='L399'></a> 399                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L400' name='L400'></a> 400         <em class='brace'>}</em>
+<a id='L401' name='L401'></a> 401 
+<a id='L402' name='L402'></a> 402         <a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a> = <a href='../S/420.html#L38' title='Defined at 38 in ext/intl/resourcebundle/resourcebundle_class.h.'>Z_INTL_RESOURCEBUNDLE_P</a>( <a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> );
+<a id='L403' name='L403'></a> 403         <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a> = <a href='../S/388.html#L132' title='Defined at 132 in ext/intl/intl_error.c.'>intl_error_get_message</a>(<a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/34004.html' title='Multiple used in 64 places.'>rb</a>));
+<a id='L404' name='L404'></a> 404         <a href='../S/1632.html#L633' title='Defined at 633 in Zend/zend_API.h.'>RETURN_STR</a>(<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>);
+<a id='L405' name='L405'></a> 405 <em class='brace'>}</em>
+<a id='L406' name='L406'></a> 406 <em class='comment'>/* }}} */</em>
+<a id='L407' name='L407'></a> 407 
+<a id='L408' name='L408'></a> 408 <em class='comment'>/* {{{ ResourceBundle_class_functions</em>
+<a id='L409' name='L409'></a> 409 <em class='comment'> * Every 'ResourceBundle' class method has an entry in this table</em>
+<a id='L410' name='L410'></a> 410 <em class='comment'> */</em>
+<a id='L411' name='L411'></a> 411 <strong class='reserved'>static</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/5469.html' title='Multiple used in 2 places.'>ResourceBundle_class_functions</a>[] = <em class='brace'>{</em>
+<a id='L412' name='L412'></a> 412         <a href='../S/1378.html#L346' title='Defined at 346 in main/php.h.'>PHP_ME</a>( <a href='../Y/5467.html' title='Multiple used in 3 places.'>ResourceBundle</a>, <a href='../Y/7952.html' title='Multiple used in 180 places.'>__construct</a>, <a href='../Y/11285.html' title='Multiple used in 3 places.'>arginfo_resourcebundle___construct</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a>|<a href='../S/1643.html#L215' title='Defined at 215 in Zend/zend_compile.h.'>ZEND_ACC_CTOR</a> )
+<a id='L413' name='L413'></a> 413         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( <a href='../Y/14577.html' title='Multiple used in 13 places.'>create</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/34674.html' title='Multiple used in 4 places.'>resourcebundle_create</a> ), <a href='../Y/11285.html' title='Multiple used in 3 places.'>arginfo_resourcebundle___construct</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a>|<a href='../S/1643.html#L189' title='Defined at 189 in Zend/zend_compile.h.'>ZEND_ACC_STATIC</a> )
+<a id='L414' name='L414'></a> 414         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( <a href='../Y/18898.html' title='Multiple used in 43 places.'>get</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>(<a href='../Y/34675.html' title='Multiple used in 4 places.'>resourcebundle_get</a>), <a href='../Y/11289.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a> )
+<a id='L415' name='L415'></a> 415         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( <a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>(<a href='../Y/34673.html' title='Multiple used in 4 places.'>resourcebundle_count</a>), <a href='../Y/11286.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_count</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a> )
+<a id='L416' name='L416'></a> 416         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( getLocales, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>(<a href='../Y/34679.html' title='Multiple used in 4 places.'>resourcebundle_locales</a>), <a href='../Y/11295.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_getlocales</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a> | <a href='../S/1643.html#L189' title='Defined at 189 in Zend/zend_compile.h.'>ZEND_ACC_STATIC</a> )
+<a id='L417' name='L417'></a> 417         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( <a href='../Y/18978.html' title='Multiple used in 8 places.'>getErrorCode</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>(<a href='../Y/34676.html' title='Multiple used in 4 places.'>resourcebundle_get_error_code</a>), <a href='../Y/11290.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get_error_code</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a> )
+<a id='L418' name='L418'></a> 418         <a href='../S/1632.html#L82' title='Defined at 82 in Zend/zend_API.h.'>ZEND_NAMED_ME</a>( <a href='../Y/18979.html' title='Multiple used in 8 places.'>getErrorMessage</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>(<a href='../Y/34677.html' title='Multiple used in 4 places.'>resourcebundle_get_error_message</a>), <a href='../Y/11292.html' title='Multiple used in 2 places.'>arginfo_resourcebundle_get_error_message</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a> )
+<a id='L419' name='L419'></a> 419         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L420' name='L420'></a> 420 <em class='brace'>}</em>;
+<a id='L421' name='L421'></a> 421 <em class='comment'>/* }}} */</em>
+<a id='L422' name='L422'></a> 422 
+<a id='L423' name='L423'></a> 423 <em class='comment'>/* {{{ resourcebundle_register_class</em>
+<a id='L424' name='L424'></a> 424 <em class='comment'> * Initialize 'ResourceBundle' class</em>
+<a id='L425' name='L425'></a> 425 <em class='comment'> */</em>
+<a id='L426' name='L426'></a> 426 <strong class='reserved'>void</strong> <a href='../R/25926.html' title='Multiple referred from 2 places.'>resourcebundle_register_class</a>( <strong class='reserved'>void</strong> )
+<a id='L427' name='L427'></a> 427 <em class='brace'>{</em>
+<a id='L428' name='L428'></a> 428         <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>;
+<a id='L429' name='L429'></a> 429 
+<a id='L430' name='L430'></a> 430         <a href='../S/1632.html#L178' title='Defined at 178 in Zend/zend_API.h.'>INIT_CLASS_ENTRY</a>( <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>, "ResourceBundle", <a href='../Y/5469.html' title='Multiple used in 2 places.'>ResourceBundle_class_functions</a> );
+<a id='L431' name='L431'></a> 431 
+<a id='L432' name='L432'></a> 432         <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>.<a href='../Y/14612.html' title='Multiple used in 78 places.'>create_object</a> = <a href='../S/419.html#L56' title='Defined at 56 in ext/intl/resourcebundle/resourcebundle_class.c.'>ResourceBundle_object_create</a>;
+<a id='L433' name='L433'></a> 433         <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>.<a href='../Y/19193.html' title='Multiple used in 85 places.'>get_iterator</a> = <a href='../S/421.html#L150' title='Defined at 150 in ext/intl/resourcebundle/resourcebundle_iterator.c.'>resourcebundle_get_iterator</a>;
+<a id='L434' name='L434'></a> 434 
+<a id='L435' name='L435'></a> 435         <a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> = <a href='../S/1631.html#L2705' title='Defined at 2705 in Zend/zend_API.c.'>zend_register_internal_class</a>( &amp;<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a> );
+<a id='L436' name='L436'></a> 436 
+<a id='L437' name='L437'></a> 437         <strong class='reserved'>if</strong>( !<a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a> )
+<a id='L438' name='L438'></a> 438         <em class='brace'>{</em>
+<a id='L439' name='L439'></a> 439                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>(<a href='../S/1651.html#L25' title='Defined at 25 in Zend/zend_errors.h.'>E_ERROR</a>, "Failed to register ResourceBundle class");
+<a id='L440' name='L440'></a> 440                 <strong class='reserved'>return</strong>;
+<a id='L441' name='L441'></a> 441         <em class='brace'>}</em>
+<a id='L442' name='L442'></a> 442 
+<a id='L443' name='L443'></a> 443         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a> = <a href='../Y/37425.html' title='Multiple used in 38 places.'>std_object_handlers</a>;
+<a id='L444' name='L444'></a> 444         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>.<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> = <a href='../D/15498.html' title='Multiple defined in 4 places.'>XtOffsetOf</a>(<a href='../S/420.html#L33' title='Defined at 33 in ext/intl/resourcebundle/resourcebundle_class.h.'>ResourceBundle_object</a>, <a href='../Y/43662.html' title='Multiple used in 7 places.'>zend</a>);
+<a id='L445' name='L445'></a> 445         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>.<a href='../Y/13874.html' title='Multiple used in 53 places.'>clone_obj</a>          = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>; <em class='comment'>/* ICU ResourceBundle has no clone implementation */</em>
+<a id='L446' name='L446'></a> 446         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>.<a href='../Y/16272.html' title='Multiple used in 31 places.'>dtor_obj</a> = <a href='../S/419.html#L39' title='Defined at 39 in ext/intl/resourcebundle/resourcebundle_class.c.'>ResourceBundle_object_destroy</a>;
+<a id='L447' name='L447'></a> 447         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>.<a href='../Y/34061.html' title='Multiple used in 20 places.'>read_dimension</a> = <a href='../S/419.html#L224' title='Defined at 224 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_get</a>;
+<a id='L448' name='L448'></a> 448         <a href='../Y/5470.html' title='Multiple used in 8 places.'>ResourceBundle_object_handlers</a>.<a href='../Y/14481.html' title='Multiple used in 9 places.'>count_elements</a> = <a href='../S/419.html#L263' title='Defined at 263 in ext/intl/resourcebundle/resourcebundle_class.c.'>resourcebundle_array_count</a>;
+<a id='L449' name='L449'></a> 449 
+<a id='L450' name='L450'></a> 450         <a href='../S/1631.html#L2688' title='Defined at 2688 in Zend/zend_API.c.'>zend_class_implements</a>(<a href='../Y/5468.html' title='Multiple used in 11 places.'>ResourceBundle_ce_ptr</a>, 1, <a href='../Y/43709.html' title='Multiple used in 19 places.'>zend_ce_traversable</a>);
+<a id='L451' name='L451'></a> 451 <em class='brace'>}</em>
+<a id='L452' name='L452'></a> 452 <em class='comment'>/* }}} */</em>
+<a id='L453' name='L453'></a> 453 
+<a id='L454' name='L454'></a> 454 <em class='comment'>/*</em>
+<a id='L455' name='L455'></a> 455 <em class='comment'> * Local variables:</em>
+<a id='L456' name='L456'></a> 456 <em class='comment'> * tab-width: 4</em>
+<a id='L457' name='L457'></a> 457 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L458' name='L458'></a> 458 <em class='comment'> * End:</em>
+<a id='L459' name='L459'></a> 459 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L460' name='L460'></a> 460 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L461' name='L461'></a> 461 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L426'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

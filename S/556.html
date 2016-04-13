@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/mbstring/libmbfl/filters/mbfilter_qprint.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1794.html'>mbstring</a>/<a href='../files/1795.html'>libmbfl</a>/<a href='../files/1796.html'>filters</a>/mbfilter_qprint.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L72'>[^]</a><a href='#L224'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L72' title='Defined at 72.'>mbfl_filt_conv_qprintenc</a></li>
+<li><a href='#L144' title='Defined at 144.'>mbfl_filt_conv_qprintenc_flush</a></li>
+<li><a href='#L156' title='Defined at 156.'>mbfl_filt_conv_qprintdec</a></li>
+<li><a href='#L224' title='Defined at 224.'>mbfl_filt_conv_qprintdec_flush</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * "streamable kanji code filter and converter"</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * Copyright (c) 1998-2002 HappySize, Inc. All rights reserved.</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> *</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * LICENSE NOTICES</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> *</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * This file is part of "streamable kanji code filter and converter",</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * which is distributed under the terms of GNU Lesser General Public</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * License (version 2) as published by the Free Software Foundation.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> *</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * This software is distributed in the hope that it will be useful,</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * but WITHOUT ANY WARRANTY; without even the implied warranty of</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * GNU Lesser General Public License for more details.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * You should have received a copy of the GNU Lesser General Public</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * License along with "streamable kanji code filter and converter";</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * if not, write to the Free Software Foundation, Inc., 59 Temple Place,</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * Suite 330, Boston, MA  02111-1307  USA</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> *</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * The author of this file:</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> */</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>/*</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * The source code included in this files was separated from mbfilter.c</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * by moriyoshi koizumi &lt;moriyoshi@php.net&gt; on 4 dec 2002.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> */</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#endif</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> "<a href='624.html'>mbfilter.h</a>"
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> "<a href='557.html'>mbfilter_qprint.h</a>"
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> "<a href='592.html'>unicode_prop.h</a>"
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/26231.html' title='Multiple used in 2 places.'>mbfl_encoding_qprint_aliases</a>[] = <em class='brace'>{</em>"qprint", <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a><em class='brace'>}</em>;
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> <a href='../Y/26230.html' title='Multiple used in 3 places.'>mbfl_encoding_qprint</a> = <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../S/638.html#L48' title='Defined at 48 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_qprint</a>,
+<a id='L42' name='L42'></a>  42         "Quoted-Printable",
+<a id='L43' name='L43'></a>  43         "Quoted-Printable",
+<a id='L44' name='L44'></a>  44         (<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *(*)[])&amp;<a href='../Y/26231.html' title='Multiple used in 2 places.'>mbfl_encoding_qprint_aliases</a>,
+<a id='L45' name='L45'></a>  45         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L46' name='L46'></a>  46         <a href='../S/633.html#L45' title='Defined at 45 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_ENCTYPE_ENC_STRM</a> | <a href='../S/633.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_ENCTYPE_GL_UNSAFE</a>
+<a id='L47' name='L47'></a>  47 <em class='brace'>}</em>;
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <strong class='reserved'>const</strong> <strong class='reserved'>struct</strong> <a href='../S/635.html#L59' title='Defined at 59 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_vtbl</a> <a href='../Y/40322.html' title='Multiple used in 3 places.'>vtbl_8bit_qprint</a> = <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50         <a href='../S/638.html#L50' title='Defined at 50 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_8bit</a>,
+<a id='L51' name='L51'></a>  51         <a href='../S/638.html#L48' title='Defined at 48 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_qprint</a>,
+<a id='L52' name='L52'></a>  52         <a href='../S/634.html#L604' title='Defined at 604 in ext/mbstring/libmbfl/mbfl/mbfl_convert.c.'>mbfl_filt_conv_common_ctor</a>,
+<a id='L53' name='L53'></a>  53         <a href='../S/634.html#L621' title='Defined at 621 in ext/mbstring/libmbfl/mbfl/mbfl_convert.c.'>mbfl_filt_conv_common_dtor</a>,
+<a id='L54' name='L54'></a>  54         <a href='../S/556.html#L72' title='Defined at 72 in ext/mbstring/libmbfl/filters/mbfilter_qprint.c.'>mbfl_filt_conv_qprintenc</a>,
+<a id='L55' name='L55'></a>  55         <a href='../S/556.html#L144' title='Defined at 144 in ext/mbstring/libmbfl/filters/mbfilter_qprint.c.'>mbfl_filt_conv_qprintenc_flush</a> <em class='brace'>}</em>;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>const</strong> <strong class='reserved'>struct</strong> <a href='../S/635.html#L59' title='Defined at 59 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_vtbl</a> <a href='../Y/40420.html' title='Multiple used in 3 places.'>vtbl_qprint_8bit</a> = <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <a href='../S/638.html#L48' title='Defined at 48 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_qprint</a>,
+<a id='L59' name='L59'></a>  59         <a href='../S/638.html#L50' title='Defined at 50 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_8bit</a>,
+<a id='L60' name='L60'></a>  60         <a href='../S/634.html#L604' title='Defined at 604 in ext/mbstring/libmbfl/mbfl/mbfl_convert.c.'>mbfl_filt_conv_common_ctor</a>,
+<a id='L61' name='L61'></a>  61         <a href='../S/634.html#L621' title='Defined at 621 in ext/mbstring/libmbfl/mbfl/mbfl_convert.c.'>mbfl_filt_conv_common_dtor</a>,
+<a id='L62' name='L62'></a>  62         <a href='../S/556.html#L156' title='Defined at 156 in ext/mbstring/libmbfl/filters/mbfilter_qprint.c.'>mbfl_filt_conv_qprintdec</a>,
+<a id='L63' name='L63'></a>  63         <a href='../S/556.html#L224' title='Defined at 224 in ext/mbstring/libmbfl/filters/mbfilter_qprint.c.'>mbfl_filt_conv_qprintdec_flush</a> <em class='brace'>}</em>;
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <em class='sharp'>#define</em> <a href='../R/891.html' title='Multiple referred from 908 places.'>CK</a>(<a href='../Y/37373.html' title='Multiple used in 445 places.'>statement</a>)   <strong class='reserved'>do</strong> <em class='brace'>{</em> <strong class='reserved'>if</strong> ((<a href='../Y/37373.html' title='Multiple used in 445 places.'>statement</a>) &lt; 0) <strong class='reserved'>return</strong> (-1); <em class='brace'>}</em> <strong class='reserved'>while</strong> (0)
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 <em class='comment'>/*</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * any =&gt; Quoted-Printable</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> */</em>
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72 <strong class='reserved'>int</strong> <a href='../R/21202.html' title='Multiple referred from 2 places.'>mbfl_filt_conv_qprintenc</a>(<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>)
+<a id='L73' name='L73'></a>  73 <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74         <strong class='reserved'>int</strong> <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>switch</strong> (<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; 0xff) <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>case</strong> 0:
+<a id='L78' name='L78'></a>  78                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L79' name='L79'></a>  79                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>++;
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>break</strong>;
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>default</strong>:
+<a id='L82' name='L82'></a>  82                 <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> = <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>;
+<a id='L83' name='L83'></a>  83                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L84' name='L84'></a>  84                 <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = (<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; 0xff00) &gt;&gt; 8;
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>if</strong> (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == 0) <em class='brace'>{</em>           <em class='comment'>/* null */</em>
+<a id='L87' name='L87'></a>  87                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L88' name='L88'></a>  88                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp;= ~0xff00;
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>break</strong>;
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92                 <strong class='reserved'>if</strong> ((<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; <a href='../S/633.html#L91' title='Defined at 91 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_QPRINT_STS_MIME_HEADER</a>) == 0) <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93                         <strong class='reserved'>if</strong> (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == 0x0a || (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == 0x0d &amp;&amp; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> != 0x0a)) <em class='brace'>{</em>    <em class='comment'>/* line feed */</em>
+<a id='L94' name='L94'></a>  94                                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x0d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* CR */</em>
+<a id='L95' name='L95'></a>  95                                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x0a, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* LF */</em>
+<a id='L96' name='L96'></a>  96                                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp;= ~0xff00;
+<a id='L97' name='L97'></a>  97                                 <strong class='reserved'>break</strong>;
+<a id='L98' name='L98'></a>  98                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == 0x0d) <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99                                 <strong class='reserved'>break</strong>;
+<a id='L100' name='L100'></a> 100                         <em class='brace'>}</em>
+<a id='L101' name='L101'></a> 101                 <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103                 <strong class='reserved'>if</strong> ((<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; <a href='../S/633.html#L91' title='Defined at 91 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_QPRINT_STS_MIME_HEADER</a>) == 0  &amp;&amp; <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> &gt;= 72) <em class='brace'>{</em>  <em class='comment'>/* soft line feed */</em>
+<a id='L104' name='L104'></a> 104                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L105' name='L105'></a> 105                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x0d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* CR */</em>
+<a id='L106' name='L106'></a> 106                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x0a, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* LF */</em>
+<a id='L107' name='L107'></a> 107                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp;= ~0xff00;
+<a id='L108' name='L108'></a> 108                 <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110                 <strong class='reserved'>if</strong> (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &lt;= 0 || <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &gt;= 0x80 || <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == 0x3d            <em class='comment'>/* not ASCII or '=' */</em>
+<a id='L111' name='L111'></a> 111                    || ((<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; <a href='../S/633.html#L91' title='Defined at 91 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_QPRINT_STS_MIME_HEADER</a>) != 0 &amp;&amp;
+<a id='L112' name='L112'></a> 112                        (<a href='../Y/26126.html' title='Multiple used in 2 places.'>mbfl_charprop_table</a>[<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>] &amp; <a href='../S/592.html#L30' title='Defined at 30 in ext/mbstring/libmbfl/filters/unicode_prop.h.'>MBFL_CHP_MMHQENC</a>) != 0)) <em class='brace'>{</em>
+<a id='L113' name='L113'></a> 113                         <em class='comment'>/* hex-octet */</em>
+<a id='L114' name='L114'></a> 114                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L115' name='L115'></a> 115                         <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = (<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &gt;&gt; 4) &amp; 0xf;
+<a id='L116' name='L116'></a> 116                         <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> &lt; 10) <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117                                 <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> += 48;                <em class='comment'>/* '0' */</em>
+<a id='L118' name='L118'></a> 118                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                                 <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> += 55;                <em class='comment'>/* 'A' - 10 */</em>
+<a id='L120' name='L120'></a> 120                         <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L122' name='L122'></a> 122                         <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &amp; 0xf;
+<a id='L123' name='L123'></a> 123                         <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> &lt; 10) <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124                                 <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> += 48;
+<a id='L125' name='L125'></a> 125                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L126' name='L126'></a> 126                                 <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> += 55;
+<a id='L127' name='L127'></a> 127                         <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L129' name='L129'></a> 129                         <strong class='reserved'>if</strong> ((<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; <a href='../S/633.html#L91' title='Defined at 91 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_QPRINT_STS_MIME_HEADER</a>) == 0) <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> += 0x300;
+<a id='L131' name='L131'></a> 131                         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L134' name='L134'></a> 134                         <strong class='reserved'>if</strong> ((<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp; <a href='../S/633.html#L91' title='Defined at 91 in ext/mbstring/libmbfl/mbfl/mbfl_consts.h.'>MBFL_QPRINT_STS_MIME_HEADER</a>) == 0) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> += 0x100;
+<a id='L136' name='L136'></a> 136                         <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137                 <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138                 <strong class='reserved'>break</strong>;
+<a id='L139' name='L139'></a> 139         <em class='brace'>}</em>
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>return</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L142' name='L142'></a> 142 <em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <strong class='reserved'>int</strong> <a href='../R/21203.html' title='Multiple referred from 2 places.'>mbfl_filt_conv_qprintenc_flush</a>(<a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>)
+<a id='L145' name='L145'></a> 145 <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146         <em class='comment'>/* flush filter cache */</em>
+<a id='L147' name='L147'></a> 147         (*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/17929.html' title='Multiple used in 118 places.'>filter_function</a>)('\0', <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>);
+<a id='L148' name='L148'></a> 148         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> &amp;= ~0xffff;
+<a id='L149' name='L149'></a> 149         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = 0;
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>return</strong> 0;
+<a id='L151' name='L151'></a> 151 <em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153 <em class='comment'>/*</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'> * Quoted-Printable =&gt; any</em>
+<a id='L155' name='L155'></a> 155 <em class='comment'> */</em>
+<a id='L156' name='L156'></a> 156 <strong class='reserved'>int</strong> <a href='../R/21200.html' title='Multiple referred from 2 places.'>mbfl_filt_conv_qprintdec</a>(<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>)
+<a id='L157' name='L157'></a> 157 <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>;
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/19968.html' title='Multiple used in 4 places.'>hex2code_map</a>[] = <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L162' name='L162'></a> 162                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L163' name='L163'></a> 163                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L164' name='L164'></a> 164                  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+<a id='L165' name='L165'></a> 165                 -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L166' name='L166'></a> 166                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L167' name='L167'></a> 167                 -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L168' name='L168'></a> 168                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L169' name='L169'></a> 169                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L170' name='L170'></a> 170                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L171' name='L171'></a> 171                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L172' name='L172'></a> 172                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L173' name='L173'></a> 173                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L174' name='L174'></a> 174                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L175' name='L175'></a> 175                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+<a id='L176' name='L176'></a> 176                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+<a id='L177' name='L177'></a> 177         <em class='brace'>}</em>;
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179         <strong class='reserved'>switch</strong> (<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>) <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180         <strong class='reserved'>case</strong> 1:
+<a id='L181' name='L181'></a> 181                 <strong class='reserved'>if</strong> (<a href='../Y/19968.html' title='Multiple used in 4 places.'>hex2code_map</a>[<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> &amp; 0xff] &gt;= 0) <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L183' name='L183'></a> 183                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 2;
+<a id='L184' name='L184'></a> 184                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == 0x0d) <em class='brace'>{</em> <em class='comment'>/* soft line feed */</em>
+<a id='L185' name='L185'></a> 185                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 3;
+<a id='L186' name='L186'></a> 186                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == 0x0a) <em class='brace'>{</em> <em class='comment'>/* soft line feed */</em>
+<a id='L187' name='L187'></a> 187                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 0;
+<a id='L188' name='L188'></a> 188                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L190' name='L190'></a> 190                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L191' name='L191'></a> 191                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 0;
+<a id='L192' name='L192'></a> 192                 <em class='brace'>}</em>
+<a id='L193' name='L193'></a> 193                 <strong class='reserved'>break</strong>;
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>case</strong> 2:
+<a id='L195' name='L195'></a> 195                 <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> = <a href='../Y/19968.html' title='Multiple used in 4 places.'>hex2code_map</a>[<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> &amp; 0xff];
+<a id='L196' name='L196'></a> 196                 <strong class='reserved'>if</strong> (<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &lt; 0) <em class='brace'>{</em>
+<a id='L197' name='L197'></a> 197                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L198' name='L198'></a> 198                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L199' name='L199'></a> 199                         <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L200' name='L200'></a> 200                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L201' name='L201'></a> 201                         <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = <a href='../Y/19968.html' title='Multiple used in 4 places.'>hex2code_map</a>[<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>] &lt;&lt; 4 | <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>;
+<a id='L202' name='L202'></a> 202                 <em class='brace'>}</em>
+<a id='L203' name='L203'></a> 203                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L204' name='L204'></a> 204                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 0;
+<a id='L205' name='L205'></a> 205                 <strong class='reserved'>break</strong>;
+<a id='L206' name='L206'></a> 206         <strong class='reserved'>case</strong> 3:
+<a id='L207' name='L207'></a> 207                 <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> != 0x0a) <em class='brace'>{</em>                <em class='comment'>/* LF */</em>
+<a id='L208' name='L208'></a> 208                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L209' name='L209'></a> 209                 <em class='brace'>}</em>
+<a id='L210' name='L210'></a> 210                 <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 0;
+<a id='L211' name='L211'></a> 211                 <strong class='reserved'>break</strong>;
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>default</strong>:
+<a id='L213' name='L213'></a> 213                 <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> == 0x3d) <em class='brace'>{</em>                <em class='comment'>/* '=' */</em>
+<a id='L214' name='L214'></a> 214                         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 1;
+<a id='L215' name='L215'></a> 215                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L216' name='L216'></a> 216                         <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L217' name='L217'></a> 217                 <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218                 <strong class='reserved'>break</strong>;
+<a id='L219' name='L219'></a> 219         <em class='brace'>}</em>
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221         <strong class='reserved'>return</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L222' name='L222'></a> 222 <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224 <strong class='reserved'>int</strong> <a href='../R/21201.html' title='Multiple referred from 2 places.'>mbfl_filt_conv_qprintdec_flush</a>(<a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>)
+<a id='L225' name='L225'></a> 225 <em class='brace'>{</em>
+<a id='L226' name='L226'></a> 226         <strong class='reserved'>int</strong> <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>, <a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>;
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228         <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>;
+<a id='L229' name='L229'></a> 229         <a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>;
+<a id='L230' name='L230'></a> 230         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = 0;
+<a id='L231' name='L231'></a> 231         <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a> = 0;
+<a id='L232' name='L232'></a> 232         <em class='comment'>/* flush fragments */</em>
+<a id='L233' name='L233'></a> 233         <strong class='reserved'>if</strong> (<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> == 1) <em class='brace'>{</em>
+<a id='L234' name='L234'></a> 234                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L235' name='L235'></a> 235         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> == 2) <em class='brace'>{</em>
+<a id='L236' name='L236'></a> 236                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(0x3d, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));             <em class='comment'>/* '=' */</em>
+<a id='L237' name='L237'></a> 237                 <a href='../D/1038.html' title='Multiple defined in 61 places.'>CK</a>((*<a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../Y/30178.html' title='Multiple used in 841 places.'>output_function</a>)(<a href='../Y/13175.html' title='Multiple used in 406 places.'>cache</a>, <a href='../Y/17915.html' title='Multiple used in 3325 places.'>filter</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>));
+<a id='L238' name='L238'></a> 238         <em class='brace'>}</em>
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>return</strong> 0;
+<a id='L241' name='L241'></a> 241 <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L72'>[^]</a><a href='#L224'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

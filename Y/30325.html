@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pCache</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L10374'>pCache</a>           10374 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache;                /* Cache that owns this page */</span>
+<span class='curline'><a href='../S/1054.html#L10467'>pCache</a>           10467 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheIterateDirty(PCache *pCache, void (*xIter)(PgHdr *));</span>
+<span class='curline'><a href='../S/1054.html#L39283'>pCache</a>           39283 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_pcache *pCache;             /* Pluggable cache module */</span>
+<span class='curline'><a href='../S/1054.html#L39301'>pCache</a>           39301 ext/sqlite3/libsqlite/sqlite3.c   PCache *p = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L39361'>pCache</a>           39361 ext/sqlite3/libsqlite/sqlite3.c   if( p-&gt;pCache-&gt;bPurgeable ){</span>
+<span class='curline'><a href='../S/1054.html#L39363'>pCache</a>           39363 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pCache-&gt;pPage1 = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39365'>pCache</a>           39365 ext/sqlite3/libsqlite/sqlite3.c     sqlite3GlobalConfig.pcache2.xUnpin(p-&gt;pCache-&gt;pCache, p-&gt;pPage, 0);</span>
+<span class='curline'><a href='../S/1054.html#L39443'>pCache</a>           39443 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3PcacheSetPageSize(PCache *pCache, int szPage){</span>
+<span class='curline'><a href='../S/1054.html#L39444'>pCache</a>           39444 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nRef==0 &amp;&amp; pCache-&gt;pDirty==0 );</span>
+<span class='curline'><a href='../S/1054.html#L39445'>pCache</a>           39445 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;szPage ){</span>
+<span class='curline'><a href='../S/1054.html#L39448'>pCache</a>           39448 ext/sqlite3/libsqlite/sqlite3.c                 szPage, pCache-&gt;szExtra + ROUND8(sizeof(PgHdr)),</span>
+<span class='curline'><a href='../S/1054.html#L39449'>pCache</a>           39449 ext/sqlite3/libsqlite/sqlite3.c                 pCache-&gt;bPurgeable</span>
+<span class='curline'><a href='../S/1054.html#L39452'>pCache</a>           39452 ext/sqlite3/libsqlite/sqlite3.c     sqlite3GlobalConfig.pcache2.xCachesize(pNew, numberOfCachePages(pCache));</span>
+<span class='curline'><a href='../S/1054.html#L39453'>pCache</a>           39453 ext/sqlite3/libsqlite/sqlite3.c     if( pCache-&gt;pCache ){</span>
+<span class='curline'><a href='../S/1054.html#L39454'>pCache</a>           39454 ext/sqlite3/libsqlite/sqlite3.c       sqlite3GlobalConfig.pcache2.xDestroy(pCache-&gt;pCache);</span>
+<span class='curline'><a href='../S/1054.html#L39456'>pCache</a>           39456 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;pCache = pNew;</span>
+<span class='curline'><a href='../S/1054.html#L39457'>pCache</a>           39457 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;pPage1 = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39458'>pCache</a>           39458 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;szPage = szPage;</span>
+<span class='curline'><a href='../S/1054.html#L39488'>pCache</a>           39488 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache,       /* Obtain the page from this cache */</span>
+<span class='curline'><a href='../S/1054.html#L39494'>pCache</a>           39494 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39495'>pCache</a>           39495 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39506'>pCache</a>           39506 ext/sqlite3/libsqlite/sqlite3.c   eCreate = createFlag &amp; pCache-&gt;eCreate;</span>
+<span class='curline'><a href='../S/1054.html#L39508'>pCache</a>           39508 ext/sqlite3/libsqlite/sqlite3.c   assert( createFlag==0 || pCache-&gt;eCreate==eCreate );</span>
+<span class='curline'><a href='../S/1054.html#L39509'>pCache</a>           39509 ext/sqlite3/libsqlite/sqlite3.c   assert( createFlag==0 || eCreate==1+(!pCache-&gt;bPurgeable||!pCache-&gt;pDirty) );</span>
+<span class='curline'><a href='../S/1054.html#L39510'>pCache</a>           39510 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3GlobalConfig.pcache2.xFetch(pCache-&gt;pCache, pgno, eCreate);</span>
+<span class='curline'><a href='../S/1054.html#L39525'>pCache</a>           39525 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache,                 /* Obtain the page from this cache */</span>
+<span class='curline'><a href='../S/1054.html#L39530'>pCache</a>           39530 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;eCreate==2 ) return 0;</span>
+<span class='curline'><a href='../S/1054.html#L39538'>pCache</a>           39538 ext/sqlite3/libsqlite/sqlite3.c   for(pPg=pCache-&gt;pSynced; </span>
+<span class='curline'><a href='../S/1054.html#L39542'>pCache</a>           39542 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;pSynced = pPg;</span>
+<span class='curline'><a href='../S/1054.html#L39544'>pCache</a>           39544 ext/sqlite3/libsqlite/sqlite3.c     for(pPg=pCache-&gt;pDirtyTail; pPg &amp;&amp; pPg-&gt;nRef; pPg=pPg-&gt;pDirtyPrev);</span>
+<span class='curline'><a href='../S/1054.html#L39552'>pCache</a>           39552 ext/sqlite3/libsqlite/sqlite3.c                 sqlite3GlobalConfig.pcache.xPagecount(pCache-&gt;pCache),</span>
+<span class='curline'><a href='../S/1054.html#L39553'>pCache</a>           39553 ext/sqlite3/libsqlite/sqlite3.c                 numberOfCachePages(pCache));</span>
+<span class='curline'><a href='../S/1054.html#L39555'>pCache</a>           39555 ext/sqlite3/libsqlite/sqlite3.c     rc = pCache-&gt;xStress(pCache-&gt;pStress, pPg);</span>
+<span class='curline'><a href='../S/1054.html#L39560'>pCache</a>           39560 ext/sqlite3/libsqlite/sqlite3.c   *ppPage = sqlite3GlobalConfig.pcache2.xFetch(pCache-&gt;pCache, pgno, 2);</span>
+<span class='curline'><a href='../S/1054.html#L39574'>pCache</a>           39574 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache,             /* Obtain the page from this cache */</span>
+<span class='curline'><a href='../S/1054.html#L39586'>pCache</a>           39586 ext/sqlite3/libsqlite/sqlite3.c   memset(pPgHdr-&gt;pExtra, 0, pCache-&gt;szExtra);</span>
+<span class='curline'><a href='../S/1054.html#L39587'>pCache</a>           39587 ext/sqlite3/libsqlite/sqlite3.c   pPgHdr-&gt;pCache = pCache;</span>
+<span class='curline'><a href='../S/1054.html#L39589'>pCache</a>           39589 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3PcacheFetchFinish(pCache,pgno,pPage);</span>
+<span class='curline'><a href='../S/1054.html#L39599'>pCache</a>           39599 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache,             /* Obtain the page from this cache */</span>
+<span class='curline'><a href='../S/1054.html#L39609'>pCache</a>           39609 ext/sqlite3/libsqlite/sqlite3.c     return pcacheFetchFinishWithInit(pCache, pgno, pPage);</span>
+<span class='curline'><a href='../S/1054.html#L39612'>pCache</a>           39612 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;nRef++;</span>
+<span class='curline'><a href='../S/1054.html#L39616'>pCache</a>           39616 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;pPage1 = pPgHdr;</span>
+<span class='curline'><a href='../S/1054.html#L39629'>pCache</a>           39629 ext/sqlite3/libsqlite/sqlite3.c     p-&gt;pCache-&gt;nRef--;</span>
+<span class='curline'><a href='../S/1054.html#L39657'>pCache</a>           39657 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;pCache-&gt;nRef--;</span>
+<span class='curline'><a href='../S/1054.html#L39659'>pCache</a>           39659 ext/sqlite3/libsqlite/sqlite3.c     p-&gt;pCache-&gt;pPage1 = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39661'>pCache</a>           39661 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xUnpin(p-&gt;pCache-&gt;pCache, p-&gt;pPage, 1);</span>
+<span class='curline'><a href='../S/1054.html#L39694'>pCache</a>           39694 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheCleanAll(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39696'>pCache</a>           39696 ext/sqlite3/libsqlite/sqlite3.c   while( (p = pCache-&gt;pDirty)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L39704'>pCache</a>           39704 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheClearSyncFlags(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39706'>pCache</a>           39706 ext/sqlite3/libsqlite/sqlite3.c   for(p=pCache-&gt;pDirty; p; p=p-&gt;pDirtyNext){</span>
+<span class='curline'><a href='../S/1054.html#L39709'>pCache</a>           39709 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;pSynced = pCache-&gt;pDirtyTail;</span>
+<span class='curline'><a href='../S/1054.html#L39716'>pCache</a>           39716 ext/sqlite3/libsqlite/sqlite3.c   PCache *pCache = p-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L39719'>pCache</a>           39719 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xRekey(pCache-&gt;pCache, p-&gt;pPage, p-&gt;pgno,newPgno);</span>
+<span class='curline'><a href='../S/1054.html#L39735'>pCache</a>           39735 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheTruncate(PCache *pCache, Pgno pgno){</span>
+<span class='curline'><a href='../S/1054.html#L39736'>pCache</a>           39736 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;pCache ){</span>
+<span class='curline'><a href='../S/1054.html#L39739'>pCache</a>           39739 ext/sqlite3/libsqlite/sqlite3.c     for(p=pCache-&gt;pDirty; p; p=pNext){</span>
+<span class='curline'><a href='../S/1054.html#L39751'>pCache</a>           39751 ext/sqlite3/libsqlite/sqlite3.c     if( pgno==0 &amp;&amp; pCache-&gt;pPage1 ){</span>
+<span class='curline'><a href='../S/1054.html#L39752'>pCache</a>           39752 ext/sqlite3/libsqlite/sqlite3.c       memset(pCache-&gt;pPage1-&gt;pData, 0, pCache-&gt;szPage);</span>
+<span class='curline'><a href='../S/1054.html#L39755'>pCache</a>           39755 ext/sqlite3/libsqlite/sqlite3.c     sqlite3GlobalConfig.pcache2.xTruncate(pCache-&gt;pCache, pgno+1);</span>
+<span class='curline'><a href='../S/1054.html#L39762'>pCache</a>           39762 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheClose(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39763'>pCache</a>           39763 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39764'>pCache</a>           39764 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xDestroy(pCache-&gt;pCache);</span>
+<span class='curline'><a href='../S/1054.html#L39770'>pCache</a>           39770 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheClear(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39771'>pCache</a>           39771 ext/sqlite3/libsqlite/sqlite3.c   sqlite3PcacheTruncate(pCache, 0);</span>
+<span class='curline'><a href='../S/1054.html#L39847'>pCache</a>           39847 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE PgHdr *sqlite3PcacheDirtyList(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39849'>pCache</a>           39849 ext/sqlite3/libsqlite/sqlite3.c   for(p=pCache-&gt;pDirty; p; p=p-&gt;pDirtyNext){</span>
+<span class='curline'><a href='../S/1054.html#L39852'>pCache</a>           39852 ext/sqlite3/libsqlite/sqlite3.c   return pcacheSortDirtyList(pCache-&gt;pDirty);</span>
+<span class='curline'><a href='../S/1054.html#L39858'>pCache</a>           39858 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3PcacheRefCount(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39859'>pCache</a>           39859 ext/sqlite3/libsqlite/sqlite3.c   return pCache-&gt;nRef;</span>
+<span class='curline'><a href='../S/1054.html#L39872'>pCache</a>           39872 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3PcachePagecount(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39873'>pCache</a>           39873 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39874'>pCache</a>           39874 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3GlobalConfig.pcache2.xPagecount(pCache-&gt;pCache);</span>
+<span class='curline'><a href='../S/1054.html#L39881'>pCache</a>           39881 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3PcacheGetCachesize(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39882'>pCache</a>           39882 ext/sqlite3/libsqlite/sqlite3.c   return numberOfCachePages(pCache);</span>
+<span class='curline'><a href='../S/1054.html#L39889'>pCache</a>           39889 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheSetCachesize(PCache *pCache, int mxPage){</span>
+<span class='curline'><a href='../S/1054.html#L39890'>pCache</a>           39890 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39891'>pCache</a>           39891 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;szCache = mxPage;</span>
+<span class='curline'><a href='../S/1054.html#L39892'>pCache</a>           39892 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xCachesize(pCache-&gt;pCache,</span>
+<span class='curline'><a href='../S/1054.html#L39893'>pCache</a>           39893 ext/sqlite3/libsqlite/sqlite3.c                                          numberOfCachePages(pCache));</span>
+<span class='curline'><a href='../S/1054.html#L39899'>pCache</a>           39899 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheShrink(PCache *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L39900'>pCache</a>           39900 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;pCache!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39901'>pCache</a>           39901 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xShrink(pCache-&gt;pCache);</span>
+<span class='curline'><a href='../S/1054.html#L39917'>pCache</a>           39917 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3PcacheIterateDirty(PCache *pCache, void (*xIter)(PgHdr *)){</span>
+<span class='curline'><a href='../S/1054.html#L39919'>pCache</a>           39919 ext/sqlite3/libsqlite/sqlite3.c   for(pDirty=pCache-&gt;pDirty; pDirty; pDirty=pDirty-&gt;pDirtyNext){</span>
+<span class='curline'><a href='../S/1054.html#L40026'>pCache</a>           40026 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache;               /* Cache that currently owns this page */</span>
+<span class='curline'><a href='../S/1054.html#L40207'>pCache</a>           40207 ext/sqlite3/libsqlite/sqlite3.c static PgHdr1 *pcache1AllocPage(PCache1 *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L40214'>pCache</a>           40214 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCache-&gt;pGroup-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L40215'>pCache</a>           40215 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40217'>pCache</a>           40217 ext/sqlite3/libsqlite/sqlite3.c   pPg = pcache1Alloc(pCache-&gt;szPage);</span>
+<span class='curline'><a href='../S/1054.html#L40218'>pCache</a>           40218 ext/sqlite3/libsqlite/sqlite3.c   p = sqlite3Malloc(sizeof(PgHdr1) + pCache-&gt;szExtra);</span>
+<span class='curline'><a href='../S/1054.html#L40225'>pCache</a>           40225 ext/sqlite3/libsqlite/sqlite3.c   pPg = pcache1Alloc(ROUND8(sizeof(PgHdr1)) + pCache-&gt;szPage + pCache-&gt;szExtra);</span>
+<span class='curline'><a href='../S/1054.html#L40226'>pCache</a>           40226 ext/sqlite3/libsqlite/sqlite3.c   p = (PgHdr1 *)&amp;((u8 *)pPg)[pCache-&gt;szPage];</span>
+<span class='curline'><a href='../S/1054.html#L40228'>pCache</a>           40228 ext/sqlite3/libsqlite/sqlite3.c   pcache1EnterMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40233'>pCache</a>           40233 ext/sqlite3/libsqlite/sqlite3.c     if( pCache-&gt;bPurgeable ){</span>
+<span class='curline'><a href='../S/1054.html#L40234'>pCache</a>           40234 ext/sqlite3/libsqlite/sqlite3.c       pCache-&gt;pGroup-&gt;nCurrentPage++;</span>
+<span class='curline'><a href='../S/1054.html#L40250'>pCache</a>           40250 ext/sqlite3/libsqlite/sqlite3.c     PCache1 *pCache = p-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40251'>pCache</a>           40251 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3_mutex_held(p-&gt;pCache-&gt;pGroup-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L40256'>pCache</a>           40256 ext/sqlite3/libsqlite/sqlite3.c     if( pCache-&gt;bPurgeable ){</span>
+<span class='curline'><a href='../S/1054.html#L40257'>pCache</a>           40257 ext/sqlite3/libsqlite/sqlite3.c       pCache-&gt;pGroup-&gt;nCurrentPage--;</span>
+<span class='curline'><a href='../S/1054.html#L40295'>pCache</a>           40295 ext/sqlite3/libsqlite/sqlite3.c static int pcache1UnderMemoryPressure(PCache1 *pCache){</span>
+<span class='curline'><a href='../S/1054.html#L40296'>pCache</a>           40296 ext/sqlite3/libsqlite/sqlite3.c   if( pcache1.nSlot &amp;&amp; (pCache-&gt;szPage+pCache-&gt;szExtra)&lt;=pcache1.szSlot ){</span>
+<span class='curline'><a href='../S/1054.html#L40354'>pCache</a>           40354 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40359'>pCache</a>           40359 ext/sqlite3/libsqlite/sqlite3.c   pCache = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40360'>pCache</a>           40360 ext/sqlite3/libsqlite/sqlite3.c   pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40377'>pCache</a>           40377 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;nRecyclable--;</span>
+<span class='curline'><a href='../S/1054.html#L40389'>pCache</a>           40389 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40392'>pCache</a>           40392 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCache-&gt;pGroup-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L40393'>pCache</a>           40393 ext/sqlite3/libsqlite/sqlite3.c   h = pPage-&gt;iKey % pCache-&gt;nHash;</span>
+<span class='curline'><a href='../S/1054.html#L40394'>pCache</a>           40394 ext/sqlite3/libsqlite/sqlite3.c   for(pp=&amp;pCache-&gt;apHash[h]; (*pp)!=pPage; pp=&amp;(*pp)-&gt;pNext);</span>
+<span class='curline'><a href='../S/1054.html#L40397'>pCache</a>           40397 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;nPage--;</span>
+<span class='curline'><a href='../S/1054.html#L40408'>pCache</a>           40408 ext/sqlite3/libsqlite/sqlite3.c     assert( p-&gt;pCache-&gt;pGroup==pGroup );</span>
+<span class='curline'><a href='../S/1054.html#L40424'>pCache</a>           40424 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache,             /* The cache to truncate */</span>
+<span class='curline'><a href='../S/1054.html#L40429'>pCache</a>           40429 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCache-&gt;pGroup-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L40430'>pCache</a>           40430 ext/sqlite3/libsqlite/sqlite3.c   for(h=0; h&lt;pCache-&gt;nHash; h++){</span>
+<span class='curline'><a href='../S/1054.html#L40431'>pCache</a>           40431 ext/sqlite3/libsqlite/sqlite3.c     PgHdr1 **pp = &amp;pCache-&gt;apHash[h]; </span>
+<span class='curline'><a href='../S/1054.html#L40435'>pCache</a>           40435 ext/sqlite3/libsqlite/sqlite3.c         pCache-&gt;nPage--;</span>
+<span class='curline'><a href='../S/1054.html#L40445'>pCache</a>           40445 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nPage==nPage );</span>
+<span class='curline'><a href='../S/1054.html#L40487'>pCache</a>           40487 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache;      /* The newly created page cache */</span>
+<span class='curline'><a href='../S/1054.html#L40513'>pCache</a>           40513 ext/sqlite3/libsqlite/sqlite3.c   pCache = (PCache1 *)sqlite3MallocZero(sz);</span>
+<span class='curline'><a href='../S/1054.html#L40514'>pCache</a>           40514 ext/sqlite3/libsqlite/sqlite3.c   if( pCache ){</span>
+<span class='curline'><a href='../S/1054.html#L40516'>pCache</a>           40516 ext/sqlite3/libsqlite/sqlite3.c       pGroup = (PGroup*)&amp;pCache[1];</span>
+<span class='curline'><a href='../S/1054.html#L40521'>pCache</a>           40521 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;pGroup = pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40522'>pCache</a>           40522 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;szPage = szPage;</span>
+<span class='curline'><a href='../S/1054.html#L40523'>pCache</a>           40523 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;szExtra = szExtra;</span>
+<span class='curline'><a href='../S/1054.html#L40524'>pCache</a>           40524 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;bPurgeable = (bPurgeable ? 1 : 0);</span>
+<span class='curline'><a href='../S/1054.html#L40526'>pCache</a>           40526 ext/sqlite3/libsqlite/sqlite3.c     pcache1ResizeHash(pCache);</span>
+<span class='curline'><a href='../S/1054.html#L40528'>pCache</a>           40528 ext/sqlite3/libsqlite/sqlite3.c       pCache-&gt;nMin = 10;</span>
+<span class='curline'><a href='../S/1054.html#L40529'>pCache</a>           40529 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;nMinPage += pCache-&gt;nMin;</span>
+<span class='curline'><a href='../S/1054.html#L40533'>pCache</a>           40533 ext/sqlite3/libsqlite/sqlite3.c     if( pCache-&gt;nHash==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L40534'>pCache</a>           40534 ext/sqlite3/libsqlite/sqlite3.c       pcache1Destroy((sqlite3_pcache*)pCache);</span>
+<span class='curline'><a href='../S/1054.html#L40535'>pCache</a>           40535 ext/sqlite3/libsqlite/sqlite3.c       pCache = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40538'>pCache</a>           40538 ext/sqlite3/libsqlite/sqlite3.c   return (sqlite3_pcache *)pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40547'>pCache</a>           40547 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40548'>pCache</a>           40548 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;bPurgeable ){</span>
+<span class='curline'><a href='../S/1054.html#L40549'>pCache</a>           40549 ext/sqlite3/libsqlite/sqlite3.c     PGroup *pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40551'>pCache</a>           40551 ext/sqlite3/libsqlite/sqlite3.c     pGroup-&gt;nMaxPage += (nMax - pCache-&gt;nMax);</span>
+<span class='curline'><a href='../S/1054.html#L40553'>pCache</a>           40553 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;nMax = nMax;</span>
+<span class='curline'><a href='../S/1054.html#L40554'>pCache</a>           40554 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;n90pct = pCache-&gt;nMax*9/10;</span>
+<span class='curline'><a href='../S/1054.html#L40566'>pCache</a>           40566 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1*)p;</span>
+<span class='curline'><a href='../S/1054.html#L40567'>pCache</a>           40567 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;bPurgeable ){</span>
+<span class='curline'><a href='../S/1054.html#L40568'>pCache</a>           40568 ext/sqlite3/libsqlite/sqlite3.c     PGroup *pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40584'>pCache</a>           40584 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1*)p;</span>
+<span class='curline'><a href='../S/1054.html#L40585'>pCache</a>           40585 ext/sqlite3/libsqlite/sqlite3.c   pcache1EnterMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40586'>pCache</a>           40586 ext/sqlite3/libsqlite/sqlite3.c   n = pCache-&gt;nPage;</span>
+<span class='curline'><a href='../S/1054.html#L40587'>pCache</a>           40587 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40601'>pCache</a>           40601 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache, </span>
+<span class='curline'><a href='../S/1054.html#L40606'>pCache</a>           40606 ext/sqlite3/libsqlite/sqlite3.c   PGroup *pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40610'>pCache</a>           40610 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nPage &gt;= pCache-&gt;nRecyclable );</span>
+<span class='curline'><a href='../S/1054.html#L40611'>pCache</a>           40611 ext/sqlite3/libsqlite/sqlite3.c   nPinned = pCache-&gt;nPage - pCache-&gt;nRecyclable;</span>
+<span class='curline'><a href='../S/1054.html#L40613'>pCache</a>           40613 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;n90pct == pCache-&gt;nMax*9/10 );</span>
+<span class='curline'><a href='../S/1054.html#L40616'>pCache</a>           40616 ext/sqlite3/libsqlite/sqlite3.c      || nPinned&gt;=pCache-&gt;n90pct</span>
+<span class='curline'><a href='../S/1054.html#L40617'>pCache</a>           40617 ext/sqlite3/libsqlite/sqlite3.c      || (pcache1UnderMemoryPressure(pCache) &amp;&amp; pCache-&gt;nRecyclable&lt;nPinned)</span>
+<span class='curline'><a href='../S/1054.html#L40622'>pCache</a>           40622 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;nPage&gt;=pCache-&gt;nHash ) pcache1ResizeHash(pCache);</span>
+<span class='curline'><a href='../S/1054.html#L40623'>pCache</a>           40623 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nHash&gt;0 &amp;&amp; pCache-&gt;apHash );</span>
+<span class='curline'><a href='../S/1054.html#L40626'>pCache</a>           40626 ext/sqlite3/libsqlite/sqlite3.c   if( pCache-&gt;bPurgeable &amp;&amp; pGroup-&gt;pLruTail &amp;&amp; (</span>
+<span class='curline'><a href='../S/1054.html#L40627'>pCache</a>           40627 ext/sqlite3/libsqlite/sqlite3.c          (pCache-&gt;nPage+1&gt;=pCache-&gt;nMax)</span>
+<span class='curline'><a href='../S/1054.html#L40629'>pCache</a>           40629 ext/sqlite3/libsqlite/sqlite3.c       || pcache1UnderMemoryPressure(pCache)</span>
+<span class='curline'><a href='../S/1054.html#L40636'>pCache</a>           40636 ext/sqlite3/libsqlite/sqlite3.c     pOther = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40640'>pCache</a>           40640 ext/sqlite3/libsqlite/sqlite3.c     assert( (pCache-&gt;szPage &amp; (pCache-&gt;szPage-1))==0 &amp;&amp; pCache-&gt;szPage&gt;=512 );</span>
+<span class='curline'><a href='../S/1054.html#L40641'>pCache</a>           40641 ext/sqlite3/libsqlite/sqlite3.c     assert( pCache-&gt;szExtra&lt;512 );</span>
+<span class='curline'><a href='../S/1054.html#L40645'>pCache</a>           40645 ext/sqlite3/libsqlite/sqlite3.c     if( pOther-&gt;szPage+pOther-&gt;szExtra != pCache-&gt;szPage+pCache-&gt;szExtra ){</span>
+<span class='curline'><a href='../S/1054.html#L40649'>pCache</a>           40649 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;nCurrentPage -= (pOther-&gt;bPurgeable - pCache-&gt;bPurgeable);</span>
+<span class='curline'><a href='../S/1054.html#L40658'>pCache</a>           40658 ext/sqlite3/libsqlite/sqlite3.c     pPage = pcache1AllocPage(pCache);</span>
+<span class='curline'><a href='../S/1054.html#L40663'>pCache</a>           40663 ext/sqlite3/libsqlite/sqlite3.c     unsigned int h = iKey % pCache-&gt;nHash;</span>
+<span class='curline'><a href='../S/1054.html#L40664'>pCache</a>           40664 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;nPage++;</span>
+<span class='curline'><a href='../S/1054.html#L40666'>pCache</a>           40666 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pNext = pCache-&gt;apHash[h];</span>
+<span class='curline'><a href='../S/1054.html#L40667'>pCache</a>           40667 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pCache = pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40672'>pCache</a>           40672 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;apHash[h] = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40673'>pCache</a>           40673 ext/sqlite3/libsqlite/sqlite3.c     if( iKey&gt;pCache-&gt;iMaxKey ){</span>
+<span class='curline'><a href='../S/1054.html#L40674'>pCache</a>           40674 ext/sqlite3/libsqlite/sqlite3.c       pCache-&gt;iMaxKey = iKey;</span>
+<span class='curline'><a href='../S/1054.html#L40739'>pCache</a>           40739 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40743'>pCache</a>           40743 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;bPurgeable || createFlag!=1 );</span>
+<span class='curline'><a href='../S/1054.html#L40744'>pCache</a>           40744 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;bPurgeable || pCache-&gt;nMin==0 );</span>
+<span class='curline'><a href='../S/1054.html#L40745'>pCache</a>           40745 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;bPurgeable==0 || pCache-&gt;nMin==10 );</span>
+<span class='curline'><a href='../S/1054.html#L40746'>pCache</a>           40746 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nMin==0 || pCache-&gt;bPurgeable );</span>
+<span class='curline'><a href='../S/1054.html#L40747'>pCache</a>           40747 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;nHash&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L40748'>pCache</a>           40748 ext/sqlite3/libsqlite/sqlite3.c   pcache1EnterMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40751'>pCache</a>           40751 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCache-&gt;apHash[iKey % pCache-&gt;nHash];</span>
+<span class='curline'><a href='../S/1054.html#L40759'>pCache</a>           40759 ext/sqlite3/libsqlite/sqlite3.c     pPage = pcache1FetchStage2(pCache, iKey, createFlag);</span>
+<span class='curline'><a href='../S/1054.html#L40761'>pCache</a>           40761 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage==0 || pCache-&gt;iMaxKey&gt;=iKey );</span>
+<span class='curline'><a href='../S/1054.html#L40762'>pCache</a>           40762 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40777'>pCache</a>           40777 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40779'>pCache</a>           40779 ext/sqlite3/libsqlite/sqlite3.c   PGroup *pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40781'>pCache</a>           40781 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pCache==pCache );</span>
+<span class='curline'><a href='../S/1054.html#L40804'>pCache</a>           40804 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;nRecyclable++;</span>
+<span class='curline'><a href='../S/1054.html#L40808'>pCache</a>           40808 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40820'>pCache</a>           40820 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40825'>pCache</a>           40825 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pCache==pCache );</span>
+<span class='curline'><a href='../S/1054.html#L40827'>pCache</a>           40827 ext/sqlite3/libsqlite/sqlite3.c   pcache1EnterMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40829'>pCache</a>           40829 ext/sqlite3/libsqlite/sqlite3.c   h = iOld%pCache-&gt;nHash;</span>
+<span class='curline'><a href='../S/1054.html#L40830'>pCache</a>           40830 ext/sqlite3/libsqlite/sqlite3.c   pp = &amp;pCache-&gt;apHash[h];</span>
+<span class='curline'><a href='../S/1054.html#L40836'>pCache</a>           40836 ext/sqlite3/libsqlite/sqlite3.c   h = iNew%pCache-&gt;nHash;</span>
+<span class='curline'><a href='../S/1054.html#L40838'>pCache</a>           40838 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pNext = pCache-&gt;apHash[h];</span>
+<span class='curline'><a href='../S/1054.html#L40839'>pCache</a>           40839 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;apHash[h] = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40840'>pCache</a>           40840 ext/sqlite3/libsqlite/sqlite3.c   if( iNew&gt;pCache-&gt;iMaxKey ){</span>
+<span class='curline'><a href='../S/1054.html#L40841'>pCache</a>           40841 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;iMaxKey = iNew;</span>
+<span class='curline'><a href='../S/1054.html#L40844'>pCache</a>           40844 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40855'>pCache</a>           40855 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40856'>pCache</a>           40856 ext/sqlite3/libsqlite/sqlite3.c   pcache1EnterMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40857'>pCache</a>           40857 ext/sqlite3/libsqlite/sqlite3.c   if( iLimit&lt;=pCache-&gt;iMaxKey ){</span>
+<span class='curline'><a href='../S/1054.html#L40858'>pCache</a>           40858 ext/sqlite3/libsqlite/sqlite3.c     pcache1TruncateUnsafe(pCache, iLimit);</span>
+<span class='curline'><a href='../S/1054.html#L40859'>pCache</a>           40859 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;iMaxKey = iLimit-1;</span>
+<span class='curline'><a href='../S/1054.html#L40861'>pCache</a>           40861 ext/sqlite3/libsqlite/sqlite3.c   pcache1LeaveMutex(pCache-&gt;pGroup);</span>
+<span class='curline'><a href='../S/1054.html#L40870'>pCache</a>           40870 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = (PCache1 *)p;</span>
+<span class='curline'><a href='../S/1054.html#L40871'>pCache</a>           40871 ext/sqlite3/libsqlite/sqlite3.c   PGroup *pGroup = pCache-&gt;pGroup;</span>
+<span class='curline'><a href='../S/1054.html#L40872'>pCache</a>           40872 ext/sqlite3/libsqlite/sqlite3.c   assert( pCache-&gt;bPurgeable || (pCache-&gt;nMax==0 &amp;&amp; pCache-&gt;nMin==0) );</span>
+<span class='curline'><a href='../S/1054.html#L40874'>pCache</a>           40874 ext/sqlite3/libsqlite/sqlite3.c   pcache1TruncateUnsafe(pCache, 0);</span>
+<span class='curline'><a href='../S/1054.html#L40875'>pCache</a>           40875 ext/sqlite3/libsqlite/sqlite3.c   assert( pGroup-&gt;nMaxPage &gt;= pCache-&gt;nMax );</span>
+<span class='curline'><a href='../S/1054.html#L40876'>pCache</a>           40876 ext/sqlite3/libsqlite/sqlite3.c   pGroup-&gt;nMaxPage -= pCache-&gt;nMax;</span>
+<span class='curline'><a href='../S/1054.html#L40877'>pCache</a>           40877 ext/sqlite3/libsqlite/sqlite3.c   assert( pGroup-&gt;nMinPage &gt;= pCache-&gt;nMin );</span>
+<span class='curline'><a href='../S/1054.html#L40878'>pCache</a>           40878 ext/sqlite3/libsqlite/sqlite3.c   pGroup-&gt;nMinPage -= pCache-&gt;nMin;</span>
+<span class='curline'><a href='../S/1054.html#L40882'>pCache</a>           40882 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pCache-&gt;apHash);</span>
+<span class='curline'><a href='../S/1054.html#L40883'>pCache</a>           40883 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pCache);</span>
+</pre>
+</body>
+</html>

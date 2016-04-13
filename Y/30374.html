@@ -1,0 +1,639 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pCur</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L6732'>pCur</a>             6732 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_db_status(sqlite3*, int op, int *pCur, int *pHiwtr, int resetFlg);</span>
+<span class='curline'><a href='../S/1054.html#L52926'>pCur</a>             52926 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3BtreeEnterCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L52927'>pCur</a>             52927 ext/sqlite3/libsqlite/sqlite3.c   sqlite3BtreeEnter(pCur-&gt;pBtree);</span>
+<span class='curline'><a href='../S/1054.html#L52929'>pCur</a>             52929 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3BtreeLeaveCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L52930'>pCur</a>             52930 ext/sqlite3/libsqlite/sqlite3.c   sqlite3BtreeLeave(pCur-&gt;pBtree);</span>
+<span class='curline'><a href='../S/1054.html#L53510'>pCur</a>             53510 ext/sqlite3/libsqlite/sqlite3.c #define invalidateOverflowCache(pCur) (pCur-&gt;curFlags &amp;= ~BTCF_ValidOvfl)</span>
+<span class='curline'><a href='../S/1054.html#L53634'>pCur</a>             53634 ext/sqlite3/libsqlite/sqlite3.c static void btreeReleaseAllCursorPages(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L53636'>pCur</a>             53636 ext/sqlite3/libsqlite/sqlite3.c   for(i=0; i&lt;=pCur-&gt;iPage; i++){</span>
+<span class='curline'><a href='../S/1054.html#L53637'>pCur</a>             53637 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pCur-&gt;apPage[i]);</span>
+<span class='curline'><a href='../S/1054.html#L53638'>pCur</a>             53638 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;apPage[i] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L53640'>pCur</a>             53640 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;iPage = -1;</span>
+<span class='curline'><a href='../S/1054.html#L53651'>pCur</a>             53651 ext/sqlite3/libsqlite/sqlite3.c static int saveCursorPosition(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L53654'>pCur</a>             53654 ext/sqlite3/libsqlite/sqlite3.c   assert( CURSOR_VALID==pCur-&gt;eState || CURSOR_SKIPNEXT==pCur-&gt;eState );</span>
+<span class='curline'><a href='../S/1054.html#L53655'>pCur</a>             53655 ext/sqlite3/libsqlite/sqlite3.c   assert( 0==pCur-&gt;pKey );</span>
+<span class='curline'><a href='../S/1054.html#L53656'>pCur</a>             53656 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L53658'>pCur</a>             53658 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState==CURSOR_SKIPNEXT ){</span>
+<span class='curline'><a href='../S/1054.html#L53659'>pCur</a>             53659 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L53661'>pCur</a>             53661 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;skipNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L53663'>pCur</a>             53663 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3BtreeKeySize(pCur, &amp;pCur-&gt;nKey);</span>
+<span class='curline'><a href='../S/1054.html#L53672'>pCur</a>             53672 ext/sqlite3/libsqlite/sqlite3.c   if( 0==pCur-&gt;apPage[0]-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L53673'>pCur</a>             53673 ext/sqlite3/libsqlite/sqlite3.c     void *pKey = sqlite3Malloc( pCur-&gt;nKey );</span>
+<span class='curline'><a href='../S/1054.html#L53675'>pCur</a>             53675 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3BtreeKey(pCur, 0, (int)pCur-&gt;nKey, pKey);</span>
+<span class='curline'><a href='../S/1054.html#L53677'>pCur</a>             53677 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;pKey = pKey;</span>
+<span class='curline'><a href='../S/1054.html#L53685'>pCur</a>             53685 ext/sqlite3/libsqlite/sqlite3.c   assert( !pCur-&gt;apPage[0]-&gt;intKey || !pCur-&gt;pKey );</span>
+<span class='curline'><a href='../S/1054.html#L53688'>pCur</a>             53688 ext/sqlite3/libsqlite/sqlite3.c     btreeReleaseAllCursorPages(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L53689'>pCur</a>             53689 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_REQUIRESEEK;</span>
+<span class='curline'><a href='../S/1054.html#L53692'>pCur</a>             53692 ext/sqlite3/libsqlite/sqlite3.c   invalidateOverflowCache(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L53751'>pCur</a>             53751 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3BtreeClearCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L53752'>pCur</a>             53752 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L53753'>pCur</a>             53753 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pCur-&gt;pKey);</span>
+<span class='curline'><a href='../S/1054.html#L53754'>pCur</a>             53754 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pKey = 0;</span>
+<span class='curline'><a href='../S/1054.html#L53755'>pCur</a>             53755 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L53764'>pCur</a>             53764 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,     /* Cursor open on the btree to be searched */</span>
+<span class='curline'><a href='../S/1054.html#L53778'>pCur</a>             53778 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;pKeyInfo, aSpace, sizeof(aSpace), &amp;pFree</span>
+<span class='curline'><a href='../S/1054.html#L53781'>pCur</a>             53781 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeRecordUnpack(pCur-&gt;pKeyInfo, (int)nKey, pKey, pIdxKey);</span>
+<span class='curline'><a href='../S/1054.html#L53783'>pCur</a>             53783 ext/sqlite3/libsqlite/sqlite3.c       sqlite3DbFree(pCur-&gt;pKeyInfo-&gt;db, pFree);</span>
+<span class='curline'><a href='../S/1054.html#L53789'>pCur</a>             53789 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3BtreeMovetoUnpacked(pCur, pIdxKey, nKey, bias, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L53791'>pCur</a>             53791 ext/sqlite3/libsqlite/sqlite3.c     sqlite3DbFree(pCur-&gt;pKeyInfo-&gt;db, pFree);</span>
+<span class='curline'><a href='../S/1054.html#L53803'>pCur</a>             53803 ext/sqlite3/libsqlite/sqlite3.c static int btreeRestoreCursorPosition(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L53806'>pCur</a>             53806 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L53807'>pCur</a>             53807 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState&gt;=CURSOR_REQUIRESEEK );</span>
+<span class='curline'><a href='../S/1054.html#L53808'>pCur</a>             53808 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState==CURSOR_FAULT ){</span>
+<span class='curline'><a href='../S/1054.html#L53809'>pCur</a>             53809 ext/sqlite3/libsqlite/sqlite3.c     return pCur-&gt;skipNext;</span>
+<span class='curline'><a href='../S/1054.html#L53811'>pCur</a>             53811 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L53812'>pCur</a>             53812 ext/sqlite3/libsqlite/sqlite3.c   rc = btreeMoveto(pCur, pCur-&gt;pKey, pCur-&gt;nKey, 0, &amp;skipNext);</span>
+<span class='curline'><a href='../S/1054.html#L53814'>pCur</a>             53814 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_free(pCur-&gt;pKey);</span>
+<span class='curline'><a href='../S/1054.html#L53815'>pCur</a>             53815 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;pKey = 0;</span>
+<span class='curline'><a href='../S/1054.html#L53816'>pCur</a>             53816 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;eState==CURSOR_VALID || pCur-&gt;eState==CURSOR_INVALID );</span>
+<span class='curline'><a href='../S/1054.html#L53817'>pCur</a>             53817 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;skipNext |= skipNext;</span>
+<span class='curline'><a href='../S/1054.html#L53818'>pCur</a>             53818 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;skipNext &amp;&amp; pCur-&gt;eState==CURSOR_VALID ){</span>
+<span class='curline'><a href='../S/1054.html#L53819'>pCur</a>             53819 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;eState = CURSOR_SKIPNEXT;</span>
+<span class='curline'><a href='../S/1054.html#L53842'>pCur</a>             53842 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeCursorHasMoved(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L53843'>pCur</a>             53843 ext/sqlite3/libsqlite/sqlite3.c   return pCur-&gt;eState!=CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L53859'>pCur</a>             53859 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeCursorRestore(BtCursor *pCur, int *pDifferentRow){</span>
+<span class='curline'><a href='../S/1054.html#L53862'>pCur</a>             53862 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L53863'>pCur</a>             53863 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState!=CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L53864'>pCur</a>             53864 ext/sqlite3/libsqlite/sqlite3.c   rc = restoreCursorPosition(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L53869'>pCur</a>             53869 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState!=CURSOR_VALID ){</span>
+<span class='curline'><a href='../S/1054.html#L53872'>pCur</a>             53872 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;skipNext==0 );</span>
+<span class='curline'><a href='../S/1054.html#L55315'>pCur</a>             55315 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L55320'>pCur</a>             55320 ext/sqlite3/libsqlite/sqlite3.c   pCur = pBt-&gt;pCursor;</span>
+<span class='curline'><a href='../S/1054.html#L55321'>pCur</a>             55321 ext/sqlite3/libsqlite/sqlite3.c   while( pCur ){</span>
+<span class='curline'><a href='../S/1054.html#L55322'>pCur</a>             55322 ext/sqlite3/libsqlite/sqlite3.c     BtCursor *pTmp = pCur;</span>
+<span class='curline'><a href='../S/1054.html#L55323'>pCur</a>             55323 ext/sqlite3/libsqlite/sqlite3.c     pCur = pCur-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L55807'>pCur</a>             55807 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L55809'>pCur</a>             55809 ext/sqlite3/libsqlite/sqlite3.c   for(pCur=pBt-&gt;pCursor; pCur; pCur=pCur-&gt;pNext){</span>
+<span class='curline'><a href='../S/1054.html#L55810'>pCur</a>             55810 ext/sqlite3/libsqlite/sqlite3.c     if( (wrOnly==0 || (pCur-&gt;curFlags &amp; BTCF_WriteFlag)!=0)</span>
+<span class='curline'><a href='../S/1054.html#L55811'>pCur</a>             55811 ext/sqlite3/libsqlite/sqlite3.c      &amp;&amp; pCur-&gt;eState!=CURSOR_FAULT ) r++; </span>
+<span class='curline'><a href='../S/1054.html#L56884'>pCur</a>             56884 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur                         /* Space for new cursor */</span>
+<span class='curline'><a href='../S/1054.html#L56917'>pCur</a>             56917 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pgnoRoot = (Pgno)iTable;</span>
+<span class='curline'><a href='../S/1054.html#L56918'>pCur</a>             56918 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;iPage = -1;</span>
+<span class='curline'><a href='../S/1054.html#L56919'>pCur</a>             56919 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pKeyInfo = pKeyInfo;</span>
+<span class='curline'><a href='../S/1054.html#L56920'>pCur</a>             56920 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pBtree = p;</span>
+<span class='curline'><a href='../S/1054.html#L56921'>pCur</a>             56921 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pBt = pBt;</span>
+<span class='curline'><a href='../S/1054.html#L56923'>pCur</a>             56923 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags = wrFlag;</span>
+<span class='curline'><a href='../S/1054.html#L56924'>pCur</a>             56924 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pNext = pBt-&gt;pCursor;</span>
+<span class='curline'><a href='../S/1054.html#L56925'>pCur</a>             56925 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;pNext ){</span>
+<span class='curline'><a href='../S/1054.html#L56926'>pCur</a>             56926 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;pNext-&gt;pPrev = pCur;</span>
+<span class='curline'><a href='../S/1054.html#L56928'>pCur</a>             56928 ext/sqlite3/libsqlite/sqlite3.c   pBt-&gt;pCursor = pCur;</span>
+<span class='curline'><a href='../S/1054.html#L56929'>pCur</a>             56929 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L56937'>pCur</a>             56937 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur                              /* Write new cursor here */</span>
+<span class='curline'><a href='../S/1054.html#L56941'>pCur</a>             56941 ext/sqlite3/libsqlite/sqlite3.c   rc = btreeCursor(p, iTable, wrFlag, pKeyInfo, pCur);</span>
+<span class='curline'><a href='../S/1054.html#L56974'>pCur</a>             56974 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeCloseCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L56975'>pCur</a>             56975 ext/sqlite3/libsqlite/sqlite3.c   Btree *pBtree = pCur-&gt;pBtree;</span>
+<span class='curline'><a href='../S/1054.html#L56978'>pCur</a>             56978 ext/sqlite3/libsqlite/sqlite3.c     BtShared *pBt = pCur-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L56980'>pCur</a>             56980 ext/sqlite3/libsqlite/sqlite3.c     sqlite3BtreeClearCursor(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L56981'>pCur</a>             56981 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;pPrev ){</span>
+<span class='curline'><a href='../S/1054.html#L56982'>pCur</a>             56982 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;pPrev-&gt;pNext = pCur-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L56984'>pCur</a>             56984 ext/sqlite3/libsqlite/sqlite3.c       pBt-&gt;pCursor = pCur-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L56986'>pCur</a>             56986 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;pNext ){</span>
+<span class='curline'><a href='../S/1054.html#L56987'>pCur</a>             56987 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;pNext-&gt;pPrev = pCur-&gt;pPrev;</span>
+<span class='curline'><a href='../S/1054.html#L56989'>pCur</a>             56989 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; i&lt;=pCur-&gt;iPage; i++){</span>
+<span class='curline'><a href='../S/1054.html#L56990'>pCur</a>             56990 ext/sqlite3/libsqlite/sqlite3.c       releasePage(pCur-&gt;apPage[i]);</span>
+<span class='curline'><a href='../S/1054.html#L56993'>pCur</a>             56993 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_free(pCur-&gt;aOverflow);</span>
+<span class='curline'><a href='../S/1054.html#L57016'>pCur</a>             57016 ext/sqlite3/libsqlite/sqlite3.c   static void assertCellInfo(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57018'>pCur</a>             57018 ext/sqlite3/libsqlite/sqlite3.c     int iPage = pCur-&gt;iPage;</span>
+<span class='curline'><a href='../S/1054.html#L57020'>pCur</a>             57020 ext/sqlite3/libsqlite/sqlite3.c     btreeParseCell(pCur-&gt;apPage[iPage], pCur-&gt;aiIdx[iPage], &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L57021'>pCur</a>             57021 ext/sqlite3/libsqlite/sqlite3.c     assert( CORRUPT_DB || memcmp(&amp;info, &amp;pCur-&gt;info, sizeof(info))==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57028'>pCur</a>             57028 ext/sqlite3/libsqlite/sqlite3.c   static void getCellInfo(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57029'>pCur</a>             57029 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;info.nSize==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57030'>pCur</a>             57030 ext/sqlite3/libsqlite/sqlite3.c       int iPage = pCur-&gt;iPage;</span>
+<span class='curline'><a href='../S/1054.html#L57031'>pCur</a>             57031 ext/sqlite3/libsqlite/sqlite3.c       btreeParseCell(pCur-&gt;apPage[iPage],pCur-&gt;aiIdx[iPage],&amp;pCur-&gt;info);</span>
+<span class='curline'><a href='../S/1054.html#L57032'>pCur</a>             57032 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;curFlags |= BTCF_ValidNKey;</span>
+<span class='curline'><a href='../S/1054.html#L57034'>pCur</a>             57034 ext/sqlite3/libsqlite/sqlite3.c       assertCellInfo(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57039'>pCur</a>             57039 ext/sqlite3/libsqlite/sqlite3.c #define getCellInfo(pCur)                                                      \</span>
+<span class='curline'><a href='../S/1054.html#L57040'>pCur</a>             57040 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;info.nSize==0 ){                                                   \</span>
+<span class='curline'><a href='../S/1054.html#L57041'>pCur</a>             57041 ext/sqlite3/libsqlite/sqlite3.c     int iPage = pCur-&gt;iPage;                                                   \</span>
+<span class='curline'><a href='../S/1054.html#L57042'>pCur</a>             57042 ext/sqlite3/libsqlite/sqlite3.c     btreeParseCell(pCur-&gt;apPage[iPage],pCur-&gt;aiIdx[iPage],&amp;pCur-&gt;info);        \</span>
+<span class='curline'><a href='../S/1054.html#L57043'>pCur</a>             57043 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;curFlags |= BTCF_ValidNKey;                                          \</span>
+<span class='curline'><a href='../S/1054.html#L57045'>pCur</a>             57045 ext/sqlite3/libsqlite/sqlite3.c     assertCellInfo(pCur);                                                      \</span>
+<span class='curline'><a href='../S/1054.html#L57055'>pCur</a>             57055 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeCursorIsValid(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57056'>pCur</a>             57056 ext/sqlite3/libsqlite/sqlite3.c   return pCur &amp;&amp; pCur-&gt;eState==CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L57072'>pCur</a>             57072 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeKeySize(BtCursor *pCur, i64 *pSize){</span>
+<span class='curline'><a href='../S/1054.html#L57073'>pCur</a>             57073 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57074'>pCur</a>             57074 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57075'>pCur</a>             57075 ext/sqlite3/libsqlite/sqlite3.c   getCellInfo(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57076'>pCur</a>             57076 ext/sqlite3/libsqlite/sqlite3.c   *pSize = pCur-&gt;info.nKey;</span>
+<span class='curline'><a href='../S/1054.html#L57092'>pCur</a>             57092 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeDataSize(BtCursor *pCur, u32 *pSize){</span>
+<span class='curline'><a href='../S/1054.html#L57093'>pCur</a>             57093 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57094'>pCur</a>             57094 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57095'>pCur</a>             57095 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&gt;=0 );</span>
+<span class='curline'><a href='../S/1054.html#L57096'>pCur</a>             57096 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&lt;BTCURSOR_MAX_DEPTH );</span>
+<span class='curline'><a href='../S/1054.html#L57097'>pCur</a>             57097 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;apPage[pCur-&gt;iPage]-&gt;intKeyLeaf==1 );</span>
+<span class='curline'><a href='../S/1054.html#L57098'>pCur</a>             57098 ext/sqlite3/libsqlite/sqlite3.c   getCellInfo(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57099'>pCur</a>             57099 ext/sqlite3/libsqlite/sqlite3.c   *pSize = pCur-&gt;info.nPayload;</span>
+<span class='curline'><a href='../S/1054.html#L57242'>pCur</a>             57242 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,      /* Cursor pointing to entry to read from */</span>
+<span class='curline'><a href='../S/1054.html#L57251'>pCur</a>             57251 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = pCur-&gt;apPage[pCur-&gt;iPage]; /* Btree page of current entry */</span>
+<span class='curline'><a href='../S/1054.html#L57252'>pCur</a>             57252 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pCur-&gt;pBt;                  /* Btree this cursor belongs to */</span>
+<span class='curline'><a href='../S/1054.html#L57259'>pCur</a>             57259 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57260'>pCur</a>             57260 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57261'>pCur</a>             57261 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57264'>pCur</a>             57264 ext/sqlite3/libsqlite/sqlite3.c   getCellInfo(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57265'>pCur</a>             57265 ext/sqlite3/libsqlite/sqlite3.c   aPayload = pCur-&gt;info.pPayload;</span>
+<span class='curline'><a href='../S/1054.html#L57267'>pCur</a>             57267 ext/sqlite3/libsqlite/sqlite3.c   bEnd = offset+amt==pCur-&gt;info.nPayload;</span>
+<span class='curline'><a href='../S/1054.html#L57269'>pCur</a>             57269 ext/sqlite3/libsqlite/sqlite3.c   assert( offset+amt &lt;= pCur-&gt;info.nPayload );</span>
+<span class='curline'><a href='../S/1054.html#L57271'>pCur</a>             57271 ext/sqlite3/libsqlite/sqlite3.c   if( &amp;aPayload[pCur-&gt;info.nLocal] &gt; &amp;pPage-&gt;aData[pBt-&gt;usableSize] ){</span>
+<span class='curline'><a href='../S/1054.html#L57277'>pCur</a>             57277 ext/sqlite3/libsqlite/sqlite3.c   if( offset&lt;pCur-&gt;info.nLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L57279'>pCur</a>             57279 ext/sqlite3/libsqlite/sqlite3.c     if( a+offset&gt;pCur-&gt;info.nLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L57280'>pCur</a>             57280 ext/sqlite3/libsqlite/sqlite3.c       a = pCur-&gt;info.nLocal - offset;</span>
+<span class='curline'><a href='../S/1054.html#L57287'>pCur</a>             57287 ext/sqlite3/libsqlite/sqlite3.c     offset -= pCur-&gt;info.nLocal;</span>
+<span class='curline'><a href='../S/1054.html#L57295'>pCur</a>             57295 ext/sqlite3/libsqlite/sqlite3.c     nextPage = get4byte(&amp;aPayload[pCur-&gt;info.nLocal]);</span>
+<span class='curline'><a href='../S/1054.html#L57305'>pCur</a>             57305 ext/sqlite3/libsqlite/sqlite3.c     if( eOp!=2 &amp;&amp; (pCur-&gt;curFlags &amp; BTCF_ValidOvfl)==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57306'>pCur</a>             57306 ext/sqlite3/libsqlite/sqlite3.c       int nOvfl = (pCur-&gt;info.nPayload-pCur-&gt;info.nLocal+ovflSize-1)/ovflSize;</span>
+<span class='curline'><a href='../S/1054.html#L57307'>pCur</a>             57307 ext/sqlite3/libsqlite/sqlite3.c       if( nOvfl&gt;pCur-&gt;nOvflAlloc ){</span>
+<span class='curline'><a href='../S/1054.html#L57309'>pCur</a>             57309 ext/sqlite3/libsqlite/sqlite3.c             pCur-&gt;aOverflow, nOvfl*2*sizeof(Pgno)</span>
+<span class='curline'><a href='../S/1054.html#L57314'>pCur</a>             57314 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;nOvflAlloc = nOvfl*2;</span>
+<span class='curline'><a href='../S/1054.html#L57315'>pCur</a>             57315 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aOverflow = aNew;</span>
+<span class='curline'><a href='../S/1054.html#L57319'>pCur</a>             57319 ext/sqlite3/libsqlite/sqlite3.c         memset(pCur-&gt;aOverflow, 0, nOvfl*sizeof(Pgno));</span>
+<span class='curline'><a href='../S/1054.html#L57320'>pCur</a>             57320 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;curFlags |= BTCF_ValidOvfl;</span>
+<span class='curline'><a href='../S/1054.html#L57328'>pCur</a>             57328 ext/sqlite3/libsqlite/sqlite3.c     if( (pCur-&gt;curFlags &amp; BTCF_ValidOvfl)!=0</span>
+<span class='curline'><a href='../S/1054.html#L57329'>pCur</a>             57329 ext/sqlite3/libsqlite/sqlite3.c      &amp;&amp; pCur-&gt;aOverflow[offset/ovflSize]</span>
+<span class='curline'><a href='../S/1054.html#L57332'>pCur</a>             57332 ext/sqlite3/libsqlite/sqlite3.c       nextPage = pCur-&gt;aOverflow[iIdx];</span>
+<span class='curline'><a href='../S/1054.html#L57339'>pCur</a>             57339 ext/sqlite3/libsqlite/sqlite3.c       if( (pCur-&gt;curFlags &amp; BTCF_ValidOvfl)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57340'>pCur</a>             57340 ext/sqlite3/libsqlite/sqlite3.c         assert(!pCur-&gt;aOverflow[iIdx] || pCur-&gt;aOverflow[iIdx]==nextPage);</span>
+<span class='curline'><a href='../S/1054.html#L57341'>pCur</a>             57341 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;aOverflow[iIdx] = nextPage;</span>
+<span class='curline'><a href='../S/1054.html#L57355'>pCur</a>             57355 ext/sqlite3/libsqlite/sqlite3.c         assert( pCur-&gt;curFlags &amp; BTCF_ValidOvfl );</span>
+<span class='curline'><a href='../S/1054.html#L57356'>pCur</a>             57356 ext/sqlite3/libsqlite/sqlite3.c         assert( pCur-&gt;pBtree-&gt;db==pBt-&gt;db );</span>
+<span class='curline'><a href='../S/1054.html#L57357'>pCur</a>             57357 ext/sqlite3/libsqlite/sqlite3.c         if( pCur-&gt;aOverflow[iIdx+1] ){</span>
+<span class='curline'><a href='../S/1054.html#L57358'>pCur</a>             57358 ext/sqlite3/libsqlite/sqlite3.c           nextPage = pCur-&gt;aOverflow[iIdx+1];</span>
+<span class='curline'><a href='../S/1054.html#L57445'>pCur</a>             57445 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeKey(BtCursor *pCur, u32 offset, u32 amt, void *pBuf){</span>
+<span class='curline'><a href='../S/1054.html#L57446'>pCur</a>             57446 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57447'>pCur</a>             57447 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57448'>pCur</a>             57448 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&gt;=0 &amp;&amp; pCur-&gt;apPage[pCur-&gt;iPage] );</span>
+<span class='curline'><a href='../S/1054.html#L57449'>pCur</a>             57449 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57450'>pCur</a>             57450 ext/sqlite3/libsqlite/sqlite3.c   return accessPayload(pCur, offset, amt, (unsigned char*)pBuf, 0);</span>
+<span class='curline'><a href='../S/1054.html#L57462'>pCur</a>             57462 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeData(BtCursor *pCur, u32 offset, u32 amt, void *pBuf){</span>
+<span class='curline'><a href='../S/1054.html#L57466'>pCur</a>             57466 ext/sqlite3/libsqlite/sqlite3.c   if ( pCur-&gt;eState==CURSOR_INVALID ){</span>
+<span class='curline'><a href='../S/1054.html#L57471'>pCur</a>             57471 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57472'>pCur</a>             57472 ext/sqlite3/libsqlite/sqlite3.c   rc = restoreCursorPosition(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57474'>pCur</a>             57474 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57475'>pCur</a>             57475 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;iPage&gt;=0 &amp;&amp; pCur-&gt;apPage[pCur-&gt;iPage] );</span>
+<span class='curline'><a href='../S/1054.html#L57476'>pCur</a>             57476 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57477'>pCur</a>             57477 ext/sqlite3/libsqlite/sqlite3.c     rc = accessPayload(pCur, offset, amt, pBuf, 0);</span>
+<span class='curline'><a href='../S/1054.html#L57502'>pCur</a>             57502 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,      /* Cursor pointing to entry to read from */</span>
+<span class='curline'><a href='../S/1054.html#L57506'>pCur</a>             57506 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur!=0 &amp;&amp; pCur-&gt;iPage&gt;=0 &amp;&amp; pCur-&gt;apPage[pCur-&gt;iPage]);</span>
+<span class='curline'><a href='../S/1054.html#L57507'>pCur</a>             57507 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57508'>pCur</a>             57508 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCur-&gt;pBtree-&gt;db-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L57509'>pCur</a>             57509 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57510'>pCur</a>             57510 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57511'>pCur</a>             57511 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;info.nSize&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L57512'>pCur</a>             57512 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;info.pPayload&gt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;aData || CORRUPT_DB );</span>
+<span class='curline'><a href='../S/1054.html#L57513'>pCur</a>             57513 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;info.pPayload&lt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;aDataEnd ||CORRUPT_DB);</span>
+<span class='curline'><a href='../S/1054.html#L57514'>pCur</a>             57514 ext/sqlite3/libsqlite/sqlite3.c   amt = (int)(pCur-&gt;apPage[pCur-&gt;iPage]-&gt;aDataEnd - pCur-&gt;info.pPayload);</span>
+<span class='curline'><a href='../S/1054.html#L57515'>pCur</a>             57515 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;info.nLocal&lt;amt ) amt = pCur-&gt;info.nLocal;</span>
+<span class='curline'><a href='../S/1054.html#L57517'>pCur</a>             57517 ext/sqlite3/libsqlite/sqlite3.c   return (void*)pCur-&gt;info.pPayload;</span>
+<span class='curline'><a href='../S/1054.html#L57535'>pCur</a>             57535 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE const void *sqlite3BtreeKeyFetch(BtCursor *pCur, u32 *pAmt){</span>
+<span class='curline'><a href='../S/1054.html#L57536'>pCur</a>             57536 ext/sqlite3/libsqlite/sqlite3.c   return fetchPayload(pCur, pAmt);</span>
+<span class='curline'><a href='../S/1054.html#L57538'>pCur</a>             57538 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE const void *sqlite3BtreeDataFetch(BtCursor *pCur, u32 *pAmt){</span>
+<span class='curline'><a href='../S/1054.html#L57539'>pCur</a>             57539 ext/sqlite3/libsqlite/sqlite3.c   return fetchPayload(pCur, pAmt);</span>
+<span class='curline'><a href='../S/1054.html#L57552'>pCur</a>             57552 ext/sqlite3/libsqlite/sqlite3.c static int moveToChild(BtCursor *pCur, u32 newPgno){</span>
+<span class='curline'><a href='../S/1054.html#L57554'>pCur</a>             57554 ext/sqlite3/libsqlite/sqlite3.c   int i = pCur-&gt;iPage;</span>
+<span class='curline'><a href='../S/1054.html#L57556'>pCur</a>             57556 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pCur-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L57558'>pCur</a>             57558 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57559'>pCur</a>             57559 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57560'>pCur</a>             57560 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&lt;BTCURSOR_MAX_DEPTH );</span>
+<span class='curline'><a href='../S/1054.html#L57561'>pCur</a>             57561 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&gt;=0 );</span>
+<span class='curline'><a href='../S/1054.html#L57562'>pCur</a>             57562 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;iPage&gt;=(BTCURSOR_MAX_DEPTH-1) ){</span>
+<span class='curline'><a href='../S/1054.html#L57566'>pCur</a>             57566 ext/sqlite3/libsqlite/sqlite3.c                (pCur-&gt;curFlags &amp; BTCF_WriteFlag)==0 ? PAGER_GET_READONLY : 0);</span>
+<span class='curline'><a href='../S/1054.html#L57568'>pCur</a>             57568 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;apPage[i+1] = pNewPage;</span>
+<span class='curline'><a href='../S/1054.html#L57569'>pCur</a>             57569 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;aiIdx[i+1] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57570'>pCur</a>             57570 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;iPage++;</span>
+<span class='curline'><a href='../S/1054.html#L57572'>pCur</a>             57572 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57573'>pCur</a>             57573 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_ValidNKey|BTCF_ValidOvfl);</span>
+<span class='curline'><a href='../S/1054.html#L57574'>pCur</a>             57574 ext/sqlite3/libsqlite/sqlite3.c   if( pNewPage-&gt;nCell&lt;1 || pNewPage-&gt;intKey!=pCur-&gt;apPage[i]-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L57610'>pCur</a>             57610 ext/sqlite3/libsqlite/sqlite3.c static void moveToParent(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57611'>pCur</a>             57611 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57612'>pCur</a>             57612 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57613'>pCur</a>             57613 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;iPage&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L57614'>pCur</a>             57614 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;apPage[pCur-&gt;iPage] );</span>
+<span class='curline'><a href='../S/1054.html#L57616'>pCur</a>             57616 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;apPage[pCur-&gt;iPage-1], </span>
+<span class='curline'><a href='../S/1054.html#L57617'>pCur</a>             57617 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage-1], </span>
+<span class='curline'><a href='../S/1054.html#L57618'>pCur</a>             57618 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;apPage[pCur-&gt;iPage]-&gt;pgno</span>
+<span class='curline'><a href='../S/1054.html#L57620'>pCur</a>             57620 ext/sqlite3/libsqlite/sqlite3.c   testcase( pCur-&gt;aiIdx[pCur-&gt;iPage-1] &gt; pCur-&gt;apPage[pCur-&gt;iPage-1]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57622'>pCur</a>             57622 ext/sqlite3/libsqlite/sqlite3.c   releasePage(pCur-&gt;apPage[pCur-&gt;iPage]);</span>
+<span class='curline'><a href='../S/1054.html#L57623'>pCur</a>             57623 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;iPage--;</span>
+<span class='curline'><a href='../S/1054.html#L57624'>pCur</a>             57624 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57625'>pCur</a>             57625 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_ValidNKey|BTCF_ValidOvfl);</span>
+<span class='curline'><a href='../S/1054.html#L57649'>pCur</a>             57649 ext/sqlite3/libsqlite/sqlite3.c static int moveToRoot(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57653'>pCur</a>             57653 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57657'>pCur</a>             57657 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState&gt;=CURSOR_REQUIRESEEK ){</span>
+<span class='curline'><a href='../S/1054.html#L57658'>pCur</a>             57658 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;eState==CURSOR_FAULT ){</span>
+<span class='curline'><a href='../S/1054.html#L57659'>pCur</a>             57659 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;skipNext!=SQLITE_OK );</span>
+<span class='curline'><a href='../S/1054.html#L57660'>pCur</a>             57660 ext/sqlite3/libsqlite/sqlite3.c       return pCur-&gt;skipNext;</span>
+<span class='curline'><a href='../S/1054.html#L57662'>pCur</a>             57662 ext/sqlite3/libsqlite/sqlite3.c     sqlite3BtreeClearCursor(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57665'>pCur</a>             57665 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;iPage&gt;=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57666'>pCur</a>             57666 ext/sqlite3/libsqlite/sqlite3.c     while( pCur-&gt;iPage ) releasePage(pCur-&gt;apPage[pCur-&gt;iPage--]);</span>
+<span class='curline'><a href='../S/1054.html#L57667'>pCur</a>             57667 ext/sqlite3/libsqlite/sqlite3.c   }else if( pCur-&gt;pgnoRoot==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57668'>pCur</a>             57668 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L57671'>pCur</a>             57671 ext/sqlite3/libsqlite/sqlite3.c     rc = getAndInitPage(pCur-&gt;pBtree-&gt;pBt, pCur-&gt;pgnoRoot, &amp;pCur-&gt;apPage[0],</span>
+<span class='curline'><a href='../S/1054.html#L57672'>pCur</a>             57672 ext/sqlite3/libsqlite/sqlite3.c                  (pCur-&gt;curFlags &amp; BTCF_WriteFlag)==0 ? PAGER_GET_READONLY : 0);</span>
+<span class='curline'><a href='../S/1054.html#L57674'>pCur</a>             57674 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L57677'>pCur</a>             57677 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;iPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57679'>pCur</a>             57679 ext/sqlite3/libsqlite/sqlite3.c   pRoot = pCur-&gt;apPage[0];</span>
+<span class='curline'><a href='../S/1054.html#L57680'>pCur</a>             57680 ext/sqlite3/libsqlite/sqlite3.c   assert( pRoot-&gt;pgno==pCur-&gt;pgnoRoot );</span>
+<span class='curline'><a href='../S/1054.html#L57693'>pCur</a>             57693 ext/sqlite3/libsqlite/sqlite3.c   if( pRoot-&gt;isInit==0 || (pCur-&gt;pKeyInfo==0)!=pRoot-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L57697'>pCur</a>             57697 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;aiIdx[0] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57698'>pCur</a>             57698 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57699'>pCur</a>             57699 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_AtLast|BTCF_ValidNKey|BTCF_ValidOvfl);</span>
+<span class='curline'><a href='../S/1054.html#L57702'>pCur</a>             57702 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L57707'>pCur</a>             57707 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L57708'>pCur</a>             57708 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, subpage);</span>
+<span class='curline'><a href='../S/1054.html#L57710'>pCur</a>             57710 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L57722'>pCur</a>             57722 ext/sqlite3/libsqlite/sqlite3.c static int moveToLeftmost(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57727'>pCur</a>             57727 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57728'>pCur</a>             57728 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57729'>pCur</a>             57729 ext/sqlite3/libsqlite/sqlite3.c   while( rc==SQLITE_OK &amp;&amp; !(pPage = pCur-&gt;apPage[pCur-&gt;iPage])-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57730'>pCur</a>             57730 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57731'>pCur</a>             57731 ext/sqlite3/libsqlite/sqlite3.c     pgno = get4byte(findCell(pPage, pCur-&gt;aiIdx[pCur-&gt;iPage]));</span>
+<span class='curline'><a href='../S/1054.html#L57732'>pCur</a>             57732 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, pgno);</span>
+<span class='curline'><a href='../S/1054.html#L57747'>pCur</a>             57747 ext/sqlite3/libsqlite/sqlite3.c static int moveToRightmost(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L57752'>pCur</a>             57752 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57753'>pCur</a>             57753 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57754'>pCur</a>             57754 ext/sqlite3/libsqlite/sqlite3.c   while( !(pPage = pCur-&gt;apPage[pCur-&gt;iPage])-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57756'>pCur</a>             57756 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage] = pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L57757'>pCur</a>             57757 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, pgno);</span>
+<span class='curline'><a href='../S/1054.html#L57760'>pCur</a>             57760 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;aiIdx[pCur-&gt;iPage] = pPage-&gt;nCell-1;</span>
+<span class='curline'><a href='../S/1054.html#L57761'>pCur</a>             57761 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;info.nSize==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57762'>pCur</a>             57762 ext/sqlite3/libsqlite/sqlite3.c   assert( (pCur-&gt;curFlags &amp; BTCF_ValidNKey)==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57770'>pCur</a>             57770 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeFirst(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L57773'>pCur</a>             57773 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57774'>pCur</a>             57774 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCur-&gt;pBtree-&gt;db-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L57775'>pCur</a>             57775 ext/sqlite3/libsqlite/sqlite3.c   rc = moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57777'>pCur</a>             57777 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;eState==CURSOR_INVALID ){</span>
+<span class='curline'><a href='../S/1054.html#L57778'>pCur</a>             57778 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;pgnoRoot==0 || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57781'>pCur</a>             57781 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L57783'>pCur</a>             57783 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToLeftmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57793'>pCur</a>             57793 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeLast(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L57796'>pCur</a>             57796 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57797'>pCur</a>             57797 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCur-&gt;pBtree-&gt;db-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L57800'>pCur</a>             57800 ext/sqlite3/libsqlite/sqlite3.c   if( CURSOR_VALID==pCur-&gt;eState &amp;&amp; (pCur-&gt;curFlags &amp; BTCF_AtLast)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L57805'>pCur</a>             57805 ext/sqlite3/libsqlite/sqlite3.c     for(ii=0; ii&lt;pCur-&gt;iPage; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L57806'>pCur</a>             57806 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;aiIdx[ii]==pCur-&gt;apPage[ii]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57808'>pCur</a>             57808 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;aiIdx[pCur-&gt;iPage]==pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell-1 );</span>
+<span class='curline'><a href='../S/1054.html#L57809'>pCur</a>             57809 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;apPage[pCur-&gt;iPage]-&gt;leaf );</span>
+<span class='curline'><a href='../S/1054.html#L57814'>pCur</a>             57814 ext/sqlite3/libsqlite/sqlite3.c   rc = moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57816'>pCur</a>             57816 ext/sqlite3/libsqlite/sqlite3.c     if( CURSOR_INVALID==pCur-&gt;eState ){</span>
+<span class='curline'><a href='../S/1054.html#L57817'>pCur</a>             57817 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;pgnoRoot==0 || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57820'>pCur</a>             57820 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;eState==CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L57822'>pCur</a>             57822 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToRightmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57824'>pCur</a>             57824 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;curFlags |= BTCF_AtLast;</span>
+<span class='curline'><a href='../S/1054.html#L57826'>pCur</a>             57826 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;curFlags &amp;= ~BTCF_AtLast;</span>
+<span class='curline'><a href='../S/1054.html#L57863'>pCur</a>             57863 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,          /* The cursor to be moved */</span>
+<span class='curline'><a href='../S/1054.html#L57872'>pCur</a>             57872 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L57873'>pCur</a>             57873 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pCur-&gt;pBtree-&gt;db-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L57875'>pCur</a>             57875 ext/sqlite3/libsqlite/sqlite3.c   assert( (pIdxKey==0)==(pCur-&gt;pKeyInfo==0) );</span>
+<span class='curline'><a href='../S/1054.html#L57879'>pCur</a>             57879 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState==CURSOR_VALID &amp;&amp; (pCur-&gt;curFlags &amp; BTCF_ValidNKey)!=0</span>
+<span class='curline'><a href='../S/1054.html#L57880'>pCur</a>             57880 ext/sqlite3/libsqlite/sqlite3.c    &amp;&amp; pCur-&gt;apPage[0]-&gt;intKey </span>
+<span class='curline'><a href='../S/1054.html#L57882'>pCur</a>             57882 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;info.nKey==intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L57886'>pCur</a>             57886 ext/sqlite3/libsqlite/sqlite3.c     if( (pCur-&gt;curFlags &amp; BTCF_AtLast)!=0 &amp;&amp; pCur-&gt;info.nKey&lt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L57903'>pCur</a>             57903 ext/sqlite3/libsqlite/sqlite3.c   rc = moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L57907'>pCur</a>             57907 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;pgnoRoot==0 || pCur-&gt;apPage[pCur-&gt;iPage] );</span>
+<span class='curline'><a href='../S/1054.html#L57908'>pCur</a>             57908 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;pgnoRoot==0 || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L57909'>pCur</a>             57909 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_INVALID || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L57910'>pCur</a>             57910 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState==CURSOR_INVALID ){</span>
+<span class='curline'><a href='../S/1054.html#L57912'>pCur</a>             57912 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;pgnoRoot==0 || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57915'>pCur</a>             57915 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;apPage[0]-&gt;intKey || pIdxKey );</span>
+<span class='curline'><a href='../S/1054.html#L57919'>pCur</a>             57919 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L57934'>pCur</a>             57934 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)idx;</span>
+<span class='curline'><a href='../S/1054.html#L57953'>pCur</a>             57953 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;curFlags |= BTCF_ValidNKey;</span>
+<span class='curline'><a href='../S/1054.html#L57954'>pCur</a>             57954 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;info.nKey = nCellKey;</span>
+<span class='curline'><a href='../S/1054.html#L57955'>pCur</a>             57955 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)idx;</span>
+<span class='curline'><a href='../S/1054.html#L58002'>pCur</a>             58002 ext/sqlite3/libsqlite/sqlite3.c           btreeParseCellPtr(pPage, pCellBody, &amp;pCur-&gt;info);</span>
+<span class='curline'><a href='../S/1054.html#L58003'>pCur</a>             58003 ext/sqlite3/libsqlite/sqlite3.c           nCell = (int)pCur-&gt;info.nKey;</span>
+<span class='curline'><a href='../S/1054.html#L58009'>pCur</a>             58009 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)idx;</span>
+<span class='curline'><a href='../S/1054.html#L58010'>pCur</a>             58010 ext/sqlite3/libsqlite/sqlite3.c           rc = accessPayload(pCur, 0, nCell, (unsigned char*)pCellKey, 2);</span>
+<span class='curline'><a href='../S/1054.html#L58020'>pCur</a>             58020 ext/sqlite3/libsqlite/sqlite3.c          &amp;&amp; (pIdxKey-&gt;errCode!=SQLITE_NOMEM || pCur-&gt;pBtree-&gt;db-&gt;mallocFailed)</span>
+<span class='curline'><a href='../S/1054.html#L58030'>pCur</a>             58030 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)idx;</span>
+<span class='curline'><a href='../S/1054.html#L58042'>pCur</a>             58042 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L58043'>pCur</a>             58043 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)idx;</span>
+<span class='curline'><a href='../S/1054.html#L58054'>pCur</a>             58054 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage] = (u16)lwr;</span>
+<span class='curline'><a href='../S/1054.html#L58055'>pCur</a>             58055 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, chldPg);</span>
+<span class='curline'><a href='../S/1054.html#L58059'>pCur</a>             58059 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58060'>pCur</a>             58060 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_ValidNKey|BTCF_ValidOvfl);</span>
+<span class='curline'><a href='../S/1054.html#L58072'>pCur</a>             58072 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeEof(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L58077'>pCur</a>             58077 ext/sqlite3/libsqlite/sqlite3.c   return (CURSOR_VALID!=pCur-&gt;eState);</span>
+<span class='curline'><a href='../S/1054.html#L58101'>pCur</a>             58101 ext/sqlite3/libsqlite/sqlite3.c static SQLITE_NOINLINE int btreeNext(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L58106'>pCur</a>             58106 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L58107'>pCur</a>             58107 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;skipNext==0 || pCur-&gt;eState!=CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L58109'>pCur</a>             58109 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState!=CURSOR_VALID ){</span>
+<span class='curline'><a href='../S/1054.html#L58110'>pCur</a>             58110 ext/sqlite3/libsqlite/sqlite3.c     assert( (pCur-&gt;curFlags &amp; BTCF_ValidOvfl)==0 );</span>
+<span class='curline'><a href='../S/1054.html#L58111'>pCur</a>             58111 ext/sqlite3/libsqlite/sqlite3.c     rc = restoreCursorPosition(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58115'>pCur</a>             58115 ext/sqlite3/libsqlite/sqlite3.c     if( CURSOR_INVALID==pCur-&gt;eState ){</span>
+<span class='curline'><a href='../S/1054.html#L58119'>pCur</a>             58119 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;skipNext ){</span>
+<span class='curline'><a href='../S/1054.html#L58120'>pCur</a>             58120 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;eState==CURSOR_VALID || pCur-&gt;eState==CURSOR_SKIPNEXT );</span>
+<span class='curline'><a href='../S/1054.html#L58121'>pCur</a>             58121 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;eState = CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L58122'>pCur</a>             58122 ext/sqlite3/libsqlite/sqlite3.c       if( pCur-&gt;skipNext&gt;0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58123'>pCur</a>             58123 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;skipNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58126'>pCur</a>             58126 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;skipNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58130'>pCur</a>             58130 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58131'>pCur</a>             58131 ext/sqlite3/libsqlite/sqlite3.c   idx = ++pCur-&gt;aiIdx[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58143'>pCur</a>             58143 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]));</span>
+<span class='curline'><a href='../S/1054.html#L58145'>pCur</a>             58145 ext/sqlite3/libsqlite/sqlite3.c       return moveToLeftmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58148'>pCur</a>             58148 ext/sqlite3/libsqlite/sqlite3.c       if( pCur-&gt;iPage==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58150'>pCur</a>             58150 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L58153'>pCur</a>             58153 ext/sqlite3/libsqlite/sqlite3.c       moveToParent(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58154'>pCur</a>             58154 ext/sqlite3/libsqlite/sqlite3.c       pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58155'>pCur</a>             58155 ext/sqlite3/libsqlite/sqlite3.c     }while( pCur-&gt;aiIdx[pCur-&gt;iPage]&gt;=pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L58157'>pCur</a>             58157 ext/sqlite3/libsqlite/sqlite3.c       return sqlite3BtreeNext(pCur, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L58165'>pCur</a>             58165 ext/sqlite3/libsqlite/sqlite3.c     return moveToLeftmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58168'>pCur</a>             58168 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeNext(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L58170'>pCur</a>             58170 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L58173'>pCur</a>             58173 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;skipNext==0 || pCur-&gt;eState!=CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L58174'>pCur</a>             58174 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58175'>pCur</a>             58175 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_ValidNKey|BTCF_ValidOvfl);</span>
+<span class='curline'><a href='../S/1054.html#L58177'>pCur</a>             58177 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState!=CURSOR_VALID ) return btreeNext(pCur, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L58178'>pCur</a>             58178 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58179'>pCur</a>             58179 ext/sqlite3/libsqlite/sqlite3.c   if( (++pCur-&gt;aiIdx[pCur-&gt;iPage])&gt;=pPage-&gt;nCell ){</span>
+<span class='curline'><a href='../S/1054.html#L58180'>pCur</a>             58180 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage]--;</span>
+<span class='curline'><a href='../S/1054.html#L58181'>pCur</a>             58181 ext/sqlite3/libsqlite/sqlite3.c     return btreeNext(pCur, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L58186'>pCur</a>             58186 ext/sqlite3/libsqlite/sqlite3.c     return moveToLeftmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58211'>pCur</a>             58211 ext/sqlite3/libsqlite/sqlite3.c static SQLITE_NOINLINE int btreePrevious(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L58215'>pCur</a>             58215 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L58218'>pCur</a>             58218 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;skipNext==0 || pCur-&gt;eState!=CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L58219'>pCur</a>             58219 ext/sqlite3/libsqlite/sqlite3.c   assert( (pCur-&gt;curFlags &amp; (BTCF_AtLast|BTCF_ValidOvfl|BTCF_ValidNKey))==0 );</span>
+<span class='curline'><a href='../S/1054.html#L58220'>pCur</a>             58220 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;info.nSize==0 );</span>
+<span class='curline'><a href='../S/1054.html#L58221'>pCur</a>             58221 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState!=CURSOR_VALID ){</span>
+<span class='curline'><a href='../S/1054.html#L58222'>pCur</a>             58222 ext/sqlite3/libsqlite/sqlite3.c     rc = restoreCursorPosition(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58226'>pCur</a>             58226 ext/sqlite3/libsqlite/sqlite3.c     if( CURSOR_INVALID==pCur-&gt;eState ){</span>
+<span class='curline'><a href='../S/1054.html#L58230'>pCur</a>             58230 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;skipNext ){</span>
+<span class='curline'><a href='../S/1054.html#L58231'>pCur</a>             58231 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;eState==CURSOR_VALID || pCur-&gt;eState==CURSOR_SKIPNEXT );</span>
+<span class='curline'><a href='../S/1054.html#L58232'>pCur</a>             58232 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;eState = CURSOR_VALID;</span>
+<span class='curline'><a href='../S/1054.html#L58233'>pCur</a>             58233 ext/sqlite3/libsqlite/sqlite3.c       if( pCur-&gt;skipNext&lt;0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58234'>pCur</a>             58234 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;skipNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58237'>pCur</a>             58237 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;skipNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58241'>pCur</a>             58241 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58244'>pCur</a>             58244 ext/sqlite3/libsqlite/sqlite3.c     int idx = pCur-&gt;aiIdx[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58245'>pCur</a>             58245 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, get4byte(findCell(pPage, idx)));</span>
+<span class='curline'><a href='../S/1054.html#L58247'>pCur</a>             58247 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToRightmost(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58249'>pCur</a>             58249 ext/sqlite3/libsqlite/sqlite3.c     while( pCur-&gt;aiIdx[pCur-&gt;iPage]==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58250'>pCur</a>             58250 ext/sqlite3/libsqlite/sqlite3.c       if( pCur-&gt;iPage==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58251'>pCur</a>             58251 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L58255'>pCur</a>             58255 ext/sqlite3/libsqlite/sqlite3.c       moveToParent(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L58257'>pCur</a>             58257 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;info.nSize==0 );</span>
+<span class='curline'><a href='../S/1054.html#L58258'>pCur</a>             58258 ext/sqlite3/libsqlite/sqlite3.c     assert( (pCur-&gt;curFlags &amp; (BTCF_ValidNKey|BTCF_ValidOvfl))==0 );</span>
+<span class='curline'><a href='../S/1054.html#L58260'>pCur</a>             58260 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage]--;</span>
+<span class='curline'><a href='../S/1054.html#L58261'>pCur</a>             58261 ext/sqlite3/libsqlite/sqlite3.c     pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58263'>pCur</a>             58263 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3BtreePrevious(pCur, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L58270'>pCur</a>             58270 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreePrevious(BtCursor *pCur, int *pRes){</span>
+<span class='curline'><a href='../S/1054.html#L58271'>pCur</a>             58271 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L58274'>pCur</a>             58274 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;skipNext==0 || pCur-&gt;eState!=CURSOR_VALID );</span>
+<span class='curline'><a href='../S/1054.html#L58276'>pCur</a>             58276 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags &amp;= ~(BTCF_AtLast|BTCF_ValidOvfl|BTCF_ValidNKey);</span>
+<span class='curline'><a href='../S/1054.html#L58277'>pCur</a>             58277 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58278'>pCur</a>             58278 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState!=CURSOR_VALID</span>
+<span class='curline'><a href='../S/1054.html#L58279'>pCur</a>             58279 ext/sqlite3/libsqlite/sqlite3.c    || pCur-&gt;aiIdx[pCur-&gt;iPage]==0</span>
+<span class='curline'><a href='../S/1054.html#L58280'>pCur</a>             58280 ext/sqlite3/libsqlite/sqlite3.c    || pCur-&gt;apPage[pCur-&gt;iPage]-&gt;leaf==0</span>
+<span class='curline'><a href='../S/1054.html#L58282'>pCur</a>             58282 ext/sqlite3/libsqlite/sqlite3.c     return btreePrevious(pCur, pRes);</span>
+<span class='curline'><a href='../S/1054.html#L58284'>pCur</a>             58284 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;aiIdx[pCur-&gt;iPage]--;</span>
+<span class='curline'><a href='../S/1054.html#L60462'>pCur</a>             60462 ext/sqlite3/libsqlite/sqlite3.c static int balance(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L60464'>pCur</a>             60464 ext/sqlite3/libsqlite/sqlite3.c   const int nMin = pCur-&gt;pBt-&gt;usableSize * 2 / 3;</span>
+<span class='curline'><a href='../S/1054.html#L60472'>pCur</a>             60472 ext/sqlite3/libsqlite/sqlite3.c     int iPage = pCur-&gt;iPage;</span>
+<span class='curline'><a href='../S/1054.html#L60473'>pCur</a>             60473 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage = pCur-&gt;apPage[iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60483'>pCur</a>             60483 ext/sqlite3/libsqlite/sqlite3.c         rc = balance_deeper(pPage, &amp;pCur-&gt;apPage[1]);</span>
+<span class='curline'><a href='../S/1054.html#L60485'>pCur</a>             60485 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;iPage = 1;</span>
+<span class='curline'><a href='../S/1054.html#L60486'>pCur</a>             60486 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aiIdx[0] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L60487'>pCur</a>             60487 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;aiIdx[1] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L60488'>pCur</a>             60488 ext/sqlite3/libsqlite/sqlite3.c           assert( pCur-&gt;apPage[1]-&gt;nOverflow );</span>
+<span class='curline'><a href='../S/1054.html#L60496'>pCur</a>             60496 ext/sqlite3/libsqlite/sqlite3.c       MemPage * const pParent = pCur-&gt;apPage[iPage-1];</span>
+<span class='curline'><a href='../S/1054.html#L60497'>pCur</a>             60497 ext/sqlite3/libsqlite/sqlite3.c       int const iIdx = pCur-&gt;aiIdx[iPage-1];</span>
+<span class='curline'><a href='../S/1054.html#L60543'>pCur</a>             60543 ext/sqlite3/libsqlite/sqlite3.c           u8 *pSpace = sqlite3PageMalloc(pCur-&gt;pBt-&gt;pageSize);</span>
+<span class='curline'><a href='../S/1054.html#L60545'>pCur</a>             60545 ext/sqlite3/libsqlite/sqlite3.c                                pCur-&gt;hints&amp;BTREE_BULKLOAD);</span>
+<span class='curline'><a href='../S/1054.html#L60565'>pCur</a>             60565 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;iPage--;</span>
+<span class='curline'><a href='../S/1054.html#L60566'>pCur</a>             60566 ext/sqlite3/libsqlite/sqlite3.c       assert( pCur-&gt;iPage&gt;=0 );</span>
+<span class='curline'><a href='../S/1054.html#L60600'>pCur</a>             60600 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,                /* Insert data into the table of this cursor */</span>
+<span class='curline'><a href='../S/1054.html#L60612'>pCur</a>             60612 ext/sqlite3/libsqlite/sqlite3.c   Btree *p = pCur-&gt;pBtree;</span>
+<span class='curline'><a href='../S/1054.html#L60617'>pCur</a>             60617 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;eState==CURSOR_FAULT ){</span>
+<span class='curline'><a href='../S/1054.html#L60618'>pCur</a>             60618 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;skipNext!=SQLITE_OK );</span>
+<span class='curline'><a href='../S/1054.html#L60619'>pCur</a>             60619 ext/sqlite3/libsqlite/sqlite3.c     return pCur-&gt;skipNext;</span>
+<span class='curline'><a href='../S/1054.html#L60622'>pCur</a>             60622 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L60623'>pCur</a>             60623 ext/sqlite3/libsqlite/sqlite3.c   assert( (pCur-&gt;curFlags &amp; BTCF_WriteFlag)!=0</span>
+<span class='curline'><a href='../S/1054.html#L60626'>pCur</a>             60626 ext/sqlite3/libsqlite/sqlite3.c   assert( hasSharedCacheTableLock(p, pCur-&gt;pgnoRoot, pCur-&gt;pKeyInfo!=0, 2) );</span>
+<span class='curline'><a href='../S/1054.html#L60633'>pCur</a>             60633 ext/sqlite3/libsqlite/sqlite3.c   assert( (pKey==0)==(pCur-&gt;pKeyInfo==0) );</span>
+<span class='curline'><a href='../S/1054.html#L60646'>pCur</a>             60646 ext/sqlite3/libsqlite/sqlite3.c   rc = saveAllCursors(pBt, pCur-&gt;pgnoRoot, pCur);</span>
+<span class='curline'><a href='../S/1054.html#L60649'>pCur</a>             60649 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;pKeyInfo==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L60657'>pCur</a>             60657 ext/sqlite3/libsqlite/sqlite3.c     if( (pCur-&gt;curFlags&amp;BTCF_ValidNKey)!=0 &amp;&amp; nKey&gt;0</span>
+<span class='curline'><a href='../S/1054.html#L60658'>pCur</a>             60658 ext/sqlite3/libsqlite/sqlite3.c       &amp;&amp; pCur-&gt;info.nKey==nKey-1 ){</span>
+<span class='curline'><a href='../S/1054.html#L60664'>pCur</a>             60664 ext/sqlite3/libsqlite/sqlite3.c     rc = btreeMoveto(pCur, pKey, nKey, appendBias, &amp;loc);</span>
+<span class='curline'><a href='../S/1054.html#L60667'>pCur</a>             60667 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;eState==CURSOR_VALID || (pCur-&gt;eState==CURSOR_INVALID &amp;&amp; loc) );</span>
+<span class='curline'><a href='../S/1054.html#L60669'>pCur</a>             60669 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60674'>pCur</a>             60674 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;pgnoRoot, nKey, nData, pPage-&gt;pgno,</span>
+<span class='curline'><a href='../S/1054.html#L60683'>pCur</a>             60683 ext/sqlite3/libsqlite/sqlite3.c   idx = pCur-&gt;aiIdx[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60700'>pCur</a>             60700 ext/sqlite3/libsqlite/sqlite3.c     idx = ++pCur-&gt;aiIdx[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60727'>pCur</a>             60727 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;info.nSize = 0;</span>
+<span class='curline'><a href='../S/1054.html#L60729'>pCur</a>             60729 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;curFlags &amp;= ~(BTCF_ValidNKey);</span>
+<span class='curline'><a href='../S/1054.html#L60730'>pCur</a>             60730 ext/sqlite3/libsqlite/sqlite3.c     rc = balance(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L60736'>pCur</a>             60736 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nOverflow = 0;</span>
+<span class='curline'><a href='../S/1054.html#L60737'>pCur</a>             60737 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;eState = CURSOR_INVALID;</span>
+<span class='curline'><a href='../S/1054.html#L60739'>pCur</a>             60739 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nOverflow==0 );</span>
+<span class='curline'><a href='../S/1054.html#L60749'>pCur</a>             60749 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeDelete(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L60750'>pCur</a>             60750 ext/sqlite3/libsqlite/sqlite3.c   Btree *p = pCur-&gt;pBtree;</span>
+<span class='curline'><a href='../S/1054.html#L60759'>pCur</a>             60759 ext/sqlite3/libsqlite/sqlite3.c   assert( cursorHoldsMutex(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L60762'>pCur</a>             60762 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;curFlags &amp; BTCF_WriteFlag );</span>
+<span class='curline'><a href='../S/1054.html#L60763'>pCur</a>             60763 ext/sqlite3/libsqlite/sqlite3.c   assert( hasSharedCacheTableLock(p, pCur-&gt;pgnoRoot, pCur-&gt;pKeyInfo!=0, 2) );</span>
+<span class='curline'><a href='../S/1054.html#L60764'>pCur</a>             60764 ext/sqlite3/libsqlite/sqlite3.c   assert( !hasReadConflicts(p, pCur-&gt;pgnoRoot) );</span>
+<span class='curline'><a href='../S/1054.html#L60766'>pCur</a>             60766 ext/sqlite3/libsqlite/sqlite3.c   if( NEVER(pCur-&gt;aiIdx[pCur-&gt;iPage]&gt;=pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell) </span>
+<span class='curline'><a href='../S/1054.html#L60767'>pCur</a>             60767 ext/sqlite3/libsqlite/sqlite3.c    || NEVER(pCur-&gt;eState!=CURSOR_VALID)</span>
+<span class='curline'><a href='../S/1054.html#L60772'>pCur</a>             60772 ext/sqlite3/libsqlite/sqlite3.c   iCellDepth = pCur-&gt;iPage;</span>
+<span class='curline'><a href='../S/1054.html#L60773'>pCur</a>             60773 ext/sqlite3/libsqlite/sqlite3.c   iCellIdx = pCur-&gt;aiIdx[iCellDepth];</span>
+<span class='curline'><a href='../S/1054.html#L60774'>pCur</a>             60774 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[iCellDepth];</span>
+<span class='curline'><a href='../S/1054.html#L60786'>pCur</a>             60786 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3BtreePrevious(pCur, &amp;notUsed);</span>
+<span class='curline'><a href='../S/1054.html#L60795'>pCur</a>             60795 ext/sqlite3/libsqlite/sqlite3.c   rc = saveAllCursors(pBt, pCur-&gt;pgnoRoot, pCur);</span>
+<span class='curline'><a href='../S/1054.html#L60800'>pCur</a>             60800 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;pKeyInfo==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L60801'>pCur</a>             60801 ext/sqlite3/libsqlite/sqlite3.c     invalidateIncrblobCursors(p, pCur-&gt;info.nKey, 0);</span>
+<span class='curline'><a href='../S/1054.html#L60816'>pCur</a>             60816 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pLeaf = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60818'>pCur</a>             60818 ext/sqlite3/libsqlite/sqlite3.c     Pgno n = pCur-&gt;apPage[iCellDepth+1]-&gt;pgno;</span>
+<span class='curline'><a href='../S/1054.html#L60847'>pCur</a>             60847 ext/sqlite3/libsqlite/sqlite3.c   rc = balance(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L60848'>pCur</a>             60848 ext/sqlite3/libsqlite/sqlite3.c   if( rc==SQLITE_OK &amp;&amp; pCur-&gt;iPage&gt;iCellDepth ){</span>
+<span class='curline'><a href='../S/1054.html#L60849'>pCur</a>             60849 ext/sqlite3/libsqlite/sqlite3.c     while( pCur-&gt;iPage&gt;iCellDepth ){</span>
+<span class='curline'><a href='../S/1054.html#L60850'>pCur</a>             60850 ext/sqlite3/libsqlite/sqlite3.c       releasePage(pCur-&gt;apPage[pCur-&gt;iPage--]);</span>
+<span class='curline'><a href='../S/1054.html#L60852'>pCur</a>             60852 ext/sqlite3/libsqlite/sqlite3.c     rc = balance(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L60856'>pCur</a>             60856 ext/sqlite3/libsqlite/sqlite3.c     moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L61116'>pCur</a>             61116 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeClearTableOfCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L61117'>pCur</a>             61117 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3BtreeClearTable(pCur-&gt;pBtree, pCur-&gt;pgnoRoot, 0);</span>
+<span class='curline'><a href='../S/1054.html#L61335'>pCur</a>             61335 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3BtreeCount(BtCursor *pCur, i64 *pnEntry){</span>
+<span class='curline'><a href='../S/1054.html#L61339'>pCur</a>             61339 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;pgnoRoot==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61343'>pCur</a>             61343 ext/sqlite3/libsqlite/sqlite3.c   rc = moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L61356'>pCur</a>             61356 ext/sqlite3/libsqlite/sqlite3.c     pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L61373'>pCur</a>             61373 ext/sqlite3/libsqlite/sqlite3.c         if( pCur-&gt;iPage==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61376'>pCur</a>             61376 ext/sqlite3/libsqlite/sqlite3.c           return moveToRoot(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L61378'>pCur</a>             61378 ext/sqlite3/libsqlite/sqlite3.c         moveToParent(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L61379'>pCur</a>             61379 ext/sqlite3/libsqlite/sqlite3.c       }while ( pCur-&gt;aiIdx[pCur-&gt;iPage]&gt;=pCur-&gt;apPage[pCur-&gt;iPage]-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L61381'>pCur</a>             61381 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;aiIdx[pCur-&gt;iPage]++;</span>
+<span class='curline'><a href='../S/1054.html#L61382'>pCur</a>             61382 ext/sqlite3/libsqlite/sqlite3.c       pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L61388'>pCur</a>             61388 ext/sqlite3/libsqlite/sqlite3.c     iIdx = pCur-&gt;aiIdx[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L61390'>pCur</a>             61390 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]));</span>
+<span class='curline'><a href='../S/1054.html#L61392'>pCur</a>             61392 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(findCell(pPage, iIdx)));</span>
+<span class='curline'><a href='../S/1054.html#L62228'>pCur</a>             62228 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE void sqlite3BtreeIncrblobCursor(BtCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L62229'>pCur</a>             62229 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;curFlags |= BTCF_Incrblob;</span>
+<span class='curline'><a href='../S/1054.html#L64037'>pCur</a>             64037 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur,   /* Cursor pointing at record to retrieve. */</span>
+<span class='curline'><a href='../S/1054.html#L64047'>pCur</a>             64047 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3BtreeCursorIsValid(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L64054'>pCur</a>             64054 ext/sqlite3/libsqlite/sqlite3.c     zData = (char *)sqlite3BtreeKeyFetch(pCur, &amp;available);</span>
+<span class='curline'><a href='../S/1054.html#L64056'>pCur</a>             64056 ext/sqlite3/libsqlite/sqlite3.c     zData = (char *)sqlite3BtreeDataFetch(pCur, &amp;available);</span>
+<span class='curline'><a href='../S/1054.html#L64068'>pCur</a>             64068 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3BtreeKey(pCur, offset, amt, pMem-&gt;z);</span>
+<span class='curline'><a href='../S/1054.html#L64070'>pCur</a>             64070 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3BtreeData(pCur, offset, amt, pMem-&gt;z);</span>
+<span class='curline'><a href='../S/1054.html#L68773'>pCur</a>             68773 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3VdbeIdxRowid(sqlite3 *db, BtCursor *pCur, i64 *rowid){</span>
+<span class='curline'><a href='../S/1054.html#L68786'>pCur</a>             68786 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3BtreeCursorIsValid(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L68787'>pCur</a>             68787 ext/sqlite3/libsqlite/sqlite3.c   VVA_ONLY(rc =) sqlite3BtreeKeySize(pCur, &amp;nCellKey);</span>
+<span class='curline'><a href='../S/1054.html#L68793'>pCur</a>             68793 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3VdbeMemFromBtree(pCur, 0, (u32)nCellKey, 1, &amp;m);</span>
+<span class='curline'><a href='../S/1054.html#L68859'>pCur</a>             68859 ext/sqlite3/libsqlite/sqlite3.c   BtCursor *pCur = pC-&gt;pCursor;</span>
+<span class='curline'><a href='../S/1054.html#L68862'>pCur</a>             68862 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3BtreeCursorIsValid(pCur) );</span>
+<span class='curline'><a href='../S/1054.html#L68863'>pCur</a>             68863 ext/sqlite3/libsqlite/sqlite3.c   VVA_ONLY(rc =) sqlite3BtreeKeySize(pCur, &amp;nCellKey);</span>
+<span class='curline'><a href='../S/1054.html#L74108'>pCur</a>             74108 ext/sqlite3/libsqlite/sqlite3.c   VdbeCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L74113'>pCur</a>             74113 ext/sqlite3/libsqlite/sqlite3.c   pCur = p-&gt;apCsr[pOp-&gt;p1];</span>
+<span class='curline'><a href='../S/1054.html#L74114'>pCur</a>             74114 ext/sqlite3/libsqlite/sqlite3.c   if( pCur &amp;&amp; pCur-&gt;pgnoRoot==(u32)pOp-&gt;p2 ){</span>
+<span class='curline'><a href='../S/1054.html#L74115'>pCur</a>             74115 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;iDb==pOp-&gt;p3 );      /* Guaranteed by the code generator */</span>
+<span class='curline'><a href='../S/1054.html#L74180'>pCur</a>             74180 ext/sqlite3/libsqlite/sqlite3.c   pCur = allocateCursor(p, pOp-&gt;p1, nField, iDb, 1);</span>
+<span class='curline'><a href='../S/1054.html#L74181'>pCur</a>             74181 ext/sqlite3/libsqlite/sqlite3.c   if( pCur==0 ) goto no_mem;</span>
+<span class='curline'><a href='../S/1054.html#L74182'>pCur</a>             74182 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;nullRow = 1;</span>
+<span class='curline'><a href='../S/1054.html#L74183'>pCur</a>             74183 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;isOrdered = 1;</span>
+<span class='curline'><a href='../S/1054.html#L74184'>pCur</a>             74184 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pgnoRoot = p2;</span>
+<span class='curline'><a href='../S/1054.html#L74185'>pCur</a>             74185 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3BtreeCursor(pX, p2, wrFlag, pKeyInfo, pCur-&gt;pCursor);</span>
+<span class='curline'><a href='../S/1054.html#L74186'>pCur</a>             74186 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;pKeyInfo = pKeyInfo;</span>
+<span class='curline'><a href='../S/1054.html#L74191'>pCur</a>             74191 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;isTable = pOp-&gt;p4type!=P4_KEYINFO;</span>
+<span class='curline'><a href='../S/1054.html#L74196'>pCur</a>             74196 ext/sqlite3/libsqlite/sqlite3.c   sqlite3BtreeCursorHints(pCur-&gt;pCursor,</span>
+<span class='curline'><a href='../S/1054.html#L76916'>pCur</a>             76916 ext/sqlite3/libsqlite/sqlite3.c   VdbeCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L76922'>pCur</a>             76922 ext/sqlite3/libsqlite/sqlite3.c   pCur = 0;</span>
+<span class='curline'><a href='../S/1054.html#L76937'>pCur</a>             76937 ext/sqlite3/libsqlite/sqlite3.c     pCur = allocateCursor(p, pOp-&gt;p1, 0, -1, 0);</span>
+<span class='curline'><a href='../S/1054.html#L76938'>pCur</a>             76938 ext/sqlite3/libsqlite/sqlite3.c     if( pCur ){</span>
+<span class='curline'><a href='../S/1054.html#L76939'>pCur</a>             76939 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;pVtabCursor = pVtabCursor;</span>
+<span class='curline'><a href='../S/1054.html#L76979'>pCur</a>             76979 ext/sqlite3/libsqlite/sqlite3.c   VdbeCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L76986'>pCur</a>             76986 ext/sqlite3/libsqlite/sqlite3.c   pCur = p-&gt;apCsr[pOp-&gt;p1];</span>
+<span class='curline'><a href='../S/1054.html#L76989'>pCur</a>             76989 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;pVtabCursor );</span>
+<span class='curline'><a href='../S/1054.html#L76990'>pCur</a>             76990 ext/sqlite3/libsqlite/sqlite3.c   pVtabCursor = pCur-&gt;pVtabCursor;</span>
+<span class='curline'><a href='../S/1054.html#L77010'>pCur</a>             77010 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;nullRow = 0;</span>
+<span class='curline'><a href='../S/1054.html#L77031'>pCur</a>             77031 ext/sqlite3/libsqlite/sqlite3.c   VdbeCursor *pCur = p-&gt;apCsr[pOp-&gt;p1];</span>
+<span class='curline'><a href='../S/1054.html#L77032'>pCur</a>             77032 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;pVtabCursor );</span>
+<span class='curline'><a href='../S/1054.html#L77036'>pCur</a>             77036 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;nullRow ){</span>
+<span class='curline'><a href='../S/1054.html#L77040'>pCur</a>             77040 ext/sqlite3/libsqlite/sqlite3.c   pVtab = pCur-&gt;pVtabCursor-&gt;pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L77046'>pCur</a>             77046 ext/sqlite3/libsqlite/sqlite3.c   rc = pModule-&gt;xColumn(pCur-&gt;pVtabCursor, &amp;sContext, pOp-&gt;p2);</span>
+<span class='curline'><a href='../S/1054.html#L77073'>pCur</a>             77073 ext/sqlite3/libsqlite/sqlite3.c   VdbeCursor *pCur;</span>
+<span class='curline'><a href='../S/1054.html#L77076'>pCur</a>             77076 ext/sqlite3/libsqlite/sqlite3.c   pCur = p-&gt;apCsr[pOp-&gt;p1];</span>
+<span class='curline'><a href='../S/1054.html#L77077'>pCur</a>             77077 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;pVtabCursor );</span>
+<span class='curline'><a href='../S/1054.html#L77078'>pCur</a>             77078 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;nullRow ){</span>
+<span class='curline'><a href='../S/1054.html#L77081'>pCur</a>             77081 ext/sqlite3/libsqlite/sqlite3.c   pVtab = pCur-&gt;pVtabCursor-&gt;pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L77091'>pCur</a>             77091 ext/sqlite3/libsqlite/sqlite3.c   rc = pModule-&gt;xNext(pCur-&gt;pVtabCursor);</span>
+<span class='curline'><a href='../S/1054.html#L77094'>pCur</a>             77094 ext/sqlite3/libsqlite/sqlite3.c     res = pModule-&gt;xEof(pCur-&gt;pVtabCursor);</span>
+<span class='curline'><a href='../S/1054.html#L152112'>pCur</a>             152112 ext/sqlite3/libsqlite/sqlite3.c static RtreeSearchPoint *rtreeSearchPointFirst(RtreeCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L152113'>pCur</a>             152113 ext/sqlite3/libsqlite/sqlite3.c   return pCur-&gt;bPoint ? &amp;pCur-&gt;sPoint : pCur-&gt;nPoint ? pCur-&gt;aPoint : 0;</span>
+<span class='curline'><a href='../S/1054.html#L152119'>pCur</a>             152119 ext/sqlite3/libsqlite/sqlite3.c static RtreeNode *rtreeNodeOfFirstSearchPoint(RtreeCursor *pCur, int *pRC){</span>
+<span class='curline'><a href='../S/1054.html#L152121'>pCur</a>             152121 ext/sqlite3/libsqlite/sqlite3.c   int ii = 1 - pCur-&gt;bPoint;</span>
+<span class='curline'><a href='../S/1054.html#L152123'>pCur</a>             152123 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;bPoint || pCur-&gt;nPoint );</span>
+<span class='curline'><a href='../S/1054.html#L152124'>pCur</a>             152124 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;aNode[ii]==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L152126'>pCur</a>             152126 ext/sqlite3/libsqlite/sqlite3.c     id = ii ? pCur-&gt;aPoint[0].id : pCur-&gt;sPoint.id;</span>
+<span class='curline'><a href='../S/1054.html#L152127'>pCur</a>             152127 ext/sqlite3/libsqlite/sqlite3.c     *pRC = nodeAcquire(RTREE_OF_CURSOR(pCur), id, 0, &amp;pCur-&gt;aNode[ii]);</span>
+<span class='curline'><a href='../S/1054.html#L152129'>pCur</a>             152129 ext/sqlite3/libsqlite/sqlite3.c   return pCur-&gt;aNode[ii];</span>
+<span class='curline'><a href='../S/1054.html#L152136'>pCur</a>             152136 ext/sqlite3/libsqlite/sqlite3.c   RtreeCursor *pCur,    /* The cursor */</span>
+<span class='curline'><a href='../S/1054.html#L152142'>pCur</a>             152142 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;nPoint&gt;=pCur-&gt;nPointAlloc ){</span>
+<span class='curline'><a href='../S/1054.html#L152143'>pCur</a>             152143 ext/sqlite3/libsqlite/sqlite3.c     int nNew = pCur-&gt;nPointAlloc*2 + 8;</span>
+<span class='curline'><a href='../S/1054.html#L152144'>pCur</a>             152144 ext/sqlite3/libsqlite/sqlite3.c     pNew = sqlite3_realloc(pCur-&gt;aPoint, nNew*sizeof(pCur-&gt;aPoint[0]));</span>
+<span class='curline'><a href='../S/1054.html#L152146'>pCur</a>             152146 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aPoint = pNew;</span>
+<span class='curline'><a href='../S/1054.html#L152147'>pCur</a>             152147 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;nPointAlloc = nNew;</span>
+<span class='curline'><a href='../S/1054.html#L152149'>pCur</a>             152149 ext/sqlite3/libsqlite/sqlite3.c   i = pCur-&gt;nPoint++;</span>
+<span class='curline'><a href='../S/1054.html#L152150'>pCur</a>             152150 ext/sqlite3/libsqlite/sqlite3.c   pNew = pCur-&gt;aPoint + i;</span>
+<span class='curline'><a href='../S/1054.html#L152157'>pCur</a>             152157 ext/sqlite3/libsqlite/sqlite3.c     pParent = pCur-&gt;aPoint + j;</span>
+<span class='curline'><a href='../S/1054.html#L152159'>pCur</a>             152159 ext/sqlite3/libsqlite/sqlite3.c     rtreeSearchPointSwap(pCur, j, i);</span>
+<span class='curline'><a href='../S/1054.html#L152171'>pCur</a>             152171 ext/sqlite3/libsqlite/sqlite3.c   RtreeCursor *pCur,    /* The cursor */</span>
+<span class='curline'><a href='../S/1054.html#L152176'>pCur</a>             152176 ext/sqlite3/libsqlite/sqlite3.c   pFirst = rtreeSearchPointFirst(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152177'>pCur</a>             152177 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;anQueue[iLevel]++;</span>
+<span class='curline'><a href='../S/1054.html#L152182'>pCur</a>             152182 ext/sqlite3/libsqlite/sqlite3.c     if( pCur-&gt;bPoint ){</span>
+<span class='curline'><a href='../S/1054.html#L152184'>pCur</a>             152184 ext/sqlite3/libsqlite/sqlite3.c       pNew = rtreeEnqueue(pCur, rScore, iLevel);</span>
+<span class='curline'><a href='../S/1054.html#L152186'>pCur</a>             152186 ext/sqlite3/libsqlite/sqlite3.c       ii = (int)(pNew - pCur-&gt;aPoint) + 1;</span>
+<span class='curline'><a href='../S/1054.html#L152188'>pCur</a>             152188 ext/sqlite3/libsqlite/sqlite3.c         assert( pCur-&gt;aNode[ii]==0 );</span>
+<span class='curline'><a href='../S/1054.html#L152189'>pCur</a>             152189 ext/sqlite3/libsqlite/sqlite3.c         pCur-&gt;aNode[ii] = pCur-&gt;aNode[0];</span>
+<span class='curline'><a href='../S/1054.html#L152191'>pCur</a>             152191 ext/sqlite3/libsqlite/sqlite3.c         nodeRelease(RTREE_OF_CURSOR(pCur), pCur-&gt;aNode[0]);</span>
+<span class='curline'><a href='../S/1054.html#L152193'>pCur</a>             152193 ext/sqlite3/libsqlite/sqlite3.c       pCur-&gt;aNode[0] = 0;</span>
+<span class='curline'><a href='../S/1054.html#L152194'>pCur</a>             152194 ext/sqlite3/libsqlite/sqlite3.c       *pNew = pCur-&gt;sPoint;</span>
+<span class='curline'><a href='../S/1054.html#L152196'>pCur</a>             152196 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;sPoint.rScore = rScore;</span>
+<span class='curline'><a href='../S/1054.html#L152197'>pCur</a>             152197 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;sPoint.iLevel = iLevel;</span>
+<span class='curline'><a href='../S/1054.html#L152198'>pCur</a>             152198 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;bPoint = 1;</span>
+<span class='curline'><a href='../S/1054.html#L152199'>pCur</a>             152199 ext/sqlite3/libsqlite/sqlite3.c     return &amp;pCur-&gt;sPoint;</span>
+<span class='curline'><a href='../S/1054.html#L152201'>pCur</a>             152201 ext/sqlite3/libsqlite/sqlite3.c     return rtreeEnqueue(pCur, rScore, iLevel);</span>
+<span class='curline'><a href='../S/1054.html#L152207'>pCur</a>             152207 ext/sqlite3/libsqlite/sqlite3.c static void tracePoint(RtreeSearchPoint *p, int idx, RtreeCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L152214'>pCur</a>             152214 ext/sqlite3/libsqlite/sqlite3.c     printf(" %p\n", pCur-&gt;aNode[idx]);</span>
+<span class='curline'><a href='../S/1054.html#L152219'>pCur</a>             152219 ext/sqlite3/libsqlite/sqlite3.c static void traceQueue(RtreeCursor *pCur, const char *zPrefix){</span>
+<span class='curline'><a href='../S/1054.html#L152222'>pCur</a>             152222 ext/sqlite3/libsqlite/sqlite3.c   if( pCur-&gt;bPoint ){</span>
+<span class='curline'><a href='../S/1054.html#L152223'>pCur</a>             152223 ext/sqlite3/libsqlite/sqlite3.c     tracePoint(&amp;pCur-&gt;sPoint, -1, pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152225'>pCur</a>             152225 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;pCur-&gt;nPoint; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L152226'>pCur</a>             152226 ext/sqlite3/libsqlite/sqlite3.c     if( ii&gt;0 || pCur-&gt;bPoint ) printf("              ");</span>
+<span class='curline'><a href='../S/1054.html#L152227'>pCur</a>             152227 ext/sqlite3/libsqlite/sqlite3.c     tracePoint(&amp;pCur-&gt;aPoint[ii], ii, pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152285'>pCur</a>             152285 ext/sqlite3/libsqlite/sqlite3.c static int rtreeStepToLeaf(RtreeCursor *pCur){</span>
+<span class='curline'><a href='../S/1054.html#L152287'>pCur</a>             152287 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = RTREE_OF_CURSOR(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152292'>pCur</a>             152292 ext/sqlite3/libsqlite/sqlite3.c   int nConstraint = pCur-&gt;nConstraint;</span>
+<span class='curline'><a href='../S/1054.html#L152298'>pCur</a>             152298 ext/sqlite3/libsqlite/sqlite3.c   while( (p = rtreeSearchPointFirst(pCur))!=0 &amp;&amp; p-&gt;iLevel&gt;0 ){</span>
+<span class='curline'><a href='../S/1054.html#L152299'>pCur</a>             152299 ext/sqlite3/libsqlite/sqlite3.c     pNode = rtreeNodeOfFirstSearchPoint(pCur, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L152308'>pCur</a>             152308 ext/sqlite3/libsqlite/sqlite3.c         RtreeConstraint *pConstraint = pCur-&gt;aConstraint + ii;</span>
+<span class='curline'><a href='../S/1054.html#L152331'>pCur</a>             152331 ext/sqlite3/libsqlite/sqlite3.c         RTREE_QUEUE_TRACE(pCur, "POP-S:");</span>
+<span class='curline'><a href='../S/1054.html#L152332'>pCur</a>             152332 ext/sqlite3/libsqlite/sqlite3.c         rtreeSearchPointPop(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152335'>pCur</a>             152335 ext/sqlite3/libsqlite/sqlite3.c       p = rtreeSearchPointNew(pCur, rScore, x.iLevel);</span>
+<span class='curline'><a href='../S/1054.html#L152340'>pCur</a>             152340 ext/sqlite3/libsqlite/sqlite3.c       RTREE_QUEUE_TRACE(pCur, "PUSH-S:");</span>
+<span class='curline'><a href='../S/1054.html#L152344'>pCur</a>             152344 ext/sqlite3/libsqlite/sqlite3.c       RTREE_QUEUE_TRACE(pCur, "POP-Se:");</span>
+<span class='curline'><a href='../S/1054.html#L152345'>pCur</a>             152345 ext/sqlite3/libsqlite/sqlite3.c       rtreeSearchPointPop(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152348'>pCur</a>             152348 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;atEOF = p==0;</span>
+<span class='curline'><a href='../S/1055.html#L6525'>pCur</a>             6525 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_db_status(sqlite3*, int op, int *pCur, int *pHiwtr, int resetFlg);</span>
+<span class='curline'><a href='../S/1524.html#L548'>pCur</a>              548 sapi/litespeed/lsapilib.c         struct lsapi_header_offset * pCur, *pEnd;</span>
+<span class='curline'><a href='../S/1524.html#L549'>pCur</a>              549 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pUnknownHeader;</span>
+<span class='curline'><a href='../S/1524.html#L550'>pCur</a>              550 sapi/litespeed/lsapilib.c         pEnd = pCur + pReq-&gt;m_pHeader-&gt;m_cntUnknownHeaders;</span>
+<span class='curline'><a href='../S/1524.html#L551'>pCur</a>              551 sapi/litespeed/lsapilib.c         while( pCur &lt; pEnd )</span>
+<span class='curline'><a href='../S/1524.html#L553'>pCur</a>              553 sapi/litespeed/lsapilib.c             swapIntEndian( &amp;pCur-&gt;nameOff );</span>
+<span class='curline'><a href='../S/1524.html#L554'>pCur</a>              554 sapi/litespeed/lsapilib.c             swapIntEndian( &amp;pCur-&gt;nameLen );</span>
+<span class='curline'><a href='../S/1524.html#L555'>pCur</a>              555 sapi/litespeed/lsapilib.c             swapIntEndian( &amp;pCur-&gt;valueOff );</span>
+<span class='curline'><a href='../S/1524.html#L556'>pCur</a>              556 sapi/litespeed/lsapilib.c             swapIntEndian( &amp;pCur-&gt;valueLen );</span>
+<span class='curline'><a href='../S/1524.html#L557'>pCur</a>              557 sapi/litespeed/lsapilib.c             ++pCur;</span>
+<span class='curline'><a href='../S/1524.html#L579'>pCur</a>              579 sapi/litespeed/lsapilib.c         struct lsapi_header_offset * pCur, *pEnd;</span>
+<span class='curline'><a href='../S/1524.html#L580'>pCur</a>              580 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pUnknownHeader;</span>
+<span class='curline'><a href='../S/1524.html#L581'>pCur</a>              581 sapi/litespeed/lsapilib.c         pEnd = pCur + pReq-&gt;m_pHeader-&gt;m_cntUnknownHeaders;</span>
+<span class='curline'><a href='../S/1524.html#L582'>pCur</a>              582 sapi/litespeed/lsapilib.c         while( pCur &lt; pEnd )</span>
+<span class='curline'><a href='../S/1524.html#L584'>pCur</a>              584 sapi/litespeed/lsapilib.c             if (pCur-&gt;nameOff &gt; totalLen </span>
+<span class='curline'><a href='../S/1524.html#L585'>pCur</a>              585 sapi/litespeed/lsapilib.c                 || pCur-&gt;nameOff + pCur-&gt;nameLen &gt; totalLen </span>
+<span class='curline'><a href='../S/1524.html#L586'>pCur</a>              586 sapi/litespeed/lsapilib.c                 || pCur-&gt;valueOff &gt; totalLen</span>
+<span class='curline'><a href='../S/1524.html#L587'>pCur</a>              587 sapi/litespeed/lsapilib.c                 || pCur-&gt;valueOff + pCur-&gt;valueLen &gt; totalLen)</span>
+<span class='curline'><a href='../S/1524.html#L589'>pCur</a>              589 sapi/litespeed/lsapilib.c             ++pCur;</span>
+<span class='curline'><a href='../S/1524.html#L1500'>pCur</a>             1500 sapi/litespeed/lsapilib.c     char * pCur;</span>
+<span class='curline'><a href='../S/1524.html#L1519'>pCur</a>             1519 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pReqBuf + pReq-&gt;m_bufProcessed;</span>
+<span class='curline'><a href='../S/1524.html#L1520'>pCur</a>             1520 sapi/litespeed/lsapilib.c         p = memchr( pCur, '\n', len );</span>
+<span class='curline'><a href='../S/1524.html#L1522'>pCur</a>             1522 sapi/litespeed/lsapilib.c             len = p - pCur + 1;</span>
+<span class='curline'><a href='../S/1524.html#L1523'>pCur</a>             1523 sapi/litespeed/lsapilib.c         memmove( pBufCur, pCur, len );</span>
+<span class='curline'><a href='../S/1524.html#L1913'>pCur</a>             1913 sapi/litespeed/lsapilib.c         struct lsapi_header_offset * pCur, *pEnd;</span>
+<span class='curline'><a href='../S/1524.html#L1914'>pCur</a>             1914 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pUnknownHeader;</span>
+<span class='curline'><a href='../S/1524.html#L1915'>pCur</a>             1915 sapi/litespeed/lsapilib.c         pEnd = pCur + pReq-&gt;m_pHeader-&gt;m_cntUnknownHeaders;</span>
+<span class='curline'><a href='../S/1524.html#L1916'>pCur</a>             1916 sapi/litespeed/lsapilib.c         while( pCur &lt; pEnd )</span>
+<span class='curline'><a href='../S/1524.html#L1918'>pCur</a>             1918 sapi/litespeed/lsapilib.c             pKey = pReq-&gt;m_pHttpHeader + pCur-&gt;nameOff;</span>
+<span class='curline'><a href='../S/1524.html#L1919'>pCur</a>             1919 sapi/litespeed/lsapilib.c             keyLen = pCur-&gt;nameLen;</span>
+<span class='curline'><a href='../S/1524.html#L1932'>pCur</a>             1932 sapi/litespeed/lsapilib.c                 pValue = pReq-&gt;m_pHttpHeader + pCur-&gt;valueOff;</span>
+<span class='curline'><a href='../S/1524.html#L1934'>pCur</a>             1934 sapi/litespeed/lsapilib.c                 if ( *(pValue + pCur-&gt;valueLen) != '\0')</span>
+<span class='curline'><a href='../S/1524.html#L1936'>pCur</a>             1936 sapi/litespeed/lsapilib.c                     *(pValue + pCur-&gt;valueLen) = '\0';</span>
+<span class='curline'><a href='../S/1524.html#L1940'>pCur</a>             1940 sapi/litespeed/lsapilib.c             ++pCur;</span>
+<span class='curline'><a href='../S/1524.html#L2019'>pCur</a>             2019 sapi/litespeed/lsapilib.c         struct lsapi_header_offset * pCur, *pEnd;</span>
+<span class='curline'><a href='../S/1524.html#L2020'>pCur</a>             2020 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pUnknownHeader;</span>
+<span class='curline'><a href='../S/1524.html#L2021'>pCur</a>             2021 sapi/litespeed/lsapilib.c         pEnd = pCur + pReq-&gt;m_pHeader-&gt;m_cntUnknownHeaders;</span>
+<span class='curline'><a href='../S/1524.html#L2022'>pCur</a>             2022 sapi/litespeed/lsapilib.c         while( pCur &lt; pEnd )</span>
+<span class='curline'><a href='../S/1524.html#L2024'>pCur</a>             2024 sapi/litespeed/lsapilib.c             pKey = pReq-&gt;m_pHttpHeader + pCur-&gt;nameOff;</span>
+<span class='curline'><a href='../S/1524.html#L2025'>pCur</a>             2025 sapi/litespeed/lsapilib.c             keyLen = pCur-&gt;nameLen;</span>
+<span class='curline'><a href='../S/1524.html#L2028'>pCur</a>             2028 sapi/litespeed/lsapilib.c             pValue = pReq-&gt;m_pHttpHeader + pCur-&gt;valueOff;</span>
+<span class='curline'><a href='../S/1524.html#L2029'>pCur</a>             2029 sapi/litespeed/lsapilib.c             *(pValue + pCur-&gt;valueLen ) = 0;</span>
+<span class='curline'><a href='../S/1524.html#L2033'>pCur</a>             2033 sapi/litespeed/lsapilib.c             headers[count]._valueLen = pCur-&gt;valueLen;</span>
+<span class='curline'><a href='../S/1524.html#L2041'>pCur</a>             2041 sapi/litespeed/lsapilib.c             ++pCur;</span>
+<span class='curline'><a href='../S/1524.html#L2088'>pCur</a>             2088 sapi/litespeed/lsapilib.c         struct lsapi_header_offset * pCur, *pEnd;</span>
+<span class='curline'><a href='../S/1524.html#L2089'>pCur</a>             2089 sapi/litespeed/lsapilib.c         pCur = pReq-&gt;m_pUnknownHeader;</span>
+<span class='curline'><a href='../S/1524.html#L2090'>pCur</a>             2090 sapi/litespeed/lsapilib.c         pEnd = pCur + pReq-&gt;m_pHeader-&gt;m_cntUnknownHeaders;</span>
+<span class='curline'><a href='../S/1524.html#L2091'>pCur</a>             2091 sapi/litespeed/lsapilib.c         while( pCur &lt; pEnd )</span>
+<span class='curline'><a href='../S/1524.html#L2093'>pCur</a>             2093 sapi/litespeed/lsapilib.c             pKey = pReq-&gt;m_pHttpHeader + pCur-&gt;nameOff;</span>
+<span class='curline'><a href='../S/1524.html#L2094'>pCur</a>             2094 sapi/litespeed/lsapilib.c             keyLen = pCur-&gt;nameLen;</span>
+<span class='curline'><a href='../S/1524.html#L2112'>pCur</a>             2112 sapi/litespeed/lsapilib.c             pValue = pReq-&gt;m_pHttpHeader + pCur-&gt;valueOff;</span>
+<span class='curline'><a href='../S/1524.html#L2113'>pCur</a>             2113 sapi/litespeed/lsapilib.c             *(pValue + pCur-&gt;valueLen ) = 0;</span>
+<span class='curline'><a href='../S/1524.html#L2115'>pCur</a>             2115 sapi/litespeed/lsapilib.c                         pValue, pCur-&gt;valueLen, arg );</span>
+<span class='curline'><a href='../S/1524.html#L2118'>pCur</a>             2118 sapi/litespeed/lsapilib.c             ++pCur;</span>
+</pre>
+</body>
+</html>

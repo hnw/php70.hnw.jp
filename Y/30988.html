@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pWC</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L115981'>pWC</a>              115981 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;       /* The clause this term is part of */</span>
+<span class='curline'><a href='../S/1054.html#L116011'>pWC</a>              116011 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;          /* WhereClause currently being scanned */</span>
+<span class='curline'><a href='../S/1054.html#L116101'>pWC</a>              116101 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;         /* WHERE clause terms */</span>
+<span class='curline'><a href='../S/1054.html#L116308'>pWC</a>              116308 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,        /* The WhereClause to be initialized */</span>
+<span class='curline'><a href='../S/1054.html#L116311'>pWC</a>              116311 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;pWInfo = pWInfo;</span>
+<span class='curline'><a href='../S/1054.html#L116312'>pWC</a>              116312 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;pOuter = 0;</span>
+<span class='curline'><a href='../S/1054.html#L116313'>pWC</a>              116313 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;nTerm = 0;</span>
+<span class='curline'><a href='../S/1054.html#L116314'>pWC</a>              116314 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;nSlot = ArraySize(pWC-&gt;aStatic);</span>
+<span class='curline'><a href='../S/1054.html#L116315'>pWC</a>              116315 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;a = pWC-&gt;aStatic;</span>
+<span class='curline'><a href='../S/1054.html#L116341'>pWC</a>              116341 ext/sqlite3/libsqlite/sqlite3.c static void whereClauseClear(WhereClause *pWC){</span>
+<span class='curline'><a href='../S/1054.html#L116344'>pWC</a>              116344 ext/sqlite3/libsqlite/sqlite3.c   sqlite3 *db = pWC-&gt;pWInfo-&gt;pParse-&gt;db;</span>
+<span class='curline'><a href='../S/1054.html#L116345'>pWC</a>              116345 ext/sqlite3/libsqlite/sqlite3.c   for(i=pWC-&gt;nTerm-1, a=pWC-&gt;a; i&gt;=0; i--, a++){</span>
+<span class='curline'><a href='../S/1054.html#L116355'>pWC</a>              116355 ext/sqlite3/libsqlite/sqlite3.c   if( pWC-&gt;a!=pWC-&gt;aStatic ){</span>
+<span class='curline'><a href='../S/1054.html#L116356'>pWC</a>              116356 ext/sqlite3/libsqlite/sqlite3.c     sqlite3DbFree(db, pWC-&gt;a);</span>
+<span class='curline'><a href='../S/1054.html#L116379'>pWC</a>              116379 ext/sqlite3/libsqlite/sqlite3.c static int whereClauseInsert(WhereClause *pWC, Expr *p, u16 wtFlags){</span>
+<span class='curline'><a href='../S/1054.html#L116383'>pWC</a>              116383 ext/sqlite3/libsqlite/sqlite3.c   if( pWC-&gt;nTerm&gt;=pWC-&gt;nSlot ){</span>
+<span class='curline'><a href='../S/1054.html#L116384'>pWC</a>              116384 ext/sqlite3/libsqlite/sqlite3.c     WhereTerm *pOld = pWC-&gt;a;</span>
+<span class='curline'><a href='../S/1054.html#L116385'>pWC</a>              116385 ext/sqlite3/libsqlite/sqlite3.c     sqlite3 *db = pWC-&gt;pWInfo-&gt;pParse-&gt;db;</span>
+<span class='curline'><a href='../S/1054.html#L116386'>pWC</a>              116386 ext/sqlite3/libsqlite/sqlite3.c     pWC-&gt;a = sqlite3DbMallocRaw(db, sizeof(pWC-&gt;a[0])*pWC-&gt;nSlot*2 );</span>
+<span class='curline'><a href='../S/1054.html#L116387'>pWC</a>              116387 ext/sqlite3/libsqlite/sqlite3.c     if( pWC-&gt;a==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L116391'>pWC</a>              116391 ext/sqlite3/libsqlite/sqlite3.c       pWC-&gt;a = pOld;</span>
+<span class='curline'><a href='../S/1054.html#L116394'>pWC</a>              116394 ext/sqlite3/libsqlite/sqlite3.c     memcpy(pWC-&gt;a, pOld, sizeof(pWC-&gt;a[0])*pWC-&gt;nTerm);</span>
+<span class='curline'><a href='../S/1054.html#L116395'>pWC</a>              116395 ext/sqlite3/libsqlite/sqlite3.c     if( pOld!=pWC-&gt;aStatic ){</span>
+<span class='curline'><a href='../S/1054.html#L116398'>pWC</a>              116398 ext/sqlite3/libsqlite/sqlite3.c     pWC-&gt;nSlot = sqlite3DbMallocSize(db, pWC-&gt;a)/sizeof(pWC-&gt;a[0]);</span>
+<span class='curline'><a href='../S/1054.html#L116399'>pWC</a>              116399 ext/sqlite3/libsqlite/sqlite3.c     memset(&amp;pWC-&gt;a[pWC-&gt;nTerm], 0, sizeof(pWC-&gt;a[0])*(pWC-&gt;nSlot-pWC-&gt;nTerm));</span>
+<span class='curline'><a href='../S/1054.html#L116401'>pWC</a>              116401 ext/sqlite3/libsqlite/sqlite3.c   pTerm = &amp;pWC-&gt;a[idx = pWC-&gt;nTerm++];</span>
+<span class='curline'><a href='../S/1054.html#L116409'>pWC</a>              116409 ext/sqlite3/libsqlite/sqlite3.c   pTerm-&gt;pWC = pWC;</span>
+<span class='curline'><a href='../S/1054.html#L116431'>pWC</a>              116431 ext/sqlite3/libsqlite/sqlite3.c static void whereSplit(WhereClause *pWC, Expr *pExpr, u8 op){</span>
+<span class='curline'><a href='../S/1054.html#L116433'>pWC</a>              116433 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;op = op;</span>
+<span class='curline'><a href='../S/1054.html#L116436'>pWC</a>              116436 ext/sqlite3/libsqlite/sqlite3.c     whereClauseInsert(pWC, pExpr, 0);</span>
+<span class='curline'><a href='../S/1054.html#L116438'>pWC</a>              116438 ext/sqlite3/libsqlite/sqlite3.c     whereSplit(pWC, pE2-&gt;pLeft, op);</span>
+<span class='curline'><a href='../S/1054.html#L116439'>pWC</a>              116439 ext/sqlite3/libsqlite/sqlite3.c     whereSplit(pWC, pE2-&gt;pRight, op);</span>
+<span class='curline'><a href='../S/1054.html#L116616'>pWC</a>              116616 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;    /* Shorthand for pScan-&gt;pWC */</span>
+<span class='curline'><a href='../S/1054.html#L116623'>pWC</a>              116623 ext/sqlite3/libsqlite/sqlite3.c     while( (pWC = pScan-&gt;pWC)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L116624'>pWC</a>              116624 ext/sqlite3/libsqlite/sqlite3.c       for(pTerm=pWC-&gt;a+k; k&lt;pWC-&gt;nTerm; k++, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L116651'>pWC</a>              116651 ext/sqlite3/libsqlite/sqlite3.c               Parse *pParse = pWC-&gt;pWInfo-&gt;pParse;</span>
+<span class='curline'><a href='../S/1054.html#L116676'>pWC</a>              116676 ext/sqlite3/libsqlite/sqlite3.c       pScan-&gt;pWC = pScan-&gt;pWC-&gt;pOuter;</span>
+<span class='curline'><a href='../S/1054.html#L116679'>pWC</a>              116679 ext/sqlite3/libsqlite/sqlite3.c     pScan-&gt;pWC = pScan-&gt;pOrigWC;</span>
+<span class='curline'><a href='../S/1054.html#L116704'>pWC</a>              116704 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,       /* The WHERE clause to be scanned */</span>
+<span class='curline'><a href='../S/1054.html#L116713'>pWC</a>              116713 ext/sqlite3/libsqlite/sqlite3.c   pScan-&gt;pOrigWC = pWC;</span>
+<span class='curline'><a href='../S/1054.html#L116714'>pWC</a>              116714 ext/sqlite3/libsqlite/sqlite3.c   pScan-&gt;pWC = pWC;</span>
+<span class='curline'><a href='../S/1054.html#L116758'>pWC</a>              116758 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,     /* The WHERE clause to be searched */</span>
+<span class='curline'><a href='../S/1054.html#L116769'>pWC</a>              116769 ext/sqlite3/libsqlite/sqlite3.c   p = whereScanInit(&amp;scan, pWC, iCur, iColumn, op, pIdx);</span>
+<span class='curline'><a href='../S/1054.html#L116790'>pWC</a>              116790 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC         /* the WHERE clause to be analyzed */</span>
+<span class='curline'><a href='../S/1054.html#L116793'>pWC</a>              116793 ext/sqlite3/libsqlite/sqlite3.c   for(i=pWC-&gt;nTerm-1; i&gt;=0; i--){</span>
+<span class='curline'><a href='../S/1054.html#L116794'>pWC</a>              116794 ext/sqlite3/libsqlite/sqlite3.c     exprAnalyze(pTabList, pWC, i);</span>
+<span class='curline'><a href='../S/1054.html#L116942'>pWC</a>              116942 ext/sqlite3/libsqlite/sqlite3.c static void markTermAsChild(WhereClause *pWC, int iChild, int iParent){</span>
+<span class='curline'><a href='../S/1054.html#L116943'>pWC</a>              116943 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;a[iChild].iParent = iParent;</span>
+<span class='curline'><a href='../S/1054.html#L116944'>pWC</a>              116944 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;a[iChild].truthProb = pWC-&gt;a[iParent].truthProb;</span>
+<span class='curline'><a href='../S/1054.html#L116945'>pWC</a>              116945 ext/sqlite3/libsqlite/sqlite3.c   pWC-&gt;a[iParent].nChild++;</span>
+<span class='curline'><a href='../S/1054.html#L116985'>pWC</a>              116985 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,      /* The complete WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L117012'>pWC</a>              117012 ext/sqlite3/libsqlite/sqlite3.c   db = pWC-&gt;pWInfo-&gt;pParse-&gt;db;</span>
+<span class='curline'><a href='../S/1054.html#L117017'>pWC</a>              117017 ext/sqlite3/libsqlite/sqlite3.c   idxNew = whereClauseInsert(pWC, pNew, TERM_VIRTUAL|TERM_DYNAMIC);</span>
+<span class='curline'><a href='../S/1054.html#L117018'>pWC</a>              117018 ext/sqlite3/libsqlite/sqlite3.c   exprAnalyze(pSrc, pWC, idxNew);</span>
+<span class='curline'><a href='../S/1054.html#L117111'>pWC</a>              117111 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,         /* the complete WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L117114'>pWC</a>              117114 ext/sqlite3/libsqlite/sqlite3.c   WhereInfo *pWInfo = pWC-&gt;pWInfo;        /* WHERE clause processing context */</span>
+<span class='curline'><a href='../S/1054.html#L117117'>pWC</a>              117117 ext/sqlite3/libsqlite/sqlite3.c   WhereTerm *pTerm = &amp;pWC-&gt;a[idxTerm];    /* The term to be analyzed */</span>
+<span class='curline'><a href='../S/1054.html#L117163'>pWC</a>              117163 ext/sqlite3/libsqlite/sqlite3.c         whereClauseInit(pAndWC, pWC-&gt;pWInfo);</span>
+<span class='curline'><a href='../S/1054.html#L117166'>pWC</a>              117166 ext/sqlite3/libsqlite/sqlite3.c         pAndWC-&gt;pOuter = pWC;</span>
+<span class='curline'><a href='../S/1054.html#L117213'>pWC</a>              117213 ext/sqlite3/libsqlite/sqlite3.c         whereCombineDisjuncts(pSrc, pWC, pOne, pTwo);</span>
+<span class='curline'><a href='../S/1054.html#L117339'>pWC</a>              117339 ext/sqlite3/libsqlite/sqlite3.c         idxNew = whereClauseInsert(pWC, pNew, TERM_VIRTUAL|TERM_DYNAMIC);</span>
+<span class='curline'><a href='../S/1054.html#L117341'>pWC</a>              117341 ext/sqlite3/libsqlite/sqlite3.c         exprAnalyze(pSrc, pWC, idxNew);</span>
+<span class='curline'><a href='../S/1054.html#L117342'>pWC</a>              117342 ext/sqlite3/libsqlite/sqlite3.c         pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117343'>pWC</a>              117343 ext/sqlite3/libsqlite/sqlite3.c         markTermAsChild(pWC, idxNew, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117373'>pWC</a>              117373 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,         /* the WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L117376'>pWC</a>              117376 ext/sqlite3/libsqlite/sqlite3.c   WhereInfo *pWInfo = pWC-&gt;pWInfo; /* WHERE clause processing context */</span>
+<span class='curline'><a href='../S/1054.html#L117393'>pWC</a>              117393 ext/sqlite3/libsqlite/sqlite3.c   pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117442'>pWC</a>              117442 ext/sqlite3/libsqlite/sqlite3.c         idxNew = whereClauseInsert(pWC, pDup, TERM_VIRTUAL|TERM_DYNAMIC);</span>
+<span class='curline'><a href='../S/1054.html#L117444'>pWC</a>              117444 ext/sqlite3/libsqlite/sqlite3.c         pNew = &amp;pWC-&gt;a[idxNew];</span>
+<span class='curline'><a href='../S/1054.html#L117445'>pWC</a>              117445 ext/sqlite3/libsqlite/sqlite3.c         markTermAsChild(pWC, idxNew, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117446'>pWC</a>              117446 ext/sqlite3/libsqlite/sqlite3.c         pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117486'>pWC</a>              117486 ext/sqlite3/libsqlite/sqlite3.c   else if( pExpr-&gt;op==TK_BETWEEN &amp;&amp; pWC-&gt;op==TK_AND ){</span>
+<span class='curline'><a href='../S/1054.html#L117499'>pWC</a>              117499 ext/sqlite3/libsqlite/sqlite3.c       idxNew = whereClauseInsert(pWC, pNewExpr, TERM_VIRTUAL|TERM_DYNAMIC);</span>
+<span class='curline'><a href='../S/1054.html#L117501'>pWC</a>              117501 ext/sqlite3/libsqlite/sqlite3.c       exprAnalyze(pSrc, pWC, idxNew);</span>
+<span class='curline'><a href='../S/1054.html#L117502'>pWC</a>              117502 ext/sqlite3/libsqlite/sqlite3.c       pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117503'>pWC</a>              117503 ext/sqlite3/libsqlite/sqlite3.c       markTermAsChild(pWC, idxNew, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117513'>pWC</a>              117513 ext/sqlite3/libsqlite/sqlite3.c     assert( pWC-&gt;op==TK_AND );</span>
+<span class='curline'><a href='../S/1054.html#L117514'>pWC</a>              117514 ext/sqlite3/libsqlite/sqlite3.c     exprAnalyzeOrTerm(pSrc, pWC, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117515'>pWC</a>              117515 ext/sqlite3/libsqlite/sqlite3.c     pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117533'>pWC</a>              117533 ext/sqlite3/libsqlite/sqlite3.c   if( pWC-&gt;op==TK_AND </span>
+<span class='curline'><a href='../S/1054.html#L117584'>pWC</a>              117584 ext/sqlite3/libsqlite/sqlite3.c     idxNew1 = whereClauseInsert(pWC, pNewExpr1, wtFlags);</span>
+<span class='curline'><a href='../S/1054.html#L117586'>pWC</a>              117586 ext/sqlite3/libsqlite/sqlite3.c     exprAnalyze(pSrc, pWC, idxNew1);</span>
+<span class='curline'><a href='../S/1054.html#L117592'>pWC</a>              117592 ext/sqlite3/libsqlite/sqlite3.c     idxNew2 = whereClauseInsert(pWC, pNewExpr2, wtFlags);</span>
+<span class='curline'><a href='../S/1054.html#L117594'>pWC</a>              117594 ext/sqlite3/libsqlite/sqlite3.c     exprAnalyze(pSrc, pWC, idxNew2);</span>
+<span class='curline'><a href='../S/1054.html#L117595'>pWC</a>              117595 ext/sqlite3/libsqlite/sqlite3.c     pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117597'>pWC</a>              117597 ext/sqlite3/libsqlite/sqlite3.c       markTermAsChild(pWC, idxNew1, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117598'>pWC</a>              117598 ext/sqlite3/libsqlite/sqlite3.c       markTermAsChild(pWC, idxNew2, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117624'>pWC</a>              117624 ext/sqlite3/libsqlite/sqlite3.c       idxNew = whereClauseInsert(pWC, pNewExpr, TERM_VIRTUAL|TERM_DYNAMIC);</span>
+<span class='curline'><a href='../S/1054.html#L117626'>pWC</a>              117626 ext/sqlite3/libsqlite/sqlite3.c       pNewTerm = &amp;pWC-&gt;a[idxNew];</span>
+<span class='curline'><a href='../S/1054.html#L117631'>pWC</a>              117631 ext/sqlite3/libsqlite/sqlite3.c       markTermAsChild(pWC, idxNew, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117632'>pWC</a>              117632 ext/sqlite3/libsqlite/sqlite3.c       pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117664'>pWC</a>              117664 ext/sqlite3/libsqlite/sqlite3.c     idxNew = whereClauseInsert(pWC, pNewExpr,</span>
+<span class='curline'><a href='../S/1054.html#L117667'>pWC</a>              117667 ext/sqlite3/libsqlite/sqlite3.c       pNewTerm = &amp;pWC-&gt;a[idxNew];</span>
+<span class='curline'><a href='../S/1054.html#L117672'>pWC</a>              117672 ext/sqlite3/libsqlite/sqlite3.c       markTermAsChild(pWC, idxNew, idxTerm);</span>
+<span class='curline'><a href='../S/1054.html#L117673'>pWC</a>              117673 ext/sqlite3/libsqlite/sqlite3.c       pTerm = &amp;pWC-&gt;a[idxTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117729'>pWC</a>              117729 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,         /* The WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L117770'>pWC</a>              117770 ext/sqlite3/libsqlite/sqlite3.c       if( 0==findTerm(pWC, iBase, iCol, ~(Bitmask)0, WO_EQ, pIdx) ){</span>
+<span class='curline'><a href='../S/1054.html#L117870'>pWC</a>              117870 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,           /* The WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L117906'>pWC</a>              117906 ext/sqlite3/libsqlite/sqlite3.c   pWCEnd = &amp;pWC-&gt;a[pWC-&gt;nTerm];</span>
+<span class='curline'><a href='../S/1054.html#L117909'>pWC</a>              117909 ext/sqlite3/libsqlite/sqlite3.c   for(pTerm=pWC-&gt;a; pTerm&lt;pWCEnd; pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L117973'>pWC</a>              117973 ext/sqlite3/libsqlite/sqlite3.c   for(pTerm=pWC-&gt;a; pTerm&lt;pWCEnd; pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L118053'>pWC</a>              118053 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,</span>
+<span class='curline'><a href='../S/1054.html#L118068'>pWC</a>              118068 ext/sqlite3/libsqlite/sqlite3.c   for(i=nTerm=0, pTerm=pWC-&gt;a; i&lt;pWC-&gt;nTerm; i++, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L118120'>pWC</a>              118120 ext/sqlite3/libsqlite/sqlite3.c   for(i=j=0, pTerm=pWC-&gt;a; i&lt;pWC-&gt;nTerm; i++, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L118898'>pWC</a>              118898 ext/sqlite3/libsqlite/sqlite3.c     pTerm = &amp;pTerm-&gt;pWC-&gt;a[pTerm-&gt;iParent];</span>
+<span class='curline'><a href='../S/1054.html#L119407'>pWC</a>              119407 ext/sqlite3/libsqlite/sqlite3.c             || pTerm-&gt;pWC-&gt;pWInfo-&gt;pParse-&gt;db-&gt;mallocFailed );</span>
+<span class='curline'><a href='../S/1054.html#L119429'>pWC</a>              119429 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;    /* Decomposition of the entire WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L119442'>pWC</a>              119442 ext/sqlite3/libsqlite/sqlite3.c   pWC = &amp;pWInfo-&gt;sWC;</span>
+<span class='curline'><a href='../S/1054.html#L120053'>pWC</a>              120053 ext/sqlite3/libsqlite/sqlite3.c     if( pWC-&gt;nTerm&gt;1 ){</span>
+<span class='curline'><a href='../S/1054.html#L120055'>pWC</a>              120055 ext/sqlite3/libsqlite/sqlite3.c       for(iTerm=0; iTerm&lt;pWC-&gt;nTerm; iTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L120056'>pWC</a>              120056 ext/sqlite3/libsqlite/sqlite3.c         Expr *pExpr = pWC-&gt;a[iTerm].pExpr;</span>
+<span class='curline'><a href='../S/1054.html#L120057'>pWC</a>              120057 ext/sqlite3/libsqlite/sqlite3.c         if( &amp;pWC-&gt;a[iTerm] == pTerm ) continue;</span>
+<span class='curline'><a href='../S/1054.html#L120059'>pWC</a>              120059 ext/sqlite3/libsqlite/sqlite3.c         if( (pWC-&gt;a[iTerm].wtFlags &amp; TERM_VIRTUAL)!=0 ) continue;</span>
+<span class='curline'><a href='../S/1054.html#L120060'>pWC</a>              120060 ext/sqlite3/libsqlite/sqlite3.c         if( (pWC-&gt;a[iTerm].eOperator &amp; WO_ALL)==0 ) continue;</span>
+<span class='curline'><a href='../S/1054.html#L120061'>pWC</a>              120061 ext/sqlite3/libsqlite/sqlite3.c         testcase( pWC-&gt;a[iTerm].wtFlags &amp; TERM_ORINFO );</span>
+<span class='curline'><a href='../S/1054.html#L120237'>pWC</a>              120237 ext/sqlite3/libsqlite/sqlite3.c   for(pTerm=pWC-&gt;a, j=pWC-&gt;nTerm; j&gt;0; j--, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L120272'>pWC</a>              120272 ext/sqlite3/libsqlite/sqlite3.c   for(pTerm=pWC-&gt;a, j=pWC-&gt;nTerm; j&gt;0; j--, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L120282'>pWC</a>              120282 ext/sqlite3/libsqlite/sqlite3.c     pAlt = findTerm(pWC, iCur, pTerm-&gt;u.leftColumn, notReady, WO_EQ|WO_IN, 0);</span>
+<span class='curline'><a href='../S/1054.html#L120305'>pWC</a>              120305 ext/sqlite3/libsqlite/sqlite3.c     for(pTerm=pWC-&gt;a, j=0; j&lt;pWC-&gt;nTerm; j++, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L120347'>pWC</a>              120347 ext/sqlite3/libsqlite/sqlite3.c static void whereLoopPrint(WhereLoop *p, WhereClause *pWC){</span>
+<span class='curline'><a href='../S/1054.html#L120348'>pWC</a>              120348 ext/sqlite3/libsqlite/sqlite3.c   WhereInfo *pWInfo = pWC-&gt;pWInfo;</span>
+<span class='curline'><a href='../S/1054.html#L120692'>pWC</a>              120692 ext/sqlite3/libsqlite/sqlite3.c       whereLoopPrint(pTemplate, pBuilder-&gt;pWC);</span>
+<span class='curline'><a href='../S/1054.html#L120709'>pWC</a>              120709 ext/sqlite3/libsqlite/sqlite3.c       whereLoopPrint(pTemplate, pBuilder-&gt;pWC);</span>
+<span class='curline'><a href='../S/1054.html#L120725'>pWC</a>              120725 ext/sqlite3/libsqlite/sqlite3.c       whereLoopPrint(p, pBuilder-&gt;pWC);</span>
+<span class='curline'><a href='../S/1054.html#L120728'>pWC</a>              120728 ext/sqlite3/libsqlite/sqlite3.c     whereLoopPrint(pTemplate, pBuilder-&gt;pWC);</span>
+<span class='curline'><a href='../S/1054.html#L120752'>pWC</a>              120752 ext/sqlite3/libsqlite/sqlite3.c         whereLoopPrint(pToDel, pBuilder-&gt;pWC);</span>
+<span class='curline'><a href='../S/1054.html#L120798'>pWC</a>              120798 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC,      /* The WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L120808'>pWC</a>              120808 ext/sqlite3/libsqlite/sqlite3.c   for(i=pWC-&gt;nTerm, pTerm=pWC-&gt;a; i&gt;0; i--, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L120816'>pWC</a>              120816 ext/sqlite3/libsqlite/sqlite3.c       if( pX-&gt;iParent&gt;=0 &amp;&amp; (&amp;pWC-&gt;a[pX-&gt;iParent])==pTerm ) break;</span>
+<span class='curline'><a href='../S/1054.html#L120906'>pWC</a>              120906 ext/sqlite3/libsqlite/sqlite3.c   pTerm = whereScanInit(&amp;scan, pBuilder-&gt;pWC, pSrc-&gt;iCursor, iCol,</span>
+<span class='curline'><a href='../S/1054.html#L120983'>pWC</a>              120983 ext/sqlite3/libsqlite/sqlite3.c         assert( (pTop-(pTerm-&gt;pWC-&gt;a))&lt;pTerm-&gt;pWC-&gt;nTerm );</span>
+<span class='curline'><a href='../S/1054.html#L121072'>pWC</a>              121072 ext/sqlite3/libsqlite/sqlite3.c     whereLoopOutputAdjust(pBuilder-&gt;pWC, pNew, rSize);</span>
+<span class='curline'><a href='../S/1054.html#L121187'>pWC</a>              121187 ext/sqlite3/libsqlite/sqlite3.c static int whereUsablePartialIndex(int iTab, WhereClause *pWC, Expr *pWhere){</span>
+<span class='curline'><a href='../S/1054.html#L121190'>pWC</a>              121190 ext/sqlite3/libsqlite/sqlite3.c   for(i=0, pTerm=pWC-&gt;a; i&lt;pWC-&gt;nTerm; i++, pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L121254'>pWC</a>              121254 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;           /* The parsed WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L121262'>pWC</a>              121262 ext/sqlite3/libsqlite/sqlite3.c   pWC = pBuilder-&gt;pWC;</span>
+<span class='curline'><a href='../S/1054.html#L121311'>pWC</a>              121311 ext/sqlite3/libsqlite/sqlite3.c     WhereTerm *pWCEnd = pWC-&gt;a + pWC-&gt;nTerm;</span>
+<span class='curline'><a href='../S/1054.html#L121312'>pWC</a>              121312 ext/sqlite3/libsqlite/sqlite3.c     for(pTerm=pWC-&gt;a; rc==SQLITE_OK &amp;&amp; pTerm&lt;pWCEnd; pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L121351'>pWC</a>              121351 ext/sqlite3/libsqlite/sqlite3.c      &amp;&amp; !whereUsablePartialIndex(pSrc-&gt;iCursor, pWC, pProbe-&gt;pPartIdxWhere) ){</span>
+<span class='curline'><a href='../S/1054.html#L121376'>pWC</a>              121376 ext/sqlite3/libsqlite/sqlite3.c       whereLoopOutputAdjust(pWC, pNew, rSize);</span>
+<span class='curline'><a href='../S/1054.html#L121412'>pWC</a>              121412 ext/sqlite3/libsqlite/sqlite3.c         whereLoopOutputAdjust(pWC, pNew, rSize);</span>
+<span class='curline'><a href='../S/1054.html#L121444'>pWC</a>              121444 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;            /* The WHERE clause */</span>
+<span class='curline'><a href='../S/1054.html#L121464'>pWC</a>              121464 ext/sqlite3/libsqlite/sqlite3.c   pWC = pBuilder-&gt;pWC;</span>
+<span class='curline'><a href='../S/1054.html#L121469'>pWC</a>              121469 ext/sqlite3/libsqlite/sqlite3.c   pIdxInfo = allocateIndexInfo(pParse, pWC, pSrc, pBuilder-&gt;pOrderBy);</span>
+<span class='curline'><a href='../S/1054.html#L121492'>pWC</a>              121492 ext/sqlite3/libsqlite/sqlite3.c       pTerm = &amp;pWC-&gt;a[j];</span>
+<span class='curline'><a href='../S/1054.html#L121540'>pWC</a>              121540 ext/sqlite3/libsqlite/sqlite3.c          || j&gt;=pWC-&gt;nTerm</span>
+<span class='curline'><a href='../S/1054.html#L121549'>pWC</a>              121549 ext/sqlite3/libsqlite/sqlite3.c         testcase( j==pWC-&gt;nTerm-1 );</span>
+<span class='curline'><a href='../S/1054.html#L121550'>pWC</a>              121550 ext/sqlite3/libsqlite/sqlite3.c         pTerm = &amp;pWC-&gt;a[j];</span>
+<span class='curline'><a href='../S/1054.html#L121608'>pWC</a>              121608 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;</span>
+<span class='curline'><a href='../S/1054.html#L121618'>pWC</a>              121618 ext/sqlite3/libsqlite/sqlite3.c   pWC = pBuilder-&gt;pWC;</span>
+<span class='curline'><a href='../S/1054.html#L121619'>pWC</a>              121619 ext/sqlite3/libsqlite/sqlite3.c   pWCEnd = pWC-&gt;a + pWC-&gt;nTerm;</span>
+<span class='curline'><a href='../S/1054.html#L121625'>pWC</a>              121625 ext/sqlite3/libsqlite/sqlite3.c   for(pTerm=pWC-&gt;a; pTerm&lt;pWCEnd &amp;&amp; rc==SQLITE_OK; pTerm++){</span>
+<span class='curline'><a href='../S/1054.html#L121642'>pWC</a>              121642 ext/sqlite3/libsqlite/sqlite3.c           sSubBuild.pWC = &amp;pOrTerm-&gt;u.pAndInfo-&gt;wc;</span>
+<span class='curline'><a href='../S/1054.html#L121644'>pWC</a>              121644 ext/sqlite3/libsqlite/sqlite3.c           tempWC.pWInfo = pWC-&gt;pWInfo;</span>
+<span class='curline'><a href='../S/1054.html#L121645'>pWC</a>              121645 ext/sqlite3/libsqlite/sqlite3.c           tempWC.pOuter = pWC;</span>
+<span class='curline'><a href='../S/1054.html#L121649'>pWC</a>              121649 ext/sqlite3/libsqlite/sqlite3.c           sSubBuild.pWC = &amp;tempWC;</span>
+<span class='curline'><a href='../S/1054.html#L121656'>pWC</a>              121656 ext/sqlite3/libsqlite/sqlite3.c                    (int)(pOrTerm-pOrWC-&gt;a), pTerm, sSubBuild.pWC-&gt;nTerm));</span>
+<span class='curline'><a href='../S/1054.html#L121658'>pWC</a>              121658 ext/sqlite3/libsqlite/sqlite3.c           for(i=0; i&lt;sSubBuild.pWC-&gt;nTerm; i++){</span>
+<span class='curline'><a href='../S/1054.html#L121659'>pWC</a>              121659 ext/sqlite3/libsqlite/sqlite3.c             whereTermPrint(&amp;sSubBuild.pWC-&gt;a[i], i);</span>
+<span class='curline'><a href='../S/1054.html#L122461'>pWC</a>              122461 ext/sqlite3/libsqlite/sqlite3.c   WhereClause *pWC;</span>
+<span class='curline'><a href='../S/1054.html#L122477'>pWC</a>              122477 ext/sqlite3/libsqlite/sqlite3.c   pWC = &amp;pWInfo-&gt;sWC;</span>
+<span class='curline'><a href='../S/1054.html#L122481'>pWC</a>              122481 ext/sqlite3/libsqlite/sqlite3.c   pTerm = findTerm(pWC, iCur, -1, 0, WO_EQ, 0);</span>
+<span class='curline'><a href='../S/1054.html#L122497'>pWC</a>              122497 ext/sqlite3/libsqlite/sqlite3.c         pTerm = findTerm(pWC, iCur, pIdx-&gt;aiColumn[j], 0, WO_EQ, pIdx);</span>
+<span class='curline'><a href='../S/1054.html#L122699'>pWC</a>              122699 ext/sqlite3/libsqlite/sqlite3.c   sWLB.pWC = &amp;pWInfo-&gt;sWC;</span>
+<span class='curline'><a href='../S/1054.html#L122717'>pWC</a>              122717 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;sWLB.pWC-&gt;nTerm; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L122718'>pWC</a>              122718 ext/sqlite3/libsqlite/sqlite3.c     if( nTabList==0 || sqlite3ExprIsConstantNotJoin(sWLB.pWC-&gt;a[ii].pExpr) ){</span>
+<span class='curline'><a href='../S/1054.html#L122719'>pWC</a>              122719 ext/sqlite3/libsqlite/sqlite3.c       sqlite3ExprIfFalse(pParse, sWLB.pWC-&gt;a[ii].pExpr, pWInfo-&gt;iBreak,</span>
+<span class='curline'><a href='../S/1054.html#L122721'>pWC</a>              122721 ext/sqlite3/libsqlite/sqlite3.c       sWLB.pWC-&gt;a[ii].wtFlags |= TERM_CODED;</span>
+<span class='curline'><a href='../S/1054.html#L122791'>pWC</a>              122791 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; i&lt;sWLB.pWC-&gt;nTerm; i++){</span>
+<span class='curline'><a href='../S/1054.html#L122792'>pWC</a>              122792 ext/sqlite3/libsqlite/sqlite3.c       whereTermPrint(&amp;sWLB.pWC-&gt;a[i], i);</span>
+<span class='curline'><a href='../S/1054.html#L122810'>pWC</a>              122810 ext/sqlite3/libsqlite/sqlite3.c         whereLoopPrint(p, sWLB.pWC);</span>
+<span class='curline'><a href='../S/1054.html#L122850'>pWC</a>              122850 ext/sqlite3/libsqlite/sqlite3.c       whereLoopPrint(pWInfo-&gt;a[ii].pWLoop, sWLB.pWC);</span>
+<span class='curline'><a href='../S/1054.html#L122871'>pWC</a>              122871 ext/sqlite3/libsqlite/sqlite3.c       pEnd = sWLB.pWC-&gt;a + sWLB.pWC-&gt;nTerm;</span>
+<span class='curline'><a href='../S/1054.html#L122872'>pWC</a>              122872 ext/sqlite3/libsqlite/sqlite3.c       for(pTerm=sWLB.pWC-&gt;a; pTerm&lt;pEnd; pTerm++){</span>
+</pre>
+</body>
+</html>

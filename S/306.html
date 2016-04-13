@@ -1,0 +1,671 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/interbase/ibase_service.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1772.html'>interbase</a>/ibase_service.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L618'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L39' title='Defined at 39.'>_php_ibase_free_service</a></li>
+<li><a href='#L64' title='Defined at 64.'>php_ibase_service_minit</a></li>
+<li><a href='#L134' title='Defined at 134.'>_php_ibase_user</a></li>
+<li><a href='#L184' title='Defined at 184.'>PHP_FUNCTION</a></li>
+<li><a href='#L192' title='Defined at 192.'>PHP_FUNCTION</a></li>
+<li><a href='#L200' title='Defined at 200.'>PHP_FUNCTION</a></li>
+<li><a href='#L208' title='Defined at 208.'>PHP_FUNCTION</a></li>
+<li><a href='#L255' title='Defined at 255.'>PHP_FUNCTION</a></li>
+<li><a href='#L271' title='Defined at 271.'>_php_ibase_service_query</a></li>
+<li><a href='#L417' title='Defined at 417.'>_php_ibase_backup_restore</a></li>
+<li><a href='#L473' title='Defined at 473.'>PHP_FUNCTION</a></li>
+<li><a href='#L481' title='Defined at 481.'>PHP_FUNCTION</a></li>
+<li><a href='#L487' title='Defined at 487.'>_php_ibase_service_action</a></li>
+<li><a href='#L581' title='Defined at 581.'>PHP_FUNCTION</a></li>
+<li><a href='#L589' title='Defined at 589.'>PHP_FUNCTION</a></li>
+<li><a href='#L597' title='Defined at 597.'>PHP_FUNCTION</a></li>
+<li><a href='#L618' title='Defined at 618.'>php_ibase_register_service_constants</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Ard Biesheuvel &lt;a.k.biesheuvel@its.tudelft.nl&gt;              |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#endif</em>
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#if</em> <a href='../Y/2832.html' title='Multiple used in 5 places.'>HAVE_IBASE</a>
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='310.html'>php_interbase.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='308.html'>php_ibase_includes.h</a>"
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31         <a href='../Y/24121.html' title='Multiple used in 2 places.'>isc_svc_handle</a> <a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>;
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>char</strong> *<a href='../Y/20035.html' title='Multiple used in 63 places.'>hostname</a>;
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>char</strong> *<a href='../Y/39908.html' title='Multiple used in 70 places.'>username</a>;
+<a id='L34' name='L34'></a>  34         <a href='../S/1731.html#L90' title='Defined at 90 in Zend/zend_types.h.'>zend_resource</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L35' name='L35'></a>  35 <em class='brace'>}</em> <a href='../R/20525.html' title='Multiple referred from 12 places.'>ibase_service</a>;
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/306.html#L66' title='Referred from 66 in ext/interbase/ibase_service.c.'>_php_ibase_free_service</a>(<a href='../S/1731.html#L90' title='Defined at 90 in Zend/zend_types.h.'>zend_resource</a> *<a href='../Y/35082.html' title='Multiple used in 154 places.'>rsrc</a>) <em class='comment'>/* {{{ */</em>
+<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *) <a href='../Y/35082.html' title='Multiple used in 154 places.'>rsrc</a>-&gt;<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>;
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>if</strong> (isc_service_detach(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>)) <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44                 <a href='../S/307.html#L508' title='Defined at 508 in ext/interbase/interbase.c.'>_php_ibase_error</a>();
+<a id='L45' name='L45'></a>  45         <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>if</strong> (<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>-&gt;<a href='../Y/20035.html' title='Multiple used in 63 places.'>hostname</a>) <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>-&gt;<a href='../Y/20035.html' title='Multiple used in 63 places.'>hostname</a>);
+<a id='L49' name='L49'></a>  49         <em class='brace'>}</em>
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>if</strong> (<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>-&gt;<a href='../Y/39908.html' title='Multiple used in 70 places.'>username</a>) <em class='brace'>{</em>
+<a id='L51' name='L51'></a>  51                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>-&gt;<a href='../Y/39908.html' title='Multiple used in 70 places.'>username</a>);
+<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37901.html' title='Multiple used in 34 places.'>sv</a>);
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>/* }}} */</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <em class='comment'>/* the svc api seems to get confused after an error has occurred,</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>   so invalidate the handle on errors */</em>
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#define</em> <a href='../R/3181.html' title='Multiple referred from 5 places.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>) \
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>do</strong> <em class='brace'>{</em> <a href='../S/1690.html#L47' title='Defined at 47 in Zend/zend_list.c.'>zend_list_delete</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>); <a href='../S/307.html#L508' title='Defined at 508 in ext/interbase/interbase.c.'>_php_ibase_error</a>(); <em class='brace'>}</em> <strong class='reserved'>while</strong> (0)
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <strong class='reserved'>void</strong> <a href='../R/23805.html' title='Multiple referred from 2 places.'>php_ibase_service_minit</a>(<a href='../S/1695.html#L29' title='Defined at 29 in Zend/zend_modules.h.'>INIT_FUNC_ARGS</a>) <em class='comment'>/* {{{ */</em>
+<a id='L65' name='L65'></a>  65 <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66         <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a> = <a href='../S/1690.html#L277' title='Defined at 277 in Zend/zend_list.c.'>zend_register_list_destructors_ex</a>(<a href='../S/306.html#L39' title='Defined at 39 in ext/interbase/ibase_service.c.'>_php_ibase_free_service</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L67' name='L67'></a>  67             "interbase service manager handle", <a href='../Y/26756.html' title='Multiple used in 210 places.'>module_number</a>);
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <em class='comment'>/* backup options */</em>
+<a id='L70' name='L70'></a>  70         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_IGNORE_CHECKSUMS", isc_spb_bkp_ignore_checksums, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L71' name='L71'></a>  71         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_IGNORE_LIMBO", isc_spb_bkp_ignore_limbo, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L72' name='L72'></a>  72         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_METADATA_ONLY", isc_spb_bkp_metadata_only, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L73' name='L73'></a>  73         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_NO_GARBAGE_COLLECT", isc_spb_bkp_no_garbage_collect, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L74' name='L74'></a>  74         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_OLD_DESCRIPTIONS", isc_spb_bkp_old_descriptions, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L75' name='L75'></a>  75         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_NON_TRANSPORTABLE", isc_spb_bkp_non_transportable, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L76' name='L76'></a>  76         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_BKP_CONVERT", isc_spb_bkp_convert, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78         <em class='comment'>/* restore options */</em>
+<a id='L79' name='L79'></a>  79         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_DEACTIVATE_IDX", isc_spb_res_deactivate_idx, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L80' name='L80'></a>  80         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_NO_SHADOW", isc_spb_res_no_shadow, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L81' name='L81'></a>  81         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_NO_VALIDITY", isc_spb_res_no_validity, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L82' name='L82'></a>  82         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_ONE_AT_A_TIME", isc_spb_res_one_at_a_time, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L83' name='L83'></a>  83         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_REPLACE", isc_spb_res_replace, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L84' name='L84'></a>  84         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_CREATE", isc_spb_res_create, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L85' name='L85'></a>  85         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RES_USE_ALL_SPACE", isc_spb_res_use_all_space, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <em class='comment'>/* manage options */</em>
+<a id='L88' name='L88'></a>  88         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_PAGE_BUFFERS", <a href='../Y/24077.html' title='Multiple used in 2 places.'>isc_spb_prp_page_buffers</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L89' name='L89'></a>  89         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_SWEEP_INTERVAL", <a href='../Y/24083.html' title='Multiple used in 2 places.'>isc_spb_prp_sweep_interval</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L90' name='L90'></a>  90         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_SHUTDOWN_DB", <a href='../Y/24082.html' title='Multiple used in 2 places.'>isc_spb_prp_shutdown_db</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L91' name='L91'></a>  91         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_DENY_NEW_TRANSACTIONS", <a href='../Y/24076.html' title='Multiple used in 2 places.'>isc_spb_prp_deny_new_transactions</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L92' name='L92'></a>  92         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_DENY_NEW_ATTACHMENTS", <a href='../Y/24075.html' title='Multiple used in 2 places.'>isc_spb_prp_deny_new_attachments</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L93' name='L93'></a>  93         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_RESERVE_SPACE", <a href='../Y/24080.html' title='Multiple used in 2 places.'>isc_spb_prp_reserve_space</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L94' name='L94'></a>  94           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_RES_USE_FULL", isc_spb_prp_res_use_full, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L95' name='L95'></a>  95           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_RES", isc_spb_prp_res, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L96' name='L96'></a>  96         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_WRITE_MODE", <a href='../Y/24086.html' title='Multiple used in 2 places.'>isc_spb_prp_write_mode</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L97' name='L97'></a>  97           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_WM_ASYNC", isc_spb_prp_wm_async, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L98' name='L98'></a>  98           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_WM_SYNC", <a href='../Y/24085.html' title='Multiple used in 2 places.'>isc_spb_prp_wm_sync</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L99' name='L99'></a>  99         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_ACCESS_MODE", <a href='../Y/24070.html' title='Multiple used in 2 places.'>isc_spb_prp_access_mode</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L100' name='L100'></a> 100           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_AM_READONLY", isc_spb_prp_am_readonly, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L101' name='L101'></a> 101           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_AM_READWRITE", isc_spb_prp_am_readwrite, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L102' name='L102'></a> 102         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_SET_SQL_DIALECT", <a href='../Y/24081.html' title='Multiple used in 2 places.'>isc_spb_prp_set_sql_dialect</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L103' name='L103'></a> 103         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_ACTIVATE", <a href='../Y/24071.html' title='Multiple used in 2 places.'>isc_spb_prp_activate</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L104' name='L104'></a> 104         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_PRP_DB_ONLINE", <a href='../Y/24074.html' title='Multiple used in 2 places.'>isc_spb_prp_db_online</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <em class='comment'>/* repair options */</em>
+<a id='L107' name='L107'></a> 107         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_CHECK_DB", <a href='../Y/24094.html' title='Multiple used in 2 places.'>isc_spb_rpr_check_db</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L108' name='L108'></a> 108         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_IGNORE_CHECKSUM", <a href='../Y/24096.html' title='Multiple used in 2 places.'>isc_spb_rpr_ignore_checksum</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L109' name='L109'></a> 109         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_KILL_SHADOWS", <a href='../Y/24097.html' title='Multiple used in 2 places.'>isc_spb_rpr_kill_shadows</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L110' name='L110'></a> 110         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_MEND_DB", <a href='../Y/24098.html' title='Multiple used in 2 places.'>isc_spb_rpr_mend_db</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L111' name='L111'></a> 111         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_VALIDATE_DB", <a href='../Y/24100.html' title='Multiple used in 2 places.'>isc_spb_rpr_validate_db</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L112' name='L112'></a> 112           <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_FULL", isc_spb_rpr_full, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L113' name='L113'></a> 113         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_RPR_SWEEP_DB", <a href='../Y/24099.html' title='Multiple used in 2 places.'>isc_spb_rpr_sweep_db</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <em class='comment'>/* db info arguments */</em>
+<a id='L116' name='L116'></a> 116         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_STS_DATA_PAGES", <a href='../Y/24108.html' title='Multiple used in 2 places.'>isc_spb_sts_data_pages</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L117' name='L117'></a> 117         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_STS_DB_LOG", <a href='../Y/24109.html' title='Multiple used in 2 places.'>isc_spb_sts_db_log</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L118' name='L118'></a> 118         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_STS_HDR_PAGES", <a href='../Y/24110.html' title='Multiple used in 2 places.'>isc_spb_sts_hdr_pages</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L119' name='L119'></a> 119         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_STS_IDX_PAGES", <a href='../Y/24111.html' title='Multiple used in 2 places.'>isc_spb_sts_idx_pages</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L120' name='L120'></a> 120         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_STS_SYS_RELATIONS", <a href='../Y/24112.html' title='Multiple used in 2 places.'>isc_spb_sts_sys_relations</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <em class='comment'>/* server info arguments */</em>
+<a id='L123' name='L123'></a> 123         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_SERVER_VERSION", <a href='../Y/24039.html' title='Multiple used in 2 places.'>isc_info_svc_server_version</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L124' name='L124'></a> 124         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_IMPLEMENTATION", <a href='../Y/24037.html' title='Multiple used in 2 places.'>isc_info_svc_implementation</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L125' name='L125'></a> 125         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_GET_ENV", <a href='../Y/24033.html' title='Multiple used in 2 places.'>isc_info_svc_get_env</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L126' name='L126'></a> 126         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_GET_ENV_LOCK", <a href='../Y/24034.html' title='Multiple used in 2 places.'>isc_info_svc_get_env_lock</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L127' name='L127'></a> 127         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_GET_ENV_MSG", <a href='../Y/24035.html' title='Multiple used in 2 places.'>isc_info_svc_get_env_msg</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L128' name='L128'></a> 128         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_USER_DBPATH", <a href='../Y/24042.html' title='Multiple used in 2 places.'>isc_info_svc_user_dbpath</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L129' name='L129'></a> 129         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_SVR_DB_INFO", <a href='../Y/24040.html' title='Multiple used in 2 places.'>isc_info_svc_svr_db_info</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L130' name='L130'></a> 130         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("IBASE_SVC_GET_USERS", <a href='../Y/24036.html' title='Multiple used in 3 places.'>isc_info_svc_get_users</a>, <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L131' name='L131'></a> 131 <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'>/* }}} */</em>
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/16085.html' title='Multiple referred from 3 places.'>_php_ibase_user</a>(<a href='../S/1627.html#L58' title='Defined at 58 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAMETERS</a>, <strong class='reserved'>char</strong> <a href='../Y/29794.html' title='Multiple used in 33 places.'>operation</a>) <em class='comment'>/* {{{ */</em>
+<a id='L135' name='L135'></a> 135 <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136         <em class='comment'>/* user = 0, password = 1, first_name = 2, middle_name = 3, last_name = 4 */</em>
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <strong class='reserved'>const</strong> <a href='../Y/39876.html' title='Multiple used in 5 places.'>user_flags</a>[] = <em class='brace'>{</em> <a href='../Y/24107.html' title='Multiple used in 2 places.'>isc_spb_sec_username</a>, isc_spb_sec_password,
+<a id='L138' name='L138'></a> 138             <a href='../Y/24101.html' title='Multiple used in 2 places.'>isc_spb_sec_firstname</a>, <a href='../Y/24104.html' title='Multiple used in 2 places.'>isc_spb_sec_middlename</a>, <a href='../Y/24103.html' title='Multiple used in 2 places.'>isc_spb_sec_lastname</a> <em class='brace'>}</em>;
+<a id='L139' name='L139'></a> 139         <strong class='reserved'>char</strong> <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[128], *<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[] = <em class='brace'>{</em> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> <em class='brace'>}</em>;
+<a id='L140' name='L140'></a> 140         <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>, <a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[] = <em class='brace'>{</em> 0, 0, 0, 0, 0 <em class='brace'>}</em>;
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong> <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> = 1;
+<a id='L142' name='L142'></a> 142         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L143' name='L143'></a> 143         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>;
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> == <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(),
+<a id='L148' name='L148'></a> 148                         (<a href='../Y/29794.html' title='Multiple used in 33 places.'>operation</a> == <a href='../Y/23963.html' title='Multiple used in 2 places.'>isc_action_svc_delete_user</a>) ? "rs" : "rss|sss",
+<a id='L149' name='L149'></a> 149                         &amp;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>, &amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[0], &amp;<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[0], &amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[1], &amp;<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[1], &amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[2], &amp;<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[2],
+<a id='L150' name='L150'></a> 150                         &amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[3], &amp;<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[3], &amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[4], &amp;<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[4])) <em class='brace'>{</em>
+<a id='L151' name='L151'></a> 151                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L152' name='L152'></a> 152         <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *)<a href='../S/1690.html#L139' title='Defined at 139 in Zend/zend_list.c.'>zend_fetch_resource_ex</a>(<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>, "Interbase service manager handle",
+<a id='L155' name='L155'></a> 155                 <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>);
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[0] = <a href='../Y/29794.html' title='Multiple used in 33 places.'>operation</a>;
+<a id='L158' name='L158'></a> 158 
+<a id='L159' name='L159'></a> 159         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <strong class='reserved'>sizeof</strong>(<a href='../Y/39876.html' title='Multiple used in 5 places.'>user_flags</a>); ++<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) <em class='brace'>{</em>
+<a id='L160' name='L160'></a> 160                 <strong class='reserved'>if</strong> (<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>] != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161                         <strong class='reserved'>int</strong> <a href='../Y/13676.html' title='Multiple used in 309 places.'>chunk</a> = <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>(&amp;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>], <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>) - <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>, "%c%c%c%s",
+<a id='L162' name='L162'></a> 162                                 <a href='../Y/39876.html' title='Multiple used in 5 places.'>user_flags</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>], (<strong class='reserved'>char</strong>)<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>], (<strong class='reserved'>char</strong>)(<a href='../Y/11899.html' title='Multiple used in 4 places.'>args_len</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>] &gt;&gt; 8), <a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]);
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164                         <strong class='reserved'>if</strong> ((<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> + <a href='../Y/13676.html' title='Multiple used in 309 places.'>chunk</a>) &gt; <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>) || <a href='../Y/13676.html' title='Multiple used in 309 places.'>chunk</a> &lt;= 0) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                                 <a href='../S/307.html#L525' title='Defined at 525 in ext/interbase/interbase.c.'>_php_ibase_module_error</a>("Internal error: insufficient buffer space for SPB (%d)", <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>);
+<a id='L166' name='L166'></a> 166                                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L167' name='L167'></a> 167                         <em class='brace'>}</em>
+<a id='L168' name='L168'></a> 168                         <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> += <a href='../Y/13676.html' title='Multiple used in 309 places.'>chunk</a>;
+<a id='L169' name='L169'></a> 169                 <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170         <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172         <em class='comment'>/* now start the job */</em>
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>if</strong> (<a href='../Y/24055.html' title='Multiple used in 4 places.'>isc_service_start</a>(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>)) <em class='brace'>{</em>
+<a id='L174' name='L174'></a> 174                 <a href='../S/306.html#L60' title='Defined at 60 in ext/interbase/ibase_service.c.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>);
+<a id='L175' name='L175'></a> 175                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L176' name='L176'></a> 176         <em class='brace'>}</em>
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178         <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L179' name='L179'></a> 179 <em class='brace'>}</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'>/* }}} */</em>
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 <em class='comment'>/* {{{ proto bool ibase_add_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])</em>
+<a id='L183' name='L183'></a> 183 <em class='comment'>   Add a user to security database */</em>
+<a id='L184' name='L184'></a> 184 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22480.html' title='Multiple used in 4 places.'>ibase_add_user</a>)
+<a id='L185' name='L185'></a> 185 <em class='brace'>{</em>
+<a id='L186' name='L186'></a> 186         <a href='../S/306.html#L134' title='Defined at 134 in ext/interbase/ibase_service.c.'>_php_ibase_user</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, isc_action_svc_add_user);
+<a id='L187' name='L187'></a> 187 <em class='brace'>}</em>
+<a id='L188' name='L188'></a> 188 <em class='comment'>/* }}} */</em>
+<a id='L189' name='L189'></a> 189 
+<a id='L190' name='L190'></a> 190 <em class='comment'>/* {{{ proto bool ibase_modify_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'>   Modify a user in security database */</em>
+<a id='L192' name='L192'></a> 192 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22515.html' title='Multiple used in 4 places.'>ibase_modify_user</a>)
+<a id='L193' name='L193'></a> 193 <em class='brace'>{</em>
+<a id='L194' name='L194'></a> 194         <a href='../S/306.html#L134' title='Defined at 134 in ext/interbase/ibase_service.c.'>_php_ibase_user</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, isc_action_svc_modify_user);
+<a id='L195' name='L195'></a> 195 <em class='brace'>}</em>
+<a id='L196' name='L196'></a> 196 <em class='comment'>/* }}} */</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198 <em class='comment'>/* {{{ proto bool ibase_delete_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'>   Delete a user from security database */</em>
+<a id='L200' name='L200'></a> 200 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22498.html' title='Multiple used in 4 places.'>ibase_delete_user</a>)
+<a id='L201' name='L201'></a> 201 <em class='brace'>{</em>
+<a id='L202' name='L202'></a> 202         <a href='../S/306.html#L134' title='Defined at 134 in ext/interbase/ibase_service.c.'>_php_ibase_user</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/23963.html' title='Multiple used in 2 places.'>isc_action_svc_delete_user</a>);
+<a id='L203' name='L203'></a> 203 <em class='brace'>}</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'>/* }}} */</em>
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206 <em class='comment'>/* {{{ proto resource ibase_service_attach(string host, string dba_username, string dba_password)</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'>   Connect to the service manager */</em>
+<a id='L208' name='L208'></a> 208 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22528.html' title='Multiple used in 4 places.'>ibase_service_attach</a>)
+<a id='L209' name='L209'></a> 209 <em class='brace'>{</em>
+<a id='L210' name='L210'></a> 210         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/20018.html' title='Multiple used in 3 places.'>hlen</a>, <a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>, <a href='../Y/32846.html' title='Multiple used in 39 places.'>plen</a>, <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>;
+<a id='L211' name='L211'></a> 211         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>;
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>char</strong> <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[128], *<a href='../D/23407.html' title='Multiple defined in 3 places.'>host</a>, *<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, *<a href='../S/279.html#L54' title='Defined at 54 in ext/hash/hash_tiger.c.'>pass</a>, *<a href='../Y/25266.html' title='Multiple used in 64 places.'>loc</a>;
+<a id='L213' name='L213'></a> 213         <a href='../Y/24121.html' title='Multiple used in 2 places.'>isc_svc_handle</a> <a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a> = 0;
+<a id='L214' name='L214'></a> 214 
+<a id='L215' name='L215'></a> 215         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>if</strong> (<a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a> != <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "sss",
+<a id='L218' name='L218'></a> 218                         &amp;<a href='../D/23407.html' title='Multiple defined in 3 places.'>host</a>, &amp;<a href='../Y/20018.html' title='Multiple used in 3 places.'>hlen</a>, &amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, &amp;<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>, &amp;<a href='../S/279.html#L54' title='Defined at 54 in ext/hash/hash_tiger.c.'>pass</a>, &amp;<a href='../Y/32846.html' title='Multiple used in 39 places.'>plen</a>)) <em class='brace'>{</em>
+<a id='L219' name='L219'></a> 219 
+<a id='L220' name='L220'></a> 220                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L221' name='L221'></a> 221         <em class='brace'>}</em>
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223         <em class='comment'>/* construct the spb, hack the service name into it as well */</em>
+<a id='L224' name='L224'></a> 224         <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> = <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>), "%c%c%c%c%s%c%c%s" "%s:service_mgr",
+<a id='L225' name='L225'></a> 225                 isc_spb_version, isc_spb_current_version, isc_spb_user_name, (<strong class='reserved'>char</strong>)<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>,
+<a id='L226' name='L226'></a> 226                 <a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, isc_spb_password, (<strong class='reserved'>char</strong>)<a href='../Y/32846.html' title='Multiple used in 39 places.'>plen</a>, <a href='../S/279.html#L54' title='Defined at 54 in ext/hash/hash_tiger.c.'>pass</a>, <a href='../D/23407.html' title='Multiple defined in 3 places.'>host</a>);
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228         <strong class='reserved'>if</strong> (<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> &gt; <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>) || <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> == -1) <em class='brace'>{</em>
+<a id='L229' name='L229'></a> 229                 <a href='../S/307.html#L525' title='Defined at 525 in ext/interbase/interbase.c.'>_php_ibase_module_error</a>("Internal error: insufficient buffer space for SPB (%d)", <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>);
+<a id='L230' name='L230'></a> 230                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L231' name='L231'></a> 231         <em class='brace'>}</em>
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233         <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> -= <a href='../Y/20018.html' title='Multiple used in 3 places.'>hlen</a> + 12;
+<a id='L234' name='L234'></a> 234         <a href='../Y/25266.html' title='Multiple used in 64 places.'>loc</a> = <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a> + <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>; <em class='comment'>/* points to %s:service_mgr part */</em>
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         <em class='comment'>/* attach to the service manager */</em>
+<a id='L237' name='L237'></a> 237         <strong class='reserved'>if</strong> (isc_service_attach(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, 0, <a href='../Y/25266.html' title='Multiple used in 64 places.'>loc</a>, &amp;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, (<strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong>)<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>)) <em class='brace'>{</em>
+<a id='L238' name='L238'></a> 238                 <a href='../S/307.html#L508' title='Defined at 508 in ext/interbase/interbase.c.'>_php_ibase_error</a>();
+<a id='L239' name='L239'></a> 239                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L240' name='L240'></a> 240         <em class='brace'>}</em>
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a>));
+<a id='L243' name='L243'></a> 243         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a> = <a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>;
+<a id='L244' name='L244'></a> 244         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/20035.html' title='Multiple used in 63 places.'>hostname</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../D/23407.html' title='Multiple defined in 3 places.'>host</a>);
+<a id='L245' name='L245'></a> 245         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/39908.html' title='Multiple used in 70 places.'>username</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>);
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247         <a href='../S/1632.html#L622' title='Defined at 622 in Zend/zend_API.h.'>RETVAL_RES</a>(<a href='../S/1690.html#L94' title='Defined at 94 in Zend/zend_list.c.'>zend_register_resource</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>, <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>));
+<a id='L248' name='L248'></a> 248         <a href='../S/1731.html#L795' title='Defined at 795 in Zend/zend_types.h.'>Z_TRY_ADDREF_P</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L249' name='L249'></a> 249         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a> = <a href='../S/1731.html#L552' title='Defined at 552 in Zend/zend_types.h.'>Z_RES_P</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L250' name='L250'></a> 250 <em class='brace'>}</em>
+<a id='L251' name='L251'></a> 251 <em class='comment'>/* }}} */</em>
+<a id='L252' name='L252'></a> 252 
+<a id='L253' name='L253'></a> 253 <em class='comment'>/* {{{ proto bool ibase_service_detach(resource service_handle)</em>
+<a id='L254' name='L254'></a> 254 <em class='comment'>   Disconnect from the service manager */</em>
+<a id='L255' name='L255'></a> 255 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22529.html' title='Multiple used in 4 places.'>ibase_service_detach</a>)
+<a id='L256' name='L256'></a> 256 <em class='brace'>{</em>
+<a id='L257' name='L257'></a> 257         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L258' name='L258'></a> 258 
+<a id='L259' name='L259'></a> 259         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261         <strong class='reserved'>if</strong> (<a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a> != <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "r", &amp;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>)) <em class='brace'>{</em>
+<a id='L262' name='L262'></a> 262                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L263' name='L263'></a> 263         <em class='brace'>}</em>
+<a id='L264' name='L264'></a> 264 
+<a id='L265' name='L265'></a> 265         <a href='../S/1690.html#L47' title='Defined at 47 in Zend/zend_list.c.'>zend_list_delete</a>(<a href='../S/1731.html#L552' title='Defined at 552 in Zend/zend_types.h.'>Z_RES_P</a>(<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>));
+<a id='L266' name='L266'></a> 266 
+<a id='L267' name='L267'></a> 267         <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L268' name='L268'></a> 268 <em class='brace'>}</em>
+<a id='L269' name='L269'></a> 269 <em class='comment'>/* }}} */</em>
+<a id='L270' name='L270'></a> 270 
+<a id='L271' name='L271'></a> 271 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/16082.html' title='Multiple referred from 3 places.'>_php_ibase_service_query</a>(<a href='../S/1627.html#L58' title='Defined at 58 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAMETERS</a>, <em class='comment'>/* {{{ */</em>
+<a id='L272' name='L272'></a> 272         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>, <strong class='reserved'>char</strong> <a href='../Y/23153.html' title='Multiple used in 3 places.'>info_action</a>)
+<a id='L273' name='L273'></a> 273 <em class='brace'>{</em>
+<a id='L274' name='L274'></a> 274         <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <a href='../Y/36619.html' title='Multiple used in 2 places.'>spb</a>[] = <em class='brace'>{</em> isc_info_svc_timeout, 10, 0, 0, 0 <em class='brace'>}</em>;
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276         <strong class='reserved'>char</strong> <a href='../Y/34610.html' title='Multiple used in 5 places.'>res_buf</a>[400], *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, *<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a>;
+<a id='L277' name='L277'></a> 277         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a> = 200, <a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a>;
+<a id='L278' name='L278'></a> 278 
+<a id='L279' name='L279'></a> 279         <em class='comment'>/* info about users requires an action first */</em>
+<a id='L280' name='L280'></a> 280         <strong class='reserved'>if</strong> (<a href='../Y/23153.html' title='Multiple used in 3 places.'>info_action</a> == <a href='../Y/24036.html' title='Multiple used in 3 places.'>isc_info_svc_get_users</a>) <em class='brace'>{</em>
+<a id='L281' name='L281'></a> 281                 <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>[] = <em class='brace'>{</em> isc_action_svc_display_user <em class='brace'>}</em>;
+<a id='L282' name='L282'></a> 282 
+<a id='L283' name='L283'></a> 283                 <strong class='reserved'>if</strong> (<a href='../Y/24055.html' title='Multiple used in 4 places.'>isc_service_start</a>(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>), <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>)) <em class='brace'>{</em>
+<a id='L284' name='L284'></a> 284                         <a href='../S/306.html#L60' title='Defined at 60 in ext/interbase/ibase_service.c.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>);
+<a id='L285' name='L285'></a> 285                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L286' name='L286'></a> 286                 <em class='brace'>}</em>
+<a id='L287' name='L287'></a> 287         <em class='brace'>}</em>
+<a id='L288' name='L288'></a> 288 
+<a id='L289' name='L289'></a> 289 <a href='../Y/33876.html' title='Multiple used in 2 places.'>query_loop</a>:
+<a id='L290' name='L290'></a> 290         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> = <a href='../Y/34610.html' title='Multiple used in 5 places.'>res_buf</a>;
+<a id='L291' name='L291'></a> 291 
+<a id='L292' name='L292'></a> 292         <strong class='reserved'>if</strong> (isc_service_query(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/36619.html' title='Multiple used in 2 places.'>spb</a>), <a href='../Y/36619.html' title='Multiple used in 2 places.'>spb</a>,
+<a id='L293' name='L293'></a> 293                         1, &amp;<a href='../Y/23153.html' title='Multiple used in 3 places.'>info_action</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/34610.html' title='Multiple used in 5 places.'>res_buf</a>), <a href='../Y/34610.html' title='Multiple used in 5 places.'>res_buf</a>)) <em class='brace'>{</em>
+<a id='L294' name='L294'></a> 294 
+<a id='L295' name='L295'></a> 295                 <a href='../S/306.html#L60' title='Defined at 60 in ext/interbase/ibase_service.c.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>);
+<a id='L296' name='L296'></a> 296                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L297' name='L297'></a> 297         <em class='brace'>}</em>
+<a id='L298' name='L298'></a> 298         <strong class='reserved'>while</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> != <a href='../Y/24020.html' title='Multiple used in 12 places.'>isc_info_end</a>) <em class='brace'>{</em>
+<a id='L299' name='L299'></a> 299                 <strong class='reserved'>switch</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>++) <em class='brace'>{</em>
+<a id='L300' name='L300'></a> 300                         <strong class='reserved'>default</strong>:
+<a id='L301' name='L301'></a> 301                                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303                         <strong class='reserved'>case</strong> <a href='../Y/24038.html' title='Multiple used in 3 places.'>isc_info_svc_line</a>:
+<a id='L304' name='L304'></a> 304                                 <strong class='reserved'>if</strong> (! (<a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, 2))) <em class='brace'>{</em>
+<a id='L305' name='L305'></a> 305                                         <em class='comment'>/* done */</em>
+<a id='L306' name='L306'></a> 306                                         <strong class='reserved'>if</strong> (<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a>) <em class='brace'>{</em>
+<a id='L307' name='L307'></a> 307                                                 <a href='../S/1632.html#L619' title='Defined at 619 in Zend/zend_API.h.'>RETVAL_STRING</a>(<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a>);
+<a id='L308' name='L308'></a> 308                                                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a>);
+<a id='L309' name='L309'></a> 309                                                 <strong class='reserved'>return</strong>;
+<a id='L310' name='L310'></a> 310                                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L311' name='L311'></a> 311                                                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L312' name='L312'></a> 312                                         <em class='brace'>}</em>
+<a id='L313' name='L313'></a> 313                                 <em class='brace'>}</em>
+<a id='L314' name='L314'></a> 314                                 <strong class='reserved'>if</strong> (!<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> || (<a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a> - <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> + <a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> +2) &gt; <a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a>) <em class='brace'>{</em>
+<a id='L315' name='L315'></a> 315                                         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/34621.html' title='Multiple used in 3 places.'>res_size</a> = <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> ? <a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a> - <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> : 0;
+<a id='L316' name='L316'></a> 316 
+<a id='L317' name='L317'></a> 317                                         <strong class='reserved'>while</strong> (<a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a> &lt; (<a href='../Y/34621.html' title='Multiple used in 3 places.'>res_size</a> + <a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> +2)) <em class='brace'>{</em>
+<a id='L318' name='L318'></a> 318                                                 <a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a> *= 2;
+<a id='L319' name='L319'></a> 319                                         <em class='brace'>}</em>
+<a id='L320' name='L320'></a> 320                                         <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> = (<strong class='reserved'>char</strong>*) <a href='../S/1629.html#L167' title='Defined at 167 in Zend/zend_alloc.h.'>erealloc</a>(<a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a>, <a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a>);
+<a id='L321' name='L321'></a> 321                                         <a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a> = <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a> + <a href='../Y/34621.html' title='Multiple used in 3 places.'>res_size</a>;
+<a id='L322' name='L322'></a> 322                                 <em class='brace'>}</em>
+<a id='L323' name='L323'></a> 323                                 <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += 2;
+<a id='L324' name='L324'></a> 324                                 *(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>+<a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a>) = 0;
+<a id='L325' name='L325'></a> 325                                 <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a>, <a href='../Y/19940.html' title='Multiple used in 6 places.'>heap_buf_size</a> - (<a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a> - <a href='../Y/19939.html' title='Multiple used in 9 places.'>heap_buf</a>), "%s\n", <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L326' name='L326'></a> 326                                 <a href='../Y/19942.html' title='Multiple used in 6 places.'>heap_p</a> += <a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> +1;
+<a id='L327' name='L327'></a> 327                                 <strong class='reserved'>goto</strong> <a href='../Y/33876.html' title='Multiple used in 2 places.'>query_loop</a>; <em class='comment'>/* repeat until result is exhausted */</em>
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329                         <strong class='reserved'>case</strong> <a href='../Y/24039.html' title='Multiple used in 2 places.'>isc_info_svc_server_version</a>:
+<a id='L330' name='L330'></a> 330                         <strong class='reserved'>case</strong> <a href='../Y/24037.html' title='Multiple used in 2 places.'>isc_info_svc_implementation</a>:
+<a id='L331' name='L331'></a> 331                         <strong class='reserved'>case</strong> <a href='../Y/24033.html' title='Multiple used in 2 places.'>isc_info_svc_get_env</a>:
+<a id='L332' name='L332'></a> 332                         <strong class='reserved'>case</strong> <a href='../Y/24034.html' title='Multiple used in 2 places.'>isc_info_svc_get_env_lock</a>:
+<a id='L333' name='L333'></a> 333                         <strong class='reserved'>case</strong> <a href='../Y/24035.html' title='Multiple used in 2 places.'>isc_info_svc_get_env_msg</a>:
+<a id='L334' name='L334'></a> 334                         <strong class='reserved'>case</strong> <a href='../Y/24042.html' title='Multiple used in 2 places.'>isc_info_svc_user_dbpath</a>:
+<a id='L335' name='L335'></a> 335                                 <a href='../S/1632.html#L638' title='Defined at 638 in Zend/zend_API.h.'>RETURN_STRINGL</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> + 2, <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, 2));
+<a id='L336' name='L336'></a> 336 
+<a id='L337' name='L337'></a> 337                         <strong class='reserved'>case</strong> <a href='../Y/24040.html' title='Multiple used in 2 places.'>isc_info_svc_svr_db_info</a>:
+<a id='L338' name='L338'></a> 338                                 <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L339' name='L339'></a> 339 
+<a id='L340' name='L340'></a> 340                                 <strong class='reserved'>do</strong> <em class='brace'>{</em>
+<a id='L341' name='L341'></a> 341                                         <strong class='reserved'>switch</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>++) <em class='brace'>{</em>
+<a id='L342' name='L342'></a> 342                                                 <strong class='reserved'>int</strong> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344                                                 <strong class='reserved'>case</strong> isc_spb_num_att:
+<a id='L345' name='L345'></a> 345                                                         <a href='../S/1632.html#L400' title='Defined at 400 in Zend/zend_API.h.'>add_assoc_long</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, "attachments", <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,4));
+<a id='L346' name='L346'></a> 346                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += 4;
+<a id='L347' name='L347'></a> 347                                                         <strong class='reserved'>break</strong>;
+<a id='L348' name='L348'></a> 348 
+<a id='L349' name='L349'></a> 349                                                 <strong class='reserved'>case</strong> isc_spb_num_db:
+<a id='L350' name='L350'></a> 350                                                         <a href='../S/1632.html#L400' title='Defined at 400 in Zend/zend_API.h.'>add_assoc_long</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, "databases", <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,4));
+<a id='L351' name='L351'></a> 351                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += 4;
+<a id='L352' name='L352'></a> 352                                                         <strong class='reserved'>break</strong>;
+<a id='L353' name='L353'></a> 353 
+<a id='L354' name='L354'></a> 354                                                 <strong class='reserved'>case</strong> <a href='../Y/24065.html' title='Multiple used in 4 places.'>isc_spb_dbname</a>:
+<a id='L355' name='L355'></a> 355                                                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,2);
+<a id='L356' name='L356'></a> 356                                                         <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> +2, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L357' name='L357'></a> 357                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>+2;
+<a id='L358' name='L358'></a> 358                                         <em class='brace'>}</em>
+<a id='L359' name='L359'></a> 359                                 <em class='brace'>}</em> <strong class='reserved'>while</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> != isc_info_flag_end);
+<a id='L360' name='L360'></a> 360                                 <strong class='reserved'>return</strong>;
+<a id='L361' name='L361'></a> 361 
+<a id='L362' name='L362'></a> 362                         <strong class='reserved'>case</strong> <a href='../Y/24036.html' title='Multiple used in 3 places.'>isc_info_svc_get_users</a>: <em class='brace'>{</em>
+<a id='L363' name='L363'></a> 363                                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>;
+<a id='L364' name='L364'></a> 364                                 <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L365' name='L365'></a> 365 
+<a id='L366' name='L366'></a> 366                                 <strong class='reserved'>while</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> != <a href='../Y/24020.html' title='Multiple used in 12 places.'>isc_info_end</a>) <em class='brace'>{</em>
+<a id='L367' name='L367'></a> 367 
+<a id='L368' name='L368'></a> 368                                         <strong class='reserved'>switch</strong> (*<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>++) <em class='brace'>{</em>
+<a id='L369' name='L369'></a> 369                                                 <strong class='reserved'>int</strong> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L370' name='L370'></a> 370 
+<a id='L371' name='L371'></a> 371                                                 <strong class='reserved'>case</strong> <a href='../Y/24107.html' title='Multiple used in 2 places.'>isc_spb_sec_username</a>:
+<a id='L372' name='L372'></a> 372                                                         <em class='comment'>/* it appears that the username is always first */</em>
+<a id='L373' name='L373'></a> 373                                                         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>);
+<a id='L374' name='L374'></a> 374                                                         <a href='../S/1631.html#L1565' title='Defined at 1565 in Zend/zend_API.c.'>add_next_index_zval</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, &amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>);
+<a id='L375' name='L375'></a> 375 
+<a id='L376' name='L376'></a> 376                                                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,2);
+<a id='L377' name='L377'></a> 377                                                         <a href='../S/1632.html#L407' title='Defined at 407 in Zend/zend_API.h.'>add_assoc_stringl</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "user_name", <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> +2, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L378' name='L378'></a> 378                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>+2;
+<a id='L379' name='L379'></a> 379                                                         <strong class='reserved'>break</strong>;
+<a id='L380' name='L380'></a> 380 
+<a id='L381' name='L381'></a> 381                                                 <strong class='reserved'>case</strong> <a href='../Y/24101.html' title='Multiple used in 2 places.'>isc_spb_sec_firstname</a>:
+<a id='L382' name='L382'></a> 382                                                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,2);
+<a id='L383' name='L383'></a> 383                                                         <a href='../S/1632.html#L407' title='Defined at 407 in Zend/zend_API.h.'>add_assoc_stringl</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "first_name", <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> +2, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L384' name='L384'></a> 384                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>+2;
+<a id='L385' name='L385'></a> 385                                                         <strong class='reserved'>break</strong>;
+<a id='L386' name='L386'></a> 386 
+<a id='L387' name='L387'></a> 387                                                 <strong class='reserved'>case</strong> <a href='../Y/24104.html' title='Multiple used in 2 places.'>isc_spb_sec_middlename</a>:
+<a id='L388' name='L388'></a> 388                                                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,2);
+<a id='L389' name='L389'></a> 389                                                         <a href='../S/1632.html#L407' title='Defined at 407 in Zend/zend_API.h.'>add_assoc_stringl</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "middle_name", <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> +2, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L390' name='L390'></a> 390                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>+2;
+<a id='L391' name='L391'></a> 391                                                         <strong class='reserved'>break</strong>;
+<a id='L392' name='L392'></a> 392 
+<a id='L393' name='L393'></a> 393                                                 <strong class='reserved'>case</strong> <a href='../Y/24103.html' title='Multiple used in 2 places.'>isc_spb_sec_lastname</a>:
+<a id='L394' name='L394'></a> 394                                                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,2);
+<a id='L395' name='L395'></a> 395                                                         <a href='../S/1632.html#L407' title='Defined at 407 in Zend/zend_API.h.'>add_assoc_stringl</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "last_name", <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> +2, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L396' name='L396'></a> 396                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>+2;
+<a id='L397' name='L397'></a> 397                                                         <strong class='reserved'>break</strong>;
+<a id='L398' name='L398'></a> 398 
+<a id='L399' name='L399'></a> 399                                                 <strong class='reserved'>case</strong> isc_spb_sec_userid:
+<a id='L400' name='L400'></a> 400                                                         <a href='../S/1632.html#L400' title='Defined at 400 in Zend/zend_API.h.'>add_assoc_long</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "user_id", <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, 4));
+<a id='L401' name='L401'></a> 401                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += 4;
+<a id='L402' name='L402'></a> 402                                                         <strong class='reserved'>break</strong>;
+<a id='L403' name='L403'></a> 403 
+<a id='L404' name='L404'></a> 404                                                 <strong class='reserved'>case</strong> isc_spb_sec_groupid:
+<a id='L405' name='L405'></a> 405                                                         <a href='../S/1632.html#L400' title='Defined at 400 in Zend/zend_API.h.'>add_assoc_long</a>(&amp;<a href='../D/32526.html' title='Multiple defined in 4 places.'>user</a>, "group_id", <a href='../Y/24133.html' title='Multiple used in 32 places.'>isc_vax_integer</a>(<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, 4));
+<a id='L406' name='L406'></a> 406                                                         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> += 4;
+<a id='L407' name='L407'></a> 407                                                         <strong class='reserved'>break</strong>;
+<a id='L408' name='L408'></a> 408                                         <em class='brace'>}</em>
+<a id='L409' name='L409'></a> 409                                 <em class='brace'>}</em>
+<a id='L410' name='L410'></a> 410                                 <strong class='reserved'>return</strong>;
+<a id='L411' name='L411'></a> 411                         <em class='brace'>}</em>
+<a id='L412' name='L412'></a> 412                 <em class='brace'>}</em>
+<a id='L413' name='L413'></a> 413         <em class='brace'>}</em>
+<a id='L414' name='L414'></a> 414 <em class='brace'>}</em>
+<a id='L415' name='L415'></a> 415 <em class='comment'>/* }}} */</em>
+<a id='L416' name='L416'></a> 416 
+<a id='L417' name='L417'></a> 417 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/16050.html' title='Multiple referred from 2 places.'>_php_ibase_backup_restore</a>(<a href='../S/1627.html#L58' title='Defined at 58 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAMETERS</a>, <strong class='reserved'>char</strong> <a href='../Y/29794.html' title='Multiple used in 33 places.'>operation</a>) <em class='comment'>/* {{{ */</em>
+<a id='L418' name='L418'></a> 418 <em class='brace'>{</em>
+<a id='L419' name='L419'></a> 419         <em class='comment'>/**</em>
+<a id='L420' name='L420'></a> 420 <em class='comment'>         * It appears that the service API is a little bit confused about which flag</em>
+<a id='L421' name='L421'></a> 421 <em class='comment'>         * to use for the source and destination in the case of a restore operation.</em>
+<a id='L422' name='L422'></a> 422 <em class='comment'>         * When passing the backup file as isc_spb_dbname and the destination db as</em>
+<a id='L423' name='L423'></a> 423 <em class='comment'>         * bpk_file, things work well.</em>
+<a id='L424' name='L424'></a> 424 <em class='comment'>         */</em>
+<a id='L425' name='L425'></a> 425         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L426' name='L426'></a> 426         <strong class='reserved'>char</strong> *<a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>, *<a href='../Y/12719.html' title='Multiple used in 30 places.'>bk</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[200];
+<a id='L427' name='L427'></a> 427         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, <a href='../Y/12720.html' title='Multiple used in 3 places.'>bklen</a>, <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>;
+<a id='L428' name='L428'></a> 428         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a> = 0;
+<a id='L429' name='L429'></a> 429         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/40226.html' title='Multiple used in 115 places.'>verbose</a> = 0;
+<a id='L430' name='L430'></a> 430         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>;
+<a id='L431' name='L431'></a> 431 
+<a id='L432' name='L432'></a> 432         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L433' name='L433'></a> 433 
+<a id='L434' name='L434'></a> 434         <strong class='reserved'>if</strong> (<a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a> != <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "rss|lb",
+<a id='L435' name='L435'></a> 435                         &amp;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>, &amp;<a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>, &amp;<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, &amp;<a href='../Y/12719.html' title='Multiple used in 30 places.'>bk</a>, &amp;<a href='../Y/12720.html' title='Multiple used in 3 places.'>bklen</a>, &amp;<a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a>, &amp;<a href='../Y/40226.html' title='Multiple used in 115 places.'>verbose</a>)) <em class='brace'>{</em>
+<a id='L436' name='L436'></a> 436                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L437' name='L437'></a> 437         <em class='brace'>}</em>
+<a id='L438' name='L438'></a> 438 
+<a id='L439' name='L439'></a> 439         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *)<a href='../S/1690.html#L139' title='Defined at 139 in Zend/zend_list.c.'>zend_fetch_resource_ex</a>(<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>,
+<a id='L440' name='L440'></a> 440                 "Interbase service manager handle", <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>);
+<a id='L441' name='L441'></a> 441 
+<a id='L442' name='L442'></a> 442         <em class='comment'>/* fill the param buffer */</em>
+<a id='L443' name='L443'></a> 443         <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> = <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>), "%c%c%c%c%s%c%c%c%s%c%c%c%c%c",
+<a id='L444' name='L444'></a> 444                 <a href='../Y/29794.html' title='Multiple used in 33 places.'>operation</a>, <a href='../Y/24065.html' title='Multiple used in 4 places.'>isc_spb_dbname</a>, (<strong class='reserved'>char</strong>)<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, (<strong class='reserved'>char</strong>)(<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a> &gt;&gt; 8), <a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>,
+<a id='L445' name='L445'></a> 445                 isc_spb_bkp_file, (<strong class='reserved'>char</strong>)<a href='../Y/12720.html' title='Multiple used in 3 places.'>bklen</a>, (<strong class='reserved'>char</strong>)(<a href='../Y/12720.html' title='Multiple used in 3 places.'>bklen</a> &gt;&gt; 8), <a href='../Y/12719.html' title='Multiple used in 30 places.'>bk</a>, <a href='../Y/24068.html' title='Multiple used in 2 places.'>isc_spb_options</a>,
+<a id='L446' name='L446'></a> 446                 (<strong class='reserved'>char</strong>)<a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a>,(<strong class='reserved'>char</strong>)(<a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a> &gt;&gt; 8), (<strong class='reserved'>char</strong>)(<a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a> &gt;&gt; 16), (<strong class='reserved'>char</strong>)(<a href='../Y/29880.html' title='Multiple used in 77 places.'>opts</a> &gt;&gt; 24));
+<a id='L447' name='L447'></a> 447 
+<a id='L448' name='L448'></a> 448         <strong class='reserved'>if</strong> (<a href='../Y/40226.html' title='Multiple used in 115 places.'>verbose</a>) <em class='brace'>{</em>
+<a id='L449' name='L449'></a> 449                 <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>++] = isc_spb_verbose;
+<a id='L450' name='L450'></a> 450         <em class='brace'>}</em>
+<a id='L451' name='L451'></a> 451 
+<a id='L452' name='L452'></a> 452         <strong class='reserved'>if</strong> (<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> &gt; <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>) || <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> &lt;= 0) <em class='brace'>{</em>
+<a id='L453' name='L453'></a> 453                 <a href='../S/307.html#L525' title='Defined at 525 in ext/interbase/interbase.c.'>_php_ibase_module_error</a>("Internal error: insufficient buffer space for SPB (%d)", <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>);
+<a id='L454' name='L454'></a> 454                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L455' name='L455'></a> 455         <em class='brace'>}</em>
+<a id='L456' name='L456'></a> 456 
+<a id='L457' name='L457'></a> 457         <em class='comment'>/* now start the backup/restore job */</em>
+<a id='L458' name='L458'></a> 458         <strong class='reserved'>if</strong> (<a href='../Y/24055.html' title='Multiple used in 4 places.'>isc_service_start</a>(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, (<strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong>)<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>)) <em class='brace'>{</em>
+<a id='L459' name='L459'></a> 459                 <a href='../S/306.html#L60' title='Defined at 60 in ext/interbase/ibase_service.c.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>);
+<a id='L460' name='L460'></a> 460                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L461' name='L461'></a> 461         <em class='brace'>}</em>
+<a id='L462' name='L462'></a> 462 
+<a id='L463' name='L463'></a> 463         <strong class='reserved'>if</strong> (!<a href='../Y/40226.html' title='Multiple used in 115 places.'>verbose</a>) <em class='brace'>{</em>
+<a id='L464' name='L464'></a> 464                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L465' name='L465'></a> 465         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L466' name='L466'></a> 466                 <a href='../S/306.html#L271' title='Defined at 271 in ext/interbase/ibase_service.c.'>_php_ibase_service_query</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>, <a href='../Y/24038.html' title='Multiple used in 3 places.'>isc_info_svc_line</a>);
+<a id='L467' name='L467'></a> 467         <em class='brace'>}</em>
+<a id='L468' name='L468'></a> 468 <em class='brace'>}</em>
+<a id='L469' name='L469'></a> 469 <em class='comment'>/* }}} */</em>
+<a id='L470' name='L470'></a> 470 
+<a id='L471' name='L471'></a> 471 <em class='comment'>/* {{{ proto mixed ibase_backup(resource service_handle, string source_db, string dest_file [, int options [, bool verbose]])</em>
+<a id='L472' name='L472'></a> 472 <em class='comment'>   Initiates a backup task in the service manager and returns immediately */</em>
+<a id='L473' name='L473'></a> 473 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22482.html' title='Multiple used in 4 places.'>ibase_backup</a>)
+<a id='L474' name='L474'></a> 474 <em class='brace'>{</em>
+<a id='L475' name='L475'></a> 475         <a href='../S/306.html#L417' title='Defined at 417 in ext/interbase/ibase_service.c.'>_php_ibase_backup_restore</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, isc_action_svc_backup);
+<a id='L476' name='L476'></a> 476 <em class='brace'>}</em>
+<a id='L477' name='L477'></a> 477 <em class='comment'>/* }}} */</em>
+<a id='L478' name='L478'></a> 478 
+<a id='L479' name='L479'></a> 479 <em class='comment'>/* {{{ proto mixed ibase_restore(resource service_handle, string source_file, string dest_db [, int options [, bool verbose]])</em>
+<a id='L480' name='L480'></a> 480 <em class='comment'>   Initiates a restore task in the service manager and returns immediately */</em>
+<a id='L481' name='L481'></a> 481 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22524.html' title='Multiple used in 4 places.'>ibase_restore</a>)
+<a id='L482' name='L482'></a> 482 <em class='brace'>{</em>
+<a id='L483' name='L483'></a> 483         <a href='../S/306.html#L417' title='Defined at 417 in ext/interbase/ibase_service.c.'>_php_ibase_backup_restore</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, isc_action_svc_restore);
+<a id='L484' name='L484'></a> 484 <em class='brace'>}</em>
+<a id='L485' name='L485'></a> 485 <em class='comment'>/* }}} */</em>
+<a id='L486' name='L486'></a> 486 
+<a id='L487' name='L487'></a> 487 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/16081.html' title='Multiple referred from 2 places.'>_php_ibase_service_action</a>(<a href='../S/1627.html#L58' title='Defined at 58 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAMETERS</a>, <strong class='reserved'>char</strong> <a href='../Y/37906.html' title='Multiple used in 5 places.'>svc_action</a>) <em class='comment'>/* {{{ */</em>
+<a id='L488' name='L488'></a> 488 <em class='brace'>{</em>
+<a id='L489' name='L489'></a> 489         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L490' name='L490'></a> 490         <strong class='reserved'>char</strong> <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>[128], *<a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>;
+<a id='L491' name='L491'></a> 491         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>;
+<a id='L492' name='L492'></a> 492         <strong class='reserved'>int</strong> <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>;
+<a id='L493' name='L493'></a> 493         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>, <a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a> = 0;
+<a id='L494' name='L494'></a> 494         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>;
+<a id='L495' name='L495'></a> 495 
+<a id='L496' name='L496'></a> 496         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L497' name='L497'></a> 497 
+<a id='L498' name='L498'></a> 498         <strong class='reserved'>if</strong> (<a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a> != <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "rsl|l",
+<a id='L499' name='L499'></a> 499                         &amp;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>, &amp;<a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>, &amp;<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, &amp;<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>, &amp;<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a>)) <em class='brace'>{</em>
+<a id='L500' name='L500'></a> 500                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L501' name='L501'></a> 501         <em class='brace'>}</em>
+<a id='L502' name='L502'></a> 502 
+<a id='L503' name='L503'></a> 503         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *)<a href='../S/1690.html#L139' title='Defined at 139 in Zend/zend_list.c.'>zend_fetch_resource_ex</a>(<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>,
+<a id='L504' name='L504'></a> 504                 "Interbase service manager handle", <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>);
+<a id='L505' name='L505'></a> 505 
+<a id='L506' name='L506'></a> 506         <strong class='reserved'>if</strong> (<a href='../Y/37906.html' title='Multiple used in 5 places.'>svc_action</a> == <a href='../Y/23962.html' title='Multiple used in 3 places.'>isc_action_svc_db_stats</a>) <em class='brace'>{</em>
+<a id='L507' name='L507'></a> 507                 <strong class='reserved'>switch</strong> (<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>) <em class='brace'>{</em>
+<a id='L508' name='L508'></a> 508                         <strong class='reserved'>default</strong>:
+<a id='L509' name='L509'></a> 509                                 <strong class='reserved'>goto</strong> <a href='../Y/39601.html' title='Multiple used in 2 places.'>unknown_option</a>;
+<a id='L510' name='L510'></a> 510 
+<a id='L511' name='L511'></a> 511                         <strong class='reserved'>case</strong> <a href='../Y/24108.html' title='Multiple used in 2 places.'>isc_spb_sts_data_pages</a>:
+<a id='L512' name='L512'></a> 512                         <strong class='reserved'>case</strong> <a href='../Y/24109.html' title='Multiple used in 2 places.'>isc_spb_sts_db_log</a>:
+<a id='L513' name='L513'></a> 513                         <strong class='reserved'>case</strong> <a href='../Y/24110.html' title='Multiple used in 2 places.'>isc_spb_sts_hdr_pages</a>:
+<a id='L514' name='L514'></a> 514                         <strong class='reserved'>case</strong> <a href='../Y/24111.html' title='Multiple used in 2 places.'>isc_spb_sts_idx_pages</a>:
+<a id='L515' name='L515'></a> 515                         <strong class='reserved'>case</strong> <a href='../Y/24112.html' title='Multiple used in 2 places.'>isc_spb_sts_sys_relations</a>:
+<a id='L516' name='L516'></a> 516                                 <strong class='reserved'>goto</strong> <a href='../Y/29871.html' title='Multiple used in 2 places.'>options_argument</a>;
+<a id='L517' name='L517'></a> 517                 <em class='brace'>}</em>
+<a id='L518' name='L518'></a> 518         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L519' name='L519'></a> 519                 <em class='comment'>/* these actions all expect different types of arguments */</em>
+<a id='L520' name='L520'></a> 520                 <strong class='reserved'>switch</strong> (<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>) <em class='brace'>{</em>
+<a id='L521' name='L521'></a> 521                         <strong class='reserved'>default</strong>:
+<a id='L522' name='L522'></a> 522 <a href='../Y/39601.html' title='Multiple used in 2 places.'>unknown_option</a>:
+<a id='L523' name='L523'></a> 523                                 <a href='../S/307.html#L525' title='Defined at 525 in ext/interbase/interbase.c.'>_php_ibase_module_error</a>("Unrecognised option (" <a href='../D/16871.html' title='Multiple defined in 2 places.'>ZEND_LONG_FMT</a> ")", <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>);
+<a id='L524' name='L524'></a> 524                                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L525' name='L525'></a> 525 
+<a id='L526' name='L526'></a> 526                         <strong class='reserved'>case</strong> <a href='../Y/24094.html' title='Multiple used in 2 places.'>isc_spb_rpr_check_db</a>:
+<a id='L527' name='L527'></a> 527                         <strong class='reserved'>case</strong> <a href='../Y/24096.html' title='Multiple used in 2 places.'>isc_spb_rpr_ignore_checksum</a>:
+<a id='L528' name='L528'></a> 528                         <strong class='reserved'>case</strong> <a href='../Y/24097.html' title='Multiple used in 2 places.'>isc_spb_rpr_kill_shadows</a>:
+<a id='L529' name='L529'></a> 529                         <strong class='reserved'>case</strong> <a href='../Y/24098.html' title='Multiple used in 2 places.'>isc_spb_rpr_mend_db</a>:
+<a id='L530' name='L530'></a> 530                         <strong class='reserved'>case</strong> <a href='../Y/24100.html' title='Multiple used in 2 places.'>isc_spb_rpr_validate_db</a>:
+<a id='L531' name='L531'></a> 531                         <strong class='reserved'>case</strong> <a href='../Y/24099.html' title='Multiple used in 2 places.'>isc_spb_rpr_sweep_db</a>:
+<a id='L532' name='L532'></a> 532                                 <a href='../Y/37906.html' title='Multiple used in 5 places.'>svc_action</a> = isc_action_svc_repair;
+<a id='L533' name='L533'></a> 533 
+<a id='L534' name='L534'></a> 534                         <strong class='reserved'>case</strong> <a href='../Y/24071.html' title='Multiple used in 2 places.'>isc_spb_prp_activate</a>:
+<a id='L535' name='L535'></a> 535                         <strong class='reserved'>case</strong> <a href='../Y/24074.html' title='Multiple used in 2 places.'>isc_spb_prp_db_online</a>:
+<a id='L536' name='L536'></a> 536 <a href='../Y/29871.html' title='Multiple used in 2 places.'>options_argument</a>:
+<a id='L537' name='L537'></a> 537                                 <a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a> |= <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>;
+<a id='L538' name='L538'></a> 538                                 <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a> = <a href='../Y/24068.html' title='Multiple used in 2 places.'>isc_spb_options</a>;
+<a id='L539' name='L539'></a> 539 
+<a id='L540' name='L540'></a> 540                         <strong class='reserved'>case</strong> <a href='../Y/24077.html' title='Multiple used in 2 places.'>isc_spb_prp_page_buffers</a>:
+<a id='L541' name='L541'></a> 541                         <strong class='reserved'>case</strong> <a href='../Y/24083.html' title='Multiple used in 2 places.'>isc_spb_prp_sweep_interval</a>:
+<a id='L542' name='L542'></a> 542                         <strong class='reserved'>case</strong> <a href='../Y/24082.html' title='Multiple used in 2 places.'>isc_spb_prp_shutdown_db</a>:
+<a id='L543' name='L543'></a> 543                         <strong class='reserved'>case</strong> <a href='../Y/24076.html' title='Multiple used in 2 places.'>isc_spb_prp_deny_new_transactions</a>:
+<a id='L544' name='L544'></a> 544                         <strong class='reserved'>case</strong> <a href='../Y/24075.html' title='Multiple used in 2 places.'>isc_spb_prp_deny_new_attachments</a>:
+<a id='L545' name='L545'></a> 545                         <strong class='reserved'>case</strong> <a href='../Y/24081.html' title='Multiple used in 2 places.'>isc_spb_prp_set_sql_dialect</a>:
+<a id='L546' name='L546'></a> 546                                 <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> = <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>), "%c%c%c%c%s%c%c%c%c%c",
+<a id='L547' name='L547'></a> 547                                         <a href='../Y/37906.html' title='Multiple used in 5 places.'>svc_action</a>, <a href='../Y/24065.html' title='Multiple used in 4 places.'>isc_spb_dbname</a>, (<strong class='reserved'>char</strong>)<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, (<strong class='reserved'>char</strong>)(<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a> &gt;&gt; 8), <a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>,
+<a id='L548' name='L548'></a> 548                                         (<strong class='reserved'>char</strong>)<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>, (<strong class='reserved'>char</strong>)<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a>, (<strong class='reserved'>char</strong>)(<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a> &gt;&gt; 8), (<strong class='reserved'>char</strong>)(<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a> &gt;&gt; 16),
+<a id='L549' name='L549'></a> 549                                         (<strong class='reserved'>char</strong>)(<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a> &gt;&gt; 24));
+<a id='L550' name='L550'></a> 550                                 <strong class='reserved'>break</strong>;
+<a id='L551' name='L551'></a> 551 
+<a id='L552' name='L552'></a> 552                         <strong class='reserved'>case</strong> <a href='../Y/24080.html' title='Multiple used in 2 places.'>isc_spb_prp_reserve_space</a>:
+<a id='L553' name='L553'></a> 553                         <strong class='reserved'>case</strong> <a href='../Y/24086.html' title='Multiple used in 2 places.'>isc_spb_prp_write_mode</a>:
+<a id='L554' name='L554'></a> 554                         <strong class='reserved'>case</strong> <a href='../Y/24070.html' title='Multiple used in 2 places.'>isc_spb_prp_access_mode</a>:
+<a id='L555' name='L555'></a> 555                                 <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> = <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>), "%c%c%c%c%s%c%c",
+<a id='L556' name='L556'></a> 556                                         <a href='../Y/23966.html' title='Multiple used in 2 places.'>isc_action_svc_properties</a>, <a href='../Y/24065.html' title='Multiple used in 4 places.'>isc_spb_dbname</a>, (<strong class='reserved'>char</strong>)<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a>, (<strong class='reserved'>char</strong>)(<a href='../Y/15257.html' title='Multiple used in 7 places.'>dblen</a> &gt;&gt; 8),
+<a id='L557' name='L557'></a> 557                                         <a href='../D/20866.html' title='Multiple defined in 2 places.'>db</a>, (<strong class='reserved'>char</strong>)<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>, (<strong class='reserved'>char</strong>)<a href='../Y/11902.html' title='Multiple used in 73 places.'>argument</a>);
+<a id='L558' name='L558'></a> 558                 <em class='brace'>}</em>
+<a id='L559' name='L559'></a> 559         <em class='brace'>}</em>
+<a id='L560' name='L560'></a> 560 
+<a id='L561' name='L561'></a> 561         <strong class='reserved'>if</strong> (<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> &gt; <strong class='reserved'>sizeof</strong>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>) || <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a> == -1) <em class='brace'>{</em>
+<a id='L562' name='L562'></a> 562                 <a href='../S/307.html#L525' title='Defined at 525 in ext/interbase/interbase.c.'>_php_ibase_module_error</a>("Internal error: insufficient buffer space for SPB (%d)", <a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>);
+<a id='L563' name='L563'></a> 563                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L564' name='L564'></a> 564         <em class='brace'>}</em>
+<a id='L565' name='L565'></a> 565 
+<a id='L566' name='L566'></a> 566         <strong class='reserved'>if</strong> (<a href='../Y/24055.html' title='Multiple used in 4 places.'>isc_service_start</a>(<a href='../S/308.html#L36' title='Defined at 36 in ext/interbase/php_ibase_includes.h.'>IB_STATUS</a>, &amp;<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>-&gt;<a href='../Y/19661.html' title='Multiple used in 526 places.'>handle</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, (<strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong>)<a href='../Y/36620.html' title='Multiple used in 25 places.'>spb_len</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>)) <em class='brace'>{</em>
+<a id='L567' name='L567'></a> 567                 <a href='../S/306.html#L60' title='Defined at 60 in ext/interbase/ibase_service.c.'>IBASE_SVC_ERROR</a>(<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>);
+<a id='L568' name='L568'></a> 568                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L569' name='L569'></a> 569         <em class='brace'>}</em>
+<a id='L570' name='L570'></a> 570 
+<a id='L571' name='L571'></a> 571         <strong class='reserved'>if</strong> (<a href='../Y/37906.html' title='Multiple used in 5 places.'>svc_action</a> == <a href='../Y/23962.html' title='Multiple used in 3 places.'>isc_action_svc_db_stats</a>) <em class='brace'>{</em>
+<a id='L572' name='L572'></a> 572                 <a href='../S/306.html#L271' title='Defined at 271 in ext/interbase/ibase_service.c.'>_php_ibase_service_query</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>, <a href='../Y/24038.html' title='Multiple used in 3 places.'>isc_info_svc_line</a>);
+<a id='L573' name='L573'></a> 573         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L574' name='L574'></a> 574                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L575' name='L575'></a> 575         <em class='brace'>}</em>
+<a id='L576' name='L576'></a> 576 <em class='brace'>}</em>
+<a id='L577' name='L577'></a> 577 <em class='comment'>/* }}} */</em>
+<a id='L578' name='L578'></a> 578 
+<a id='L579' name='L579'></a> 579 <em class='comment'>/* {{{ proto bool ibase_maintain_db(resource service_handle, string db, int action [, int argument])</em>
+<a id='L580' name='L580'></a> 580 <em class='comment'>   Execute a maintenance command on the database server */</em>
+<a id='L581' name='L581'></a> 581 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22514.html' title='Multiple used in 4 places.'>ibase_maintain_db</a>)
+<a id='L582' name='L582'></a> 582 <em class='brace'>{</em>
+<a id='L583' name='L583'></a> 583         <a href='../S/306.html#L487' title='Defined at 487 in ext/interbase/ibase_service.c.'>_php_ibase_service_action</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/23966.html' title='Multiple used in 2 places.'>isc_action_svc_properties</a>);
+<a id='L584' name='L584'></a> 584 <em class='brace'>}</em>
+<a id='L585' name='L585'></a> 585 <em class='comment'>/* }}} */</em>
+<a id='L586' name='L586'></a> 586 
+<a id='L587' name='L587'></a> 587 <em class='comment'>/* {{{ proto string ibase_db_info(resource service_handle, string db, int action [, int argument])</em>
+<a id='L588' name='L588'></a> 588 <em class='comment'>   Request statistics about a database */</em>
+<a id='L589' name='L589'></a> 589 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22496.html' title='Multiple used in 4 places.'>ibase_db_info</a>)
+<a id='L590' name='L590'></a> 590 <em class='brace'>{</em>
+<a id='L591' name='L591'></a> 591         <a href='../S/306.html#L487' title='Defined at 487 in ext/interbase/ibase_service.c.'>_php_ibase_service_action</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/23962.html' title='Multiple used in 3 places.'>isc_action_svc_db_stats</a>);
+<a id='L592' name='L592'></a> 592 <em class='brace'>}</em>
+<a id='L593' name='L593'></a> 593 <em class='comment'>/* }}} */</em>
+<a id='L594' name='L594'></a> 594 
+<a id='L595' name='L595'></a> 595 <em class='comment'>/* {{{ proto string ibase_server_info(resource service_handle, int action)</em>
+<a id='L596' name='L596'></a> 596 <em class='comment'>   Request information about a database server */</em>
+<a id='L597' name='L597'></a> 597 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22527.html' title='Multiple used in 4 places.'>ibase_server_info</a>)
+<a id='L598' name='L598'></a> 598 <em class='brace'>{</em>
+<a id='L599' name='L599'></a> 599         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>;
+<a id='L600' name='L600'></a> 600         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>;
+<a id='L601' name='L601'></a> 601         <a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *<a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>;
+<a id='L602' name='L602'></a> 602 
+<a id='L603' name='L603'></a> 603         <a href='../S/308.html#L34' title='Defined at 34 in ext/interbase/php_ibase_includes.h.'>RESET_ERRMSG</a>;
+<a id='L604' name='L604'></a> 604 
+<a id='L605' name='L605'></a> 605         <strong class='reserved'>if</strong> (<a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a> != <a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "rl", &amp;<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>, &amp;<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>)) <em class='brace'>{</em>
+<a id='L606' name='L606'></a> 606                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L607' name='L607'></a> 607         <em class='brace'>}</em>
+<a id='L608' name='L608'></a> 608 
+<a id='L609' name='L609'></a> 609         <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a> = (<a href='../S/306.html#L35' title='Defined at 35 in ext/interbase/ibase_service.c.'>ibase_service</a> *)<a href='../S/1690.html#L139' title='Defined at 139 in Zend/zend_list.c.'>zend_fetch_resource_ex</a>(<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>,
+<a id='L610' name='L610'></a> 610                 "Interbase service manager handle", <a href='../Y/24920.html' title='Multiple used in 12 places.'>le_service</a>);
+<a id='L611' name='L611'></a> 611 
+<a id='L612' name='L612'></a> 612         <a href='../S/306.html#L271' title='Defined at 271 in ext/interbase/ibase_service.c.'>_php_ibase_service_query</a>(<a href='../S/1627.html#L59' title='Defined at 59 in Zend/zend.h.'>INTERNAL_FUNCTION_PARAM_PASSTHRU</a>, <a href='../Y/37908.html' title='Multiple used in 31 places.'>svm</a>, (<strong class='reserved'>char</strong>)<a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>);
+<a id='L613' name='L613'></a> 613 <em class='brace'>}</em>
+<a id='L614' name='L614'></a> 614 <em class='comment'>/* }}} */</em>
+<a id='L615' name='L615'></a> 615 
+<a id='L616' name='L616'></a> 616 <em class='sharp'>#else</em>
+<a id='L617' name='L617'></a> 617 
+<a id='L618' name='L618'></a> 618 <strong class='reserved'>void</strong> php_ibase_register_service_constants(<a href='../S/1695.html#L29' title='Defined at 29 in Zend/zend_modules.h.'>INIT_FUNC_ARGS</a>) <em class='brace'>{</em> <em class='comment'>/* nop */</em> <em class='brace'>}</em>
+<a id='L619' name='L619'></a> 619 
+<a id='L620' name='L620'></a> 620 <em class='sharp'>#endif</em> <em class='comment'>/* HAVE_IBASE */</em>
+<a id='L621' name='L621'></a> 621 
+<a id='L622' name='L622'></a> 622 <em class='comment'>/*</em>
+<a id='L623' name='L623'></a> 623 <em class='comment'> * Local variables:</em>
+<a id='L624' name='L624'></a> 624 <em class='comment'> * tab-width: 4</em>
+<a id='L625' name='L625'></a> 625 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L626' name='L626'></a> 626 <em class='comment'> * End:</em>
+<a id='L627' name='L627'></a> 627 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L628' name='L628'></a> 628 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L629' name='L629'></a> 629 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L618'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

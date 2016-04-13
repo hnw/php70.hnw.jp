@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ldap_mods</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/456.html#L1421'>ldap_mods</a>        1421 ext/ldap/ldap.c 	LDAPMod **ldap_mods;</span>
+<span class='curline'><a href='../S/456.html#L1438'>ldap_mods</a>        1438 ext/ldap/ldap.c 	ldap_mods = safe_emalloc((num_attribs+1), sizeof(LDAPMod *), 0);</span>
+<span class='curline'><a href='../S/456.html#L1450'>ldap_mods</a>        1450 ext/ldap/ldap.c 		ldap_mods[i] = emalloc(sizeof(LDAPMod));</span>
+<span class='curline'><a href='../S/456.html#L1451'>ldap_mods</a>        1451 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_op = oper | LDAP_MOD_BVALUES;</span>
+<span class='curline'><a href='../S/456.html#L1452'>ldap_mods</a>        1452 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_type = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1455'>ldap_mods</a>        1455 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));</span>
+<span class='curline'><a href='../S/456.html#L1460'>ldap_mods</a>        1460 ext/ldap/ldap.c 				if (ldap_mods[i]-&gt;mod_type) {</span>
+<span class='curline'><a href='../S/456.html#L1461'>ldap_mods</a>        1461 ext/ldap/ldap.c 					efree(ldap_mods[i]-&gt;mod_type);</span>
+<span class='curline'><a href='../S/456.html#L1463'>ldap_mods</a>        1463 ext/ldap/ldap.c 				efree(ldap_mods[i]);</span>
+<span class='curline'><a href='../S/456.html#L1467'>ldap_mods</a>        1467 ext/ldap/ldap.c 			efree(ldap_mods);</span>
+<span class='curline'><a href='../S/456.html#L1481'>ldap_mods</a>        1481 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);</span>
+<span class='curline'><a href='../S/456.html#L1486'>ldap_mods</a>        1486 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));</span>
+<span class='curline'><a href='../S/456.html#L1487'>ldap_mods</a>        1487 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues[0]-&gt;bv_len = Z_STRLEN_P(value);</span>
+<span class='curline'><a href='../S/456.html#L1488'>ldap_mods</a>        1488 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues[0]-&gt;bv_val = Z_STRVAL_P(value);</span>
+<span class='curline'><a href='../S/456.html#L1499'>ldap_mods</a>        1499 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));</span>
+<span class='curline'><a href='../S/456.html#L1500'>ldap_mods</a>        1500 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j]-&gt;bv_len = Z_STRLEN_P(ivalue);</span>
+<span class='curline'><a href='../S/456.html#L1501'>ldap_mods</a>        1501 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j]-&gt;bv_val = Z_STRVAL_P(ivalue);</span>
+<span class='curline'><a href='../S/456.html#L1504'>ldap_mods</a>        1504 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_bvalues[num_values] = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1507'>ldap_mods</a>        1507 ext/ldap/ldap.c 	ldap_mods[num_attribs] = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1511'>ldap_mods</a>        1511 ext/ldap/ldap.c 		if ((i = ldap_add_ext_s(ld-&gt;link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {</span>
+<span class='curline'><a href='../S/456.html#L1516'>ldap_mods</a>        1516 ext/ldap/ldap.c 		if ((i = ldap_modify_ext_s(ld-&gt;link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {</span>
+<span class='curline'><a href='../S/456.html#L1524'>ldap_mods</a>        1524 ext/ldap/ldap.c 		efree(ldap_mods[i]-&gt;mod_type);</span>
+<span class='curline'><a href='../S/456.html#L1526'>ldap_mods</a>        1526 ext/ldap/ldap.c 			efree(ldap_mods[i]-&gt;mod_bvalues[j]);</span>
+<span class='curline'><a href='../S/456.html#L1528'>ldap_mods</a>        1528 ext/ldap/ldap.c 		efree(ldap_mods[i]-&gt;mod_bvalues);</span>
+<span class='curline'><a href='../S/456.html#L1529'>ldap_mods</a>        1529 ext/ldap/ldap.c 		efree(ldap_mods[i]);</span>
+<span class='curline'><a href='../S/456.html#L1532'>ldap_mods</a>        1532 ext/ldap/ldap.c 	efree(ldap_mods);</span>
+<span class='curline'><a href='../S/456.html#L1655'>ldap_mods</a>        1655 ext/ldap/ldap.c 	LDAPMod **ldap_mods;</span>
+<span class='curline'><a href='../S/456.html#L1838'>ldap_mods</a>        1838 ext/ldap/ldap.c 	ldap_mods = safe_emalloc((num_mods+1), sizeof(LDAPMod *), 0);</span>
+<span class='curline'><a href='../S/456.html#L1843'>ldap_mods</a>        1843 ext/ldap/ldap.c 		ldap_mods[i] = safe_emalloc(1, sizeof(LDAPMod), 0);</span>
+<span class='curline'><a href='../S/456.html#L1871'>ldap_mods</a>        1871 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_op = oper | LDAP_MOD_BVALUES;</span>
+<span class='curline'><a href='../S/456.html#L1872'>ldap_mods</a>        1872 ext/ldap/ldap.c 		ldap_mods[i]-&gt;mod_type = estrndup(Z_STRVAL_P(attrib), Z_STRLEN_P(attrib));</span>
+<span class='curline'><a href='../S/456.html#L1876'>ldap_mods</a>        1876 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1881'>ldap_mods</a>        1881 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues = safe_emalloc((num_modvals+1), sizeof(struct berval *), 0);</span>
+<span class='curline'><a href='../S/456.html#L1890'>ldap_mods</a>        1890 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j] = safe_emalloc(1, sizeof(struct berval), 0);</span>
+<span class='curline'><a href='../S/456.html#L1893'>ldap_mods</a>        1893 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j]-&gt;bv_len = Z_STRLEN_P(modval);</span>
+<span class='curline'><a href='../S/456.html#L1894'>ldap_mods</a>        1894 ext/ldap/ldap.c 				ldap_mods[i]-&gt;mod_bvalues[j]-&gt;bv_val = estrndup(Z_STRVAL_P(modval), Z_STRLEN_P(modval));</span>
+<span class='curline'><a href='../S/456.html#L1898'>ldap_mods</a>        1898 ext/ldap/ldap.c 			ldap_mods[i]-&gt;mod_bvalues[num_modvals] = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1903'>ldap_mods</a>        1903 ext/ldap/ldap.c 	ldap_mods[num_mods] = NULL;</span>
+<span class='curline'><a href='../S/456.html#L1906'>ldap_mods</a>        1906 ext/ldap/ldap.c 	if ((i = ldap_modify_ext_s(ld-&gt;link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {</span>
+<span class='curline'><a href='../S/456.html#L1915'>ldap_mods</a>        1915 ext/ldap/ldap.c 			efree(ldap_mods[i]-&gt;mod_type);</span>
+<span class='curline'><a href='../S/456.html#L1917'>ldap_mods</a>        1917 ext/ldap/ldap.c 			if (ldap_mods[i]-&gt;mod_bvalues != NULL) {</span>
+<span class='curline'><a href='../S/456.html#L1919'>ldap_mods</a>        1919 ext/ldap/ldap.c 				for (j = 0; ldap_mods[i]-&gt;mod_bvalues[j] != NULL; j++) {</span>
+<span class='curline'><a href='../S/456.html#L1921'>ldap_mods</a>        1921 ext/ldap/ldap.c 					efree(ldap_mods[i]-&gt;mod_bvalues[j]-&gt;bv_val);</span>
+<span class='curline'><a href='../S/456.html#L1924'>ldap_mods</a>        1924 ext/ldap/ldap.c 					efree(ldap_mods[i]-&gt;mod_bvalues[j]);</span>
+<span class='curline'><a href='../S/456.html#L1928'>ldap_mods</a>        1928 ext/ldap/ldap.c 				efree(ldap_mods[i]-&gt;mod_bvalues);</span>
+<span class='curline'><a href='../S/456.html#L1932'>ldap_mods</a>        1932 ext/ldap/ldap.c 			efree(ldap_mods[i]);</span>
+<span class='curline'><a href='../S/456.html#L1936'>ldap_mods</a>        1936 ext/ldap/ldap.c 		efree(ldap_mods);</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/xmlrpc/libxmlrpc/system_methods.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1851.html'>xmlrpc</a>/<a href='../files/1852.html'>libxmlrpc</a>/system_methods.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L299'>[^]</a><a href='#L348'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L299' title='Defined at 299.'>xsm_lazy_doc_methods_cb</a></li>
+<li><a href='#L305' title='Defined at 305.'>xsm_register</a></li>
+<li><a href='#L315' title='Defined at 315.'>xsm_system_multicall_cb</a></li>
+<li><a href='#L348' title='Defined at 348.'>xsm_system_get_capabilities_cb</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  This file is part of libXMLRPC - a C library for xml-encoded function calls.</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'></em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  Author: Dan Libby (dan@libby.com)</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  Epinions.com may be contacted at feedback@epinions-inc.com</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>*/</em>
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8 <em class='comment'>/*</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  Copyright 2001 Epinions, Inc.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  Subject to the following 3 conditions, Epinions, Inc.  permits you, free</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  of charge, to (a) use, copy, distribute, modify, perform and display this</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  software and associated documentation files (the "Software"), and (b)</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  permit others to whom the Software is furnished to do so as well.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'></em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  1) The above copyright notice and this permission notice shall be included</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>  without modification in all copies or substantial portions of the</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>  Software.</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'></em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>  PURPOSE OR NONINFRINGEMENT.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'></em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>  DAMAGES.</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'></em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>*/</em>
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='comment'>/****h* ABOUT/system_methods</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * AUTHOR</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> *   Dan Libby, aka danda  (dan@libby.com)</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * HISTORY</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> *   $Log$</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *   Revision 1.7  2001/09/29 21:58:05  danda</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> *   adding cvs log to history section</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> *</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> *   4/28/2001 -- danda -- adding system.multicall and separating out system methods.</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * TODO</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> * NOTES</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> *******/</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#include</em> "<a href='1219.html'>queue.h</a>"
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#include</em> "<a href='1233.html'>xmlrpc.h</a>"
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#include</em> "<a href='1237.html'>xmlrpc_private.h</a>"
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#include</em> "<a href='1236.html'>xmlrpc_introspection_private.h</a>"
+<a id='L52' name='L52'></a>  52 <em class='sharp'>#include</em> "<a href='1223.html'>system_methods_private.h</a>"
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L54' name='L54'></a>  54 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#include</em> &lt;stdarg.h&gt;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/41640.html' title='Multiple used in 2 places.'>xsm_introspection_xml</a> =
+<a id='L59' name='L59'></a>  59 "&lt;?xml version='1.0' ?&gt;"
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 "&lt;introspection version='1.0'&gt;"
+<a id='L62' name='L62'></a>  62  "&lt;typeList&gt;"
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64  "&lt;typeDescription name='system.value' basetype='struct' desc='description of a value'&gt;"
+<a id='L65' name='L65'></a>  65    "&lt;value type='string' name='name' optional='yes'&gt;value identifier&lt;/value&gt;"
+<a id='L66' name='L66'></a>  66    "&lt;value type='string' name='type'&gt;value&amp;apos;s xmlrpc or user-defined type&lt;/value&gt;"
+<a id='L67' name='L67'></a>  67    "&lt;value type='string' name='description'&gt;value&amp;apos;s textual description&lt;/value&gt; "
+<a id='L68' name='L68'></a>  68    "&lt;value type='boolean' name='optional'&gt;true if value is optional, else it is required&lt;/value&gt; "
+<a id='L69' name='L69'></a>  69    "&lt;value type='any' name='member' optional='yes'&gt;a child of this element. n/a for scalar types&lt;/value&gt; "
+<a id='L70' name='L70'></a>  70  "&lt;/typeDescription&gt;"
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72  "&lt;typeDescription name='system.valueList' basetype='array' desc='list of value descriptions'&gt;"
+<a id='L73' name='L73'></a>  73    "&lt;value type='system.value'/&gt;"
+<a id='L74' name='L74'></a>  74  "&lt;/typeDescription&gt;"
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76  "&lt;typeDescription name='system.stringList' basetype='array' desc='list of strings'&gt;"
+<a id='L77' name='L77'></a>  77    "&lt;value type='string'/&gt;"
+<a id='L78' name='L78'></a>  78  "&lt;/typeDescription&gt;"
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81  "&lt;/typeList&gt;"
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83  "&lt;methodList&gt;"
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85  "&lt;!-- system.describeMethods --&gt;"
+<a id='L86' name='L86'></a>  86  "&lt;methodDescription name='system.describeMethods'&gt;"
+<a id='L87' name='L87'></a>  87   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L88' name='L88'></a>  88   "&lt;purpose&gt;fully describes the methods and types implemented by this XML-RPC server.&lt;/purpose&gt;"
+<a id='L89' name='L89'></a>  89   "&lt;version&gt;1.1&lt;/version&gt;"
+<a id='L90' name='L90'></a>  90   "&lt;signatures&gt;"
+<a id='L91' name='L91'></a>  91    "&lt;signature&gt;"
+<a id='L92' name='L92'></a>  92     "&lt;params&gt;"
+<a id='L93' name='L93'></a>  93      "&lt;value type='array' name='methodList' optional='yes' desc='a list of methods to be described. if omitted, all are described.'&gt;"
+<a id='L94' name='L94'></a>  94       "&lt;value type='string'&gt;a valid method name&lt;/value&gt;"
+<a id='L95' name='L95'></a>  95      "&lt;/value&gt;"
+<a id='L96' name='L96'></a>  96     "&lt;/params&gt;"
+<a id='L97' name='L97'></a>  97     "&lt;returns&gt;"
+<a id='L98' name='L98'></a>  98      "&lt;value type='struct' desc='contains methods list and types list'&gt;"
+<a id='L99' name='L99'></a>  99       "&lt;value type='array' name='methodList' desc='a list of methods'&gt;"
+<a id='L100' name='L100'></a> 100        "&lt;value type='struct' desc='representation of a single method'&gt;"
+<a id='L101' name='L101'></a> 101         "&lt;value type='string' name='name'&gt;method name&lt;/value&gt;"
+<a id='L102' name='L102'></a> 102         "&lt;value type='string' name='version' optional='yes'&gt;method version&lt;/value&gt;"
+<a id='L103' name='L103'></a> 103         "&lt;value type='string' name='author' optional='yes'&gt;method author&lt;/value&gt;"
+<a id='L104' name='L104'></a> 104         "&lt;value type='string' name='purpose' optional='yes'&gt;method purpose&lt;/value&gt;"
+<a id='L105' name='L105'></a> 105         "&lt;value type='array' name='signatures' desc='list of method signatures'&gt;"
+<a id='L106' name='L106'></a> 106          "&lt;value type='struct' desc='representation of a single signature'&gt;"
+<a id='L107' name='L107'></a> 107           "&lt;value type='system.valueList' name='params' optional='yes'&gt;parameter list&lt;/value&gt;"
+<a id='L108' name='L108'></a> 108           "&lt;value type='system.valueList' name='returns' optional='yes'&gt;return value list&lt;/value&gt;"
+<a id='L109' name='L109'></a> 109          "&lt;/value&gt;"
+<a id='L110' name='L110'></a> 110         "&lt;/value&gt;"
+<a id='L111' name='L111'></a> 111         "&lt;value type='system.stringList' name='bugs' optional='yes'&gt;list of known bugs&lt;/value&gt;"
+<a id='L112' name='L112'></a> 112         "&lt;value type='system.stringList' name='errors' optional='yes'&gt;list of possible errors and error codes&lt;/value&gt;"
+<a id='L113' name='L113'></a> 113         "&lt;value type='system.stringList' name='examples' optional='yes'&gt;list of examples&lt;/value&gt;"
+<a id='L114' name='L114'></a> 114         "&lt;value type='system.stringList' name='history' optional='yes'&gt;list of modifications&lt;/value&gt;"
+<a id='L115' name='L115'></a> 115         "&lt;value type='system.stringList' name='notes' optional='yes'&gt;list of notes&lt;/value&gt;"
+<a id='L116' name='L116'></a> 116         "&lt;value type='system.stringList' name='see' optional='yes'&gt;see also.  list of related methods&lt;/value&gt;"
+<a id='L117' name='L117'></a> 117         "&lt;value type='system.stringList' name='todo' optional='yes'&gt;list of unimplemented features&lt;/value&gt;"
+<a id='L118' name='L118'></a> 118        "&lt;/value&gt;"
+<a id='L119' name='L119'></a> 119       "&lt;/value&gt;"
+<a id='L120' name='L120'></a> 120       "&lt;value type='array' name='typeList' desc='a list of type descriptions. Typically used for referencing complex types'&gt;"
+<a id='L121' name='L121'></a> 121        "&lt;value type='system.value'&gt;a type description&lt;/value&gt;"
+<a id='L122' name='L122'></a> 122       "&lt;/value&gt;"
+<a id='L123' name='L123'></a> 123      "&lt;/value&gt;"
+<a id='L124' name='L124'></a> 124     "&lt;/returns&gt;"
+<a id='L125' name='L125'></a> 125    "&lt;/signature&gt;"
+<a id='L126' name='L126'></a> 126   "&lt;/signatures&gt;"
+<a id='L127' name='L127'></a> 127   "&lt;see&gt;"
+<a id='L128' name='L128'></a> 128    "&lt;item name='system.listMethods' /&gt;"
+<a id='L129' name='L129'></a> 129    "&lt;item name='system.methodSignature' /&gt;"
+<a id='L130' name='L130'></a> 130    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L131' name='L131'></a> 131   "&lt;/see&gt;"
+<a id='L132' name='L132'></a> 132   "&lt;example/&gt;"
+<a id='L133' name='L133'></a> 133   "&lt;error/&gt;"
+<a id='L134' name='L134'></a> 134   "&lt;note/&gt;"
+<a id='L135' name='L135'></a> 135   "&lt;bug/&gt;"
+<a id='L136' name='L136'></a> 136   "&lt;todo/&gt;"
+<a id='L137' name='L137'></a> 137  "&lt;/methodDescription&gt;"
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139  "&lt;!-- system.listMethods --&gt;"
+<a id='L140' name='L140'></a> 140  "&lt;methodDescription name='system.listMethods'&gt;"
+<a id='L141' name='L141'></a> 141   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L142' name='L142'></a> 142   "&lt;purpose&gt;enumerates the methods implemented by this XML-RPC server.&lt;/purpose&gt;"
+<a id='L143' name='L143'></a> 143   "&lt;version&gt;1.0&lt;/version&gt;"
+<a id='L144' name='L144'></a> 144   "&lt;signatures&gt;"
+<a id='L145' name='L145'></a> 145    "&lt;signature&gt;"
+<a id='L146' name='L146'></a> 146     "&lt;returns&gt;"
+<a id='L147' name='L147'></a> 147      "&lt;value type='array' desc='an array of strings'&gt;"
+<a id='L148' name='L148'></a> 148       "&lt;value type='string'&gt;name of a method implemented by the server.&lt;/value&gt;"
+<a id='L149' name='L149'></a> 149      "&lt;/value&gt;"
+<a id='L150' name='L150'></a> 150     "&lt;/returns&gt;"
+<a id='L151' name='L151'></a> 151    "&lt;/signature&gt;"
+<a id='L152' name='L152'></a> 152   "&lt;/signatures&gt;"
+<a id='L153' name='L153'></a> 153   "&lt;see&gt;"
+<a id='L154' name='L154'></a> 154    "&lt;item name='system.describeMethods' /&gt;"
+<a id='L155' name='L155'></a> 155    "&lt;item name='system.methodSignature' /&gt;"
+<a id='L156' name='L156'></a> 156    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L157' name='L157'></a> 157   "&lt;/see&gt;"
+<a id='L158' name='L158'></a> 158   "&lt;example/&gt;"
+<a id='L159' name='L159'></a> 159   "&lt;error/&gt;"
+<a id='L160' name='L160'></a> 160   "&lt;note/&gt;"
+<a id='L161' name='L161'></a> 161   "&lt;bug/&gt;"
+<a id='L162' name='L162'></a> 162   "&lt;todo/&gt;"
+<a id='L163' name='L163'></a> 163  "&lt;/methodDescription&gt;"
+<a id='L164' name='L164'></a> 164 
+<a id='L165' name='L165'></a> 165  "&lt;!-- system.methodHelp --&gt;"
+<a id='L166' name='L166'></a> 166  "&lt;methodDescription name='system.methodHelp'&gt;"
+<a id='L167' name='L167'></a> 167   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L168' name='L168'></a> 168   "&lt;purpose&gt;provides documentation string for a single method&lt;/purpose&gt;"
+<a id='L169' name='L169'></a> 169   "&lt;version&gt;1.0&lt;/version&gt;"
+<a id='L170' name='L170'></a> 170   "&lt;signatures&gt;"
+<a id='L171' name='L171'></a> 171    "&lt;signature&gt;"
+<a id='L172' name='L172'></a> 172     "&lt;params&gt;"
+<a id='L173' name='L173'></a> 173      "&lt;value type='string' name='methodName'&gt;name of the method for which documentation is desired&lt;/value&gt;"
+<a id='L174' name='L174'></a> 174     "&lt;/params&gt;"
+<a id='L175' name='L175'></a> 175     "&lt;returns&gt;"
+<a id='L176' name='L176'></a> 176      "&lt;value type='string'&gt;help text if defined for the method passed, otherwise an empty string&lt;/value&gt;"
+<a id='L177' name='L177'></a> 177     "&lt;/returns&gt;"
+<a id='L178' name='L178'></a> 178    "&lt;/signature&gt;"
+<a id='L179' name='L179'></a> 179   "&lt;/signatures&gt;"
+<a id='L180' name='L180'></a> 180   "&lt;see&gt;"
+<a id='L181' name='L181'></a> 181    "&lt;item name='system.listMethods' /&gt;"
+<a id='L182' name='L182'></a> 182    "&lt;item name='system.methodSignature' /&gt;"
+<a id='L183' name='L183'></a> 183    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L184' name='L184'></a> 184   "&lt;/see&gt;"
+<a id='L185' name='L185'></a> 185   "&lt;example/&gt;"
+<a id='L186' name='L186'></a> 186   "&lt;error/&gt;"
+<a id='L187' name='L187'></a> 187   "&lt;note/&gt;"
+<a id='L188' name='L188'></a> 188   "&lt;bug/&gt;"
+<a id='L189' name='L189'></a> 189   "&lt;todo/&gt;"
+<a id='L190' name='L190'></a> 190  "&lt;/methodDescription&gt;"
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192  "&lt;!-- system.methodSignature --&gt;"
+<a id='L193' name='L193'></a> 193  "&lt;methodDescription name='system.methodSignature'&gt;"
+<a id='L194' name='L194'></a> 194   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L195' name='L195'></a> 195   "&lt;purpose&gt;provides 1 or more signatures for a single method&lt;/purpose&gt;"
+<a id='L196' name='L196'></a> 196   "&lt;version&gt;1.0&lt;/version&gt;"
+<a id='L197' name='L197'></a> 197   "&lt;signatures&gt;"
+<a id='L198' name='L198'></a> 198    "&lt;signature&gt;"
+<a id='L199' name='L199'></a> 199     "&lt;params&gt;"
+<a id='L200' name='L200'></a> 200      "&lt;value type='string' name='methodName'&gt;name of the method for which documentation is desired&lt;/value&gt;"
+<a id='L201' name='L201'></a> 201     "&lt;/params&gt;"
+<a id='L202' name='L202'></a> 202     "&lt;returns&gt;"
+<a id='L203' name='L203'></a> 203      "&lt;value type='array' desc='a list of arrays, each representing a signature'&gt;"
+<a id='L204' name='L204'></a> 204       "&lt;value type='array' desc='a list of strings. the first element represents the method return value. subsequent elements represent parameters.'&gt;"
+<a id='L205' name='L205'></a> 205        "&lt;value type='string'&gt;a string indicating the xmlrpc type of a value. one of: string, int, double, base64, datetime, array, struct&lt;/value&gt;"
+<a id='L206' name='L206'></a> 206       "&lt;/value&gt;"
+<a id='L207' name='L207'></a> 207      "&lt;/value&gt;"
+<a id='L208' name='L208'></a> 208     "&lt;/returns&gt;"
+<a id='L209' name='L209'></a> 209    "&lt;/signature&gt;"
+<a id='L210' name='L210'></a> 210   "&lt;/signatures&gt;"
+<a id='L211' name='L211'></a> 211   "&lt;see&gt;"
+<a id='L212' name='L212'></a> 212    "&lt;item name='system.listMethods' /&gt;"
+<a id='L213' name='L213'></a> 213    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L214' name='L214'></a> 214    "&lt;item name='system.describeMethods' /&gt;"
+<a id='L215' name='L215'></a> 215   "&lt;/see&gt;"
+<a id='L216' name='L216'></a> 216   "&lt;example/&gt;"
+<a id='L217' name='L217'></a> 217   "&lt;error/&gt;"
+<a id='L218' name='L218'></a> 218   "&lt;note/&gt;"
+<a id='L219' name='L219'></a> 219   "&lt;bug/&gt;"
+<a id='L220' name='L220'></a> 220   "&lt;todo/&gt;"
+<a id='L221' name='L221'></a> 221  "&lt;/methodDescription&gt;"
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223  "&lt;!-- system.multiCall --&gt;"
+<a id='L224' name='L224'></a> 224  "&lt;methodDescription name='system.multiCall'&gt;"
+<a id='L225' name='L225'></a> 225   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L226' name='L226'></a> 226   "&lt;purpose&gt;executes multiple methods in sequence and returns the results&lt;/purpose&gt;"
+<a id='L227' name='L227'></a> 227   "&lt;version&gt;1.0&lt;/version&gt;"
+<a id='L228' name='L228'></a> 228   "&lt;signatures&gt;"
+<a id='L229' name='L229'></a> 229    "&lt;signature&gt;"
+<a id='L230' name='L230'></a> 230     "&lt;params&gt;"
+<a id='L231' name='L231'></a> 231      "&lt;value type='array' name='methodList' desc='an array of method call structs'&gt;"
+<a id='L232' name='L232'></a> 232       "&lt;value type='struct' desc='a struct representing a single method call'&gt;"
+<a id='L233' name='L233'></a> 233        "&lt;value type='string' name='methodName' desc='name of the method to be executed'/&gt;"
+<a id='L234' name='L234'></a> 234        "&lt;value type='array' name='params' desc='an array representing the params to a method. sub-elements should match method signature'/&gt;"
+<a id='L235' name='L235'></a> 235       "&lt;/value&gt;"
+<a id='L236' name='L236'></a> 236      "&lt;/value&gt;"
+<a id='L237' name='L237'></a> 237     "&lt;/params&gt;"
+<a id='L238' name='L238'></a> 238     "&lt;returns&gt;"
+<a id='L239' name='L239'></a> 239      "&lt;value type='array' desc='an array of method responses'&gt;"
+<a id='L240' name='L240'></a> 240       "&lt;value type='array' desc='an array containing a single value, which is the method&amp;apos;s response'/&gt;"
+<a id='L241' name='L241'></a> 241      "&lt;/value&gt;"
+<a id='L242' name='L242'></a> 242     "&lt;/returns&gt;"
+<a id='L243' name='L243'></a> 243    "&lt;/signature&gt;"
+<a id='L244' name='L244'></a> 244   "&lt;/signatures&gt;"
+<a id='L245' name='L245'></a> 245   "&lt;see&gt;"
+<a id='L246' name='L246'></a> 246    "&lt;item name='system.listMethods' /&gt;"
+<a id='L247' name='L247'></a> 247    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L248' name='L248'></a> 248    "&lt;item name='system.describeMethods' /&gt;"
+<a id='L249' name='L249'></a> 249   "&lt;/see&gt;"
+<a id='L250' name='L250'></a> 250   "&lt;example/&gt;"
+<a id='L251' name='L251'></a> 251   "&lt;error/&gt;"
+<a id='L252' name='L252'></a> 252   "&lt;note/&gt;"
+<a id='L253' name='L253'></a> 253   "&lt;bug/&gt;"
+<a id='L254' name='L254'></a> 254   "&lt;todo/&gt;"
+<a id='L255' name='L255'></a> 255  "&lt;/methodDescription&gt;"
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257  "&lt;!-- system.getCapabilities --&gt;"
+<a id='L258' name='L258'></a> 258  "&lt;methodDescription name='system.getCapabilities'&gt;"
+<a id='L259' name='L259'></a> 259   "&lt;author&gt;Dan Libby&lt;/author&gt;"
+<a id='L260' name='L260'></a> 260   "&lt;purpose&gt;returns a list of capabilities supported by this server&lt;/purpose&gt;"
+<a id='L261' name='L261'></a> 261   "&lt;version&gt;1.0&lt;/version&gt;"
+<a id='L262' name='L262'></a> 262   "&lt;notes&gt;&lt;item&gt;spec url: http://groups.yahoo.com/group/xml-rpc/message/2897&lt;/item&gt;&lt;/notes&gt;"
+<a id='L263' name='L263'></a> 263   "&lt;signatures&gt;"
+<a id='L264' name='L264'></a> 264    "&lt;signature&gt;"
+<a id='L265' name='L265'></a> 265     "&lt;returns&gt;"
+<a id='L266' name='L266'></a> 266      "&lt;value type='struct' desc='list of capabilities, each with a unique key defined by the capability&amp;apos;s spec'&gt;"
+<a id='L267' name='L267'></a> 267       "&lt;value type='struct' desc='definition of a single capability'&gt;"
+<a id='L268' name='L268'></a> 268        "&lt;value type='string' name='specURL'&gt;www address of the specification defining this capability&lt;/value&gt;"
+<a id='L269' name='L269'></a> 269        "&lt;value type='int' name='specVersion'&gt;version of the spec that this server's implementation conforms to&lt;/value&gt;"
+<a id='L270' name='L270'></a> 270       "&lt;/value&gt;"
+<a id='L271' name='L271'></a> 271      "&lt;/value&gt;"
+<a id='L272' name='L272'></a> 272     "&lt;/returns&gt;"
+<a id='L273' name='L273'></a> 273    "&lt;/signature&gt;"
+<a id='L274' name='L274'></a> 274   "&lt;/signatures&gt;"
+<a id='L275' name='L275'></a> 275   "&lt;see&gt;"
+<a id='L276' name='L276'></a> 276    "&lt;item name='system.listMethods' /&gt;"
+<a id='L277' name='L277'></a> 277    "&lt;item name='system.methodHelp' /&gt;"
+<a id='L278' name='L278'></a> 278    "&lt;item name='system.describeMethods' /&gt;"
+<a id='L279' name='L279'></a> 279   "&lt;/see&gt;"
+<a id='L280' name='L280'></a> 280   "&lt;example/&gt;"
+<a id='L281' name='L281'></a> 281   "&lt;error/&gt;"
+<a id='L282' name='L282'></a> 282   "&lt;note/&gt;"
+<a id='L283' name='L283'></a> 283   "&lt;bug/&gt;"
+<a id='L284' name='L284'></a> 284   "&lt;todo/&gt;"
+<a id='L285' name='L285'></a> 285  "&lt;/methodDescription&gt;"
+<a id='L286' name='L286'></a> 286 
+<a id='L287' name='L287'></a> 287  "&lt;/methodList&gt;"
+<a id='L288' name='L288'></a> 288 "&lt;/introspection&gt;";
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290 
+<a id='L291' name='L291'></a> 291 <em class='comment'>/* forward declarations for static (non public, non api) funcs */</em>
+<a id='L292' name='L292'></a> 292 <strong class='reserved'>static</strong> <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../S/1222.html#L315' title='Defined at 315 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_system_multicall_cb</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1233.html#L287' title='Defined at 287 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_REQUEST</a> <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <strong class='reserved'>void</strong>* <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>);
+<a id='L293' name='L293'></a> 293 <strong class='reserved'>static</strong> <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../S/1222.html#L348' title='Defined at 348 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_system_get_capabilities_cb</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1233.html#L287' title='Defined at 287 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_REQUEST</a> <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <strong class='reserved'>void</strong>* <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>);
+<a id='L294' name='L294'></a> 294 
+<a id='L295' name='L295'></a> 295 <em class='comment'>/*-*******************</em>
+<a id='L296' name='L296'></a> 296 <em class='comment'>* System Methods API *</em>
+<a id='L297' name='L297'></a> 297 <em class='comment'>*********************/</em>
+<a id='L298' name='L298'></a> 298 
+<a id='L299' name='L299'></a> 299 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1222.html#L312' title='Referred from 312 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_lazy_doc_methods_cb</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <strong class='reserved'>void</strong>* <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>) <em class='brace'>{</em>
+<a id='L300' name='L300'></a> 300    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40931.html' title='Multiple used in 8 places.'>xDesc</a> = <a href='../S/1234.html#L458' title='Defined at 458 in ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c.'>XMLRPC_IntrospectionCreateDescription</a>(<a href='../Y/41640.html' title='Multiple used in 2 places.'>xsm_introspection_xml</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L301' name='L301'></a> 301    <a href='../S/1234.html#L500' title='Defined at 500 in ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c.'>XMLRPC_ServerAddIntrospectionData</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../Y/40931.html' title='Multiple used in 8 places.'>xDesc</a>);
+<a id='L302' name='L302'></a> 302    <a href='../S/1232.html#L1444' title='Defined at 1444 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CleanupValue</a>(<a href='../Y/40931.html' title='Multiple used in 8 places.'>xDesc</a>);
+<a id='L303' name='L303'></a> 303 <em class='brace'>}</em>
+<a id='L304' name='L304'></a> 304 
+<a id='L305' name='L305'></a> 305 <strong class='reserved'>void</strong> <a href='../R/29814.html' title='Multiple referred from 2 places.'>xsm_register</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>) <em class='brace'>{</em>
+<a id='L306' name='L306'></a> 306    <a href='../S/1234.html#L279' title='Defined at 279 in ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c.'>xi_register_system_methods</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>);
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308    <a href='../S/1232.html#L2439' title='Defined at 2439 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_ServerRegisterMethod</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1223.html#L60' title='Defined at 60 in ext/xmlrpc/libxmlrpc/system_methods_private.h.'>xsm_token_system_multicall</a>, <a href='../S/1222.html#L315' title='Defined at 315 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_system_multicall_cb</a>);
+<a id='L309' name='L309'></a> 309    <a href='../S/1232.html#L2439' title='Defined at 2439 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_ServerRegisterMethod</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1223.html#L61' title='Defined at 61 in ext/xmlrpc/libxmlrpc/system_methods_private.h.'>xsm_token_system_get_capabilities</a>, <a href='../S/1222.html#L348' title='Defined at 348 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_system_get_capabilities_cb</a>);
+<a id='L310' name='L310'></a> 310 
+<a id='L311' name='L311'></a> 311    <em class='comment'>/* callback for documentation generation should it be requested */</em>
+<a id='L312' name='L312'></a> 312    <a href='../S/1234.html#L577' title='Defined at 577 in ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c.'>XMLRPC_ServerRegisterIntrospectionCallback</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1222.html#L299' title='Defined at 299 in ext/xmlrpc/libxmlrpc/system_methods.c.'>xsm_lazy_doc_methods_cb</a>);
+<a id='L313' name='L313'></a> 313 <em class='brace'>}</em>
+<a id='L314' name='L314'></a> 314 
+<a id='L315' name='L315'></a> 315 <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../R/29816.html' title='Multiple referred from 2 places.'>xsm_system_multicall_cb</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1233.html#L287' title='Defined at 287 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_REQUEST</a> <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <strong class='reserved'>void</strong>* <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>) <em class='brace'>{</em>
+<a id='L316' name='L316'></a> 316    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40894.html' title='Multiple used in 4 places.'>xArray</a> = <a href='../S/1232.html#L2165' title='Defined at 2165 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_VectorRewind</a>(<a href='../S/1232.html#L512' title='Defined at 512 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestGetData</a>(<a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>));
+<a id='L317' name='L317'></a> 317    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a> = <a href='../S/1232.html#L1096' title='Defined at 1096 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CreateVector</a>(0, <a href='../S/1233.html#L96' title='Defined at 96 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_vector_array</a>);
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319    <strong class='reserved'>if</strong> (<a href='../Y/40894.html' title='Multiple used in 4 places.'>xArray</a>) <em class='brace'>{</em>
+<a id='L320' name='L320'></a> 320       <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40969.html' title='Multiple used in 5 places.'>xMethodIter</a> = <a href='../S/1232.html#L2165' title='Defined at 2165 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_VectorRewind</a>(<a href='../Y/40894.html' title='Multiple used in 4 places.'>xArray</a>);
+<a id='L321' name='L321'></a> 321 
+<a id='L322' name='L322'></a> 322       <strong class='reserved'>while</strong> (<a href='../Y/40969.html' title='Multiple used in 5 places.'>xMethodIter</a>) <em class='brace'>{</em>
+<a id='L323' name='L323'></a> 323          <a href='../S/1233.html#L287' title='Defined at 287 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_REQUEST</a> <a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a> = <a href='../S/1232.html#L310' title='Defined at 310 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestNew</a>();
+<a id='L324' name='L324'></a> 324          <strong class='reserved'>if</strong>(<a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>) <em class='brace'>{</em>
+<a id='L325' name='L325'></a> 325             <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/26522.html' title='Multiple used in 14 places.'>methodName</a> = <a href='../S/1233.html#L437' title='Defined at 437 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorGetStringWithID</a>(<a href='../Y/40969.html' title='Multiple used in 5 places.'>xMethodIter</a>, "methodName");
+<a id='L326' name='L326'></a> 326             <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/31166.html' title='Multiple used in 499 places.'>params</a> = <a href='../S/1233.html#L436' title='Defined at 436 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorGetValueWithID</a>(<a href='../Y/40969.html' title='Multiple used in 5 places.'>xMethodIter</a>, "params");
+<a id='L327' name='L327'></a> 327 
+<a id='L328' name='L328'></a> 328             <strong class='reserved'>if</strong>(<a href='../Y/26522.html' title='Multiple used in 14 places.'>methodName</a> &amp;&amp; <a href='../Y/31166.html' title='Multiple used in 499 places.'>params</a>) <em class='brace'>{</em>
+<a id='L329' name='L329'></a> 329                <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40999.html' title='Multiple used in 3 places.'>xRandomArray</a> = <a href='../S/1232.html#L1096' title='Defined at 1096 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CreateVector</a>(0, <a href='../S/1233.html#L96' title='Defined at 96 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_vector_array</a>);
+<a id='L330' name='L330'></a> 330                <a href='../S/1232.html#L368' title='Defined at 368 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestSetMethodName</a>(<a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>, <a href='../Y/26522.html' title='Multiple used in 14 places.'>methodName</a>);
+<a id='L331' name='L331'></a> 331                <a href='../S/1232.html#L480' title='Defined at 480 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestSetData</a>(<a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>, <a href='../Y/31166.html' title='Multiple used in 499 places.'>params</a>);
+<a id='L332' name='L332'></a> 332                <a href='../S/1232.html#L419' title='Defined at 419 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestSetRequestType</a>(<a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>, <a href='../S/1233.html#L141' title='Defined at 141 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_request_call</a>);
+<a id='L333' name='L333'></a> 333 
+<a id='L334' name='L334'></a> 334                <a href='../S/1232.html#L1155' title='Defined at 1155 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_AddValueToVector</a>(<a href='../Y/40999.html' title='Multiple used in 3 places.'>xRandomArray</a>,
+<a id='L335' name='L335'></a> 335                                        <a href='../S/1232.html#L2567' title='Defined at 2567 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_ServerCallMethod</a>(<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>, <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>));
+<a id='L336' name='L336'></a> 336 
+<a id='L337' name='L337'></a> 337                <a href='../S/1232.html#L1155' title='Defined at 1155 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_AddValueToVector</a>(<a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a>, <a href='../Y/40999.html' title='Multiple used in 3 places.'>xRandomArray</a>);
+<a id='L338' name='L338'></a> 338             <em class='brace'>}</em>
+<a id='L339' name='L339'></a> 339             <a href='../S/1232.html#L335' title='Defined at 335 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_RequestFree</a>(<a href='../S/800.html#L793' title='Defined at 793 in ext/mysqlnd/mysqlnd_structs.h.'>request</a>, 1);
+<a id='L340' name='L340'></a> 340          <em class='brace'>}</em>
+<a id='L341' name='L341'></a> 341          <a href='../Y/40969.html' title='Multiple used in 5 places.'>xMethodIter</a> = <a href='../S/1232.html#L2191' title='Defined at 2191 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_VectorNext</a>(<a href='../Y/40894.html' title='Multiple used in 4 places.'>xArray</a>);
+<a id='L342' name='L342'></a> 342       <em class='brace'>}</em>
+<a id='L343' name='L343'></a> 343    <em class='brace'>}</em>
+<a id='L344' name='L344'></a> 344    <strong class='reserved'>return</strong> <a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a>;
+<a id='L345' name='L345'></a> 345 <em class='brace'>}</em>
+<a id='L346' name='L346'></a> 346 
+<a id='L347' name='L347'></a> 347 
+<a id='L348' name='L348'></a> 348 <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../R/29815.html' title='Multiple referred from 2 places.'>xsm_system_get_capabilities_cb</a>(<a href='../S/1233.html#L288' title='Defined at 288 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_SERVER</a> <a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>, <a href='../S/1233.html#L287' title='Defined at 287 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_REQUEST</a> <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <strong class='reserved'>void</strong>* <a href='../Y/39851.html' title='Multiple used in 52 places.'>userData</a>) <em class='brace'>{</em>
+<a id='L349' name='L349'></a> 349    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a> = <a href='../S/1232.html#L1096' title='Defined at 1096 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CreateVector</a>(0, <a href='../S/1233.html#L98' title='Defined at 98 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_vector_struct</a>);
+<a id='L350' name='L350'></a> 350    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40944.html' title='Multiple used in 4 places.'>xFaults</a> = <a href='../S/1232.html#L1096' title='Defined at 1096 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CreateVector</a>("faults_interop", <a href='../S/1233.html#L98' title='Defined at 98 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_vector_struct</a>);
+<a id='L351' name='L351'></a> 351    <a href='../S/1233.html#L289' title='Defined at 289 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VALUE</a> <a href='../Y/40960.html' title='Multiple used in 4 places.'>xIntro</a> = <a href='../S/1232.html#L1096' title='Defined at 1096 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_CreateVector</a>("introspection", <a href='../S/1233.html#L98' title='Defined at 98 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>xmlrpc_vector_struct</a>);
+<a id='L352' name='L352'></a> 352 
+<a id='L353' name='L353'></a> 353    <em class='comment'>/* support for fault spec */</em>
+<a id='L354' name='L354'></a> 354    <a href='../S/1233.html#L427' title='Defined at 427 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorAppendString</a>(<a href='../Y/40944.html' title='Multiple used in 4 places.'>xFaults</a>, "specURL", "http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php", 0);
+<a id='L355' name='L355'></a> 355    <a href='../S/1233.html#L432' title='Defined at 432 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorAppendInt</a>(<a href='../Y/40944.html' title='Multiple used in 4 places.'>xFaults</a>, "specVersion", 20010516);
+<a id='L356' name='L356'></a> 356 
+<a id='L357' name='L357'></a> 357    <em class='comment'>/* support for introspection spec */</em>
+<a id='L358' name='L358'></a> 358    <a href='../S/1233.html#L427' title='Defined at 427 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorAppendString</a>(<a href='../Y/40960.html' title='Multiple used in 4 places.'>xIntro</a>, "specURL", "http://xmlrpc-epi.sourceforge.net/specs/rfc.introspection.php", 0);
+<a id='L359' name='L359'></a> 359    <a href='../S/1233.html#L432' title='Defined at 432 in ext/xmlrpc/libxmlrpc/xmlrpc.h.'>XMLRPC_VectorAppendInt</a>(<a href='../Y/40960.html' title='Multiple used in 4 places.'>xIntro</a>, "specVersion", 20010516);
+<a id='L360' name='L360'></a> 360 
+<a id='L361' name='L361'></a> 361    <a href='../S/1232.html#L1218' title='Defined at 1218 in ext/xmlrpc/libxmlrpc/xmlrpc.c.'>XMLRPC_AddValuesToVector</a>(<a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a>,
+<a id='L362' name='L362'></a> 362                             <a href='../Y/40944.html' title='Multiple used in 4 places.'>xFaults</a>,
+<a id='L363' name='L363'></a> 363                             <a href='../Y/40960.html' title='Multiple used in 4 places.'>xIntro</a>,
+<a id='L364' name='L364'></a> 364                             <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L365' name='L365'></a> 365 
+<a id='L366' name='L366'></a> 366    <strong class='reserved'>return</strong> <a href='../Y/41011.html' title='Multiple used in 66 places.'>xReturn</a>;
+<a id='L367' name='L367'></a> 367 
+<a id='L368' name='L368'></a> 368 <em class='brace'>}</em>
+<a id='L369' name='L369'></a> 369 
+<a id='L370' name='L370'></a> 370 <em class='comment'>/*-***********************</em>
+<a id='L371' name='L371'></a> 371 <em class='comment'>* End System Methods API *</em>
+<a id='L372' name='L372'></a> 372 <em class='comment'>*************************/</em>
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374 
+<a id='L375' name='L375'></a> 375 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L299'>[^]</a><a href='#L348'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

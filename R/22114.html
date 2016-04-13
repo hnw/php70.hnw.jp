@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>new_size</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1628.html#L820'>new_size</a>          820 Zend/zend_alloc.c static int zend_mm_chunk_truncate(zend_mm_heap *heap, void *addr, size_t old_size, size_t new_size)</span>
+<span class='curline'><a href='../S/1628.html#L825'>new_size</a>          825 Zend/zend_alloc.c 			return heap-&gt;storage-&gt;handlers.chunk_truncate(heap-&gt;storage, addr, old_size, new_size);</span>
+<span class='curline'><a href='../S/1628.html#L832'>new_size</a>          832 Zend/zend_alloc.c 	zend_mm_munmap((char*)addr + new_size, old_size - new_size);</span>
+<span class='curline'><a href='../S/1628.html#L839'>new_size</a>          839 Zend/zend_alloc.c static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size, size_t new_size)</span>
+<span class='curline'><a href='../S/1628.html#L844'>new_size</a>          844 Zend/zend_alloc.c 			return heap-&gt;storage-&gt;handlers.chunk_extend(heap-&gt;storage, addr, old_size, new_size);</span>
+<span class='curline'><a href='../S/1628.html#L851'>new_size</a>          851 Zend/zend_alloc.c 	return (zend_mm_mmap_fixed((char*)addr + old_size, new_size - old_size) != NULL);</span>
+<span class='curline'><a href='../S/1628.html#L1452'>new_size</a>         1452 Zend/zend_alloc.c 	size_t new_size;</span>
+<span class='curline'><a href='../S/1628.html#L1478'>new_size</a>         1478 Zend/zend_alloc.c 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));</span>
+<span class='curline'><a href='../S/1628.html#L1480'>new_size</a>         1480 Zend/zend_alloc.c 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1482'>new_size</a>         1482 Zend/zend_alloc.c 			if (new_size == old_size) {</span>
+<span class='curline'><a href='../S/1628.html#L1484'>new_size</a>         1484 Zend/zend_alloc.c 				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1486'>new_size</a>         1486 Zend/zend_alloc.c 				zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1489'>new_size</a>         1489 Zend/zend_alloc.c 			} else if (new_size &lt; old_size) {</span>
+<span class='curline'><a href='../S/1628.html#L1491'>new_size</a>         1491 Zend/zend_alloc.c 				if (zend_mm_chunk_truncate(heap, ptr, old_size, new_size)) {</span>
+<span class='curline'><a href='../S/1628.html#L1493'>new_size</a>         1493 Zend/zend_alloc.c 					heap-&gt;real_size -= old_size - new_size;</span>
+<span class='curline'><a href='../S/1628.html#L1496'>new_size</a>         1496 Zend/zend_alloc.c 					heap-&gt;size -= old_size - new_size;</span>
+<span class='curline'><a href='../S/1628.html#L1499'>new_size</a>         1499 Zend/zend_alloc.c 					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1501'>new_size</a>         1501 Zend/zend_alloc.c 					zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1507'>new_size</a>         1507 Zend/zend_alloc.c 				if (UNEXPECTED(heap-&gt;real_size + (new_size - old_size) &gt; heap-&gt;limit)) {</span>
+<span class='curline'><a href='../S/1628.html#L1508'>new_size</a>         1508 Zend/zend_alloc.c 					if (zend_mm_gc(heap) &amp;&amp; heap-&gt;real_size + (new_size - old_size) &lt;= heap-&gt;limit) {</span>
+<span class='curline'><a href='../S/1628.html#L1521'>new_size</a>         1521 Zend/zend_alloc.c 				if (zend_mm_chunk_extend(heap, ptr, old_size, new_size)) {</span>
+<span class='curline'><a href='../S/1628.html#L1523'>new_size</a>         1523 Zend/zend_alloc.c 					heap-&gt;real_size += new_size - old_size;</span>
+<span class='curline'><a href='../S/1628.html#L1527'>new_size</a>         1527 Zend/zend_alloc.c 					heap-&gt;size += new_size - old_size;</span>
+<span class='curline'><a href='../S/1628.html#L1531'>new_size</a>         1531 Zend/zend_alloc.c 					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1533'>new_size</a>         1533 Zend/zend_alloc.c 					zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1571'>new_size</a>         1571 Zend/zend_alloc.c 				new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1572'>new_size</a>         1572 Zend/zend_alloc.c 				if (new_size == old_size) {</span>
+<span class='curline'><a href='../S/1628.html#L1582'>new_size</a>         1582 Zend/zend_alloc.c 				} else if (new_size &lt; old_size) {</span>
+<span class='curline'><a href='../S/1628.html#L1584'>new_size</a>         1584 Zend/zend_alloc.c 					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1585'>new_size</a>         1585 Zend/zend_alloc.c 					int rest_pages_count = (int)((old_size - new_size) / ZEND_MM_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1603'>new_size</a>         1603 Zend/zend_alloc.c 					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1611'>new_size</a>         1611 Zend/zend_alloc.c 							size_t size = heap-&gt;size + (new_size - old_size);</span>
+<span class='curline'><a href='../S/1628.html#L1746'>new_size</a>         1746 Zend/zend_alloc.c 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));</span>
+<span class='curline'><a href='../S/1628.html#L1748'>new_size</a>         1748 Zend/zend_alloc.c 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1753'>new_size</a>         1753 Zend/zend_alloc.c 	if (UNEXPECTED(heap-&gt;real_size + new_size &gt; heap-&gt;limit)) {</span>
+<span class='curline'><a href='../S/1628.html#L1754'>new_size</a>         1754 Zend/zend_alloc.c 		if (zend_mm_gc(heap) &amp;&amp; heap-&gt;real_size + new_size &lt;= heap-&gt;limit) {</span>
+<span class='curline'><a href='../S/1628.html#L1766'>new_size</a>         1766 Zend/zend_alloc.c 	ptr = zend_mm_chunk_alloc(heap, new_size, ZEND_MM_CHUNK_SIZE);</span>
+<span class='curline'><a href='../S/1628.html#L1770'>new_size</a>         1770 Zend/zend_alloc.c 		    (ptr = zend_mm_chunk_alloc(heap, new_size, ZEND_MM_CHUNK_SIZE)) != NULL) {</span>
+<span class='curline'><a href='../S/1628.html#L1784'>new_size</a>         1784 Zend/zend_alloc.c 	zend_mm_add_huge_block(heap, ptr, new_size, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1786'>new_size</a>         1786 Zend/zend_alloc.c 	zend_mm_add_huge_block(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/1628.html#L1790'>new_size</a>         1790 Zend/zend_alloc.c 		size_t size = heap-&gt;real_size + new_size;</span>
+<span class='curline'><a href='../S/1628.html#L1796'>new_size</a>         1796 Zend/zend_alloc.c 		size_t size = heap-&gt;size + new_size;</span>
+<span class='curline'><a href='../S/1628.html#L1802'>new_size</a>         1802 Zend/zend_alloc.c 	heap-&gt;real_size += new_size;</span>
+<span class='curline'><a href='../S/1629.html#L292'>new_size</a>          292 Zend/zend_alloc.h typedef int   (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);</span>
+<span class='curline'><a href='../S/1629.html#L293'>new_size</a>          293 Zend/zend_alloc.h typedef int   (*zend_mm_chunk_extend_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);</span>
+<span class='curline'><a href='../S/1634.html#L35'>new_size</a>           35 Zend/zend_ast.c static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size) {</span>
+<span class='curline'><a href='../S/1634.html#L36'>new_size</a>           36 Zend/zend_ast.c 	void *new = zend_ast_alloc(new_size);</span>
+<span class='curline'><a href='../S/156.html#L2427'>new_size</a>         2427 ext/exif/exif.c 	size_t            new_size, new_move, new_value;</span>
+<span class='curline'><a href='../S/156.html#L2451'>new_size</a>         2451 ext/exif/exif.c 			new_size  = 8 + 2 + info_list-&gt;count * 12 + 4;</span>
+<span class='curline'><a href='../S/156.html#L2453'>new_size</a>         2453 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: size of signature + directory(%d): 0x%02X", info_list-&gt;count, new_size);</span>
+<span class='curline'><a href='../S/156.html#L2455'>new_size</a>         2455 ext/exif/exif.c 			new_value= new_size; /* offset for ifd values outside ifd directory */</span>
+<span class='curline'><a href='../S/156.html#L2460'>new_size</a>         2460 ext/exif/exif.c 					new_size += byte_count;</span>
+<span class='curline'><a href='../S/156.html#L2463'>new_size</a>         2463 ext/exif/exif.c 			new_move = new_size;</span>
+<span class='curline'><a href='../S/156.html#L2464'>new_size</a>         2464 ext/exif/exif.c 			new_data = safe_erealloc(ImageInfo-&gt;Thumbnail.data, 1, ImageInfo-&gt;Thumbnail.size, new_size);</span>
+<span class='curline'><a href='../S/156.html#L2467'>new_size</a>         2467 ext/exif/exif.c 			ImageInfo-&gt;Thumbnail.size += new_size;</span>
+<span class='curline'><a href='../S/718.html#L842'>new_size</a>          842 ext/mbstring/oniguruma/regenc.c resize_property_list(int new_size, const OnigCodePoint*** plist, int* psize)</span>
+<span class='curline'><a href='../S/718.html#L847'>new_size</a>          847 ext/mbstring/oniguruma/regenc.c   size = sizeof(OnigCodePoint*) * new_size;</span>
+<span class='curline'><a href='../S/718.html#L858'>new_size</a>          858 ext/mbstring/oniguruma/regenc.c   *psize = new_size;</span>
+<span class='curline'><a href='../S/718.html#L873'>new_size</a>          873 ext/mbstring/oniguruma/regenc.c     int new_size = (*psize == 0 ? PROP_INIT_SIZE : *psize * 2);</span>
+<span class='curline'><a href='../S/718.html#L874'>new_size</a>          874 ext/mbstring/oniguruma/regenc.c     r = resize_property_list(new_size, plist, psize);</span>
+<span class='curline'><a href='../S/732.html#L155'>new_size</a>          155 ext/mbstring/oniguruma/st.c     size = new_size(size);	/* round up to prime number */</span>
+<span class='curline'><a href='../S/732.html#L321'>new_size</a>          321 ext/mbstring/oniguruma/st.c     new_num_bins = new_size(old_num_bins+1);</span>
+<span class='curline'><a href='../S/770.html#L243'>new_size</a>          243 ext/mysqlnd/mysqlnd_alloc.c void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L259'>new_size</a>          259 ext/mysqlnd/mysqlnd_alloc.c 	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu, new_size=%lu", ptr, old_size, new_size);</span>
+<span class='curline'><a href='../S/770.html#L265'>new_size</a>          265 ext/mysqlnd/mysqlnd_alloc.c 		ret = _erealloc(REAL_PTR(ptr), REAL_SIZE(new_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);</span>
+<span class='curline'><a href='../S/770.html#L275'>new_size</a>          275 ext/mysqlnd/mysqlnd_alloc.c 		*(size_t *) ret = new_size;</span>
+<span class='curline'><a href='../S/770.html#L276'>new_size</a>          276 ext/mysqlnd/mysqlnd_alloc.c 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMOUNT, new_size);</span>
+<span class='curline'><a href='../S/770.html#L284'>new_size</a>          284 ext/mysqlnd/mysqlnd_alloc.c void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L300'>new_size</a>          300 ext/mysqlnd/mysqlnd_alloc.c 	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu new_size=%lu   persistent=%u", ptr, old_size, new_size, persistent);</span>
+<span class='curline'><a href='../S/770.html#L306'>new_size</a>          306 ext/mysqlnd/mysqlnd_alloc.c 		ret = perealloc(REAL_PTR(ptr), REAL_SIZE(new_size), persistent);</span>
+<span class='curline'><a href='../S/770.html#L319'>new_size</a>          319 ext/mysqlnd/mysqlnd_alloc.c 		*(size_t *) ret = new_size;</span>
+<span class='curline'><a href='../S/770.html#L320'>new_size</a>          320 ext/mysqlnd/mysqlnd_alloc.c 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(s1, 1, s2, new_size);</span>
+<span class='curline'><a href='../S/770.html#L469'>new_size</a>          469 ext/mysqlnd/mysqlnd_alloc.c void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L484'>new_size</a>          484 ext/mysqlnd/mysqlnd_alloc.c 	TRACE_ALLOC_INF_FMT("ptr=%p new_size=%lu ", new_size, ptr);</span>
+<span class='curline'><a href='../S/770.html#L491'>new_size</a>          491 ext/mysqlnd/mysqlnd_alloc.c 		ret = realloc(REAL_PTR(ptr), REAL_SIZE(new_size));</span>
+<span class='curline'><a href='../S/770.html#L502'>new_size</a>          502 ext/mysqlnd/mysqlnd_alloc.c 		*(size_t *) ret = new_size;</span>
+<span class='curline'><a href='../S/770.html#L503'>new_size</a>          503 ext/mysqlnd/mysqlnd_alloc.c 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_REALLOC_COUNT, 1, STAT_MEM_REALLOC_AMOUNT, new_size);</span>
+<span class='curline'><a href='../S/770.html#L679'>new_size</a>          679 ext/mysqlnd/mysqlnd_alloc.c static void * mysqlnd_zend_mm_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L681'>new_size</a>          681 ext/mysqlnd/mysqlnd_alloc.c 	return erealloc(ptr, new_size);</span>
+<span class='curline'><a href='../S/770.html#L687'>new_size</a>          687 ext/mysqlnd/mysqlnd_alloc.c static void * mysqlnd_zend_mm_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L689'>new_size</a>          689 ext/mysqlnd/mysqlnd_alloc.c 	return perealloc(ptr, new_size, persistent);</span>
+<span class='curline'><a href='../S/770.html#L727'>new_size</a>          727 ext/mysqlnd/mysqlnd_alloc.c static void * mysqlnd_zend_mm_realloc(void * ptr, size_t new_size MYSQLND_MEM_D)</span>
+<span class='curline'><a href='../S/770.html#L729'>new_size</a>          729 ext/mysqlnd/mysqlnd_alloc.c 	return realloc(ptr, new_size);</span>
+<span class='curline'><a href='../S/771.html#L38'>new_size</a>           38 ext/mysqlnd/mysqlnd_alloc.h 	void *	(*m_erealloc)(void *ptr, size_t new_size MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L39'>new_size</a>           39 ext/mysqlnd/mysqlnd_alloc.h 	void *	(*m_perealloc)(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L44'>new_size</a>           44 ext/mysqlnd/mysqlnd_alloc.h 	void *	(*m_realloc)(void *ptr, size_t new_size MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L59'>new_size</a>           59 ext/mysqlnd/mysqlnd_alloc.h PHPAPI void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L60'>new_size</a>           60 ext/mysqlnd/mysqlnd_alloc.h PHPAPI void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L65'>new_size</a>           65 ext/mysqlnd/mysqlnd_alloc.h PHPAPI void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);</span>
+<span class='curline'><a href='../S/771.html#L77'>new_size</a>           77 ext/mysqlnd/mysqlnd_alloc.h #define mnd_erealloc(ptr, new_size)		mysqlnd_allocator.m_erealloc((ptr), (new_size) MYSQLND_MEM_C)</span>
+<span class='curline'><a href='../S/771.html#L78'>new_size</a>           78 ext/mysqlnd/mysqlnd_alloc.h #define mnd_perealloc(ptr, new_size, p)	mysqlnd_allocator.m_perealloc((ptr), (new_size), (p) MYSQLND_MEM_C)</span>
+<span class='curline'><a href='../S/771.html#L83'>new_size</a>           83 ext/mysqlnd/mysqlnd_alloc.h #define mnd_realloc(ptr, new_size)		mysqlnd_allocator.m_realloc((ptr), (new_size) MYSQLND_MEM_C)</span>
+<span class='curline'><a href='../S/1054.html#L24905'>new_size</a>         24905 ext/sqlite3/libsqlite/sqlite3.c static int rehash(Hash *pH, unsigned int new_size){</span>
+<span class='curline'><a href='../S/1054.html#L24910'>new_size</a>         24910 ext/sqlite3/libsqlite/sqlite3.c   if( new_size*sizeof(struct _ht)&gt;SQLITE_MALLOC_SOFT_LIMIT ){</span>
+<span class='curline'><a href='../S/1054.html#L24911'>new_size</a>         24911 ext/sqlite3/libsqlite/sqlite3.c     new_size = SQLITE_MALLOC_SOFT_LIMIT/sizeof(struct _ht);</span>
+<span class='curline'><a href='../S/1054.html#L24913'>new_size</a>         24913 ext/sqlite3/libsqlite/sqlite3.c   if( new_size==pH-&gt;htsize ) return 0;</span>
+<span class='curline'><a href='../S/1054.html#L24925'>new_size</a>         24925 ext/sqlite3/libsqlite/sqlite3.c   new_ht = (struct _ht *)sqlite3Malloc( new_size*sizeof(struct _ht) );</span>
+<span class='curline'><a href='../S/1054.html#L24931'>new_size</a>         24931 ext/sqlite3/libsqlite/sqlite3.c   pH-&gt;htsize = new_size = sqlite3MallocSize(new_ht)/sizeof(struct _ht);</span>
+<span class='curline'><a href='../S/1054.html#L24932'>new_size</a>         24932 ext/sqlite3/libsqlite/sqlite3.c   memset(new_ht, 0, new_size*sizeof(struct _ht));</span>
+<span class='curline'><a href='../S/1054.html#L24934'>new_size</a>         24934 ext/sqlite3/libsqlite/sqlite3.c     unsigned int h = strHash(elem-&gt;pKey) % new_size;</span>
+<span class='curline'><a href='../S/1054.html#L140920'>new_size</a>         140920 ext/sqlite3/libsqlite/sqlite3.c static int fts3Rehash(Fts3Hash *pH, int new_size){</span>
+<span class='curline'><a href='../S/1054.html#L140925'>new_size</a>         140925 ext/sqlite3/libsqlite/sqlite3.c   assert( (new_size &amp; (new_size-1))==0 );</span>
+<span class='curline'><a href='../S/1054.html#L140926'>new_size</a>         140926 ext/sqlite3/libsqlite/sqlite3.c   new_ht = (struct _fts3ht *)fts3HashMalloc( new_size*sizeof(struct _fts3ht) );</span>
+<span class='curline'><a href='../S/1054.html#L140930'>new_size</a>         140930 ext/sqlite3/libsqlite/sqlite3.c   pH-&gt;htsize = new_size;</span>
+<span class='curline'><a href='../S/1054.html#L140933'>new_size</a>         140933 ext/sqlite3/libsqlite/sqlite3.c     int h = (*xHash)(elem-&gt;pKey, elem-&gt;nKey) &amp; (new_size-1);</span>
+<span class='curline'><a href='../S/1106.html#L1104'>new_size</a>         1104 ext/standard/html.c 	size_t new_size = TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen);</span>
+<span class='curline'><a href='../S/1106.html#L1114'>new_size</a>         1114 ext/standard/html.c 	if (oldlen &gt; new_size) {</span>
+<span class='curline'><a href='../S/1106.html#L1120'>new_size</a>         1120 ext/standard/html.c 	ret = zend_string_alloc(new_size, 0);</span>
+<span class='curline'><a href='../S/1426.html#L841'>new_size</a>          841 main/streams/plain_wrapper.c 					ptrdiff_t new_size = *(ptrdiff_t*)ptrparam;</span>
+<span class='curline'><a href='../S/1426.html#L842'>new_size</a>          842 main/streams/plain_wrapper.c 					if (new_size &lt; 0) {</span>
+<span class='curline'><a href='../S/1426.html#L845'>new_size</a>          845 main/streams/plain_wrapper.c 					return ftruncate(fd, new_size) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;</span>
+<span class='curline'><a href='../S/1429.html#L996'>new_size</a>          996 main/streams/userspace.c 			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;</span>
+<span class='curline'><a href='../S/1429.html#L997'>new_size</a>          997 main/streams/userspace.c 			if (new_size &gt;= 0 &amp;&amp; new_size &lt;= (ptrdiff_t)LONG_MAX) {</span>
+<span class='curline'><a href='../S/1429.html#L998'>new_size</a>          998 main/streams/userspace.c 				ZVAL_LONG(&amp;args[0], (zend_long)new_size);</span>
+</pre>
+</body>
+</html>

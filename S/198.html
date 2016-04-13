@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/gd/gdcache.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1765.html'>gd</a>/gdcache.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/324.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * $Id$</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> *</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * Caches of pointers to user structs in which the least-recently-used</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * element is replaced in the event of a cache miss after the cache has</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * reached a given size.</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> *</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * John Ellson  (ellson@lucent.com)  Oct 31, 1997</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> *</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * Test this with:</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> *               gcc -o gdcache -g -Wall -DTEST gdcache.c</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> *</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * The cache is implemented by a singly-linked list of elements</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * each containing a pointer to a user struct that is being managed by</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> * the cache.</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> *</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * The head structure has a pointer to the most-recently-used</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * element, and elements are moved to this position in the list each</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * time they are used.  The head also contains pointers to three</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * user defined functions:</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> *              - a function to test if a cached userdata matches some keydata</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *              - a function to provide a new userdata struct to the cache</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *          if there has been a cache miss.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> *              - a function to release a userdata struct when it is</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> *          no longer being managed by the cache</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> *</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * In the event of a cache miss the cache is allowed to grow up to</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * a specified maximum size.  After the maximum size is reached then</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * the least-recently-used element is discarded to make room for the</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * new.  The most-recently-returned value is always left at the</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * beginning of the list after retrieval.</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> *</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * In the current implementation the cache is traversed by a linear</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * search from most-recent to least-recent.  This linear search</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * probably limits the usefulness of this implementation to cache</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * sizes of a few tens of elements.</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> */</em>
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <em class='comment'>/*********************************************************/</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'>/* header                                                */</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'>/*********************************************************/</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#if</em> (!<strong class='reserved'>defined</strong>(<a href='../Y/7799.html' title='Multiple used in 7 places.'>_OSD_POSIX</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../Y/7870.html' title='Multiple used in 11 places.'>__FreeBSD__</a>)) &amp;&amp; <a href='../Y/2904.html' title='Multiple used in 3 places.'>HAVE_MALLOC_H</a>
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#include</em> &lt;malloc.h&gt;
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#else</em>
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#include</em> &lt;stdlib.h&gt; <em class='comment'>/* BS2000/OSD defines malloc() &amp; friends in stdlib.h */</em>
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#endif</em>
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#ifndef</em> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#define</em> <a href='../R/5152.html' title='Multiple referred from 26476 places.'>NULL</a> (<strong class='reserved'>void</strong> *)0
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#endif</em>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <em class='comment'>/* user defined function templates */</em>
+<a id='L53' name='L53'></a>  53 <strong class='reserved'>typedef</strong> <strong class='reserved'>int</strong> (*<a href='../Y/18862.html' title='Multiple used in 8 places.'>gdCacheTestFn_t</a>)(<strong class='reserved'>void</strong> *<a href='../Y/39905.html' title='Multiple used in 52 places.'>userdata</a>, <strong class='reserved'>void</strong> *<a href='../Y/24483.html' title='Multiple used in 12 places.'>keydata</a>);
+<a id='L54' name='L54'></a>  54 <strong class='reserved'>typedef</strong> <strong class='reserved'>void</strong> *(*<a href='../Y/18858.html' title='Multiple used in 8 places.'>gdCacheFetchFn_t</a>)(<strong class='reserved'>char</strong> **<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <strong class='reserved'>void</strong> *<a href='../Y/24483.html' title='Multiple used in 12 places.'>keydata</a>);
+<a id='L55' name='L55'></a>  55 <strong class='reserved'>typedef</strong> <strong class='reserved'>void</strong> (*<a href='../Y/18860.html' title='Multiple used in 8 places.'>gdCacheReleaseFn_t</a>)(<strong class='reserved'>void</strong> *<a href='../Y/39905.html' title='Multiple used in 52 places.'>userdata</a>);
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <em class='comment'>/* element structure */</em>
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../D/22667.html' title='Multiple defined in 2 places.'>gdCache_element_s</a> <a href='../D/22668.html' title='Multiple defined in 2 places.'>gdCache_element_t</a>;
+<a id='L59' name='L59'></a>  59 <strong class='reserved'>struct</strong> <a href='../R/19806.html' title='Multiple referred from 2 places.'>gdCache_element_s</a> <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60         <a href='../D/22668.html' title='Multiple defined in 2 places.'>gdCache_element_t</a>       *<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>void</strong>                    *<a href='../Y/39905.html' title='Multiple used in 52 places.'>userdata</a>;
+<a id='L62' name='L62'></a>  62 <em class='brace'>}</em>;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <em class='comment'>/* head structure */</em>
+<a id='L65' name='L65'></a>  65 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../D/22669.html' title='Multiple defined in 2 places.'>gdCache_head_s</a> <a href='../R/19809.html' title='Multiple referred from 24 places.'>gdCache_head_t</a>;
+<a id='L66' name='L66'></a>  66 <strong class='reserved'>struct</strong> <a href='../R/19808.html' title='Multiple referred from 2 places.'>gdCache_head_s</a> <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67         <a href='../D/22668.html' title='Multiple defined in 2 places.'>gdCache_element_t</a>       *<a href='../Y/26908.html' title='Multiple used in 16 places.'>mru</a>;
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>int</strong>                                     <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>char</strong>                            *<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L70' name='L70'></a>  70         <a href='../Y/18862.html' title='Multiple used in 8 places.'>gdCacheTestFn_t</a>         <a href='../Y/18861.html' title='Multiple used in 10 places.'>gdCacheTest</a>;
+<a id='L71' name='L71'></a>  71         <a href='../Y/18858.html' title='Multiple used in 8 places.'>gdCacheFetchFn_t</a>        <a href='../Y/18857.html' title='Multiple used in 10 places.'>gdCacheFetch</a>;
+<a id='L72' name='L72'></a>  72         <a href='../Y/18860.html' title='Multiple used in 8 places.'>gdCacheReleaseFn_t</a>      <a href='../Y/18859.html' title='Multiple used in 12 places.'>gdCacheRelease</a>;
+<a id='L73' name='L73'></a>  73 <em class='brace'>}</em>;
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <em class='comment'>/* function templates */</em>
+<a id='L76' name='L76'></a>  76 <a href='../D/22670.html' title='Multiple defined in 2 places.'>gdCache_head_t</a> *
+<a id='L77' name='L77'></a>  77 <a href='../D/22664.html' title='Multiple defined in 3 places.'>gdCacheCreate</a>(
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>int</strong>                                     <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>,
+<a id='L79' name='L79'></a>  79         <a href='../Y/18862.html' title='Multiple used in 8 places.'>gdCacheTestFn_t</a>         <a href='../Y/18861.html' title='Multiple used in 10 places.'>gdCacheTest</a>,
+<a id='L80' name='L80'></a>  80         <a href='../Y/18858.html' title='Multiple used in 8 places.'>gdCacheFetchFn_t</a>        <a href='../Y/18857.html' title='Multiple used in 10 places.'>gdCacheFetch</a>,
+<a id='L81' name='L81'></a>  81         <a href='../Y/18860.html' title='Multiple used in 8 places.'>gdCacheReleaseFn_t</a>      <a href='../Y/18859.html' title='Multiple used in 12 places.'>gdCacheRelease</a> );
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>void</strong>
+<a id='L84' name='L84'></a>  84 <a href='../D/22665.html' title='Multiple defined in 3 places.'>gdCacheDelete</a>( <a href='../D/22670.html' title='Multiple defined in 2 places.'>gdCache_head_t</a> *<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> );
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86 <strong class='reserved'>void</strong> *
+<a id='L87' name='L87'></a>  87 <a href='../D/22666.html' title='Multiple defined in 3 places.'>gdCacheGet</a>( <a href='../D/22670.html' title='Multiple defined in 2 places.'>gdCache_head_t</a> *<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>, <strong class='reserved'>void</strong> *<a href='../Y/24483.html' title='Multiple used in 12 places.'>keydata</a> );
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

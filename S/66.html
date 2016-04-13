@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/date/lib/dow.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1752.html'>date</a>/<a href='../files/1753.html'>lib</a>/dow.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L30'>[^]</a><a href='#L169'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L30' title='Defined at 30.'>positive_mod</a></li>
+<li><a href='#L42' title='Defined at 42.'>century_value</a></li>
+<li><a href='#L47' title='Defined at 47.'>timelib_day_of_week_ex</a></li>
+<li><a href='#L66' title='Defined at 66.'>timelib_day_of_week</a></li>
+<li><a href='#L71' title='Defined at 71.'>timelib_iso_day_of_week</a></li>
+<li><a href='#L82' title='Defined at 82.'>timelib_day_of_year</a></li>
+<li><a href='#L87' title='Defined at 87.'>timelib_days_in_month</a></li>
+<li><a href='#L92' title='Defined at 92.'>timelib_isoweek_from_date</a></li>
+<li><a href='#L140' title='Defined at 140.'>timelib_daynr_from_weeknr</a></li>
+<li><a href='#L153' title='Defined at 153.'>timelib_valid_time</a></li>
+<li><a href='#L161' title='Defined at 161.'>timelib_valid_date</a></li>
+<li><a href='#L169' title='Defined at 169.'>main</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * The MIT License (MIT)</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> *</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * Copyright (c) 2015 Derick Rethans</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> *</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * Permission is hereby granted, free of charge, to any person obtaining a copy</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * of this software and associated documentation files (the "Software"), to deal</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * in the Software without restriction, including without limitation the rights</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * copies of the Software, and to permit persons to whom the Software is</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * furnished to do so, subject to the following conditions:</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> *</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * The above copyright notice and this permission notice shall be included in</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * all copies or substantial portions of the Software.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * THE SOFTWARE.</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> */</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='73.html'>timelib.h</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/25620.html' title='Multiple used in 2 places.'>m_table_common</a>[13] = <em class='brace'>{</em> -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 <em class='brace'>}</em>; <em class='comment'>/* 1 = jan */</em>
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/25621.html' title='Multiple used in 2 places.'>m_table_leap</a>[13] =   <em class='brace'>{</em> -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 <em class='brace'>}</em>; <em class='comment'>/* 1 = jan */</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>static</strong> <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/25562.html' title='Multiple referred from 3 places.'>positive_mod</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>)
+<a id='L31' name='L31'></a>  31 <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32         <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a>;
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34         <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> = <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> % <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>;
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>if</strong> (<a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> &lt; 0) <em class='brace'>{</em>
+<a id='L36' name='L36'></a>  36                 <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> += <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>;
+<a id='L37' name='L37'></a>  37         <em class='brace'>}</em>
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>return</strong> <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a>;
+<a id='L40' name='L40'></a>  40 <em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>static</strong> <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../S/66.html#L54' title='Referred from 54 in ext/date/lib/dow.c.'>century_value</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/24253.html' title='Multiple used in 1856 places.'>j</a>)
+<a id='L43' name='L43'></a>  43 <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>return</strong> 6 - <a href='../S/66.html#L30' title='Defined at 30 in ext/date/lib/dow.c.'>positive_mod</a>(<a href='../Y/24253.html' title='Multiple used in 1856 places.'>j</a>, 4) * 2;
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <strong class='reserved'>static</strong> <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28576.html' title='Multiple referred from 2 places.'>timelib_day_of_week_ex</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, <strong class='reserved'>int</strong> <a href='../Y/24155.html' title='Multiple used in 2 places.'>iso</a>)
+<a id='L48' name='L48'></a>  48 <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49         <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/13127.html' title='Multiple used in 694 places.'>c1</a>, <a href='../Y/41652.html' title='Multiple used in 132 places.'>y1</a>, <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>, <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a>;
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51         <em class='comment'>/* Only valid for Gregorian calendar, commented out as we don't handle</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>         * Julian calendar. We just return the 'wrong' day of week to be</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>         * consistent. */</em>
+<a id='L54' name='L54'></a>  54         <a href='../Y/13127.html' title='Multiple used in 694 places.'>c1</a> = <a href='../S/66.html#L42' title='Defined at 42 in ext/date/lib/dow.c.'>century_value</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> / 100);
+<a id='L55' name='L55'></a>  55         <a href='../Y/41652.html' title='Multiple used in 132 places.'>y1</a> = <a href='../S/66.html#L30' title='Defined at 30 in ext/date/lib/dow.c.'>positive_mod</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, 100);
+<a id='L56' name='L56'></a>  56         <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a> = <a href='../S/74.html#L311' title='Defined at 311 in ext/date/lib/timelib_structs.h.'>timelib_is_leap</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) ? <a href='../Y/25621.html' title='Multiple used in 2 places.'>m_table_leap</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] : <a href='../Y/25620.html' title='Multiple used in 2 places.'>m_table_common</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>];
+<a id='L57' name='L57'></a>  57         <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> = <a href='../S/66.html#L30' title='Defined at 30 in ext/date/lib/dow.c.'>positive_mod</a>((<a href='../Y/13127.html' title='Multiple used in 694 places.'>c1</a> + <a href='../Y/41652.html' title='Multiple used in 132 places.'>y1</a> + <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a> + (<a href='../Y/41652.html' title='Multiple used in 132 places.'>y1</a> / 4) + <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>), 7);
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>if</strong> (<a href='../Y/24155.html' title='Multiple used in 2 places.'>iso</a>) <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59                 <strong class='reserved'>if</strong> (<a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> == 0) <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60                         <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> = 7;
+<a id='L61' name='L61'></a>  61                 <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62         <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>return</strong> <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a>;
+<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28575.html' title='Multiple referred from 16 places.'>timelib_day_of_week</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L67' name='L67'></a>  67 <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>return</strong> <a href='../S/66.html#L47' title='Defined at 47 in ext/date/lib/dow.c.'>timelib_day_of_week_ex</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, 0);
+<a id='L69' name='L69'></a>  69 <em class='brace'>}</em>
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71 <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28603.html' title='Multiple referred from 2 places.'>timelib_iso_day_of_week</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L72' name='L72'></a>  72 <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73         <strong class='reserved'>return</strong> <a href='../S/66.html#L47' title='Defined at 47 in ext/date/lib/dow.c.'>timelib_day_of_week_ex</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, 1);
+<a id='L74' name='L74'></a>  74 <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76                                 <em class='comment'>/*     jan  feb  mar  apr  may  jun  jul  aug  sep  oct  nov  dec */</em>
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/14988.html' title='Multiple used in 2 places.'>d_table_common</a>[13]  = <em class='brace'>{</em>  0,   0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334 <em class='brace'>}</em>;
+<a id='L78' name='L78'></a>  78 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/14989.html' title='Multiple used in 2 places.'>d_table_leap</a>[13]    = <em class='brace'>{</em>  0,   0,  31,  60,  91, 121, 152, 182, 213, 244, 274, 305, 335 <em class='brace'>}</em>;
+<a id='L79' name='L79'></a>  79 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/26664.html' title='Multiple used in 2 places.'>ml_table_common</a>[13] = <em class='brace'>{</em>  0,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 <em class='brace'>}</em>;
+<a id='L80' name='L80'></a>  80 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/26665.html' title='Multiple used in 2 places.'>ml_table_leap</a>[13]   = <em class='brace'>{</em>  0,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 <em class='brace'>}</em>;
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28577.html' title='Multiple referred from 8 places.'>timelib_day_of_year</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L83' name='L83'></a>  83 <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>return</strong> (<a href='../S/74.html#L311' title='Defined at 311 in ext/date/lib/timelib_structs.h.'>timelib_is_leap</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) ? <a href='../Y/14989.html' title='Multiple used in 2 places.'>d_table_leap</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] : <a href='../Y/14988.html' title='Multiple used in 2 places.'>d_table_common</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>]) + <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a> - 1;
+<a id='L85' name='L85'></a>  85 <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28579.html' title='Multiple referred from 4 places.'>timelib_days_in_month</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>)
+<a id='L88' name='L88'></a>  88 <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>return</strong> <a href='../S/74.html#L311' title='Defined at 311 in ext/date/lib/timelib_structs.h.'>timelib_is_leap</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) ? <a href='../Y/26665.html' title='Multiple used in 2 places.'>ml_table_leap</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] : <a href='../Y/26664.html' title='Multiple used in 2 places.'>ml_table_common</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>];
+<a id='L90' name='L90'></a>  90 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <strong class='reserved'>void</strong> <a href='../R/28604.html' title='Multiple referred from 4 places.'>timelib_isoweek_from_date</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> *<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a>)
+<a id='L93' name='L93'></a>  93 <em class='brace'>{</em>
+<a id='L94' name='L94'></a>  94         <strong class='reserved'>int</strong> <a href='../Y/41665.html' title='Multiple used in 5 places.'>y_leap</a>, <a href='../Y/33332.html' title='Multiple used in 3 places.'>prev_y_leap</a>, <a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a>, <a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a>, <a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a>;
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96         <a href='../Y/41665.html' title='Multiple used in 5 places.'>y_leap</a> = <a href='../S/74.html#L311' title='Defined at 311 in ext/date/lib/timelib_structs.h.'>timelib_is_leap</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>);
+<a id='L97' name='L97'></a>  97         <a href='../Y/33332.html' title='Multiple used in 3 places.'>prev_y_leap</a> = <a href='../S/74.html#L311' title='Defined at 311 in ext/date/lib/timelib_structs.h.'>timelib_is_leap</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>-1);
+<a id='L98' name='L98'></a>  98         <a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a> = <a href='../S/66.html#L82' title='Defined at 82 in ext/date/lib/dow.c.'>timelib_day_of_year</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>) + 1;
+<a id='L99' name='L99'></a>  99         <strong class='reserved'>if</strong> (<a href='../Y/41665.html' title='Multiple used in 5 places.'>y_leap</a> &amp;&amp; <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &gt; 2) <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100                 <a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a>++;
+<a id='L101' name='L101'></a> 101         <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102         <a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> = <a href='../S/66.html#L66' title='Defined at 66 in ext/date/lib/dow.c.'>timelib_day_of_week</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, 1, 1);
+<a id='L103' name='L103'></a> 103         <a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a> = <a href='../S/66.html#L66' title='Defined at 66 in ext/date/lib/dow.c.'>timelib_day_of_week</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>);
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>if</strong> (<a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a> == 0) <a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a> = 7;
+<a id='L105' name='L105'></a> 105         <strong class='reserved'>if</strong> (<a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> == 0) <a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> = 7;
+<a id='L106' name='L106'></a> 106         <em class='comment'>/* Find if Y M D falls in YearNumber Y-1, WeekNumber 52 or 53 */</em>
+<a id='L107' name='L107'></a> 107         <strong class='reserved'>if</strong> (<a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a> &lt;= (8 - <a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a>) &amp;&amp; <a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> &gt; 4) <em class='brace'>{</em>
+<a id='L108' name='L108'></a> 108                 *<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a> = <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> - 1;
+<a id='L109' name='L109'></a> 109                 <strong class='reserved'>if</strong> (<a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> == 5 || (<a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> == 6 &amp;&amp; <a href='../Y/33332.html' title='Multiple used in 3 places.'>prev_y_leap</a>)) <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                         *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a> = 53;
+<a id='L111' name='L111'></a> 111                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112                         *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a> = 52;
+<a id='L113' name='L113'></a> 113                 <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 *<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a> = <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>;
+<a id='L116' name='L116'></a> 116         <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117         <em class='comment'>/* 8. Find if Y M D falls in YearNumber Y+1, WeekNumber 1 */</em>
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>if</strong> (*<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a> == <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                 <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121                 <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <a href='../Y/41665.html' title='Multiple used in 5 places.'>y_leap</a> ? 366 : 365;
+<a id='L122' name='L122'></a> 122                 <strong class='reserved'>if</strong> ((<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> - (<a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a> - <a href='../Y/41665.html' title='Multiple used in 5 places.'>y_leap</a>)) &lt; (4 - <a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a>)) <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                         *<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a> = <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> + 1;
+<a id='L124' name='L124'></a> 124                         *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a> = 1;
+<a id='L125' name='L125'></a> 125                         <strong class='reserved'>return</strong>;
+<a id='L126' name='L126'></a> 126                 <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127         <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128         <em class='comment'>/* 9. Find if Y M D falls in YearNumber Y, WeekNumber 1 through 53 */</em>
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>if</strong> (*<a href='../Y/24252.html' title='Multiple used in 11 places.'>iy</a> == <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                 <strong class='reserved'>int</strong> <a href='../Y/24253.html' title='Multiple used in 1856 places.'>j</a>;
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132                 <a href='../Y/24253.html' title='Multiple used in 1856 places.'>j</a> = <a href='../Y/16144.html' title='Multiple used in 6 places.'>doy</a> + (7 - <a href='../Y/40680.html' title='Multiple used in 26 places.'>weekday</a>) + (<a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> - 1);
+<a id='L133' name='L133'></a> 133                 *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a> = <a href='../Y/24253.html' title='Multiple used in 1856 places.'>j</a> / 7;
+<a id='L134' name='L134'></a> 134                 <strong class='reserved'>if</strong> (<a href='../Y/24260.html' title='Multiple used in 7 places.'>jan1weekday</a> &gt; 4) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                         *<a href='../Y/24250.html' title='Multiple used in 7 places.'>iw</a> -= 1;
+<a id='L136' name='L136'></a> 136                 <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137         <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 <em class='brace'>}</em>
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140 <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../R/28578.html' title='Multiple referred from 4 places.'>timelib_daynr_from_weeknr</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L141' name='L141'></a> 141 <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142         <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a>, <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a>;
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144         <em class='comment'>/* Figure out the dayofweek for y-1-1 */</em>
+<a id='L145' name='L145'></a> 145         <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> = <a href='../S/66.html#L66' title='Defined at 66 in ext/date/lib/dow.c.'>timelib_day_of_week</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, 1, 1);
+<a id='L146' name='L146'></a> 146         <em class='comment'>/* then use that to figure out the offset for day 1 of week 1 */</em>
+<a id='L147' name='L147'></a> 147         <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a> = 0 - (<a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> &gt; 4 ? <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a> - 7 : <a href='../Y/16143.html' title='Multiple used in 36 places.'>dow</a>);
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149         <em class='comment'>/* Add weeks and days */</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>return</strong> <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a> + ((<a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a> - 1) * 7) + <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>;
+<a id='L151' name='L151'></a> 151 <em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153 <strong class='reserved'>int</strong> <a href='../R/28668.html' title='Multiple referred from 3 places.'>timelib_valid_time</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>)
+<a id='L154' name='L154'></a> 154 <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155         <strong class='reserved'>if</strong> (<a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a> &lt; 0 || <a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a> &gt; 23 || <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; 0 || <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &gt; 59 || <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &lt; 0 || <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> &gt; 59) <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156                 <strong class='reserved'>return</strong> 0;
+<a id='L157' name='L157'></a> 157         <em class='brace'>}</em>
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>return</strong> 1;
+<a id='L159' name='L159'></a> 159 <em class='brace'>}</em>
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161 <strong class='reserved'>int</strong> <a href='../R/28667.html' title='Multiple referred from 4 places.'>timelib_valid_date</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L162' name='L162'></a> 162 <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163         <strong class='reserved'>if</strong> (<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &lt; 1 || <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &gt; 12 || <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a> &lt; 1 || <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a> &gt; <a href='../S/66.html#L87' title='Defined at 87 in ext/date/lib/dow.c.'>timelib_days_in_month</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>)) <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164                 <strong class='reserved'>return</strong> 0;
+<a id='L165' name='L165'></a> 165         <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166         <strong class='reserved'>return</strong> 1;
+<a id='L167' name='L167'></a> 167 <em class='brace'>}</em>
+<a id='L168' name='L168'></a> 168 <em class='sharp'>#if</em> 0
+<a id='L169' name='L169'></a> 169 <strong class='reserved'>int</strong> <a href='../R/21014.html' title='Multiple referred from 8 places.'>main</a>(<strong class='reserved'>void</strong>)
+<a id='L170' name='L170'></a> 170 <em class='brace'>{</em>
+<a id='L171' name='L171'></a> 171         <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("dow = %d\n", <a href='../S/66.html#L66' title='Defined at 66 in ext/date/lib/dow.c.'>timelib_day_of_week</a>(1978, 12, 22)); <em class='comment'>/* 5 */</em>
+<a id='L172' name='L172'></a> 172         <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("dow = %d\n", <a href='../S/66.html#L66' title='Defined at 66 in ext/date/lib/dow.c.'>timelib_day_of_week</a>(2005,  2, 19)); <em class='comment'>/* 6 */</em>
+<a id='L173' name='L173'></a> 173 <em class='brace'>}</em>
+<a id='L174' name='L174'></a> 174 <em class='sharp'>#endif</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L30'>[^]</a><a href='#L169'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

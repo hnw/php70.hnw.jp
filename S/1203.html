@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/tokenizer/tokenizer.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1847.html'>tokenizer</a>/tokenizer.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L294'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L43' title='Defined at 43.'>tokenizer_token_get_all_register_constants</a></li>
+<li><a href='#L86' title='Defined at 86.'>ZEND_GET_MODULE</a></li>
+<li><a href='#L101' title='Defined at 101.'>PHP_MINFO_FUNCTION</a></li>
+<li><a href='#L109' title='Defined at 109.'>tokenize</a></li>
+<li><a href='#L188' title='Defined at 188.'>on_event</a></li>
+<li><a href='#L227' title='Defined at 227.'>tokenize_parse</a></li>
+<li><a href='#L270' title='Defined at 270.'>PHP_FUNCTION</a></li>
+<li><a href='#L294' title='Defined at 294.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Andrei Zmievski &lt;andrei@php.net&gt;                             |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>*/</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='comment'>/* $Id$ */</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#endif</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='1114.html'>ext/standard/info.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='1202.html'>php_tokenizer.h</a>"
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='1627.html'>zend.h</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='1653.html'>zend_exceptions.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='1688.html'>zend_language_scanner.h</a>"
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='1689.html'>zend_language_scanner_defs.h</a>"
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;<a href='1685.html'>zend_language_parser.h</a>&gt;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#define</em> <a href='../R/31494.html' title='Multiple referred from 3 places.'>zendtext</a>   <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43195.html' title='Multiple used in 273 places.'>yy_text</a>)
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#define</em> <a href='../R/31491.html' title='Multiple referred from 3 places.'>zendleng</a>   <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43186.html' title='Multiple used in 20 places.'>yy_leng</a>)
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#define</em> <a href='../R/31487.html' title='Multiple referred from 2 places.'>zendcursor</a> <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43183.html' title='Multiple used in 13 places.'>yy_cursor</a>)
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#define</em> <a href='../R/31493.html' title='Multiple referred from 2 places.'>zendlimit</a>  <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43187.html' title='Multiple used in 12 places.'>yy_limit</a>)
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#define</em> <a href='../R/11966.html' title='Multiple referred from 2 places.'>TOKEN_PARSE</a>                             1
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <strong class='reserved'>void</strong> <a href='../S/1203.html#L94' title='Referred from 94 in ext/tokenizer/tokenizer.c.'>tokenizer_token_get_all_register_constants</a>(<a href='../S/1695.html#L29' title='Defined at 29 in Zend/zend_modules.h.'>INIT_FUNC_ARGS</a>) <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("TOKEN_PARSE", <a href='../S/1203.html#L41' title='Defined at 41 in ext/tokenizer/tokenizer.c.'>TOKEN_PARSE</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <em class='comment'>/* {{{ arginfo */</em>
+<a id='L48' name='L48'></a>  48 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/11634.html' title='Multiple used in 2 places.'>arginfo_token_get_all</a>, 0, 0, 1)
+<a id='L49' name='L49'></a>  49         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>)
+<a id='L50' name='L50'></a>  50         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L51' name='L51'></a>  51 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/11635.html' title='Multiple used in 2 places.'>arginfo_token_name</a>, 0, 0, 1)
+<a id='L54' name='L54'></a>  54         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>)
+<a id='L55' name='L55'></a>  55 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L56' name='L56'></a>  56 <em class='comment'>/* }}} */</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <em class='comment'>/* {{{ tokenizer_functions[]</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> *</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * Every user visible function must have an entry in tokenizer_functions[].</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> */</em>
+<a id='L62' name='L62'></a>  62 <strong class='reserved'>const</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/38798.html' title='Multiple used in 2 places.'>tokenizer_functions</a>[] = <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/38787.html' title='Multiple used in 3 places.'>token_get_all</a>,   <a href='../Y/11634.html' title='Multiple used in 2 places.'>arginfo_token_get_all</a>)
+<a id='L64' name='L64'></a>  64         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/38790.html' title='Multiple used in 3 places.'>token_name</a>,              <a href='../Y/11635.html' title='Multiple used in 2 places.'>arginfo_token_name</a>)
+<a id='L65' name='L65'></a>  65         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L66' name='L66'></a>  66 <em class='brace'>}</em>;
+<a id='L67' name='L67'></a>  67 <em class='comment'>/* }}} */</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69 <em class='comment'>/* {{{ tokenizer_module_entry</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> */</em>
+<a id='L71' name='L71'></a>  71 <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/38801.html' title='Multiple used in 3 places.'>tokenizer_module_entry</a> = <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72         <a href='../S/1695.html#L44' title='Defined at 44 in Zend/zend_modules.h.'>STANDARD_MODULE_HEADER</a>,
+<a id='L73' name='L73'></a>  73         "tokenizer",
+<a id='L74' name='L74'></a>  74         <a href='../Y/38798.html' title='Multiple used in 2 places.'>tokenizer_functions</a>,
+<a id='L75' name='L75'></a>  75         <a href='../S/1378.html#L365' title='Defined at 365 in main/php.h.'>PHP_MINIT</a>(<a href='../Y/38797.html' title='Multiple used in 7 places.'>tokenizer</a>),
+<a id='L76' name='L76'></a>  76         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L77' name='L77'></a>  77         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L78' name='L78'></a>  78         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L79' name='L79'></a>  79         <a href='../S/1378.html#L369' title='Defined at 369 in main/php.h.'>PHP_MINFO</a>(<a href='../Y/38797.html' title='Multiple used in 7 places.'>tokenizer</a>),
+<a id='L80' name='L80'></a>  80         <a href='../S/1202.html#L28' title='Defined at 28 in ext/tokenizer/php_tokenizer.h.'>PHP_TOKENIZER_VERSION</a>,
+<a id='L81' name='L81'></a>  81         <a href='../S/1695.html#L61' title='Defined at 61 in Zend/zend_modules.h.'>STANDARD_MODULE_PROPERTIES</a>
+<a id='L82' name='L82'></a>  82 <em class='brace'>}</em>;
+<a id='L83' name='L83'></a>  83 <em class='comment'>/* }}} */</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <em class='sharp'>#ifdef</em> COMPILE_DL_TOKENIZER
+<a id='L86' name='L86'></a>  86 <a href='../R/14241.html' title='Multiple referred from 44 places.'>ZEND_GET_MODULE</a>(<a href='../Y/38797.html' title='Multiple used in 7 places.'>tokenizer</a>)
+<a id='L87' name='L87'></a>  87 <em class='sharp'>#endif</em>
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 <em class='comment'>/* {{{ PHP_MINIT_FUNCTION</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> */</em>
+<a id='L91' name='L91'></a>  91 <a href='../D/8309.html' title='Multiple defined in 96 places.'>PHP_MINIT_FUNCTION</a>(<a href='../Y/38797.html' title='Multiple used in 7 places.'>tokenizer</a>)
+<a id='L92' name='L92'></a>  92 <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93         <a href='../S/1204.html#L31' title='Defined at 31 in ext/tokenizer/tokenizer_data.c.'>tokenizer_register_constants</a>(<a href='../S/1695.html#L30' title='Defined at 30 in Zend/zend_modules.h.'>INIT_FUNC_ARGS_PASSTHRU</a>);
+<a id='L94' name='L94'></a>  94         <a href='../S/1203.html#L43' title='Defined at 43 in ext/tokenizer/tokenizer.c.'>tokenizer_token_get_all_register_constants</a>(<a href='../S/1695.html#L30' title='Defined at 30 in Zend/zend_modules.h.'>INIT_FUNC_ARGS_PASSTHRU</a>);
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L96' name='L96'></a>  96 <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>/* }}} */</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <em class='comment'>/* {{{ PHP_MINFO_FUNCTION</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'> */</em>
+<a id='L101' name='L101'></a> 101 <a href='../R/7343.html' title='Multiple referred from 70 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/38797.html' title='Multiple used in 7 places.'>tokenizer</a>)
+<a id='L102' name='L102'></a> 102 <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103         <a href='../S/1113.html#L1097' title='Defined at 1097 in ext/standard/info.c.'>php_info_print_table_start</a>();
+<a id='L104' name='L104'></a> 104         <a href='../S/1113.html#L1251' title='Defined at 1251 in ext/standard/info.c.'>php_info_print_table_row</a>(2, "Tokenizer Support", "enabled");
+<a id='L105' name='L105'></a> 105         <a href='../S/1113.html#L1107' title='Defined at 1107 in ext/standard/info.c.'>php_info_print_table_end</a>();
+<a id='L106' name='L106'></a> 106 <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'>/* }}} */</em>
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109 <strong class='reserved'>static</strong> <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../S/1203.html#L283' title='Referred from 283 in ext/tokenizer/tokenizer.c.'>tokenize</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>)
+<a id='L110' name='L110'></a> 110 <em class='brace'>{</em>
+<a id='L111' name='L111'></a> 111         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>;
+<a id='L112' name='L112'></a> 112         <a href='../S/1688.html#L58' title='Defined at 58 in Zend/zend_language_scanner.h.'>zend_lex_state</a> <a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>;
+<a id='L113' name='L113'></a> 113         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>;
+<a id='L114' name='L114'></a> 114         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>;
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>int</strong> <a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a>;
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>int</strong> <a href='../Y/38789.html' title='Multiple used in 7 places.'>token_line</a> = 1;
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>int</strong> <a href='../Y/28074.html' title='Multiple used in 4 places.'>need_tokens</a> = -1; <em class='comment'>/* for __halt_compiler lexing. -1 = disabled */</em>
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119         <a href='../S/1731.html#L644' title='Defined at 644 in Zend/zend_types.h.'>ZVAL_STR_COPY</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>, <a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>);
+<a id='L120' name='L120'></a> 120         <a href='../S/1687.html#L201' title='Defined at 201 in Zend/zend_language_scanner.c.'>zend_save_lexical_state</a>(&amp;<a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>);
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <strong class='reserved'>if</strong> (<a href='../S/1687.html#L669' title='Defined at 669 in Zend/zend_language_scanner.c.'>zend_prepare_string_for_scanning</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>, "") == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                 <a href='../S/1687.html#L235' title='Defined at 235 in Zend/zend_language_scanner.c.'>zend_restore_lexical_state</a>(&amp;<a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>);
+<a id='L124' name='L124'></a> 124                 <strong class='reserved'>return</strong> 0;
+<a id='L125' name='L125'></a> 125         <em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127         <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43194.html' title='Multiple used in 11 places.'>yy_state</a>) = <a href='../D/33211.html' title='Multiple defined in 2 places.'>yycINITIAL</a>;
+<a id='L128' name='L128'></a> 128         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130         <a href='../S/1731.html#L587' title='Defined at 587 in Zend/zend_types.h.'>ZVAL_UNDEF</a>(&amp;<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>);
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>while</strong> ((<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> = <a href='../S/1687.html#L1111' title='Defined at 1111 in Zend/zend_language_scanner.c.'>lex_scan</a>(&amp;<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>))) <em class='brace'>{</em>
+<a id='L132' name='L132'></a> 132                 <strong class='reserved'>if</strong> (<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> == <a href='../D/14044.html' title='Multiple defined in 2 places.'>T_CLOSE_TAG</a> &amp;&amp; <a href='../S/1203.html#L36' title='Defined at 36 in ext/tokenizer/tokenizer.c.'>zendtext</a>[<a href='../S/1203.html#L37' title='Defined at 37 in ext/tokenizer/tokenizer.c.'>zendleng</a> - 1] != '&gt;') <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                         <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/43782.html' title='Multiple used in 50 places.'>zend_lineno</a>)++;
+<a id='L134' name='L134'></a> 134                 <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136                 <strong class='reserved'>if</strong> (<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> &gt;= 256) <em class='brace'>{</em>
+<a id='L137' name='L137'></a> 137                         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L138' name='L138'></a> 138                         <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a>);
+<a id='L139' name='L139'></a> 139                         <strong class='reserved'>if</strong> (<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> == <a href='../D/14078.html' title='Multiple defined in 2 places.'>T_END_HEREDOC</a>) <em class='brace'>{</em>
+<a id='L140' name='L140'></a> 140                                 <strong class='reserved'>if</strong> (<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/23100.html' title='Multiple used in 10 places.'>increment_lineno</a>)) <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141                                         <a href='../Y/38789.html' title='Multiple used in 7 places.'>token_line</a> = ++<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/43782.html' title='Multiple used in 50 places.'>zend_lineno</a>);
+<a id='L142' name='L142'></a> 142                                         <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/23100.html' title='Multiple used in 10 places.'>increment_lineno</a>) = 0;
+<a id='L143' name='L143'></a> 143                                 <em class='brace'>}</em>
+<a id='L144' name='L144'></a> 144                         <em class='brace'>}</em>
+<a id='L145' name='L145'></a> 145                         <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, (<strong class='reserved'>char</strong> *)<a href='../S/1203.html#L36' title='Defined at 36 in ext/tokenizer/tokenizer.c.'>zendtext</a>, <a href='../S/1203.html#L37' title='Defined at 37 in ext/tokenizer/tokenizer.c.'>zendleng</a>);
+<a id='L146' name='L146'></a> 146                         <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../Y/38789.html' title='Multiple used in 7 places.'>token_line</a>);
+<a id='L147' name='L147'></a> 147                         <a href='../S/1631.html#L1565' title='Defined at 1565 in Zend/zend_API.c.'>add_next_index_zval</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, &amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L148' name='L148'></a> 148                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149                         <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, (<strong class='reserved'>char</strong> *)<a href='../S/1203.html#L36' title='Defined at 36 in ext/tokenizer/tokenizer.c.'>zendtext</a>, <a href='../S/1203.html#L37' title='Defined at 37 in ext/tokenizer/tokenizer.c.'>zendleng</a>);
+<a id='L150' name='L150'></a> 150                 <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a>) <em class='brace'>{</em>
+<a id='L153' name='L153'></a> 153                         <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(&amp;<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>);
+<a id='L154' name='L154'></a> 154                         <a href='../S/1731.html#L587' title='Defined at 587 in Zend/zend_types.h.'>ZVAL_UNDEF</a>(&amp;<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>);
+<a id='L155' name='L155'></a> 155                 <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157                 <em class='comment'>/* after T_HALT_COMPILER collect the next three non-dropped tokens */</em>
+<a id='L158' name='L158'></a> 158                 <strong class='reserved'>if</strong> (<a href='../Y/28074.html' title='Multiple used in 4 places.'>need_tokens</a> != -1) <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159                         <strong class='reserved'>if</strong> (<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> != <a href='../D/14178.html' title='Multiple defined in 2 places.'>T_WHITESPACE</a> &amp;&amp; <a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> != <a href='../D/14133.html' title='Multiple defined in 2 places.'>T_OPEN_TAG</a>
+<a id='L160' name='L160'></a> 160                                 &amp;&amp; <a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> != <a href='../D/14047.html' title='Multiple defined in 2 places.'>T_COMMENT</a> &amp;&amp; <a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> != <a href='../D/14062.html' title='Multiple defined in 2 places.'>T_DOC_COMMENT</a>
+<a id='L161' name='L161'></a> 161                                 &amp;&amp; --<a href='../Y/28074.html' title='Multiple used in 4 places.'>need_tokens</a> == 0
+<a id='L162' name='L162'></a> 162                         ) <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163                                 <em class='comment'>/* fetch the rest into a T_INLINE_HTML */</em>
+<a id='L164' name='L164'></a> 164                                 <strong class='reserved'>if</strong> (<a href='../S/1203.html#L38' title='Defined at 38 in ext/tokenizer/tokenizer.c.'>zendcursor</a> != <a href='../S/1203.html#L39' title='Defined at 39 in ext/tokenizer/tokenizer.c.'>zendlimit</a>) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                                         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L166' name='L166'></a> 166                                         <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../D/14100.html' title='Multiple defined in 2 places.'>T_INLINE_HTML</a>);
+<a id='L167' name='L167'></a> 167                                         <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, (<strong class='reserved'>char</strong> *)<a href='../S/1203.html#L38' title='Defined at 38 in ext/tokenizer/tokenizer.c.'>zendcursor</a>, <a href='../S/1203.html#L39' title='Defined at 39 in ext/tokenizer/tokenizer.c.'>zendlimit</a> - <a href='../S/1203.html#L38' title='Defined at 38 in ext/tokenizer/tokenizer.c.'>zendcursor</a>);
+<a id='L168' name='L168'></a> 168                                         <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../Y/38789.html' title='Multiple used in 7 places.'>token_line</a>);
+<a id='L169' name='L169'></a> 169                                         <a href='../S/1631.html#L1565' title='Defined at 1565 in Zend/zend_API.c.'>add_next_index_zval</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, &amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L170' name='L170'></a> 170                                 <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171                                 <strong class='reserved'>break</strong>;
+<a id='L172' name='L172'></a> 172                         <em class='brace'>}</em>
+<a id='L173' name='L173'></a> 173                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/38794.html' title='Multiple used in 20 places.'>token_type</a> == <a href='../D/14093.html' title='Multiple defined in 2 places.'>T_HALT_COMPILER</a>) <em class='brace'>{</em>
+<a id='L174' name='L174'></a> 174                         <a href='../Y/28074.html' title='Multiple used in 4 places.'>need_tokens</a> = 3;
+<a id='L175' name='L175'></a> 175                 <em class='brace'>}</em>
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177                 <a href='../Y/38789.html' title='Multiple used in 7 places.'>token_line</a> = <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/43782.html' title='Multiple used in 50 places.'>zend_lineno</a>);
+<a id='L178' name='L178'></a> 178         <em class='brace'>}</em>
+<a id='L179' name='L179'></a> 179 
+<a id='L180' name='L180'></a> 180         <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>);
+<a id='L181' name='L181'></a> 181         <a href='../S/1687.html#L235' title='Defined at 235 in Zend/zend_language_scanner.c.'>zend_restore_lexical_state</a>(&amp;<a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>);
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183         <strong class='reserved'>return</strong> 1;
+<a id='L184' name='L184'></a> 184 <em class='brace'>}</em>
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188 <strong class='reserved'>void</strong> <a href='../R/22297.html' title='Multiple referred from 9 places.'>on_event</a>(<a href='../S/1665.html#L256' title='Defined at 256 in Zend/zend_globals.h.'>zend_php_scanner_event</a> <a href='../S/308.html#L96' title='Defined at 96 in ext/interbase/php_ibase_includes.h.'>event</a>, <strong class='reserved'>int</strong> <a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>, <strong class='reserved'>int</strong> <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>)
+<a id='L189' name='L189'></a> 189 <em class='brace'>{</em>
+<a id='L190' name='L190'></a> 190         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>;
+<a id='L191' name='L191'></a> 191         <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/38804.html' title='Multiple used in 3 places.'>tokens_ht</a>;
+<a id='L192' name='L192'></a> 192         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/38796.html' title='Multiple used in 4 places.'>token_zv</a>;
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>switch</strong> (<a href='../S/308.html#L96' title='Defined at 96 in ext/interbase/php_ibase_includes.h.'>event</a>) <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195                 <strong class='reserved'>case</strong> <a href='../S/1665.html#L253' title='Defined at 253 in Zend/zend_globals.h.'>ON_TOKEN</a>:
+<a id='L196' name='L196'></a> 196                         <strong class='reserved'>if</strong> (<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a> == <a href='../D/1949.html' title='Multiple defined in 2 places.'>END</a>) <strong class='reserved'>break</strong>;
+<a id='L197' name='L197'></a> 197                         <strong class='reserved'>if</strong> (<a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a> &gt;= 256) <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198                                 <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L199' name='L199'></a> 199                                 <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>);
+<a id='L200' name='L200'></a> 200                                 <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, (<strong class='reserved'>char</strong> *)<a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43195.html' title='Multiple used in 273 places.'>yy_text</a>), <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43186.html' title='Multiple used in 20 places.'>yy_leng</a>));
+<a id='L201' name='L201'></a> 201                                 <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>);
+<a id='L202' name='L202'></a> 202                                 <a href='../S/1631.html#L1565' title='Defined at 1565 in Zend/zend_API.c.'>add_next_index_zval</a>(&amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>, &amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L203' name='L203'></a> 203                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L204' name='L204'></a> 204                                 <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(&amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>, (<strong class='reserved'>char</strong> *)<a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43195.html' title='Multiple used in 273 places.'>yy_text</a>), <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43186.html' title='Multiple used in 20 places.'>yy_leng</a>));
+<a id='L205' name='L205'></a> 205                         <em class='brace'>}</em>
+<a id='L206' name='L206'></a> 206                         <strong class='reserved'>break</strong>;
+<a id='L207' name='L207'></a> 207                 <strong class='reserved'>case</strong> <a href='../S/1665.html#L254' title='Defined at 254 in Zend/zend_globals.h.'>ON_FEEDBACK</a>:
+<a id='L208' name='L208'></a> 208                         <a href='../Y/38804.html' title='Multiple used in 3 places.'>tokens_ht</a> = <a href='../S/1731.html#L527' title='Defined at 527 in Zend/zend_types.h.'>Z_ARRVAL</a>(<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>);
+<a id='L209' name='L209'></a> 209                         <a href='../Y/38796.html' title='Multiple used in 4 places.'>token_zv</a> = <a href='../S/1667.html#L2021' title='Defined at 2021 in Zend/zend_hash.c.'>zend_hash_index_find</a>(<a href='../Y/38804.html' title='Multiple used in 3 places.'>tokens_ht</a>, <a href='../S/1668.html#L211' title='Defined at 211 in Zend/zend_hash.h.'>zend_hash_num_elements</a>(<a href='../Y/38804.html' title='Multiple used in 3 places.'>tokens_ht</a>) - 1);
+<a id='L210' name='L210'></a> 210                         <strong class='reserved'>if</strong> (<a href='../Y/38796.html' title='Multiple used in 4 places.'>token_zv</a> &amp;&amp; <a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38796.html' title='Multiple used in 4 places.'>token_zv</a>) == <a href='../S/1731.html#L309' title='Defined at 309 in Zend/zend_types.h.'>IS_ARRAY</a>) <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211                                 <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a>(<a href='../S/1667.html#L2021' title='Defined at 2021 in Zend/zend_hash.c.'>zend_hash_index_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/38796.html' title='Multiple used in 4 places.'>token_zv</a>), 0), <a href='../Y/38783.html' title='Multiple used in 195 places.'>token</a>);
+<a id='L212' name='L212'></a> 212                         <em class='brace'>}</em>
+<a id='L213' name='L213'></a> 213                         <strong class='reserved'>break</strong>;
+<a id='L214' name='L214'></a> 214                 <strong class='reserved'>case</strong> <a href='../S/1665.html#L255' title='Defined at 255 in Zend/zend_globals.h.'>ON_STOP</a>:
+<a id='L215' name='L215'></a> 215                         <strong class='reserved'>if</strong> (<a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43183.html' title='Multiple used in 13 places.'>yy_cursor</a>) != <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43187.html' title='Multiple used in 12 places.'>yy_limit</a>)) <em class='brace'>{</em>
+<a id='L216' name='L216'></a> 216                                 <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L217' name='L217'></a> 217                                 <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../D/14100.html' title='Multiple defined in 2 places.'>T_INLINE_HTML</a>);
+<a id='L218' name='L218'></a> 218                                 <a href='../S/1631.html#L1556' title='Defined at 1556 in Zend/zend_API.c.'>add_next_index_stringl</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>,
+<a id='L219' name='L219'></a> 219                                         (<strong class='reserved'>char</strong> *)<a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43183.html' title='Multiple used in 13 places.'>yy_cursor</a>), <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43187.html' title='Multiple used in 12 places.'>yy_limit</a>) - <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43183.html' title='Multiple used in 13 places.'>yy_cursor</a>));
+<a id='L220' name='L220'></a> 220                                 <a href='../S/1631.html#L1493' title='Defined at 1493 in Zend/zend_API.c.'>add_next_index_long</a>(&amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>, <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/43782.html' title='Multiple used in 50 places.'>zend_lineno</a>));
+<a id='L221' name='L221'></a> 221                                 <a href='../S/1631.html#L1565' title='Defined at 1565 in Zend/zend_API.c.'>add_next_index_zval</a>(&amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>, &amp;<a href='../Y/24492.html' title='Multiple used in 22 places.'>keyword</a>);
+<a id='L222' name='L222'></a> 222                         <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223                         <strong class='reserved'>break</strong>;
+<a id='L224' name='L224'></a> 224         <em class='brace'>}</em>
+<a id='L225' name='L225'></a> 225 <em class='brace'>}</em>
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227 <strong class='reserved'>static</strong> <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../S/1203.html#L281' title='Referred from 281 in ext/tokenizer/tokenizer.c.'>tokenize_parse</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>)
+<a id='L228' name='L228'></a> 228 <em class='brace'>{</em>
+<a id='L229' name='L229'></a> 229         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>;
+<a id='L230' name='L230'></a> 230         <a href='../S/1688.html#L58' title='Defined at 58 in Zend/zend_language_scanner.h.'>zend_lex_state</a> <a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>;
+<a id='L231' name='L231'></a> 231         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/30046.html' title='Multiple used in 7 places.'>original_in_compilation</a>;
+<a id='L232' name='L232'></a> 232         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a>;
+<a id='L233' name='L233'></a> 233 
+<a id='L234' name='L234'></a> 234         <a href='../S/1731.html#L644' title='Defined at 644 in Zend/zend_types.h.'>ZVAL_STR_COPY</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>, <a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>);
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         <a href='../Y/30046.html' title='Multiple used in 7 places.'>original_in_compilation</a> = <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/23008.html' title='Multiple used in 41 places.'>in_compilation</a>);
+<a id='L237' name='L237'></a> 237         <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/23008.html' title='Multiple used in 41 places.'>in_compilation</a>) = 1;
+<a id='L238' name='L238'></a> 238         <a href='../S/1687.html#L201' title='Defined at 201 in Zend/zend_language_scanner.c.'>zend_save_lexical_state</a>(&amp;<a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>);
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>if</strong> ((<a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a> = (<a href='../S/1687.html#L669' title='Defined at 669 in Zend/zend_language_scanner.c.'>zend_prepare_string_for_scanning</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>, "") == <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>))) <em class='brace'>{</em>
+<a id='L241' name='L241'></a> 241                 <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L242' name='L242'></a> 242                 <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/12052.html' title='Multiple used in 11 places.'>ast_arena</a>) = <a href='../S/1633.html#L34' title='Defined at 34 in Zend/zend_arena.h.'>zend_arena_create</a>(1024 * 32);
+<a id='L243' name='L243'></a> 243                 <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../Y/43194.html' title='Multiple used in 11 places.'>yy_state</a>) = <a href='../D/33211.html' title='Multiple defined in 2 places.'>yycINITIAL</a>;
+<a id='L244' name='L244'></a> 244                 <a href='../D/4318.html' title='Multiple defined in 2 places.'>LANG_SCNG</a>(<a href='../S/1203.html#L188' title='Defined at 188 in ext/tokenizer/tokenizer.c.'>on_event</a>) = <a href='../S/1203.html#L188' title='Defined at 188 in ext/tokenizer/tokenizer.c.'>on_event</a>;
+<a id='L245' name='L245'></a> 245 
+<a id='L246' name='L246'></a> 246                 <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(&amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>);
+<a id='L247' name='L247'></a> 247                 <strong class='reserved'>if</strong>((<a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a> = (<a href='../Y/43906.html' title='Multiple used in 6 places.'>zendparse</a>() == <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>))) <em class='brace'>{</em>
+<a id='L248' name='L248'></a> 248                         <a href='../S/1731.html#L848' title='Defined at 848 in Zend/zend_types.h.'>ZVAL_COPY_VALUE</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, &amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>);
+<a id='L249' name='L249'></a> 249                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L250' name='L250'></a> 250                         <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;<a href='../Y/38793.html' title='Multiple used in 8 places.'>token_stream</a>);
+<a id='L251' name='L251'></a> 251                 <em class='brace'>}</em>
+<a id='L252' name='L252'></a> 252 
+<a id='L253' name='L253'></a> 253                 <a href='../S/1634.html#L497' title='Defined at 497 in Zend/zend_ast.c.'>zend_ast_destroy</a>(<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>));
+<a id='L254' name='L254'></a> 254                 <a href='../S/1633.html#L44' title='Defined at 44 in Zend/zend_arena.h.'>zend_arena_destroy</a>(<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/12052.html' title='Multiple used in 11 places.'>ast_arena</a>));
+<a id='L255' name='L255'></a> 255         <em class='brace'>}</em>
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257         <em class='comment'>/* restore compiler and scanner global states */</em>
+<a id='L258' name='L258'></a> 258         <a href='../S/1687.html#L235' title='Defined at 235 in Zend/zend_language_scanner.c.'>zend_restore_lexical_state</a>(&amp;<a href='../Y/30049.html' title='Multiple used in 25 places.'>original_lex_state</a>);
+<a id='L259' name='L259'></a> 259         <a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../Y/23008.html' title='Multiple used in 41 places.'>in_compilation</a>) = <a href='../Y/30046.html' title='Multiple used in 7 places.'>original_in_compilation</a>;
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261         <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(&amp;<a href='../Y/36603.html' title='Multiple used in 8 places.'>source_zval</a>);
+<a id='L262' name='L262'></a> 262 
+<a id='L263' name='L263'></a> 263         <strong class='reserved'>return</strong> <a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a>;
+<a id='L264' name='L264'></a> 264 <em class='brace'>}</em>
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266 <em class='comment'>/* }}} */</em>
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268 <em class='comment'>/* {{{ proto array token_get_all(string source [, int flags])</em>
+<a id='L269' name='L269'></a> 269 <em class='comment'> */</em>
+<a id='L270' name='L270'></a> 270 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/38787.html' title='Multiple used in 3 places.'>token_get_all</a>)
+<a id='L271' name='L271'></a> 271 <em class='brace'>{</em>
+<a id='L272' name='L272'></a> 272         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>;
+<a id='L273' name='L273'></a> 273         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> = 0;
+<a id='L274' name='L274'></a> 274         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a>;
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "S|l", &amp;<a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>, &amp;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L277' name='L277'></a> 277                 <strong class='reserved'>return</strong>;
+<a id='L278' name='L278'></a> 278         <em class='brace'>}</em>
+<a id='L279' name='L279'></a> 279 
+<a id='L280' name='L280'></a> 280         <strong class='reserved'>if</strong> (<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1203.html#L41' title='Defined at 41 in ext/tokenizer/tokenizer.c.'>TOKEN_PARSE</a>) <em class='brace'>{</em>
+<a id='L281' name='L281'></a> 281                 <a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a> = <a href='../S/1203.html#L227' title='Defined at 227 in ext/tokenizer/tokenizer.c.'>tokenize_parse</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>);
+<a id='L282' name='L282'></a> 282         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L283' name='L283'></a> 283                 <a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a> = <a href='../S/1203.html#L109' title='Defined at 109 in ext/tokenizer/tokenizer.c.'>tokenize</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/36583.html' title='Multiple used in 512 places.'>source</a>);
+<a id='L284' name='L284'></a> 284                 <em class='comment'>/* Normal token_get_all() should not throw. */</em>
+<a id='L285' name='L285'></a> 285                 <a href='../S/1652.html#L177' title='Defined at 177 in Zend/zend_exceptions.c.'>zend_clear_exception</a>();
+<a id='L286' name='L286'></a> 286         <em class='brace'>}</em>
+<a id='L287' name='L287'></a> 287 
+<a id='L288' name='L288'></a> 288         <strong class='reserved'>if</strong> (!<a href='../Y/37862.html' title='Multiple used in 37 places.'>success</a>) <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L289' name='L289'></a> 289 <em class='brace'>}</em>
+<a id='L290' name='L290'></a> 290 <em class='comment'>/* }}} */</em>
+<a id='L291' name='L291'></a> 291 
+<a id='L292' name='L292'></a> 292 <em class='comment'>/* {{{ proto string token_name(int type)</em>
+<a id='L293' name='L293'></a> 293 <em class='comment'> */</em>
+<a id='L294' name='L294'></a> 294 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/38790.html' title='Multiple used in 3 places.'>token_name</a>)
+<a id='L295' name='L295'></a> 295 <em class='brace'>{</em>
+<a id='L296' name='L296'></a> 296         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>;
+<a id='L297' name='L297'></a> 297 
+<a id='L298' name='L298'></a> 298         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "l", &amp;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L299' name='L299'></a> 299                 <strong class='reserved'>return</strong>;
+<a id='L300' name='L300'></a> 300         <em class='brace'>}</em>
+<a id='L301' name='L301'></a> 301 
+<a id='L302' name='L302'></a> 302         <a href='../S/1632.html#L619' title='Defined at 619 in Zend/zend_API.h.'>RETVAL_STRING</a>(<a href='../S/1204.html#L168' title='Defined at 168 in ext/tokenizer/tokenizer_data.c.'>get_token_type_name</a>(<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>));
+<a id='L303' name='L303'></a> 303 <em class='brace'>}</em>
+<a id='L304' name='L304'></a> 304 <em class='comment'>/* }}} */</em>
+<a id='L305' name='L305'></a> 305 
+<a id='L306' name='L306'></a> 306 <em class='comment'>/*</em>
+<a id='L307' name='L307'></a> 307 <em class='comment'> * Local variables:</em>
+<a id='L308' name='L308'></a> 308 <em class='comment'> * tab-width: 4</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'> * End:</em>
+<a id='L311' name='L311'></a> 311 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L312' name='L312'></a> 312 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L313' name='L313'></a> 313 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L294'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

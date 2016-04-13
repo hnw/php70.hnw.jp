@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pMerger</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L78221'>pMerger</a>          78221 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger;           /* Or here, if bUseThreads==0 */</span>
+<span class='curline'><a href='../S/1054.html#L78296'>pMerger</a>          78296 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger;           /* Merge engine thread reads data from */</span>
+<span class='curline'><a href='../S/1054.html#L79085'>pMerger</a>          79085 ext/sqlite3/libsqlite/sqlite3.c static void vdbeMergeEngineFree(MergeEngine *pMerger){</span>
+<span class='curline'><a href='../S/1054.html#L79087'>pMerger</a>          79087 ext/sqlite3/libsqlite/sqlite3.c   if( pMerger ){</span>
+<span class='curline'><a href='../S/1054.html#L79088'>pMerger</a>          79088 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; i&lt;pMerger-&gt;nTree; i++){</span>
+<span class='curline'><a href='../S/1054.html#L79089'>pMerger</a>          79089 ext/sqlite3/libsqlite/sqlite3.c       vdbePmaReaderClear(&amp;pMerger-&gt;aReadr[i]);</span>
+<span class='curline'><a href='../S/1054.html#L79092'>pMerger</a>          79092 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L79108'>pMerger</a>          79108 ext/sqlite3/libsqlite/sqlite3.c     vdbeMergeEngineFree(pIncr-&gt;pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L79127'>pMerger</a>          79127 ext/sqlite3/libsqlite/sqlite3.c   vdbeMergeEngineFree(pSorter-&gt;pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L79128'>pMerger</a>          79128 ext/sqlite3/libsqlite/sqlite3.c   pSorter-&gt;pMerger = 0;</span>
+<span class='curline'><a href='../S/1054.html#L79498'>pMerger</a>          79498 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger,      /* The merge engine to advance to the next row */</span>
+<span class='curline'><a href='../S/1054.html#L79502'>pMerger</a>          79502 ext/sqlite3/libsqlite/sqlite3.c   int iPrev = pMerger-&gt;aTree[1];/* Index of PmaReader to advance */</span>
+<span class='curline'><a href='../S/1054.html#L79503'>pMerger</a>          79503 ext/sqlite3/libsqlite/sqlite3.c   SortSubtask *pTask = pMerger-&gt;pTask;</span>
+<span class='curline'><a href='../S/1054.html#L79506'>pMerger</a>          79506 ext/sqlite3/libsqlite/sqlite3.c   rc = vdbePmaReaderNext(&amp;pMerger-&gt;aReadr[iPrev]);</span>
+<span class='curline'><a href='../S/1054.html#L79517'>pMerger</a>          79517 ext/sqlite3/libsqlite/sqlite3.c     pReadr1 = &amp;pMerger-&gt;aReadr[(iPrev &amp; 0xFFFE)];</span>
+<span class='curline'><a href='../S/1054.html#L79518'>pMerger</a>          79518 ext/sqlite3/libsqlite/sqlite3.c     pReadr2 = &amp;pMerger-&gt;aReadr[(iPrev | 0x0001)];</span>
+<span class='curline'><a href='../S/1054.html#L79520'>pMerger</a>          79520 ext/sqlite3/libsqlite/sqlite3.c     for(i=(pMerger-&gt;nTree+iPrev)/2; i&gt;0; i=i/2){</span>
+<span class='curline'><a href='../S/1054.html#L79549'>pMerger</a>          79549 ext/sqlite3/libsqlite/sqlite3.c         pMerger-&gt;aTree[i] = (int)(pReadr1 - pMerger-&gt;aReadr);</span>
+<span class='curline'><a href='../S/1054.html#L79550'>pMerger</a>          79550 ext/sqlite3/libsqlite/sqlite3.c         pReadr2 = &amp;pMerger-&gt;aReadr[ pMerger-&gt;aTree[i ^ 0x0001] ];</span>
+<span class='curline'><a href='../S/1054.html#L79554'>pMerger</a>          79554 ext/sqlite3/libsqlite/sqlite3.c         pMerger-&gt;aTree[i] = (int)(pReadr2 - pMerger-&gt;aReadr);</span>
+<span class='curline'><a href='../S/1054.html#L79555'>pMerger</a>          79555 ext/sqlite3/libsqlite/sqlite3.c         pReadr1 = &amp;pMerger-&gt;aReadr[ pMerger-&gt;aTree[i ^ 0x0001] ];</span>
+<span class='curline'><a href='../S/1054.html#L79558'>pMerger</a>          79558 ext/sqlite3/libsqlite/sqlite3.c     *pbEof = (pMerger-&gt;aReadr[pMerger-&gt;aTree[1]].pFd==0);</span>
+<span class='curline'><a href='../S/1054.html#L79761'>pMerger</a>          79761 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger = pIncr-&gt;pMerger;</span>
+<span class='curline'><a href='../S/1054.html#L79770'>pMerger</a>          79770 ext/sqlite3/libsqlite/sqlite3.c     PmaReader *pReader = &amp;pMerger-&gt;aReadr[ pMerger-&gt;aTree[1] ];</span>
+<span class='curline'><a href='../S/1054.html#L79782'>pMerger</a>          79782 ext/sqlite3/libsqlite/sqlite3.c     assert( pIncr-&gt;pMerger-&gt;pTask==pTask );</span>
+<span class='curline'><a href='../S/1054.html#L79783'>pMerger</a>          79783 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbeMergeEngineStep(pIncr-&gt;pMerger, &amp;dummy);</span>
+<span class='curline'><a href='../S/1054.html#L79872'>pMerger</a>          79872 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger,   /* The MergeEngine that the IncrMerger will control */</span>
+<span class='curline'><a href='../S/1054.html#L79879'>pMerger</a>          79879 ext/sqlite3/libsqlite/sqlite3.c     pIncr-&gt;pMerger = pMerger;</span>
+<span class='curline'><a href='../S/1054.html#L79884'>pMerger</a>          79884 ext/sqlite3/libsqlite/sqlite3.c     vdbeMergeEngineFree(pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L79908'>pMerger</a>          79908 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger,  /* Merge engine containing PmaReaders to compare */</span>
+<span class='curline'><a href='../S/1054.html#L79917'>pMerger</a>          79917 ext/sqlite3/libsqlite/sqlite3.c   assert( iOut&lt;pMerger-&gt;nTree &amp;&amp; iOut&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L79919'>pMerger</a>          79919 ext/sqlite3/libsqlite/sqlite3.c   if( iOut&gt;=(pMerger-&gt;nTree/2) ){</span>
+<span class='curline'><a href='../S/1054.html#L79920'>pMerger</a>          79920 ext/sqlite3/libsqlite/sqlite3.c     i1 = (iOut - pMerger-&gt;nTree/2) * 2;</span>
+<span class='curline'><a href='../S/1054.html#L79923'>pMerger</a>          79923 ext/sqlite3/libsqlite/sqlite3.c     i1 = pMerger-&gt;aTree[iOut*2];</span>
+<span class='curline'><a href='../S/1054.html#L79924'>pMerger</a>          79924 ext/sqlite3/libsqlite/sqlite3.c     i2 = pMerger-&gt;aTree[iOut*2+1];</span>
+<span class='curline'><a href='../S/1054.html#L79927'>pMerger</a>          79927 ext/sqlite3/libsqlite/sqlite3.c   p1 = &amp;pMerger-&gt;aReadr[i1];</span>
+<span class='curline'><a href='../S/1054.html#L79928'>pMerger</a>          79928 ext/sqlite3/libsqlite/sqlite3.c   p2 = &amp;pMerger-&gt;aReadr[i2];</span>
+<span class='curline'><a href='../S/1054.html#L79935'>pMerger</a>          79935 ext/sqlite3/libsqlite/sqlite3.c     SortSubtask *pTask = pMerger-&gt;pTask;</span>
+<span class='curline'><a href='../S/1054.html#L79949'>pMerger</a>          79949 ext/sqlite3/libsqlite/sqlite3.c   pMerger-&gt;aTree[iOut] = iRes;</span>
+<span class='curline'><a href='../S/1054.html#L79991'>pMerger</a>          79991 ext/sqlite3/libsqlite/sqlite3.c   MergeEngine *pMerger,           /* MergeEngine to initialize */</span>
+<span class='curline'><a href='../S/1054.html#L79996'>pMerger</a>          79996 ext/sqlite3/libsqlite/sqlite3.c   int nTree = pMerger-&gt;nTree;</span>
+<span class='curline'><a href='../S/1054.html#L80002'>pMerger</a>          80002 ext/sqlite3/libsqlite/sqlite3.c   assert( pMerger-&gt;pTask==0 );</span>
+<span class='curline'><a href='../S/1054.html#L80003'>pMerger</a>          80003 ext/sqlite3/libsqlite/sqlite3.c   pMerger-&gt;pTask = pTask;</span>
+<span class='curline'><a href='../S/1054.html#L80014'>pMerger</a>          80014 ext/sqlite3/libsqlite/sqlite3.c       rc = vdbePmaReaderNext(&amp;pMerger-&gt;aReadr[nTree-i-1]);</span>
+<span class='curline'><a href='../S/1054.html#L80016'>pMerger</a>          80016 ext/sqlite3/libsqlite/sqlite3.c       rc = vdbePmaReaderIncrInit(&amp;pMerger-&gt;aReadr[i], INCRINIT_NORMAL);</span>
+<span class='curline'><a href='../S/1054.html#L80021'>pMerger</a>          80021 ext/sqlite3/libsqlite/sqlite3.c   for(i=pMerger-&gt;nTree-1; i&gt;0; i--){</span>
+<span class='curline'><a href='../S/1054.html#L80022'>pMerger</a>          80022 ext/sqlite3/libsqlite/sqlite3.c     vdbeMergeEngineCompare(pMerger, i);</span>
+<span class='curline'><a href='../S/1054.html#L80069'>pMerger</a>          80069 ext/sqlite3/libsqlite/sqlite3.c   rc = vdbeMergeEngineInit(pTask, pIncr-&gt;pMerger, eMode);</span>
+<span class='curline'><a href='../S/1054.html#L80267'>pMerger</a>          80267 ext/sqlite3/libsqlite/sqlite3.c       p = pReadr-&gt;pIncr-&gt;pMerger;</span>
+<span class='curline'><a href='../S/1054.html#L80326'>pMerger</a>          80326 ext/sqlite3/libsqlite/sqlite3.c           MergeEngine *pMerger = 0; /* New level-0 PMA merger */</span>
+<span class='curline'><a href='../S/1054.html#L80330'>pMerger</a>          80330 ext/sqlite3/libsqlite/sqlite3.c           rc = vdbeMergeEngineLevel0(pTask, nReader, &amp;iReadOff, &amp;pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L80332'>pMerger</a>          80332 ext/sqlite3/libsqlite/sqlite3.c             rc = vdbeSorterAddToTree(pTask, nDepth, iSeq++, pRoot, pMerger);</span>
+<span class='curline'><a href='../S/1054.html#L80435'>pMerger</a>          80435 ext/sqlite3/libsqlite/sqlite3.c       pSorter-&gt;pMerger = pMain;</span>
+<span class='curline'><a href='../S/1054.html#L80502'>pMerger</a>          80502 ext/sqlite3/libsqlite/sqlite3.c   assert( pSorter-&gt;bUsePMA || (pSorter-&gt;pReader==0 &amp;&amp; pSorter-&gt;pMerger==0) );</span>
+<span class='curline'><a href='../S/1054.html#L80504'>pMerger</a>          80504 ext/sqlite3/libsqlite/sqlite3.c     assert( pSorter-&gt;pReader==0 || pSorter-&gt;pMerger==0 );</span>
+<span class='curline'><a href='../S/1054.html#L80506'>pMerger</a>          80506 ext/sqlite3/libsqlite/sqlite3.c     assert( pSorter-&gt;bUseThreads==1 || pSorter-&gt;pMerger );</span>
+<span class='curline'><a href='../S/1054.html#L80514'>pMerger</a>          80514 ext/sqlite3/libsqlite/sqlite3.c       assert( pSorter-&gt;pMerger!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L80515'>pMerger</a>          80515 ext/sqlite3/libsqlite/sqlite3.c       assert( pSorter-&gt;pMerger-&gt;pTask==(&amp;pSorter-&gt;aTask[0]) );</span>
+<span class='curline'><a href='../S/1054.html#L80516'>pMerger</a>          80516 ext/sqlite3/libsqlite/sqlite3.c       rc = vdbeMergeEngineStep(pSorter-&gt;pMerger, pbEof);</span>
+<span class='curline'><a href='../S/1054.html#L80546'>pMerger</a>          80546 ext/sqlite3/libsqlite/sqlite3.c       pReader = &amp;pSorter-&gt;pMerger-&gt;aReadr[pSorter-&gt;pMerger-&gt;aTree[1]];</span>
+</pre>
+</body>
+</html>

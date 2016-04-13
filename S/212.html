@@ -1,0 +1,800 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/gd/libgd/gd_gif_out.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1765.html'>gd</a>/<a href='../files/1766.html'>libgd</a>/gd_gif_out.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L100'>[^]</a><a href='#L752'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L100' title='Defined at 100.'>gdImageGifPtr</a></li>
+<li><a href='#L110' title='Defined at 110.'>gdImageGif</a></li>
+<li><a href='#L117' title='Defined at 117.'>gdImageGifCtx</a></li>
+<li><a href='#L144' title='Defined at 144.'>colorstobpp</a></li>
+<li><a href='#L182' title='Defined at 182.'>BumpPixel</a></li>
+<li><a href='#L238' title='Defined at 238.'>GIFNextPixel</a></li>
+<li><a href='#L257' title='Defined at 257.'>GIFEncode</a></li>
+<li><a href='#L492' title='Defined at 492.'>compress</a></li>
+<li><a href='#L610' title='Defined at 610.'>output</a></li>
+<li><a href='#L667' title='Defined at 667.'>cl_block</a></li>
+<li><a href='#L678' title='Defined at 678.'>cl_hash</a></li>
+<li><a href='#L722' title='Defined at 722.'>char_init</a></li>
+<li><a href='#L732' title='Defined at 732.'>char_out</a></li>
+<li><a href='#L743' title='Defined at 743.'>flush_char</a></li>
+<li><a href='#L752' title='Defined at 752.'>gifPutWord</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L2' name='L2'></a>   2 <em class='sharp'>#include</em> &lt;math.h&gt;
+<a id='L3' name='L3'></a>   3 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L4' name='L4'></a>   4 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L5' name='L5'></a>   5 <em class='sharp'>#include</em> "<a href='200.html'>gd.h</a>"
+<a id='L6' name='L6'></a>   6 
+<a id='L7' name='L7'></a>   7 <em class='comment'>/* Code drawn from ppmtogif.c, from the pbmplus package</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>**</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>** Based on GIFENCOD by David Rowley &lt;mgardi@watdscu.waterloo.edu&gt;. A</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>** Lempel-Zim compression based on "compress".</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>**</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>** Modified by Marcel Wijkstra &lt;wijkstra@fwi.uva.nl&gt;</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>**</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>** Copyright (C) 1989 by Jef Poskanzer.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>** Permission to use, copy, modify, and distribute this software and its</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>** documentation for any purpose and without fee is hereby granted, provided</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>** that the above copyright notice appear in all copies and that both that</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>** copyright notice and this permission notice appear in supporting</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>** documentation.  This software is provided "as is" without express or</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>** implied warranty.</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>**</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>** The Graphics Interchange Format(c) is the Copyright property of</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>** CompuServe Incorporated.  GIF(sm) is a Service Mark property of</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>** CompuServe Incorporated.</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>*/</em>
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <em class='comment'>/*</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * a code_int must be able to hold 2**GIFBITS values of type int, and also -1</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> */</em>
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>typedef</strong> <strong class='reserved'>int</strong>             <a href='../R/17583.html' title='Multiple referred from 19 places.'>code_int</a>;
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#ifdef</em> <a href='../Y/5605.html' title='Multiple used in 3 places.'>SIGNED_COMPARE_SLOW</a>
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>typedef</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <strong class='reserved'>int</strong> <a href='../R/17843.html' title='Multiple referred from 6 places.'>count_int</a>;
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>typedef</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong> <strong class='reserved'>int</strong> count_short;
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#else</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>typedef</strong> <strong class='reserved'>long</strong> <strong class='reserved'>int</strong>          <a href='../R/17843.html' title='Multiple referred from 6 places.'>count_int</a>;
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#endif</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='comment'>/* 2.0.28: threadsafe */</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#define</em> <a href='../R/21078.html' title='Multiple referred from 2 places.'>maxbits</a> <a href='../S/212.html#L423' title='Defined at 423 in ext/gd/libgd/gd_gif_out.c.'>GIFBITS</a>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <em class='comment'>/* should NEVER generate this code */</em>
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#define</em> <a href='../R/21079.html' title='Multiple referred from 3 places.'>maxmaxcode</a> ((<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)1 &lt;&lt; <a href='../S/212.html#L423' title='Defined at 423 in ext/gd/libgd/gd_gif_out.c.'>GIFBITS</a>)
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#define</em> <a href='../R/3105.html' title='Multiple referred from 3 places.'>HSIZE</a>  5003            <em class='comment'>/* 80% occupancy */</em>
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#define</em> <a href='../R/20494.html' title='Multiple referred from 3 places.'>hsize</a> <a href='../S/212.html#L47' title='Defined at 47 in ext/gd/libgd/gd_gif_out.c.'>HSIZE</a>            <em class='comment'>/* Apparently invariant, left over from</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>                                        compress */</em>
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>int</strong> <a href='../Y/7354.html' title='Multiple used in 26 places.'>Width</a>, <a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a>;
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>int</strong> <a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a>, <a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a>;
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>long</strong> <a href='../Y/1281.html' title='Multiple used in 4 places.'>CountDown</a>;
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>int</strong> <a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a>;
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>int</strong> <a href='../Y/3485.html' title='Multiple used in 4 places.'>Interlace</a>;
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>int</strong> <a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>;                        <em class='comment'>/* number of bits/code */</em>
+<a id='L58' name='L58'></a>  58         <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a>;                  <em class='comment'>/* maximum code, given n_bits */</em>
+<a id='L59' name='L59'></a>  59         <a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a> <a href='../Y/21964.html' title='Multiple used in 24 places.'>htab</a> [<a href='../S/212.html#L47' title='Defined at 47 in ext/gd/libgd/gd_gif_out.c.'>HSIZE</a>];
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>unsigned</strong> <strong class='reserved'>short</strong> <a href='../Y/14001.html' title='Multiple used in 2 places.'>codetab</a> [<a href='../S/212.html#L47' title='Defined at 47 in ext/gd/libgd/gd_gif_out.c.'>HSIZE</a>];
+<a id='L61' name='L61'></a>  61         <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a>;                  <em class='comment'>/* first unused entry */</em>
+<a id='L62' name='L62'></a>  62         <em class='comment'>/*</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'>         * block compression parameters -- after all codes are used up,</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>         * and compression rate changes, start over.</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>         */</em>
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>int</strong> <a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a>;
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>int</strong> <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>;
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>long</strong> <strong class='reserved'>int</strong> <a href='../Y/23009.html' title='Multiple used in 4 places.'>in_count</a>;            <em class='comment'>/* length of input */</em>
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>long</strong> <strong class='reserved'>int</strong> <a href='../Y/30115.html' title='Multiple used in 4 places.'>out_count</a>;           <em class='comment'>/* # of codes output (for debugging) */</em>
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>int</strong> <a href='../Y/18814.html' title='Multiple used in 4 places.'>g_init_bits</a>;
+<a id='L72' name='L72'></a>  72         <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> * <a href='../Y/18817.html' title='Multiple used in 4 places.'>g_outfile</a>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <strong class='reserved'>int</strong> <a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a>;
+<a id='L75' name='L75'></a>  75         <strong class='reserved'>int</strong> <a href='../Y/1800.html' title='Multiple used in 4 places.'>EOFCode</a>;
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a>;
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>int</strong> <a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a>;
+<a id='L78' name='L78'></a>  78         <em class='comment'>/*</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>         * Number of characters so far in this 'packet'</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>         */</em>
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>int</strong> <a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a>;
+<a id='L82' name='L82'></a>  82         <em class='comment'>/*</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'>         * Define the storage for the packet accumulator</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'>         */</em>
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>char</strong> <a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>[ 256 ];
+<a id='L86' name='L86'></a>  86 <em class='brace'>}</em> <a href='../R/2905.html' title='Multiple referred from 20 places.'>GifCtx</a>;
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>(<strong class='reserved'>int</strong> <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a>, <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> *<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L89' name='L89'></a>  89 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../S/212.html#L144' title='Defined at 144 in ext/gd/libgd/gd_gif_out.c.'>colorstobpp</a>(<strong class='reserved'>int</strong> <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a>);
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L182' title='Defined at 182 in ext/gd/libgd/gd_gif_out.c.'>BumpPixel</a> (<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L91' name='L91'></a>  91 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../S/212.html#L238' title='Defined at 238 in ext/gd/libgd/gd_gif_out.c.'>GIFNextPixel</a> (<a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L92' name='L92'></a>  92 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L257' title='Defined at 257 in ext/gd/libgd/gd_gif_out.c.'>GIFEncode</a> (<a href='../S/216.html#L25' title='Defined at 25 in ext/gd/libgd/gd_io.h.'>gdIOCtxPtr</a> <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>, <strong class='reserved'>int</strong> <a href='../Y/2578.html' title='Multiple used in 3 places.'>GWidth</a>, <strong class='reserved'>int</strong> <a href='../Y/2549.html' title='Multiple used in 3 places.'>GHeight</a>, <strong class='reserved'>int</strong> <a href='../Y/2550.html' title='Multiple used in 3 places.'>GInterlace</a>, <strong class='reserved'>int</strong> <a href='../Y/311.html' title='Multiple used in 6 places.'>Background</a>, <strong class='reserved'>int</strong> <a href='../Y/6670.html' title='Multiple used in 12 places.'>Transparent</a>, <strong class='reserved'>int</strong> <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>, <strong class='reserved'>int</strong> *<a href='../Y/5440.html' title='Multiple used in 3 places.'>Red</a>, <strong class='reserved'>int</strong> *<a href='../Y/2667.html' title='Multiple used in 3 places.'>Green</a>, <strong class='reserved'>int</strong> *<a href='../Y/327.html' title='Multiple used in 3 places.'>Blue</a>, <a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>);
+<a id='L93' name='L93'></a>  93 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../D/20535.html' title='Multiple defined in 2 places.'>compress</a> (<strong class='reserved'>int</strong> <a href='../Y/23226.html' title='Multiple used in 4 places.'>init_bits</a>, <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> *<a href='../Y/30157.html' title='Multiple used in 34 places.'>outfile</a>, <a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L94' name='L94'></a>  94 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a> (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L95' name='L95'></a>  95 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L667' title='Defined at 667 in ext/gd/libgd/gd_gif_out.c.'>cl_block</a> (<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L96' name='L96'></a>  96 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L678' title='Defined at 678 in ext/gd/libgd/gd_gif_out.c.'>cl_hash</a> (<strong class='reserved'>register</strong> <a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a> <a href='../Y/13675.html' title='Multiple used in 6 places.'>chsize</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L97' name='L97'></a>  97 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L722' title='Defined at 722 in ext/gd/libgd/gd_gif_out.c.'>char_init</a> (<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L98' name='L98'></a>  98 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L732' title='Defined at 732 in ext/gd/libgd/gd_gif_out.c.'>char_out</a> (<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L99' name='L99'></a>  99 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/212.html#L743' title='Defined at 743 in ext/gd/libgd/gd_gif_out.c.'>flush_char</a> (<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L100' name='L100'></a> 100 <strong class='reserved'>void</strong> * gdImageGifPtr (<a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <strong class='reserved'>int</strong> *<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>)
+<a id='L101' name='L101'></a> 101 <em class='brace'>{</em>
+<a id='L102' name='L102'></a> 102   <strong class='reserved'>void</strong> *<a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>;
+<a id='L103' name='L103'></a> 103   <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> *<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a> = <a href='../D/22931.html' title='Multiple defined in 2 places.'>gdNewDynamicCtx</a> (2048, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L104' name='L104'></a> 104   <a href='../D/22836.html' title='Multiple defined in 2 places.'>gdImageGifCtx</a> (<a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L105' name='L105'></a> 105   <a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a> = <a href='../D/22678.html' title='Multiple defined in 2 places.'>gdDPExtractData</a> (<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>, <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>);
+<a id='L106' name='L106'></a> 106   <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>-&gt;<a href='../Y/18869.html' title='Multiple used in 51 places.'>gd_free</a> (<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L107' name='L107'></a> 107   <strong class='reserved'>return</strong> <a href='../Y/35124.html' title='Multiple used in 773 places.'>rv</a>;
+<a id='L108' name='L108'></a> 108 <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 <strong class='reserved'>void</strong> <a href='../S/200.html#L588' title='Referred from 588 in ext/gd/libgd/gd.h.'>gdImageGif</a> (<a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../Y/2301.html' title='Multiple used in 249 places.'>FILE</a> * <a href='../Y/30098.html' title='Multiple used in 18 places.'>outFile</a>)
+<a id='L111' name='L111'></a> 111 <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112   <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> *<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a> = <a href='../D/22933.html' title='Multiple defined in 2 places.'>gdNewFileCtx</a> (<a href='../Y/30098.html' title='Multiple used in 18 places.'>outFile</a>);
+<a id='L113' name='L113'></a> 113   <a href='../D/22836.html' title='Multiple defined in 2 places.'>gdImageGifCtx</a> (<a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L114' name='L114'></a> 114   <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>-&gt;<a href='../Y/18869.html' title='Multiple used in 51 places.'>gd_free</a> (<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L115' name='L115'></a> 115 <em class='brace'>}</em>
+<a id='L116' name='L116'></a> 116 
+<a id='L117' name='L117'></a> 117 <strong class='reserved'>void</strong> <a href='../R/19966.html' title='Multiple referred from 4 places.'>gdImageGifCtx</a>(<a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/216.html#L25' title='Defined at 25 in ext/gd/libgd/gd_io.h.'>gdIOCtxPtr</a> <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>)
+<a id='L118' name='L118'></a> 118 <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119         <a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a> = 0, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a> = <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>;
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>int</strong> <a href='../Y/23382.html' title='Multiple used in 16 places.'>interlace</a>, <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>;
+<a id='L121' name='L121'></a> 121         <a href='../Y/23382.html' title='Multiple used in 16 places.'>interlace</a> = <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>-&gt;<a href='../Y/23382.html' title='Multiple used in 16 places.'>interlace</a>;
+<a id='L122' name='L122'></a> 122         <strong class='reserved'>if</strong> (<a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>-&gt;<a href='../Y/38984.html' title='Multiple used in 122 places.'>trueColor</a>) <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                 <em class='comment'>/* Expensive, but the only way that produces an</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'>                        acceptable result: mix down to a palette</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'>                        based temporary image. */</em>
+<a id='L126' name='L126'></a> 126                 <a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a> = <a href='../D/22806.html' title='Multiple defined in 2 places.'>gdImageCreatePaletteFromTrueColor</a>(<a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, 1, 256);
+<a id='L127' name='L127'></a> 127                 <strong class='reserved'>if</strong> (!<a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a>) <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128                         <strong class='reserved'>return</strong>;
+<a id='L129' name='L129'></a> 129                 <em class='brace'>}</em>
+<a id='L130' name='L130'></a> 130                 <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a> = <a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a>;
+<a id='L131' name='L131'></a> 131         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132         <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a> = <a href='../S/212.html#L144' title='Defined at 144 in ext/gd/libgd/gd_gif_out.c.'>colorstobpp</a>(<a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/14083.html' title='Multiple used in 62 places.'>colorsTotal</a>);
+<a id='L133' name='L133'></a> 133         <em class='comment'>/* All set, let's do it. */</em>
+<a id='L134' name='L134'></a> 134         <a href='../S/212.html#L257' title='Defined at 257 in ext/gd/libgd/gd_gif_out.c.'>GIFEncode</a>(
+<a id='L135' name='L135'></a> 135                 <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/37921.html' title='Multiple used in 180 places.'>sx</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/37932.html' title='Multiple used in 173 places.'>sy</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/23382.html' title='Multiple used in 16 places.'>interlace</a>, 0, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/38949.html' title='Multiple used in 73 places.'>transparent</a>, <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>,
+<a id='L136' name='L136'></a> 136                 <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/34215.html' title='Multiple used in 130 places.'>red</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/19515.html' title='Multiple used in 130 places.'>green</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>-&gt;<a href='../Y/12789.html' title='Multiple used in 128 places.'>blue</a>, <a href='../Y/38465.html' title='Multiple used in 5 places.'>tim</a>);
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>if</strong> (<a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a>) <em class='brace'>{</em>
+<a id='L138' name='L138'></a> 138                 <em class='comment'>/* Destroy palette based temporary image. */</em>
+<a id='L139' name='L139'></a> 139                 <a href='../D/22812.html' title='Multiple defined in 2 places.'>gdImageDestroy</a>( <a href='../Y/32789.html' title='Multiple used in 6 places.'>pim</a>);
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141 <em class='brace'>}</em>
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong>
+<a id='L144' name='L144'></a> 144 <a href='../R/17630.html' title='Multiple referred from 2 places.'>colorstobpp</a>(<strong class='reserved'>int</strong> <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a>)
+<a id='L145' name='L145'></a> 145 <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146     <strong class='reserved'>int</strong> <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 0;
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148     <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 2 )
+<a id='L149' name='L149'></a> 149         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 1;
+<a id='L150' name='L150'></a> 150     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 4 )
+<a id='L151' name='L151'></a> 151         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 2;
+<a id='L152' name='L152'></a> 152     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 8 )
+<a id='L153' name='L153'></a> 153         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 3;
+<a id='L154' name='L154'></a> 154     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 16 )
+<a id='L155' name='L155'></a> 155         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 4;
+<a id='L156' name='L156'></a> 156     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 32 )
+<a id='L157' name='L157'></a> 157         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 5;
+<a id='L158' name='L158'></a> 158     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 64 )
+<a id='L159' name='L159'></a> 159         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 6;
+<a id='L160' name='L160'></a> 160     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 128 )
+<a id='L161' name='L161'></a> 161         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 7;
+<a id='L162' name='L162'></a> 162     <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( <a href='../Y/14082.html' title='Multiple used in 43 places.'>colors</a> &lt;= 256 )
+<a id='L163' name='L163'></a> 163         <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a> = 8;
+<a id='L164' name='L164'></a> 164     <strong class='reserved'>return</strong> <a href='../Y/12842.html' title='Multiple used in 10 places.'>bpp</a>;
+<a id='L165' name='L165'></a> 165     <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167 <em class='comment'>/*****************************************************************************</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'> *</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'> * GIFENCODE.C    - GIF Image compression interface</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'> *</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'> * GIFEncode( FName, GHeight, GWidth, GInterlace, Background, Transparent,</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'> *            BitsPerPixel, Red, Green, Blue, gdImagePtr )</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'> *</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'> *****************************************************************************/</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176 <em class='sharp'>#define</em> <a href='../R/12038.html' title='Multiple referred from 715 places.'>TRUE</a> 1
+<a id='L177' name='L177'></a> 177 <em class='sharp'>#define</em> <a href='../R/2044.html' title='Multiple referred from 724 places.'>FALSE</a> 0
+<a id='L178' name='L178'></a> 178 <em class='comment'>/*</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * Bump the 'curx' and 'cury' to point to the next pixel</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> */</em>
+<a id='L181' name='L181'></a> 181 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L182' name='L182'></a> 182 <a href='../R/553.html' title='Multiple referred from 2 places.'>BumpPixel</a>(<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L183' name='L183'></a> 183 <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184         <em class='comment'>/*</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'>         * Bump the current X position</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'>         */</em>
+<a id='L187' name='L187'></a> 187         ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a>);
+<a id='L188' name='L188'></a> 188 
+<a id='L189' name='L189'></a> 189         <em class='comment'>/*</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'>         * If we are at the end of a scan line, set curx back to the beginning</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'>         * If we are interlaced, bump the cury to the appropriate spot,</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'>         * otherwise, just increment it.</em>
+<a id='L193' name='L193'></a> 193 <em class='comment'>         */</em>
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a> == <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/7354.html' title='Multiple used in 26 places.'>Width</a> ) <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a> = 0;
+<a id='L196' name='L196'></a> 196 
+<a id='L197' name='L197'></a> 197                 <strong class='reserved'>if</strong>( !<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/3485.html' title='Multiple used in 4 places.'>Interlace</a> )
+<a id='L198' name='L198'></a> 198                         ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a>);
+<a id='L199' name='L199'></a> 199                 <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200                      <strong class='reserved'>switch</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a> ) <em class='brace'>{</em>
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202                        <strong class='reserved'>case</strong> 0:
+<a id='L203' name='L203'></a> 203                           <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> += 8;
+<a id='L204' name='L204'></a> 204                           <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> &gt;= <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a> ) <em class='brace'>{</em>
+<a id='L205' name='L205'></a> 205                                 ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a>);
+<a id='L206' name='L206'></a> 206                                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> = 4;
+<a id='L207' name='L207'></a> 207                           <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208                           <strong class='reserved'>break</strong>;
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210                        <strong class='reserved'>case</strong> 1:
+<a id='L211' name='L211'></a> 211                           <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> += 8;
+<a id='L212' name='L212'></a> 212                           <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> &gt;= <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a> ) <em class='brace'>{</em>
+<a id='L213' name='L213'></a> 213                                 ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a>);
+<a id='L214' name='L214'></a> 214                                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> = 2;
+<a id='L215' name='L215'></a> 215                           <em class='brace'>}</em>
+<a id='L216' name='L216'></a> 216                           <strong class='reserved'>break</strong>;
+<a id='L217' name='L217'></a> 217 
+<a id='L218' name='L218'></a> 218                        <strong class='reserved'>case</strong> 2:
+<a id='L219' name='L219'></a> 219                           <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> += 4;
+<a id='L220' name='L220'></a> 220                           <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> &gt;= <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a> ) <em class='brace'>{</em>
+<a id='L221' name='L221'></a> 221                              ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a>);
+<a id='L222' name='L222'></a> 222                              <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> = 1;
+<a id='L223' name='L223'></a> 223                           <em class='brace'>}</em>
+<a id='L224' name='L224'></a> 224                           <strong class='reserved'>break</strong>;
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226                        <strong class='reserved'>case</strong> 3:
+<a id='L227' name='L227'></a> 227                           <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> += 2;
+<a id='L228' name='L228'></a> 228                           <strong class='reserved'>break</strong>;
+<a id='L229' name='L229'></a> 229                         <em class='brace'>}</em>
+<a id='L230' name='L230'></a> 230                 <em class='brace'>}</em>
+<a id='L231' name='L231'></a> 231         <em class='brace'>}</em>
+<a id='L232' name='L232'></a> 232 <em class='brace'>}</em>
+<a id='L233' name='L233'></a> 233 
+<a id='L234' name='L234'></a> 234 <em class='comment'>/*</em>
+<a id='L235' name='L235'></a> 235 <em class='comment'> * Return the next pixel from the image</em>
+<a id='L236' name='L236'></a> 236 <em class='comment'> */</em>
+<a id='L237' name='L237'></a> 237 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong>
+<a id='L238' name='L238'></a> 238 <a href='../R/2836.html' title='Multiple referred from 4 places.'>GIFNextPixel</a>(<a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L239' name='L239'></a> 239 <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>int</strong> <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>;
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242         <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1281.html' title='Multiple used in 4 places.'>CountDown</a> == 0 )
+<a id='L243' name='L243'></a> 243                 <strong class='reserved'>return</strong> <a href='../Y/1799.html' title='Multiple used in 148 places.'>EOF</a>;
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         --(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1281.html' title='Multiple used in 4 places.'>CountDown</a>);
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247         <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../D/22832.html' title='Multiple defined in 2 places.'>gdImageGetPixel</a>(<a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a>);
+<a id='L248' name='L248'></a> 248 
+<a id='L249' name='L249'></a> 249         <a href='../S/212.html#L182' title='Defined at 182 in ext/gd/libgd/gd_gif_out.c.'>BumpPixel</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L250' name='L250'></a> 250 
+<a id='L251' name='L251'></a> 251         <strong class='reserved'>return</strong> <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>;
+<a id='L252' name='L252'></a> 252 <em class='brace'>}</em>
+<a id='L253' name='L253'></a> 253 
+<a id='L254' name='L254'></a> 254 <em class='comment'>/* public */</em>
+<a id='L255' name='L255'></a> 255 
+<a id='L256' name='L256'></a> 256 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L257' name='L257'></a> 257 <a href='../R/2835.html' title='Multiple referred from 2 places.'>GIFEncode</a>(<a href='../S/216.html#L25' title='Defined at 25 in ext/gd/libgd/gd_io.h.'>gdIOCtxPtr</a> <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>, <strong class='reserved'>int</strong> <a href='../Y/2578.html' title='Multiple used in 3 places.'>GWidth</a>, <strong class='reserved'>int</strong> <a href='../Y/2549.html' title='Multiple used in 3 places.'>GHeight</a>, <strong class='reserved'>int</strong> <a href='../Y/2550.html' title='Multiple used in 3 places.'>GInterlace</a>, <strong class='reserved'>int</strong> <a href='../Y/311.html' title='Multiple used in 6 places.'>Background</a>, <strong class='reserved'>int</strong> <a href='../Y/6670.html' title='Multiple used in 12 places.'>Transparent</a>, <strong class='reserved'>int</strong> <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>, <strong class='reserved'>int</strong> *<a href='../Y/5440.html' title='Multiple used in 3 places.'>Red</a>, <strong class='reserved'>int</strong> *<a href='../Y/2667.html' title='Multiple used in 3 places.'>Green</a>, <strong class='reserved'>int</strong> *<a href='../Y/327.html' title='Multiple used in 3 places.'>Blue</a>, <a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>)
+<a id='L258' name='L258'></a> 258 <em class='brace'>{</em>
+<a id='L259' name='L259'></a> 259         <strong class='reserved'>int</strong> <a href='../D/306.html' title='Multiple defined in 4 places.'>B</a>;
+<a id='L260' name='L260'></a> 260         <strong class='reserved'>int</strong> <a href='../Y/5420.html' title='Multiple used in 3 places.'>RWidth</a>, <a href='../Y/5343.html' title='Multiple used in 3 places.'>RHeight</a>;
+<a id='L261' name='L261'></a> 261         <strong class='reserved'>int</strong> <a href='../Y/3932.html' title='Multiple used in 3 places.'>LeftOfs</a>, <a href='../Y/6659.html' title='Multiple used in 3 places.'>TopOfs</a>;
+<a id='L262' name='L262'></a> 262         <strong class='reserved'>int</strong> <a href='../Y/5466.html' title='Multiple used in 3 places.'>Resolution</a>;
+<a id='L263' name='L263'></a> 263         <strong class='reserved'>int</strong> <a href='../Y/1266.html' title='Multiple used in 3 places.'>ColorMapSize</a>;
+<a id='L264' name='L264'></a> 264         <strong class='reserved'>int</strong> <a href='../Y/3476.html' title='Multiple used in 5 places.'>InitCodeSize</a>;
+<a id='L265' name='L265'></a> 265         <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L266' name='L266'></a> 266                 <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>;
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268                 <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(&amp;<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>, 0, <strong class='reserved'>sizeof</strong>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>));
+<a id='L269' name='L269'></a> 269         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/3485.html' title='Multiple used in 4 places.'>Interlace</a> = <a href='../Y/2550.html' title='Multiple used in 3 places.'>GInterlace</a>;
+<a id='L270' name='L270'></a> 270                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/23009.html' title='Multiple used in 4 places.'>in_count</a> = 1;
+<a id='L271' name='L271'></a> 271 
+<a id='L272' name='L272'></a> 272         <a href='../Y/1266.html' title='Multiple used in 3 places.'>ColorMapSize</a> = 1 &lt;&lt; <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>;
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274         <a href='../Y/5420.html' title='Multiple used in 3 places.'>RWidth</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/7354.html' title='Multiple used in 26 places.'>Width</a> = <a href='../Y/2578.html' title='Multiple used in 3 places.'>GWidth</a>;
+<a id='L275' name='L275'></a> 275         <a href='../Y/5343.html' title='Multiple used in 3 places.'>RHeight</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a> = <a href='../Y/2549.html' title='Multiple used in 3 places.'>GHeight</a>;
+<a id='L276' name='L276'></a> 276         <a href='../Y/3932.html' title='Multiple used in 3 places.'>LeftOfs</a> = <a href='../Y/6659.html' title='Multiple used in 3 places.'>TopOfs</a> = 0;
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278         <a href='../Y/5466.html' title='Multiple used in 3 places.'>Resolution</a> = <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>;
+<a id='L279' name='L279'></a> 279 
+<a id='L280' name='L280'></a> 280         <em class='comment'>/*</em>
+<a id='L281' name='L281'></a> 281 <em class='comment'>         * Calculate number of bits we are expecting</em>
+<a id='L282' name='L282'></a> 282 <em class='comment'>         */</em>
+<a id='L283' name='L283'></a> 283         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/1281.html' title='Multiple used in 4 places.'>CountDown</a> = (<strong class='reserved'>long</strong>)<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/7354.html' title='Multiple used in 26 places.'>Width</a> * (<strong class='reserved'>long</strong>)<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a>;
+<a id='L284' name='L284'></a> 284 
+<a id='L285' name='L285'></a> 285         <em class='comment'>/*</em>
+<a id='L286' name='L286'></a> 286 <em class='comment'>         * Indicate which pass we are on (if interlace)</em>
+<a id='L287' name='L287'></a> 287 <em class='comment'>         */</em>
+<a id='L288' name='L288'></a> 288         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/5265.html' title='Multiple used in 6 places.'>Pass</a> = 0;
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290         <em class='comment'>/*</em>
+<a id='L291' name='L291'></a> 291 <em class='comment'>         * The initial code size</em>
+<a id='L292' name='L292'></a> 292 <em class='comment'>         */</em>
+<a id='L293' name='L293'></a> 293         <strong class='reserved'>if</strong>( <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a> &lt;= 1 )
+<a id='L294' name='L294'></a> 294                 <a href='../Y/3476.html' title='Multiple used in 5 places.'>InitCodeSize</a> = 2;
+<a id='L295' name='L295'></a> 295         <strong class='reserved'>else</strong>
+<a id='L296' name='L296'></a> 296                 <a href='../Y/3476.html' title='Multiple used in 5 places.'>InitCodeSize</a> = <a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a>;
+<a id='L297' name='L297'></a> 297 
+<a id='L298' name='L298'></a> 298         <em class='comment'>/*</em>
+<a id='L299' name='L299'></a> 299 <em class='comment'>         * Set up the current x and y position</em>
+<a id='L300' name='L300'></a> 300 <em class='comment'>         */</em>
+<a id='L301' name='L301'></a> 301         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/14913.html' title='Multiple used in 6 places.'>curx</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/14914.html' title='Multiple used in 14 places.'>cury</a> = 0;
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303         <em class='comment'>/*</em>
+<a id='L304' name='L304'></a> 304 <em class='comment'>         * Write the Magic header</em>
+<a id='L305' name='L305'></a> 305 <em class='comment'>         */</em>
+<a id='L306' name='L306'></a> 306         <a href='../D/22950.html' title='Multiple defined in 2 places.'>gdPutBuf</a>(<a href='../Y/6670.html' title='Multiple used in 12 places.'>Transparent</a> &lt; 0 ? "GIF87a" : "GIF89a", 6, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308         <em class='comment'>/*</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'>         * Write out the screen width and height</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'>         */</em>
+<a id='L311' name='L311'></a> 311         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/5420.html' title='Multiple used in 3 places.'>RWidth</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L312' name='L312'></a> 312         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/5343.html' title='Multiple used in 3 places.'>RHeight</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L313' name='L313'></a> 313 
+<a id='L314' name='L314'></a> 314         <em class='comment'>/*</em>
+<a id='L315' name='L315'></a> 315 <em class='comment'>         * Indicate that there is a global colour map</em>
+<a id='L316' name='L316'></a> 316 <em class='comment'>         */</em>
+<a id='L317' name='L317'></a> 317         <a href='../D/306.html' title='Multiple defined in 4 places.'>B</a> = 0x80;       <em class='comment'>/* Yes, there is a color map */</em>
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319         <em class='comment'>/*</em>
+<a id='L320' name='L320'></a> 320 <em class='comment'>         * OR in the resolution</em>
+<a id='L321' name='L321'></a> 321 <em class='comment'>         */</em>
+<a id='L322' name='L322'></a> 322         <a href='../D/306.html' title='Multiple defined in 4 places.'>B</a> |= (<a href='../Y/5466.html' title='Multiple used in 3 places.'>Resolution</a> - 1) &lt;&lt; 5;
+<a id='L323' name='L323'></a> 323 
+<a id='L324' name='L324'></a> 324         <em class='comment'>/*</em>
+<a id='L325' name='L325'></a> 325 <em class='comment'>         * OR in the Bits per Pixel</em>
+<a id='L326' name='L326'></a> 326 <em class='comment'>         */</em>
+<a id='L327' name='L327'></a> 327         <a href='../D/306.html' title='Multiple defined in 4 places.'>B</a> |= (<a href='../Y/326.html' title='Multiple used in 10 places.'>BitsPerPixel</a> - 1);
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329         <em class='comment'>/*</em>
+<a id='L330' name='L330'></a> 330 <em class='comment'>         * Write it out</em>
+<a id='L331' name='L331'></a> 331 <em class='comment'>         */</em>
+<a id='L332' name='L332'></a> 332         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../D/306.html' title='Multiple defined in 4 places.'>B</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L333' name='L333'></a> 333 
+<a id='L334' name='L334'></a> 334         <em class='comment'>/*</em>
+<a id='L335' name='L335'></a> 335 <em class='comment'>         * Write out the Background colour</em>
+<a id='L336' name='L336'></a> 336 <em class='comment'>         */</em>
+<a id='L337' name='L337'></a> 337         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/311.html' title='Multiple used in 6 places.'>Background</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L338' name='L338'></a> 338 
+<a id='L339' name='L339'></a> 339         <em class='comment'>/*</em>
+<a id='L340' name='L340'></a> 340 <em class='comment'>         * Byte of 0's (future expansion)</em>
+<a id='L341' name='L341'></a> 341 <em class='comment'>         */</em>
+<a id='L342' name='L342'></a> 342         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344         <em class='comment'>/*</em>
+<a id='L345' name='L345'></a> 345 <em class='comment'>         * Write out the Global Colour Map</em>
+<a id='L346' name='L346'></a> 346 <em class='comment'>         */</em>
+<a id='L347' name='L347'></a> 347         <strong class='reserved'>for</strong>( <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>=0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>&lt;<a href='../Y/1266.html' title='Multiple used in 3 places.'>ColorMapSize</a>; ++<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> ) <em class='brace'>{</em>
+<a id='L348' name='L348'></a> 348                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/5440.html' title='Multiple used in 3 places.'>Red</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>], <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L349' name='L349'></a> 349                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/2667.html' title='Multiple used in 3 places.'>Green</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>], <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L350' name='L350'></a> 350                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/327.html' title='Multiple used in 3 places.'>Blue</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>], <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L351' name='L351'></a> 351         <em class='brace'>}</em>
+<a id='L352' name='L352'></a> 352 
+<a id='L353' name='L353'></a> 353         <em class='comment'>/*</em>
+<a id='L354' name='L354'></a> 354 <em class='comment'>         * Write out extension for transparent colour index, if necessary.</em>
+<a id='L355' name='L355'></a> 355 <em class='comment'>         */</em>
+<a id='L356' name='L356'></a> 356         <strong class='reserved'>if</strong> ( <a href='../Y/6670.html' title='Multiple used in 12 places.'>Transparent</a> &gt;= 0 ) <em class='brace'>{</em>
+<a id='L357' name='L357'></a> 357             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( '!', <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L358' name='L358'></a> 358             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0xf9, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L359' name='L359'></a> 359             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 4, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L360' name='L360'></a> 360             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 1, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L361' name='L361'></a> 361             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L362' name='L362'></a> 362             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L363' name='L363'></a> 363             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( (<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>) <a href='../Y/6670.html' title='Multiple used in 12 places.'>Transparent</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L364' name='L364'></a> 364             <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L365' name='L365'></a> 365         <em class='brace'>}</em>
+<a id='L366' name='L366'></a> 366 
+<a id='L367' name='L367'></a> 367         <em class='comment'>/*</em>
+<a id='L368' name='L368'></a> 368 <em class='comment'>         * Write an Image separator</em>
+<a id='L369' name='L369'></a> 369 <em class='comment'>         */</em>
+<a id='L370' name='L370'></a> 370         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( ',', <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L371' name='L371'></a> 371 
+<a id='L372' name='L372'></a> 372         <em class='comment'>/*</em>
+<a id='L373' name='L373'></a> 373 <em class='comment'>         * Write the Image header</em>
+<a id='L374' name='L374'></a> 374 <em class='comment'>         */</em>
+<a id='L375' name='L375'></a> 375 
+<a id='L376' name='L376'></a> 376         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/3932.html' title='Multiple used in 3 places.'>LeftOfs</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L377' name='L377'></a> 377         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/6659.html' title='Multiple used in 3 places.'>TopOfs</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L378' name='L378'></a> 378         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/7354.html' title='Multiple used in 26 places.'>Width</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L379' name='L379'></a> 379         <a href='../S/212.html#L752' title='Defined at 752 in ext/gd/libgd/gd_gif_out.c.'>gifPutWord</a>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/3224.html' title='Multiple used in 26 places.'>Height</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L380' name='L380'></a> 380 
+<a id='L381' name='L381'></a> 381         <em class='comment'>/*</em>
+<a id='L382' name='L382'></a> 382 <em class='comment'>         * Write out whether or not the image is interlaced</em>
+<a id='L383' name='L383'></a> 383 <em class='comment'>         */</em>
+<a id='L384' name='L384'></a> 384         <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>.<a href='../Y/3485.html' title='Multiple used in 4 places.'>Interlace</a> )
+<a id='L385' name='L385'></a> 385                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0x40, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L386' name='L386'></a> 386         <strong class='reserved'>else</strong>
+<a id='L387' name='L387'></a> 387                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0x00, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L388' name='L388'></a> 388 
+<a id='L389' name='L389'></a> 389         <em class='comment'>/*</em>
+<a id='L390' name='L390'></a> 390 <em class='comment'>         * Write out the initial code size</em>
+<a id='L391' name='L391'></a> 391 <em class='comment'>         */</em>
+<a id='L392' name='L392'></a> 392         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/3476.html' title='Multiple used in 5 places.'>InitCodeSize</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L393' name='L393'></a> 393 
+<a id='L394' name='L394'></a> 394         <em class='comment'>/*</em>
+<a id='L395' name='L395'></a> 395 <em class='comment'>         * Go and actually compress the data</em>
+<a id='L396' name='L396'></a> 396 <em class='comment'>         */</em>
+<a id='L397' name='L397'></a> 397         <a href='../D/20535.html' title='Multiple defined in 2 places.'>compress</a>( <a href='../Y/3476.html' title='Multiple used in 5 places.'>InitCodeSize</a>+1, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>, <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, &amp;<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L398' name='L398'></a> 398 
+<a id='L399' name='L399'></a> 399         <em class='comment'>/*</em>
+<a id='L400' name='L400'></a> 400 <em class='comment'>         * Write out a Zero-length packet (to end the series)</em>
+<a id='L401' name='L401'></a> 401 <em class='comment'>         */</em>
+<a id='L402' name='L402'></a> 402         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( 0, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L403' name='L403'></a> 403 
+<a id='L404' name='L404'></a> 404         <em class='comment'>/*</em>
+<a id='L405' name='L405'></a> 405 <em class='comment'>         * Write the GIF file terminator</em>
+<a id='L406' name='L406'></a> 406 <em class='comment'>         */</em>
+<a id='L407' name='L407'></a> 407         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( ';', <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> );
+<a id='L408' name='L408'></a> 408 <em class='brace'>}</em>
+<a id='L409' name='L409'></a> 409 
+<a id='L410' name='L410'></a> 410 <em class='comment'>/***************************************************************************</em>
+<a id='L411' name='L411'></a> 411 <em class='comment'> *</em>
+<a id='L412' name='L412'></a> 412 <em class='comment'> *  GIFCOMPR.C       - GIF Image compression routines</em>
+<a id='L413' name='L413'></a> 413 <em class='comment'> *</em>
+<a id='L414' name='L414'></a> 414 <em class='comment'> *  Lempel-Ziv compression based on 'compress'.  GIF modifications by</em>
+<a id='L415' name='L415'></a> 415 <em class='comment'> *  David Rowley (mgardi@watdcsu.waterloo.edu)</em>
+<a id='L416' name='L416'></a> 416 <em class='comment'> *</em>
+<a id='L417' name='L417'></a> 417 <em class='comment'> ***************************************************************************/</em>
+<a id='L418' name='L418'></a> 418 
+<a id='L419' name='L419'></a> 419 <em class='comment'>/*</em>
+<a id='L420' name='L420'></a> 420 <em class='comment'> * General DEFINEs</em>
+<a id='L421' name='L421'></a> 421 <em class='comment'> */</em>
+<a id='L422' name='L422'></a> 422 
+<a id='L423' name='L423'></a> 423 <em class='sharp'>#define</em> <a href='../R/2834.html' title='Multiple referred from 3 places.'>GIFBITS</a>    12
+<a id='L424' name='L424'></a> 424 
+<a id='L425' name='L425'></a> 425 <em class='sharp'>#ifdef</em> NO_UCHAR
+<a id='L426' name='L426'></a> 426  <strong class='reserved'>typedef</strong> <strong class='reserved'>char</strong>   <a href='../R/17405.html' title='Multiple referred from 2 places.'>char_type</a>;
+<a id='L427' name='L427'></a> 427 <em class='sharp'>#else</em> <em class='comment'>/*NO_UCHAR*/</em>
+<a id='L428' name='L428'></a> 428  <strong class='reserved'>typedef</strong>        <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>   <a href='../R/17405.html' title='Multiple referred from 2 places.'>char_type</a>;
+<a id='L429' name='L429'></a> 429 <em class='sharp'>#endif</em> <em class='comment'>/*NO_UCHAR*/</em>
+<a id='L430' name='L430'></a> 430 
+<a id='L431' name='L431'></a> 431 <em class='comment'>/*</em>
+<a id='L432' name='L432'></a> 432 <em class='comment'> *</em>
+<a id='L433' name='L433'></a> 433 <em class='comment'> * GIF Image compression - modified 'compress'</em>
+<a id='L434' name='L434'></a> 434 <em class='comment'> *</em>
+<a id='L435' name='L435'></a> 435 <em class='comment'> * Based on: compress.c - File compression ala IEEE Computer, June 1984.</em>
+<a id='L436' name='L436'></a> 436 <em class='comment'> *</em>
+<a id='L437' name='L437'></a> 437 <em class='comment'> * By Authors:  Spencer W. Thomas       (decvax!harpo!utah-cs!utah-gr!thomas)</em>
+<a id='L438' name='L438'></a> 438 <em class='comment'> *              Jim McKie               (decvax!mcvax!jim)</em>
+<a id='L439' name='L439'></a> 439 <em class='comment'> *              Steve Davies            (decvax!vax135!petsd!peora!srd)</em>
+<a id='L440' name='L440'></a> 440 <em class='comment'> *              Ken Turkowski           (decvax!decwrl!turtlevax!ken)</em>
+<a id='L441' name='L441'></a> 441 <em class='comment'> *              James A. Woods          (decvax!ihnp4!ames!jaw)</em>
+<a id='L442' name='L442'></a> 442 <em class='comment'> *              Joe Orost               (decvax!vax135!petsd!joe)</em>
+<a id='L443' name='L443'></a> 443 <em class='comment'> *</em>
+<a id='L444' name='L444'></a> 444 <em class='comment'> */</em>
+<a id='L445' name='L445'></a> 445 <em class='sharp'>#include</em> &lt;ctype.h&gt;
+<a id='L446' name='L446'></a> 446 
+<a id='L447' name='L447'></a> 447 <em class='sharp'>#define</em> ARGVAL() (*++(*<a href='../Y/11912.html' title='Multiple used in 777 places.'>argv</a>) || (--<a href='../Y/9481.html' title='Multiple used in 906 places.'>argc</a> &amp;&amp; *++<a href='../Y/11912.html' title='Multiple used in 777 places.'>argv</a>))
+<a id='L448' name='L448'></a> 448 
+<a id='L449' name='L449'></a> 449 <em class='sharp'>#ifdef</em> COMPATIBLE               <em class='comment'>/* But wrong! */</em>
+<a id='L450' name='L450'></a> 450 <em class='sharp'># define</em> <a href='../R/4146.html' title='Multiple referred from 3 places.'>MAXCODE</a>(<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>)        ((<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>) 1 &lt;&lt; (<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>) - 1)
+<a id='L451' name='L451'></a> 451 <em class='sharp'>#else</em> <em class='comment'>/*COMPATIBLE*/</em>
+<a id='L452' name='L452'></a> 452 <em class='sharp'># define</em> <a href='../R/4146.html' title='Multiple referred from 3 places.'>MAXCODE</a>(<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>)        (((<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>) 1 &lt;&lt; (<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>)) - 1)
+<a id='L453' name='L453'></a> 453 <em class='sharp'>#endif</em> <em class='comment'>/*COMPATIBLE*/</em>
+<a id='L454' name='L454'></a> 454 
+<a id='L455' name='L455'></a> 455 <em class='sharp'>#define</em> <a href='../R/3170.html' title='Multiple referred from 5 places.'>HashTabOf</a>(<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>)       <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/21964.html' title='Multiple used in 24 places.'>htab</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]
+<a id='L456' name='L456'></a> 456 <em class='sharp'>#define</em> <a href='../R/1184.html' title='Multiple referred from 4 places.'>CodeTabOf</a>(<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>)    <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14001.html' title='Multiple used in 2 places.'>codetab</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]
+<a id='L457' name='L457'></a> 457 
+<a id='L458' name='L458'></a> 458 
+<a id='L459' name='L459'></a> 459 <em class='comment'>/*</em>
+<a id='L460' name='L460'></a> 460 <em class='comment'> * To save much memory, we overlay the table used by compress() with those</em>
+<a id='L461' name='L461'></a> 461 <em class='comment'> * used by decompress().  The tab_prefix table is the same size and type</em>
+<a id='L462' name='L462'></a> 462 <em class='comment'> * as the codetab.  The tab_suffix table needs 2**GIFBITS characters.  We</em>
+<a id='L463' name='L463'></a> 463 <em class='comment'> * get this from the beginning of htab.  The output stack uses the rest</em>
+<a id='L464' name='L464'></a> 464 <em class='comment'> * of htab, and contains characters.  There is plenty of room for any</em>
+<a id='L465' name='L465'></a> 465 <em class='comment'> * possible stack (stack used to be 8000 characters).</em>
+<a id='L466' name='L466'></a> 466 <em class='comment'> */</em>
+<a id='L467' name='L467'></a> 467 
+<a id='L468' name='L468'></a> 468 <em class='sharp'>#define</em> tab_prefixof(<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) <a href='../S/212.html#L456' title='Defined at 456 in ext/gd/libgd/gd_gif_out.c.'>CodeTabOf</a>(<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>)
+<a id='L469' name='L469'></a> 469 <em class='sharp'>#define</em> <a href='../S/212.html#L470' title='Referred from 470 in ext/gd/libgd/gd_gif_out.c.'>tab_suffixof</a>(<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>)        ((<a href='../D/20199.html' title='Multiple defined in 2 places.'>char_type</a>*)(<a href='../Y/21964.html' title='Multiple used in 24 places.'>htab</a>))[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]
+<a id='L470' name='L470'></a> 470 <em class='sharp'>#define</em> de_stack               ((<a href='../D/20199.html' title='Multiple defined in 2 places.'>char_type</a>*)&amp;<a href='../S/212.html#L469' title='Defined at 469 in ext/gd/libgd/gd_gif_out.c.'>tab_suffixof</a>((<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)1&lt;&lt;<a href='../S/212.html#L423' title='Defined at 423 in ext/gd/libgd/gd_gif_out.c.'>GIFBITS</a>))
+<a id='L471' name='L471'></a> 471 
+<a id='L472' name='L472'></a> 472 <em class='comment'>/*</em>
+<a id='L473' name='L473'></a> 473 <em class='comment'> * compress stdin to stdout</em>
+<a id='L474' name='L474'></a> 474 <em class='comment'> *</em>
+<a id='L475' name='L475'></a> 475 <em class='comment'> * Algorithm:  use open addressing double hashing (no chaining) on the</em>
+<a id='L476' name='L476'></a> 476 <em class='comment'> * prefix code / next character combination.  We do a variant of Knuth's</em>
+<a id='L477' name='L477'></a> 477 <em class='comment'> * algorithm D (vol. 3, sec. 6.4) along with G. Knott's relatively-prime</em>
+<a id='L478' name='L478'></a> 478 <em class='comment'> * secondary probe.  Here, the modular division first probe is gives way</em>
+<a id='L479' name='L479'></a> 479 <em class='comment'> * to a faster exclusive-or manipulation.  Also do block compression with</em>
+<a id='L480' name='L480'></a> 480 <em class='comment'> * an adaptive reset, whereby the code table is cleared when the compression</em>
+<a id='L481' name='L481'></a> 481 <em class='comment'> * ratio decreases, but after the table fills.  The variable-length output</em>
+<a id='L482' name='L482'></a> 482 <em class='comment'> * codes are re-sized at this point, and a special CLEAR code is generated</em>
+<a id='L483' name='L483'></a> 483 <em class='comment'> * for the decompressor.  Late addition:  construct the table according to</em>
+<a id='L484' name='L484'></a> 484 <em class='comment'> * file size for noticeable speed improvement on small files.  Please direct</em>
+<a id='L485' name='L485'></a> 485 <em class='comment'> * questions about this implementation to ames!jaw.</em>
+<a id='L486' name='L486'></a> 486 <em class='comment'> */</em>
+<a id='L487' name='L487'></a> 487 
+<a id='L488' name='L488'></a> 488 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L489' name='L489'></a> 489 <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a>(<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L490' name='L490'></a> 490 
+<a id='L491' name='L491'></a> 491 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L492' name='L492'></a> 492 <a href='../R/17736.html' title='Multiple referred from 18 places.'>compress</a>(<strong class='reserved'>int</strong> <a href='../Y/23226.html' title='Multiple used in 4 places.'>init_bits</a>, <a href='../S/216.html#L25' title='Defined at 25 in ext/gd/libgd/gd_io.h.'>gdIOCtxPtr</a> <a href='../Y/30157.html' title='Multiple used in 34 places.'>outfile</a>, <a href='../S/200.html#L260' title='Defined at 260 in ext/gd/libgd/gd.h.'>gdImagePtr</a> <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L493' name='L493'></a> 493 <em class='brace'>{</em>
+<a id='L494' name='L494'></a> 494     <strong class='reserved'>register</strong> <strong class='reserved'>long</strong> <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a>;
+<a id='L495' name='L495'></a> 495     <strong class='reserved'>register</strong> <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> <em class='comment'>/* = 0 */</em>;
+<a id='L496' name='L496'></a> 496     <strong class='reserved'>register</strong> <strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L497' name='L497'></a> 497     <strong class='reserved'>register</strong> <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a>;
+<a id='L498' name='L498'></a> 498     <strong class='reserved'>register</strong> <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/15780.html' title='Multiple used in 98 places.'>disp</a>;
+<a id='L499' name='L499'></a> 499     <strong class='reserved'>register</strong> <a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/20058.html' title='Multiple used in 5 places.'>hsize_reg</a>;
+<a id='L500' name='L500'></a> 500     <strong class='reserved'>register</strong> <strong class='reserved'>int</strong> <a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a>;
+<a id='L501' name='L501'></a> 501 
+<a id='L502' name='L502'></a> 502     <em class='comment'>/*</em>
+<a id='L503' name='L503'></a> 503 <em class='comment'>     * Set up the globals:  g_init_bits - initial number of bits</em>
+<a id='L504' name='L504'></a> 504 <em class='comment'>     *                      g_outfile   - pointer to output file</em>
+<a id='L505' name='L505'></a> 505 <em class='comment'>     */</em>
+<a id='L506' name='L506'></a> 506     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18814.html' title='Multiple used in 4 places.'>g_init_bits</a> = <a href='../Y/23226.html' title='Multiple used in 4 places.'>init_bits</a>;
+<a id='L507' name='L507'></a> 507     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18817.html' title='Multiple used in 4 places.'>g_outfile</a> = <a href='../Y/30157.html' title='Multiple used in 34 places.'>outfile</a>;
+<a id='L508' name='L508'></a> 508 
+<a id='L509' name='L509'></a> 509     <em class='comment'>/*</em>
+<a id='L510' name='L510'></a> 510 <em class='comment'>     * Set up the necessary values</em>
+<a id='L511' name='L511'></a> 511 <em class='comment'>     */</em>
+<a id='L512' name='L512'></a> 512     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> = 0;
+<a id='L513' name='L513'></a> 513     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/30115.html' title='Multiple used in 4 places.'>out_count</a> = 0;
+<a id='L514' name='L514'></a> 514     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a> = 0;
+<a id='L515' name='L515'></a> 515     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/23009.html' title='Multiple used in 4 places.'>in_count</a> = 1;
+<a id='L516' name='L516'></a> 516     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a> = <a href='../D/4791.html' title='Multiple defined in 2 places.'>MAXCODE</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18814.html' title='Multiple used in 4 places.'>g_init_bits</a>);
+<a id='L517' name='L517'></a> 517 
+<a id='L518' name='L518'></a> 518     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a> = (1 &lt;&lt; (<a href='../Y/23226.html' title='Multiple used in 4 places.'>init_bits</a> - 1));
+<a id='L519' name='L519'></a> 519     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1800.html' title='Multiple used in 4 places.'>EOFCode</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a> + 1;
+<a id='L520' name='L520'></a> 520     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a> + 2;
+<a id='L521' name='L521'></a> 521 
+<a id='L522' name='L522'></a> 522     <a href='../S/212.html#L722' title='Defined at 722 in ext/gd/libgd/gd_gif_out.c.'>char_init</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L523' name='L523'></a> 523 
+<a id='L524' name='L524'></a> 524     <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a> = <a href='../S/212.html#L238' title='Defined at 238 in ext/gd/libgd/gd_gif_out.c.'>GIFNextPixel</a>( <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L525' name='L525'></a> 525 
+<a id='L526' name='L526'></a> 526     <a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a> = 0;
+<a id='L527' name='L527'></a> 527     <strong class='reserved'>for</strong> ( <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> = (<strong class='reserved'>long</strong>) <a href='../S/212.html#L48' title='Defined at 48 in ext/gd/libgd/gd_gif_out.c.'>hsize</a>;  <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> &lt; 65536L; <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> *= 2L )
+<a id='L528' name='L528'></a> 528         ++<a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a>;
+<a id='L529' name='L529'></a> 529     <a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a> = 8 - <a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a>;                <em class='comment'>/* set hash code range bound */</em>
+<a id='L530' name='L530'></a> 530 
+<a id='L531' name='L531'></a> 531     <a href='../Y/20058.html' title='Multiple used in 5 places.'>hsize_reg</a> = <a href='../S/212.html#L48' title='Defined at 48 in ext/gd/libgd/gd_gif_out.c.'>hsize</a>;
+<a id='L532' name='L532'></a> 532     <a href='../S/212.html#L678' title='Defined at 678 in ext/gd/libgd/gd_gif_out.c.'>cl_hash</a>( (<a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a>) <a href='../Y/20058.html' title='Multiple used in 5 places.'>hsize_reg</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );            <em class='comment'>/* clear hash table */</em>
+<a id='L533' name='L533'></a> 533 
+<a id='L534' name='L534'></a> 534     <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a>( (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L535' name='L535'></a> 535 
+<a id='L536' name='L536'></a> 536 <em class='sharp'>#ifdef</em> <a href='../Y/5605.html' title='Multiple used in 3 places.'>SIGNED_COMPARE_SLOW</a>
+<a id='L537' name='L537'></a> 537     <strong class='reserved'>while</strong> ( (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = <a href='../S/212.html#L238' title='Defined at 238 in ext/gd/libgd/gd_gif_out.c.'>GIFNextPixel</a>( <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a> )) != (<strong class='reserved'>unsigned</strong>) <a href='../Y/1799.html' title='Multiple used in 148 places.'>EOF</a> ) <em class='brace'>{</em>
+<a id='L538' name='L538'></a> 538 <em class='sharp'>#else</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L539' name='L539'></a> 539     <strong class='reserved'>while</strong> ( (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = <a href='../S/212.html#L238' title='Defined at 238 in ext/gd/libgd/gd_gif_out.c.'>GIFNextPixel</a>( <a href='../Y/22693.html' title='Multiple used in 1693 places.'>im</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> )) != <a href='../Y/1799.html' title='Multiple used in 148 places.'>EOF</a> ) <em class='brace'>{</em>  <em class='comment'>/* } */</em>
+<a id='L540' name='L540'></a> 540 <em class='sharp'>#endif</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L541' name='L541'></a> 541 
+<a id='L542' name='L542'></a> 542         ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/23009.html' title='Multiple used in 4 places.'>in_count</a>);
+<a id='L543' name='L543'></a> 543 
+<a id='L544' name='L544'></a> 544         <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> = (<strong class='reserved'>long</strong>) (((<strong class='reserved'>long</strong>) <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> &lt;&lt; <a href='../S/212.html#L42' title='Defined at 42 in ext/gd/libgd/gd_gif_out.c.'>maxbits</a>) + <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a>);
+<a id='L545' name='L545'></a> 545         <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = (((<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> &lt;&lt; <a href='../Y/20057.html' title='Multiple used in 5 places.'>hshift</a>) ^ <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a>);    <em class='comment'>/* xor hashing */</em>
+<a id='L546' name='L546'></a> 546 
+<a id='L547' name='L547'></a> 547         <strong class='reserved'>if</strong> ( <a href='../S/212.html#L455' title='Defined at 455 in ext/gd/libgd/gd_gif_out.c.'>HashTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) == <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> ) <em class='brace'>{</em>
+<a id='L548' name='L548'></a> 548             <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a> = <a href='../S/212.html#L456' title='Defined at 456 in ext/gd/libgd/gd_gif_out.c.'>CodeTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>);
+<a id='L549' name='L549'></a> 549             <strong class='reserved'>continue</strong>;
+<a id='L550' name='L550'></a> 550         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ( (<strong class='reserved'>long</strong>)<a href='../S/212.html#L455' title='Defined at 455 in ext/gd/libgd/gd_gif_out.c.'>HashTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) &lt; 0 )      <em class='comment'>/* empty slot */</em>
+<a id='L551' name='L551'></a> 551             <strong class='reserved'>goto</strong> <a href='../Y/28637.html' title='Multiple used in 11 places.'>nomatch</a>;
+<a id='L552' name='L552'></a> 552         <a href='../Y/15780.html' title='Multiple used in 98 places.'>disp</a> = <a href='../Y/20058.html' title='Multiple used in 5 places.'>hsize_reg</a> - <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;           <em class='comment'>/* secondary hash (after G. Knott) */</em>
+<a id='L553' name='L553'></a> 553         <strong class='reserved'>if</strong> ( <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> == 0 )
+<a id='L554' name='L554'></a> 554             <a href='../Y/15780.html' title='Multiple used in 98 places.'>disp</a> = 1;
+<a id='L555' name='L555'></a> 555 <a href='../Y/33408.html' title='Multiple used in 4 places.'>probe</a>:
+<a id='L556' name='L556'></a> 556         <strong class='reserved'>if</strong> ( (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> -= <a href='../Y/15780.html' title='Multiple used in 98 places.'>disp</a>) &lt; 0 )
+<a id='L557' name='L557'></a> 557             <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> += <a href='../Y/20058.html' title='Multiple used in 5 places.'>hsize_reg</a>;
+<a id='L558' name='L558'></a> 558 
+<a id='L559' name='L559'></a> 559         <strong class='reserved'>if</strong> ( <a href='../S/212.html#L455' title='Defined at 455 in ext/gd/libgd/gd_gif_out.c.'>HashTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) == <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a> ) <em class='brace'>{</em>
+<a id='L560' name='L560'></a> 560             <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a> = <a href='../S/212.html#L456' title='Defined at 456 in ext/gd/libgd/gd_gif_out.c.'>CodeTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>);
+<a id='L561' name='L561'></a> 561             <strong class='reserved'>continue</strong>;
+<a id='L562' name='L562'></a> 562         <em class='brace'>}</em>
+<a id='L563' name='L563'></a> 563         <strong class='reserved'>if</strong> ( (<strong class='reserved'>long</strong>)<a href='../S/212.html#L455' title='Defined at 455 in ext/gd/libgd/gd_gif_out.c.'>HashTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) &gt; 0 )
+<a id='L564' name='L564'></a> 564             <strong class='reserved'>goto</strong> <a href='../Y/33408.html' title='Multiple used in 4 places.'>probe</a>;
+<a id='L565' name='L565'></a> 565 <a href='../Y/28637.html' title='Multiple used in 11 places.'>nomatch</a>:
+<a id='L566' name='L566'></a> 566         <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a> ( (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>) <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L567' name='L567'></a> 567         ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/30115.html' title='Multiple used in 4 places.'>out_count</a>);
+<a id='L568' name='L568'></a> 568         <a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L569' name='L569'></a> 569 <em class='sharp'>#ifdef</em> <a href='../Y/5605.html' title='Multiple used in 3 places.'>SIGNED_COMPARE_SLOW</a>
+<a id='L570' name='L570'></a> 570         <strong class='reserved'>if</strong> ( (<strong class='reserved'>unsigned</strong>) <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a> &lt; (<strong class='reserved'>unsigned</strong>) <a href='../S/212.html#L45' title='Defined at 45 in ext/gd/libgd/gd_gif_out.c.'>maxmaxcode</a>) <em class='brace'>{</em>
+<a id='L571' name='L571'></a> 571 <em class='sharp'>#else</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L572' name='L572'></a> 572         <strong class='reserved'>if</strong> ( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a> &lt; <a href='../S/212.html#L45' title='Defined at 45 in ext/gd/libgd/gd_gif_out.c.'>maxmaxcode</a> ) <em class='brace'>{</em>  <em class='comment'>/* } */</em>
+<a id='L573' name='L573'></a> 573 <em class='sharp'>#endif</em> <em class='comment'>/*SIGNED_COMPARE_SLOW*/</em>
+<a id='L574' name='L574'></a> 574             <a href='../S/212.html#L456' title='Defined at 456 in ext/gd/libgd/gd_gif_out.c.'>CodeTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a>++; <em class='comment'>/* code -&gt; hashtable */</em>
+<a id='L575' name='L575'></a> 575             <a href='../S/212.html#L455' title='Defined at 455 in ext/gd/libgd/gd_gif_out.c.'>HashTabOf</a> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>) = <a href='../Y/17689.html' title='Multiple used in 6 places.'>fcode</a>;
+<a id='L576' name='L576'></a> 576         <em class='brace'>}</em> <strong class='reserved'>else</strong>
+<a id='L577' name='L577'></a> 577                 <a href='../S/212.html#L667' title='Defined at 667 in ext/gd/libgd/gd_gif_out.c.'>cl_block</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L578' name='L578'></a> 578     <em class='brace'>}</em>
+<a id='L579' name='L579'></a> 579     <em class='comment'>/*</em>
+<a id='L580' name='L580'></a> 580 <em class='comment'>     * Put out the final code.</em>
+<a id='L581' name='L581'></a> 581 <em class='comment'>     */</em>
+<a id='L582' name='L582'></a> 582     <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a>( (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)<a href='../Y/16845.html' title='Multiple used in 148 places.'>ent</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L583' name='L583'></a> 583     ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/30115.html' title='Multiple used in 4 places.'>out_count</a>);
+<a id='L584' name='L584'></a> 584     <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a>( (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>) <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1800.html' title='Multiple used in 4 places.'>EOFCode</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L585' name='L585'></a> 585 <em class='brace'>}</em>
+<a id='L586' name='L586'></a> 586 
+<a id='L587' name='L587'></a> 587 <em class='comment'>/*****************************************************************</em>
+<a id='L588' name='L588'></a> 588 <em class='comment'> * TAG( output )</em>
+<a id='L589' name='L589'></a> 589 <em class='comment'> *</em>
+<a id='L590' name='L590'></a> 590 <em class='comment'> * Output the given code.</em>
+<a id='L591' name='L591'></a> 591 <em class='comment'> * Inputs:</em>
+<a id='L592' name='L592'></a> 592 <em class='comment'> *      code:   A n_bits-bit integer.  If == -1, then EOF.  This assumes</em>
+<a id='L593' name='L593'></a> 593 <em class='comment'> *              that n_bits =&lt; (long)wordsize - 1.</em>
+<a id='L594' name='L594'></a> 594 <em class='comment'> * Outputs:</em>
+<a id='L595' name='L595'></a> 595 <em class='comment'> *      Outputs code to the file.</em>
+<a id='L596' name='L596'></a> 596 <em class='comment'> * Assumptions:</em>
+<a id='L597' name='L597'></a> 597 <em class='comment'> *      Chars are 8 bits long.</em>
+<a id='L598' name='L598'></a> 598 <em class='comment'> * Algorithm:</em>
+<a id='L599' name='L599'></a> 599 <em class='comment'> *      Maintain a GIFBITS character long buffer (so that 8 codes will</em>
+<a id='L600' name='L600'></a> 600 <em class='comment'> * fit in it exactly).  Use the VAX insv instruction to insert each</em>
+<a id='L601' name='L601'></a> 601 <em class='comment'> * code in turn.  When the buffer fills up empty it and start over.</em>
+<a id='L602' name='L602'></a> 602 <em class='comment'> */</em>
+<a id='L603' name='L603'></a> 603 
+<a id='L604' name='L604'></a> 604 <strong class='reserved'>static</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/25817.html' title='Multiple used in 2 places.'>masks</a>[] = <em class='brace'>{</em> 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
+<a id='L605' name='L605'></a> 605                                   0x001F, 0x003F, 0x007F, 0x00FF,
+<a id='L606' name='L606'></a> 606                                   0x01FF, 0x03FF, 0x07FF, 0x0FFF,
+<a id='L607' name='L607'></a> 607                                   0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF <em class='brace'>}</em>;
+<a id='L608' name='L608'></a> 608 
+<a id='L609' name='L609'></a> 609 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L610' name='L610'></a> 610 <a href='../R/22591.html' title='Multiple referred from 278 places.'>output</a>(<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L611' name='L611'></a> 611 <em class='brace'>{</em>
+<a id='L612' name='L612'></a> 612     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> &amp;= <a href='../Y/25817.html' title='Multiple used in 2 places.'>masks</a>[ <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> ];
+<a id='L613' name='L613'></a> 613 
+<a id='L614' name='L614'></a> 614     <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> &gt; 0 )
+<a id='L615' name='L615'></a> 615         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> |= ((<strong class='reserved'>long</strong>)<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &lt;&lt; <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a>);
+<a id='L616' name='L616'></a> 616     <strong class='reserved'>else</strong>
+<a id='L617' name='L617'></a> 617         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> = <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>;
+<a id='L618' name='L618'></a> 618 
+<a id='L619' name='L619'></a> 619     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> += <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>;
+<a id='L620' name='L620'></a> 620 
+<a id='L621' name='L621'></a> 621     <strong class='reserved'>while</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> &gt;= 8 ) <em class='brace'>{</em>
+<a id='L622' name='L622'></a> 622         <a href='../S/212.html#L732' title='Defined at 732 in ext/gd/libgd/gd_gif_out.c.'>char_out</a>( (<strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong>)(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> &amp; 0xff), <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L623' name='L623'></a> 623         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> &gt;&gt;= 8;
+<a id='L624' name='L624'></a> 624         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> -= 8;
+<a id='L625' name='L625'></a> 625     <em class='brace'>}</em>
+<a id='L626' name='L626'></a> 626 
+<a id='L627' name='L627'></a> 627     <em class='comment'>/*</em>
+<a id='L628' name='L628'></a> 628 <em class='comment'>     * If the next entry is going to be too big for the code size,</em>
+<a id='L629' name='L629'></a> 629 <em class='comment'>     * then increase it, if possible.</em>
+<a id='L630' name='L630'></a> 630 <em class='comment'>     */</em>
+<a id='L631' name='L631'></a> 631    <strong class='reserved'>if</strong> ( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a> &gt; <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a> || <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a> ) <em class='brace'>{</em>
+<a id='L632' name='L632'></a> 632 
+<a id='L633' name='L633'></a> 633             <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a> ) <em class='brace'>{</em>
+<a id='L634' name='L634'></a> 634 
+<a id='L635' name='L635'></a> 635                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a> = <a href='../D/4791.html' title='Multiple defined in 2 places.'>MAXCODE</a> (<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18814.html' title='Multiple used in 4 places.'>g_init_bits</a>);
+<a id='L636' name='L636'></a> 636                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a> = 0;
+<a id='L637' name='L637'></a> 637 
+<a id='L638' name='L638'></a> 638             <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L639' name='L639'></a> 639 
+<a id='L640' name='L640'></a> 640                 ++(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>);
+<a id='L641' name='L641'></a> 641                 <strong class='reserved'>if</strong> ( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a> == <a href='../S/212.html#L42' title='Defined at 42 in ext/gd/libgd/gd_gif_out.c.'>maxbits</a> )
+<a id='L642' name='L642'></a> 642                     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a> = <a href='../S/212.html#L45' title='Defined at 45 in ext/gd/libgd/gd_gif_out.c.'>maxmaxcode</a>;
+<a id='L643' name='L643'></a> 643                 <strong class='reserved'>else</strong>
+<a id='L644' name='L644'></a> 644                     <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/25946.html' title='Multiple used in 6 places.'>maxcode</a> = <a href='../D/4791.html' title='Multiple defined in 2 places.'>MAXCODE</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/27892.html' title='Multiple used in 9 places.'>n_bits</a>);
+<a id='L645' name='L645'></a> 645             <em class='brace'>}</em>
+<a id='L646' name='L646'></a> 646         <em class='brace'>}</em>
+<a id='L647' name='L647'></a> 647 
+<a id='L648' name='L648'></a> 648     <strong class='reserved'>if</strong>( <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> == <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1800.html' title='Multiple used in 4 places.'>EOFCode</a> ) <em class='brace'>{</em>
+<a id='L649' name='L649'></a> 649         <em class='comment'>/*</em>
+<a id='L650' name='L650'></a> 650 <em class='comment'>         * At EOF, write the rest of the buffer.</em>
+<a id='L651' name='L651'></a> 651 <em class='comment'>         */</em>
+<a id='L652' name='L652'></a> 652         <strong class='reserved'>while</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> &gt; 0 ) <em class='brace'>{</em>
+<a id='L653' name='L653'></a> 653                 <a href='../S/212.html#L732' title='Defined at 732 in ext/gd/libgd/gd_gif_out.c.'>char_out</a>( (<strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong>)(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> &amp; 0xff), <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L654' name='L654'></a> 654                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14711.html' title='Multiple used in 8 places.'>cur_accum</a> &gt;&gt;= 8;
+<a id='L655' name='L655'></a> 655                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/14716.html' title='Multiple used in 9 places.'>cur_bits</a> -= 8;
+<a id='L656' name='L656'></a> 656         <em class='brace'>}</em>
+<a id='L657' name='L657'></a> 657 
+<a id='L658' name='L658'></a> 658         <a href='../S/212.html#L743' title='Defined at 743 in ext/gd/libgd/gd_gif_out.c.'>flush_char</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L659' name='L659'></a> 659 
+<a id='L660' name='L660'></a> 660     <em class='brace'>}</em>
+<a id='L661' name='L661'></a> 661 <em class='brace'>}</em>
+<a id='L662' name='L662'></a> 662 
+<a id='L663' name='L663'></a> 663 <em class='comment'>/*</em>
+<a id='L664' name='L664'></a> 664 <em class='comment'> * Clear out the hash table</em>
+<a id='L665' name='L665'></a> 665 <em class='comment'> */</em>
+<a id='L666' name='L666'></a> 666 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L667' name='L667'></a> 667 <a href='../R/17488.html' title='Multiple referred from 2 places.'>cl_block</a> (<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)             <em class='comment'>/* table clear for block compress */</em>
+<a id='L668' name='L668'></a> 668 <em class='brace'>{</em>
+<a id='L669' name='L669'></a> 669 
+<a id='L670' name='L670'></a> 670         <a href='../S/212.html#L678' title='Defined at 678 in ext/gd/libgd/gd_gif_out.c.'>cl_hash</a> ( (<a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a>) <a href='../S/212.html#L48' title='Defined at 48 in ext/gd/libgd/gd_gif_out.c.'>hsize</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a> );
+<a id='L671' name='L671'></a> 671         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18348.html' title='Multiple used in 7 places.'>free_ent</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a> + 2;
+<a id='L672' name='L672'></a> 672         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/13809.html' title='Multiple used in 6 places.'>clear_flg</a> = 1;
+<a id='L673' name='L673'></a> 673 
+<a id='L674' name='L674'></a> 674         <a href='../S/212.html#L610' title='Defined at 610 in ext/gd/libgd/gd_gif_out.c.'>output</a>( (<a href='../S/212.html#L31' title='Defined at 31 in ext/gd/libgd/gd_gif_out.c.'>code_int</a>)<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/1246.html' title='Multiple used in 7 places.'>ClearCode</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L675' name='L675'></a> 675 <em class='brace'>}</em>
+<a id='L676' name='L676'></a> 676 
+<a id='L677' name='L677'></a> 677 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L678' name='L678'></a> 678 <a href='../R/17489.html' title='Multiple referred from 3 places.'>cl_hash</a>(<strong class='reserved'>register</strong> <a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a> <a href='../Y/13675.html' title='Multiple used in 6 places.'>chsize</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)          <em class='comment'>/* reset code table */</em>
+<a id='L679' name='L679'></a> 679 
+<a id='L680' name='L680'></a> 680 <em class='brace'>{</em>
+<a id='L681' name='L681'></a> 681 
+<a id='L682' name='L682'></a> 682         <strong class='reserved'>register</strong> <a href='../D/20646.html' title='Multiple defined in 2 places.'>count_int</a> *<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a> = <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/21964.html' title='Multiple used in 24 places.'>htab</a>+<a href='../Y/13675.html' title='Multiple used in 6 places.'>chsize</a>;
+<a id='L683' name='L683'></a> 683 
+<a id='L684' name='L684'></a> 684         <strong class='reserved'>register</strong> <strong class='reserved'>long</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L685' name='L685'></a> 685         <strong class='reserved'>register</strong> <strong class='reserved'>long</strong> <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a> = -1;
+<a id='L686' name='L686'></a> 686 
+<a id='L687' name='L687'></a> 687         <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <a href='../Y/13675.html' title='Multiple used in 6 places.'>chsize</a> - 16;
+<a id='L688' name='L688'></a> 688         <strong class='reserved'>do</strong> <em class='brace'>{</em>                            <em class='comment'>/* might use Sys V memset(3) here */</em>
+<a id='L689' name='L689'></a> 689                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-16) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L690' name='L690'></a> 690                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-15) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L691' name='L691'></a> 691                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-14) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L692' name='L692'></a> 692                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-13) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L693' name='L693'></a> 693                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-12) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L694' name='L694'></a> 694                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-11) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L695' name='L695'></a> 695                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-10) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L696' name='L696'></a> 696                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-9) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L697' name='L697'></a> 697                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-8) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L698' name='L698'></a> 698                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-7) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L699' name='L699'></a> 699                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-6) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L700' name='L700'></a> 700                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-5) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L701' name='L701'></a> 701                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-4) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L702' name='L702'></a> 702                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-3) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L703' name='L703'></a> 703                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-2) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L704' name='L704'></a> 704                 *(<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a>-1) = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L705' name='L705'></a> 705                 <a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a> -= 16;
+<a id='L706' name='L706'></a> 706         <em class='brace'>}</em> <strong class='reserved'>while</strong> ((<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> -= 16) &gt;= 0);
+<a id='L707' name='L707'></a> 707 
+<a id='L708' name='L708'></a> 708         <strong class='reserved'>for</strong> ( <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> += 16; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &gt; 0; --<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> )
+<a id='L709' name='L709'></a> 709                 *--<a href='../Y/21965.html' title='Multiple used in 19 places.'>htab_p</a> = <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>;
+<a id='L710' name='L710'></a> 710 <em class='brace'>}</em>
+<a id='L711' name='L711'></a> 711 
+<a id='L712' name='L712'></a> 712 <em class='comment'>/******************************************************************************</em>
+<a id='L713' name='L713'></a> 713 <em class='comment'> *</em>
+<a id='L714' name='L714'></a> 714 <em class='comment'> * GIF Specific routines</em>
+<a id='L715' name='L715'></a> 715 <em class='comment'> *</em>
+<a id='L716' name='L716'></a> 716 <em class='comment'> ******************************************************************************/</em>
+<a id='L717' name='L717'></a> 717 
+<a id='L718' name='L718'></a> 718 <em class='comment'>/*</em>
+<a id='L719' name='L719'></a> 719 <em class='comment'> * Set up the 'byte output' routine</em>
+<a id='L720' name='L720'></a> 720 <em class='comment'> */</em>
+<a id='L721' name='L721'></a> 721 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L722' name='L722'></a> 722 <a href='../R/17401.html' title='Multiple referred from 2 places.'>char_init</a>(<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L723' name='L723'></a> 723 <em class='brace'>{</em>
+<a id='L724' name='L724'></a> 724         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a> = 0;
+<a id='L725' name='L725'></a> 725 <em class='brace'>}</em>
+<a id='L726' name='L726'></a> 726 
+<a id='L727' name='L727'></a> 727 <em class='comment'>/*</em>
+<a id='L728' name='L728'></a> 728 <em class='comment'> * Add a character to the end of the current packet, and if it is 254</em>
+<a id='L729' name='L729'></a> 729 <em class='comment'> * characters, flush the packet to disk.</em>
+<a id='L730' name='L730'></a> 730 <em class='comment'> */</em>
+<a id='L731' name='L731'></a> 731 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L732' name='L732'></a> 732 <a href='../R/17403.html' title='Multiple referred from 3 places.'>char_out</a>(<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L733' name='L733'></a> 733 <em class='brace'>{</em>
+<a id='L734' name='L734'></a> 734         <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>[ <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a>++ ] = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L735' name='L735'></a> 735         <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a> &gt;= 254 )
+<a id='L736' name='L736'></a> 736                 <a href='../S/212.html#L743' title='Defined at 743 in ext/gd/libgd/gd_gif_out.c.'>flush_char</a>(<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>);
+<a id='L737' name='L737'></a> 737 <em class='brace'>}</em>
+<a id='L738' name='L738'></a> 738 
+<a id='L739' name='L739'></a> 739 <em class='comment'>/*</em>
+<a id='L740' name='L740'></a> 740 <em class='comment'> * Flush the packet to disk, and reset the accumulator</em>
+<a id='L741' name='L741'></a> 741 <em class='comment'> */</em>
+<a id='L742' name='L742'></a> 742 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L743' name='L743'></a> 743 <a href='../R/19081.html' title='Multiple referred from 3 places.'>flush_char</a>(<a href='../S/212.html#L86' title='Defined at 86 in ext/gd/libgd/gd_gif_out.c.'>GifCtx</a> *<a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>)
+<a id='L744' name='L744'></a> 744 <em class='brace'>{</em>
+<a id='L745' name='L745'></a> 745         <strong class='reserved'>if</strong>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a> &gt; 0 ) <em class='brace'>{</em>
+<a id='L746' name='L746'></a> 746                 <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18817.html' title='Multiple used in 4 places.'>g_outfile</a> );
+<a id='L747' name='L747'></a> 747                 <a href='../D/22950.html' title='Multiple defined in 2 places.'>gdPutBuf</a>( <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a>, <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/18817.html' title='Multiple used in 4 places.'>g_outfile</a> );
+<a id='L748' name='L748'></a> 748                 <a href='../Y/14682.html' title='Multiple used in 2260 places.'>ctx</a>-&gt;<a href='../Y/8661.html' title='Multiple used in 8 places.'>a_count</a> = 0;
+<a id='L749' name='L749'></a> 749         <em class='brace'>}</em>
+<a id='L750' name='L750'></a> 750 <em class='brace'>}</em>
+<a id='L751' name='L751'></a> 751 
+<a id='L752' name='L752'></a> 752 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/20353.html' title='Multiple referred from 7 places.'>gifPutWord</a>(<strong class='reserved'>int</strong> <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a>, <a href='../D/22735.html' title='Multiple defined in 2 places.'>gdIOCtx</a> *<a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>)
+<a id='L753' name='L753'></a> 753 <em class='brace'>{</em>
+<a id='L754' name='L754'></a> 754         <em class='comment'>/* Byte order is little-endian */</em>
+<a id='L755' name='L755'></a> 755         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>(<a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a> &amp; 0xFF, <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L756' name='L756'></a> 756         <a href='../D/22951.html' title='Multiple defined in 2 places.'>gdPutC</a>((<a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a> &gt;&gt; 8) &amp; 0xFF, <a href='../S/170.html#L386' title='Defined at 386 in ext/fileinfo/libmagic/file.h.'>out</a>);
+<a id='L757' name='L757'></a> 757         <strong class='reserved'>return</strong> 0;
+<a id='L758' name='L758'></a> 758 <em class='brace'>}</em>
+<a id='L759' name='L759'></a> 759 
+<a id='L760' name='L760'></a> 760 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L100'>[^]</a><a href='#L752'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

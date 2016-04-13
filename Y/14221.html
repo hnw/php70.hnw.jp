@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>compiler_globals</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1626.html#L134'>compiler_globals</a>  134 Zend/zend.c     	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)</span>
+<span class='curline'><a href='../S/1626.html#L136'>compiler_globals</a>  136 Zend/zend.c     	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)</span>
+<span class='curline'><a href='../S/1626.html#L478'>compiler_globals</a>  478 Zend/zend.c    static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{{ */</span>
+<span class='curline'><a href='../S/1626.html#L480'>compiler_globals</a>  480 Zend/zend.c    	compiler_globals-&gt;compiled_filename = NULL;</span>
+<span class='curline'><a href='../S/1626.html#L482'>compiler_globals</a>  482 Zend/zend.c    	compiler_globals-&gt;function_table = (HashTable *) malloc(sizeof(HashTable));</span>
+<span class='curline'><a href='../S/1626.html#L483'>compiler_globals</a>  483 Zend/zend.c    	zend_hash_init_ex(compiler_globals-&gt;function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1, 0);</span>
+<span class='curline'><a href='../S/1626.html#L484'>compiler_globals</a>  484 Zend/zend.c    	zend_hash_copy(compiler_globals-&gt;function_table, global_function_table, function_copy_ctor);</span>
+<span class='curline'><a href='../S/1626.html#L486'>compiler_globals</a>  486 Zend/zend.c    	compiler_globals-&gt;class_table = (HashTable *) malloc(sizeof(HashTable));</span>
+<span class='curline'><a href='../S/1626.html#L487'>compiler_globals</a>  487 Zend/zend.c    	zend_hash_init_ex(compiler_globals-&gt;class_table, 64, NULL, ZEND_CLASS_DTOR, 1, 0);</span>
+<span class='curline'><a href='../S/1626.html#L488'>compiler_globals</a>  488 Zend/zend.c    	zend_hash_copy(compiler_globals-&gt;class_table, global_class_table, zend_class_add_ref);</span>
+<span class='curline'><a href='../S/1626.html#L492'>compiler_globals</a>  492 Zend/zend.c    	compiler_globals-&gt;auto_globals = (HashTable *) malloc(sizeof(HashTable));</span>
+<span class='curline'><a href='../S/1626.html#L493'>compiler_globals</a>  493 Zend/zend.c    	zend_hash_init_ex(compiler_globals-&gt;auto_globals, 8, NULL, auto_global_dtor, 1, 0);</span>
+<span class='curline'><a href='../S/1626.html#L494'>compiler_globals</a>  494 Zend/zend.c    	zend_hash_copy(compiler_globals-&gt;auto_globals, global_auto_globals_table, auto_global_copy_ctor);</span>
+<span class='curline'><a href='../S/1626.html#L496'>compiler_globals</a>  496 Zend/zend.c    	compiler_globals-&gt;last_static_member = zend_hash_num_elements(compiler_globals-&gt;class_table);</span>
+<span class='curline'><a href='../S/1626.html#L497'>compiler_globals</a>  497 Zend/zend.c    	if (compiler_globals-&gt;last_static_member) {</span>
+<span class='curline'><a href='../S/1626.html#L498'>compiler_globals</a>  498 Zend/zend.c    		compiler_globals-&gt;static_members_table = calloc(compiler_globals-&gt;last_static_member, sizeof(zval*));</span>
+<span class='curline'><a href='../S/1626.html#L500'>compiler_globals</a>  500 Zend/zend.c    		compiler_globals-&gt;static_members_table = NULL;</span>
+<span class='curline'><a href='../S/1626.html#L502'>compiler_globals</a>  502 Zend/zend.c    	compiler_globals-&gt;script_encoding_list = NULL;</span>
+<span class='curline'><a href='../S/1626.html#L504'>compiler_globals</a>  504 Zend/zend.c    	zend_interned_empty_string_init(&amp;compiler_globals-&gt;empty_string);</span>
+<span class='curline'><a href='../S/1626.html#L506'>compiler_globals</a>  506 Zend/zend.c    	memset(compiler_globals-&gt;one_char_string, 0, sizeof(compiler_globals-&gt;one_char_string));</span>
+<span class='curline'><a href='../S/1626.html#L510'>compiler_globals</a>  510 Zend/zend.c    static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{{ */</span>
+<span class='curline'><a href='../S/1626.html#L512'>compiler_globals</a>  512 Zend/zend.c    	if (compiler_globals-&gt;function_table != GLOBAL_FUNCTION_TABLE) {</span>
+<span class='curline'><a href='../S/1626.html#L513'>compiler_globals</a>  513 Zend/zend.c    		zend_hash_destroy(compiler_globals-&gt;function_table);</span>
+<span class='curline'><a href='../S/1626.html#L514'>compiler_globals</a>  514 Zend/zend.c    		free(compiler_globals-&gt;function_table);</span>
+<span class='curline'><a href='../S/1626.html#L516'>compiler_globals</a>  516 Zend/zend.c    	if (compiler_globals-&gt;class_table != GLOBAL_CLASS_TABLE) {</span>
+<span class='curline'><a href='../S/1626.html#L517'>compiler_globals</a>  517 Zend/zend.c    		zend_hash_destroy(compiler_globals-&gt;class_table);</span>
+<span class='curline'><a href='../S/1626.html#L518'>compiler_globals</a>  518 Zend/zend.c    		free(compiler_globals-&gt;class_table);</span>
+<span class='curline'><a href='../S/1626.html#L520'>compiler_globals</a>  520 Zend/zend.c    	if (compiler_globals-&gt;auto_globals != GLOBAL_AUTO_GLOBALS_TABLE) {</span>
+<span class='curline'><a href='../S/1626.html#L521'>compiler_globals</a>  521 Zend/zend.c    		zend_hash_destroy(compiler_globals-&gt;auto_globals);</span>
+<span class='curline'><a href='../S/1626.html#L522'>compiler_globals</a>  522 Zend/zend.c    		free(compiler_globals-&gt;auto_globals);</span>
+<span class='curline'><a href='../S/1626.html#L524'>compiler_globals</a>  524 Zend/zend.c    	if (compiler_globals-&gt;static_members_table) {</span>
+<span class='curline'><a href='../S/1626.html#L525'>compiler_globals</a>  525 Zend/zend.c    		free(compiler_globals-&gt;static_members_table);</span>
+<span class='curline'><a href='../S/1626.html#L527'>compiler_globals</a>  527 Zend/zend.c    	if (compiler_globals-&gt;script_encoding_list) {</span>
+<span class='curline'><a href='../S/1626.html#L528'>compiler_globals</a>  528 Zend/zend.c    		pefree((char*)compiler_globals-&gt;script_encoding_list, 1);</span>
+<span class='curline'><a href='../S/1626.html#L530'>compiler_globals</a>  530 Zend/zend.c    	compiler_globals-&gt;last_static_member = 0;</span>
+<span class='curline'><a href='../S/1626.html#L532'>compiler_globals</a>  532 Zend/zend.c    	zend_interned_empty_string_free(&amp;compiler_globals-&gt;empty_string);</span>
+<span class='curline'><a href='../S/1626.html#L635'>compiler_globals</a>  635 Zend/zend.c    	zend_compiler_globals *compiler_globals;</span>
+<span class='curline'><a href='../S/1626.html#L719'>compiler_globals</a>  719 Zend/zend.c    	compiler_globals = ts_resource(compiler_globals_id);</span>
+<span class='curline'><a href='../S/1626.html#L722'>compiler_globals</a>  722 Zend/zend.c    	compiler_globals_dtor(compiler_globals);</span>
+<span class='curline'><a href='../S/1626.html#L723'>compiler_globals</a>  723 Zend/zend.c    	compiler_globals-&gt;in_compilation = 0;</span>
+<span class='curline'><a href='../S/1626.html#L724'>compiler_globals</a>  724 Zend/zend.c    	compiler_globals-&gt;function_table = (HashTable *) malloc(sizeof(HashTable));</span>
+<span class='curline'><a href='../S/1626.html#L725'>compiler_globals</a>  725 Zend/zend.c    	compiler_globals-&gt;class_table = (HashTable *) malloc(sizeof(HashTable));</span>
+<span class='curline'><a href='../S/1626.html#L727'>compiler_globals</a>  727 Zend/zend.c    	*compiler_globals-&gt;function_table = *GLOBAL_FUNCTION_TABLE;</span>
+<span class='curline'><a href='../S/1626.html#L728'>compiler_globals</a>  728 Zend/zend.c    	*compiler_globals-&gt;class_table = *GLOBAL_CLASS_TABLE;</span>
+<span class='curline'><a href='../S/1626.html#L729'>compiler_globals</a>  729 Zend/zend.c    	compiler_globals-&gt;auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;</span>
+<span class='curline'><a href='../S/1626.html#L780'>compiler_globals</a>  780 Zend/zend.c    	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);</span>
+<span class='curline'><a href='../S/1626.html#L783'>compiler_globals</a>  783 Zend/zend.c    	*GLOBAL_FUNCTION_TABLE = *compiler_globals-&gt;function_table;</span>
+<span class='curline'><a href='../S/1626.html#L784'>compiler_globals</a>  784 Zend/zend.c    	*GLOBAL_CLASS_TABLE = *compiler_globals-&gt;class_table;</span>
+<span class='curline'><a href='../S/1626.html#L791'>compiler_globals</a>  791 Zend/zend.c    	free(compiler_globals-&gt;function_table);</span>
+<span class='curline'><a href='../S/1626.html#L792'>compiler_globals</a>  792 Zend/zend.c    	free(compiler_globals-&gt;class_table);</span>
+<span class='curline'><a href='../S/1626.html#L793'>compiler_globals</a>  793 Zend/zend.c    	if ((script_encoding_list = (zend_encoding **)compiler_globals-&gt;script_encoding_list)) {</span>
+<span class='curline'><a href='../S/1626.html#L794'>compiler_globals</a>  794 Zend/zend.c    		compiler_globals_ctor(compiler_globals);</span>
+<span class='curline'><a href='../S/1626.html#L795'>compiler_globals</a>  795 Zend/zend.c    		compiler_globals-&gt;script_encoding_list = (const zend_encoding **)script_encoding_list;</span>
+<span class='curline'><a href='../S/1626.html#L797'>compiler_globals</a>  797 Zend/zend.c    		compiler_globals_ctor(compiler_globals);</span>
+<span class='curline'><a href='../S/1642.html#L85'>compiler_globals</a>   85 Zend/zend_compile.c ZEND_API zend_compiler_globals compiler_globals;</span>
+<span class='curline'><a href='../S/1666.html#L36'>compiler_globals</a>   36 Zend/zend_globals_macros.h # define CG(v) (compiler_globals.v)</span>
+<span class='curline'><a href='../S/1666.html#L37'>compiler_globals</a>   37 Zend/zend_globals_macros.h extern ZEND_API struct _zend_compiler_globals compiler_globals;</span>
+<span class='curline'><a href='../S/1374.html#L514'>compiler_globals</a>  514 main/main.c    	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)</span>
+<span class='curline'><a href='../S/1522.html#L80'>compiler_globals</a>   80 sapi/litespeed/lsapi_main.c zend_compiler_globals    *compiler_globals;</span>
+<span class='curline'><a href='../S/1522.html#L1031'>compiler_globals</a> 1031 sapi/litespeed/lsapi_main.c     compiler_globals = ts_resource(compiler_globals_id);</span>
+</pre>
+</body>
+</html>

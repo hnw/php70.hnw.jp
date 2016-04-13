@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/standard/assert.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1842.html'>standard</a>/assert.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L55'>[^]</a><a href='#L284'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L55' title='Defined at 55.'>PHP_INI_MH</a></li>
+<li><a href='#L81' title='Defined at 81.'>PHP_INI_BEGIN</a></li>
+<li><a href='#L97' title='Defined at 97.'>PHP_MINIT_FUNCTION</a></li>
+<li><a href='#L119' title='Defined at 119.'>PHP_MSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L129' title='Defined at 129.'>PHP_RSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L140' title='Defined at 140.'>PHP_MINFO_FUNCTION</a></li>
+<li><a href='#L148' title='Defined at 148.'>PHP_FUNCTION</a></li>
+<li><a href='#L284' title='Defined at 284.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Thies C. Arntzen &lt;thies@thieso.net&gt;                          |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>*/</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='comment'>/* $Id$ */</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='comment'>/* {{{ includes */</em>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='1133.html'>php_assert.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1653.html'>zend_exceptions.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='comment'>/* }}} */</em>
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <a href='../D/15970.html' title='Multiple defined in 5 places.'>ZEND_BEGIN_MODULE_GLOBALS</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>)
+<a id='L29' name='L29'></a>  29         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>;
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>char</strong> *<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>;
+<a id='L31' name='L31'></a>  31         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/8774.html' title='Multiple used in 104 places.'>active</a>;
+<a id='L32' name='L32'></a>  32         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/12434.html' title='Multiple used in 78 places.'>bail</a>;
+<a id='L33' name='L33'></a>  33         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/40612.html' title='Multiple used in 11 places.'>warning</a>;
+<a id='L34' name='L34'></a>  34         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/33891.html' title='Multiple used in 5 places.'>quiet_eval</a>;
+<a id='L35' name='L35'></a>  35         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/17215.html' title='Multiple used in 684 places.'>exception</a>;
+<a id='L36' name='L36'></a>  36 <a href='../S/459.html#L55' title='Defined at 55 in ext/libxml/php_libxml.h.'>ZEND_END_MODULE_GLOBALS</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>)
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <a href='../D/16157.html' title='Multiple defined in 12 places.'>ZEND_DECLARE_MODULE_GLOBALS</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>)
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <strong class='reserved'>static</strong> <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/12038.html' title='Multiple used in 4 places.'>assertion_error_ce</a>;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#define</em> <a href='../R/222.html' title='Multiple referred from 40 places.'>ASSERTG</a>(<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>) <a href='../D/16954.html' title='Multiple defined in 2 places.'>ZEND_MODULE_GLOBALS_ACCESSOR</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>)
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#define</em> <a href='../R/8922.html' title='Multiple referred from 12 places.'>SAFE_STRING</a>(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>) ((<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>)?(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>):"")
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47         <a href='../R/223.html' title='Multiple referred from 2 places.'>ASSERT_ACTIVE</a>=1,
+<a id='L48' name='L48'></a>  48         <a href='../R/225.html' title='Multiple referred from 2 places.'>ASSERT_CALLBACK</a>,
+<a id='L49' name='L49'></a>  49         <a href='../R/224.html' title='Multiple referred from 2 places.'>ASSERT_BAIL</a>,
+<a id='L50' name='L50'></a>  50         <a href='../R/228.html' title='Multiple referred from 2 places.'>ASSERT_WARNING</a>,
+<a id='L51' name='L51'></a>  51         <a href='../R/227.html' title='Multiple referred from 2 places.'>ASSERT_QUIET_EVAL</a>,
+<a id='L52' name='L52'></a>  52         <a href='../R/226.html' title='Multiple referred from 2 places.'>ASSERT_EXCEPTION</a>
+<a id='L53' name='L53'></a>  53 <em class='brace'>}</em>;
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <strong class='reserved'>static</strong> <a href='../R/7201.html' title='Multiple referred from 5 places.'>PHP_INI_MH</a>(<a href='../Y/4718.html' title='Multiple used in 2 places.'>OnChangeCallback</a>) <em class='comment'>/* {{{ */</em>
+<a id='L56' name='L56'></a>  56 <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>if</strong> (<a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/14848.html' title='Multiple used in 272 places.'>current_execute_data</a>)) <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a>) <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59                         <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L60' name='L60'></a>  60                         <a href='../S/1731.html#L587' title='Defined at 587 in Zend/zend_types.h.'>ZVAL_UNDEF</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L61' name='L61'></a>  61                 <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62                 <strong class='reserved'>if</strong> (<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a> &amp;&amp; (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a> || <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>))) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                         <a href='../S/1731.html#L644' title='Defined at 644 in Zend/zend_types.h.'>ZVAL_STR_COPY</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>), <a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>);
+<a id='L64' name='L64'></a>  64                 <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>)) <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67                         <a href='../S/1629.html#L197' title='Defined at 197 in Zend/zend_alloc.h.'>pefree</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>), 1);
+<a id='L68' name='L68'></a>  68                 <em class='brace'>}</em>
+<a id='L69' name='L69'></a>  69                 <strong class='reserved'>if</strong> (<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a> &amp;&amp; <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>)) <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                         <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>) = <a href='../S/1629.html#L195' title='Defined at 195 in Zend/zend_alloc.h.'>pemalloc</a>(<a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>) + 1, 1);
+<a id='L71' name='L71'></a>  71                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>), <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>), <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>));
+<a id='L72' name='L72'></a>  72                         <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>)[<a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/28359.html' title='Multiple used in 210 places.'>new_value</a>)] = '\0';
+<a id='L73' name='L73'></a>  73                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74                         <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>) = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L75' name='L75'></a>  75                 <em class='brace'>}</em>
+<a id='L76' name='L76'></a>  76         <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L78' name='L78'></a>  78 <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>/* }}} */</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81 <a href='../R/7194.html' title='Multiple referred from 8 places.'>PHP_INI_BEGIN</a>()
+<a id='L82' name='L82'></a>  82          <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("assert.active",             "1",    <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4726.html' title='Multiple used in 97 places.'>OnUpdateBool</a>,           <a href='../Y/8774.html' title='Multiple used in 104 places.'>active</a>,                         <a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a>,            <a href='../Y/12034.html' title='Multiple used in 5 places.'>assert_globals</a>)
+<a id='L83' name='L83'></a>  83          <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("assert.bail",               "0",    <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4726.html' title='Multiple used in 97 places.'>OnUpdateBool</a>,           <a href='../Y/12434.html' title='Multiple used in 78 places.'>bail</a>,                           <a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a>,            <a href='../Y/12034.html' title='Multiple used in 5 places.'>assert_globals</a>)
+<a id='L84' name='L84'></a>  84          <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("assert.warning",    "1",    <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4726.html' title='Multiple used in 97 places.'>OnUpdateBool</a>,           <a href='../Y/40612.html' title='Multiple used in 11 places.'>warning</a>,                        <a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a>,            <a href='../Y/12034.html' title='Multiple used in 5 places.'>assert_globals</a>)
+<a id='L85' name='L85'></a>  85          <a href='../S/1385.html#L66' title='Defined at 66 in main/php_ini.h.'>PHP_INI_ENTRY</a>("assert.callback",               <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,   <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4718.html' title='Multiple used in 2 places.'>OnChangeCallback</a>)
+<a id='L86' name='L86'></a>  86          <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("assert.quiet_eval", "0",    <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4726.html' title='Multiple used in 97 places.'>OnUpdateBool</a>,           <a href='../Y/33891.html' title='Multiple used in 5 places.'>quiet_eval</a>,                     <a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a>,            <a href='../Y/12034.html' title='Multiple used in 5 places.'>assert_globals</a>)
+<a id='L87' name='L87'></a>  87          <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("assert.exception",  "0",    <a href='../S/1385.html#L49' title='Defined at 49 in main/php_ini.h.'>PHP_INI_ALL</a>,    <a href='../Y/4726.html' title='Multiple used in 97 places.'>OnUpdateBool</a>,           <a href='../Y/17215.html' title='Multiple used in 684 places.'>exception</a>,                      <a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a>,            <a href='../Y/12034.html' title='Multiple used in 5 places.'>assert_globals</a>)
+<a id='L88' name='L88'></a>  88 <a href='../S/1385.html#L57' title='Defined at 57 in main/php_ini.h.'>PHP_INI_END</a>()
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../Y/32021.html' title='Multiple used in 2 places.'>php_assert_init_globals</a>(<a href='../Y/43672.html' title='Multiple used in 6 places.'>zend_assert_globals</a> *<a href='../Y/12035.html' title='Multiple used in 3 places.'>assert_globals_p</a>) <em class='comment'>/* {{{ */</em>
+<a id='L91' name='L91'></a>  91 <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92         <a href='../S/1731.html#L587' title='Defined at 587 in Zend/zend_types.h.'>ZVAL_UNDEF</a>(&amp;<a href='../Y/12035.html' title='Multiple used in 3 places.'>assert_globals_p</a>-&gt;<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>);
+<a id='L93' name='L93'></a>  93         <a href='../Y/12035.html' title='Multiple used in 3 places.'>assert_globals_p</a>-&gt;<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L94' name='L94'></a>  94 <em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>/* }}} */</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97 <a href='../R/7345.html' title='Multiple referred from 104 places.'>PHP_MINIT_FUNCTION</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>) <em class='comment'>/* {{{ */</em>
+<a id='L98' name='L98'></a>  98 <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99         <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>;
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101         <a href='../D/16656.html' title='Multiple defined in 2 places.'>ZEND_INIT_MODULE_GLOBALS</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>, <a href='../Y/32021.html' title='Multiple used in 2 places.'>php_assert_init_globals</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <a href='../S/1674.html#L149' title='Defined at 149 in Zend/zend_ini.h.'>REGISTER_INI_ENTRIES</a>();
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_ACTIVE", <a href='../S/1061.html#L47' title='Defined at 47 in ext/standard/assert.c.'>ASSERT_ACTIVE</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L106' name='L106'></a> 106         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_CALLBACK", <a href='../S/1061.html#L48' title='Defined at 48 in ext/standard/assert.c.'>ASSERT_CALLBACK</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L107' name='L107'></a> 107         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_BAIL", <a href='../S/1061.html#L49' title='Defined at 49 in ext/standard/assert.c.'>ASSERT_BAIL</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L108' name='L108'></a> 108         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_WARNING", <a href='../S/1061.html#L50' title='Defined at 50 in ext/standard/assert.c.'>ASSERT_WARNING</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L109' name='L109'></a> 109         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_QUIET_EVAL", <a href='../S/1061.html#L51' title='Defined at 51 in ext/standard/assert.c.'>ASSERT_QUIET_EVAL</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L110' name='L110'></a> 110         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>("ASSERT_EXCEPTION", <a href='../S/1061.html#L52' title='Defined at 52 in ext/standard/assert.c.'>ASSERT_EXCEPTION</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a>|<a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <a href='../S/1632.html#L178' title='Defined at 178 in Zend/zend_API.h.'>INIT_CLASS_ENTRY</a>(<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>, "AssertionError", <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L113' name='L113'></a> 113         <a href='../Y/12038.html' title='Multiple used in 4 places.'>assertion_error_ce</a> = <a href='../S/1631.html#L2675' title='Defined at 2675 in Zend/zend_API.c.'>zend_register_internal_class_ex</a>(&amp;<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>, <a href='../Y/43701.html' title='Multiple used in 46 places.'>zend_ce_error</a>);
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L116' name='L116'></a> 116 <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'>/* }}} */</em>
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119 <a href='../R/7364.html' title='Multiple referred from 56 places.'>PHP_MSHUTDOWN_FUNCTION</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>) <em class='comment'>/* {{{ */</em>
+<a id='L120' name='L120'></a> 120 <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121         <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>)) <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122                 <a href='../S/1629.html#L197' title='Defined at 197 in Zend/zend_alloc.h.'>pefree</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>), 1);
+<a id='L123' name='L123'></a> 123                 <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>) = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L124' name='L124'></a> 124         <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L126' name='L126'></a> 126 <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>/* }}} */</em>
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <a href='../R/7616.html' title='Multiple referred from 32 places.'>PHP_RSHUTDOWN_FUNCTION</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>) <em class='comment'>/* {{{ */</em>
+<a id='L130' name='L130'></a> 130 <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a>) <em class='brace'>{</em>
+<a id='L132' name='L132'></a> 132                 <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L133' name='L133'></a> 133                 <a href='../S/1731.html#L587' title='Defined at 587 in Zend/zend_types.h.'>ZVAL_UNDEF</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L134' name='L134'></a> 134         <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 <em class='comment'>/* }}} */</em>
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140 <a href='../R/7343.html' title='Multiple referred from 70 places.'>PHP_MINFO_FUNCTION</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>) <em class='comment'>/* {{{ */</em>
+<a id='L141' name='L141'></a> 141 <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142         <a href='../S/1674.html#L151' title='Defined at 151 in Zend/zend_ini.h.'>DISPLAY_INI_ENTRIES</a>();
+<a id='L143' name='L143'></a> 143 <em class='brace'>}</em>
+<a id='L144' name='L144'></a> 144 <em class='comment'>/* }}} */</em>
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146 <em class='comment'>/* {{{ proto int assert(string|bool assertion[, mixed description])</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'>   Checks if assertion is false */</em>
+<a id='L148' name='L148'></a> 148 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a>)
+<a id='L149' name='L149'></a> 149 <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>;
+<a id='L151' name='L151'></a> 151         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>int</strong> <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>;
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>char</strong> *<a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L154' name='L154'></a> 154         <strong class='reserved'>char</strong> *<a href='../Y/14217.html' title='Multiple used in 8 places.'>compiled_string_description</a>;
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156         <strong class='reserved'>if</strong> (! <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/8774.html' title='Multiple used in 104 places.'>active</a>)) <em class='brace'>{</em>
+<a id='L157' name='L157'></a> 157                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L158' name='L158'></a> 158         <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "z|z", &amp;<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>, &amp;<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161                 <strong class='reserved'>return</strong>;
+<a id='L162' name='L162'></a> 162         <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>;
+<a id='L166' name='L166'></a> 166                 <strong class='reserved'>int</strong> <a href='../Y/29411.html' title='Multiple used in 16 places.'>old_error_reporting</a> = 0; <em class='comment'>/* shut up gcc! */</em>
+<a id='L167' name='L167'></a> 167                 <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/30011.html' title='Multiple used in 5 places.'>orig_scope</a> = <a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/35476.html' title='Multiple used in 725 places.'>scope</a>);
+<a id='L168' name='L168'></a> 168 
+<a id='L169' name='L169'></a> 169                 <a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>);
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171                 <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/33891.html' title='Multiple used in 5 places.'>quiet_eval</a>)) <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172                         <a href='../Y/29411.html' title='Multiple used in 16 places.'>old_error_reporting</a> = <a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/17085.html' title='Multiple used in 63 places.'>error_reporting</a>);
+<a id='L173' name='L173'></a> 173                         <a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/17085.html' title='Multiple used in 63 places.'>error_reporting</a>) = 0;
+<a id='L174' name='L174'></a> 174                 <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176                 <a href='../Y/14217.html' title='Multiple used in 8 places.'>compiled_string_description</a> = <a href='../S/1626.html#L1448' title='Defined at 1448 in Zend/zend.c.'>zend_make_compiled_string_description</a>("assert code");
+<a id='L177' name='L177'></a> 177                 <strong class='reserved'>if</strong> (<a href='../S/1656.html#L1101' title='Defined at 1101 in Zend/zend_execute_API.c.'>zend_eval_stringl</a>(<a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>, <a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>), &amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>, <a href='../Y/14217.html' title='Multiple used in 8 places.'>compiled_string_description</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L178' name='L178'></a> 178                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/14217.html' title='Multiple used in 8 places.'>compiled_string_description</a>);
+<a id='L179' name='L179'></a> 179                         <strong class='reserved'>if</strong> (!<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L37' title='Defined at 37 in Zend/zend_errors.h.'>E_RECOVERABLE_ERROR</a>, "Failure evaluating code: %s%s", <a href='../D/7920.html' title='Multiple defined in 2 places.'>PHP_EOL</a>, <a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>);
+<a id='L181' name='L181'></a> 181                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182                                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>);
+<a id='L183' name='L183'></a> 183                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L37' title='Defined at 37 in Zend/zend_errors.h.'>E_RECOVERABLE_ERROR</a>, "Failure evaluating code: %s%s:\"%s\"", <a href='../D/7920.html' title='Multiple defined in 2 places.'>PHP_EOL</a>, <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>), <a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>);
+<a id='L184' name='L184'></a> 184                                 <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>);
+<a id='L185' name='L185'></a> 185                         <em class='brace'>}</em>
+<a id='L186' name='L186'></a> 186                         <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/12434.html' title='Multiple used in 78 places.'>bail</a>)) <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187                                 <a href='../S/1627.html#L221' title='Defined at 221 in Zend/zend.h.'>zend_bailout</a>();
+<a id='L188' name='L188'></a> 188                         <em class='brace'>}</em>
+<a id='L189' name='L189'></a> 189                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L190' name='L190'></a> 190                 <em class='brace'>}</em>
+<a id='L191' name='L191'></a> 191                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/14217.html' title='Multiple used in 8 places.'>compiled_string_description</a>);
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193                 <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/33891.html' title='Multiple used in 5 places.'>quiet_eval</a>)) <em class='brace'>{</em>
+<a id='L194' name='L194'></a> 194                         <a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/17085.html' title='Multiple used in 63 places.'>error_reporting</a>) = <a href='../Y/29411.html' title='Multiple used in 16 places.'>old_error_reporting</a>;
+<a id='L195' name='L195'></a> 195                 <em class='brace'>}</em>
+<a id='L196' name='L196'></a> 196 
+<a id='L197' name='L197'></a> 197                 <a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/35476.html' title='Multiple used in 725 places.'>scope</a>) = <a href='../Y/30011.html' title='Multiple used in 5 places.'>orig_scope</a>;
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199                 <a href='../S/1706.html#L428' title='Defined at 428 in Zend/zend_operators.c.'>convert_to_boolean</a>(&amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>);
+<a id='L200' name='L200'></a> 200                 <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a> = <a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>) == <a href='../S/1731.html#L305' title='Defined at 305 in Zend/zend_types.h.'>IS_TRUE</a>;
+<a id='L201' name='L201'></a> 201         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L202' name='L202'></a> 202                 <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a> = <a href='../S/1706.html#L2374' title='Defined at 2374 in Zend/zend_operators.c.'>zend_is_true</a>(<a href='../Y/12037.html' title='Multiple used in 7 places.'>assertion</a>);
+<a id='L203' name='L203'></a> 203         <em class='brace'>}</em>
+<a id='L204' name='L204'></a> 204 
+<a id='L205' name='L205'></a> 205         <strong class='reserved'>if</strong> (<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>) <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L207' name='L207'></a> 207         <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) == <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a> &amp;&amp; <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>)) <em class='brace'>{</em>
+<a id='L210' name='L210'></a> 210                 <a href='../S/1632.html#L572' title='Defined at 572 in Zend/zend_API.h.'>ZVAL_STRING</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>), <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>));
+<a id='L211' name='L211'></a> 211         <em class='brace'>}</em>
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a>) <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a> = <a href='../D/29341.html' title='Multiple defined in 2 places.'>safe_emalloc</a>(!<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a> ? 3 : 4, <strong class='reserved'>sizeof</strong>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a>), 0);
+<a id='L215' name='L215'></a> 215                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>;
+<a id='L216' name='L216'></a> 216                 <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L217' name='L217'></a> 217                 <a href='../D/32380.html' title='Multiple defined in 3 places.'>uint</a> <a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a> = <a href='../S/1656.html#L506' title='Defined at 506 in Zend/zend_execute_API.c.'>zend_get_executed_lineno</a>();
+<a id='L218' name='L218'></a> 218                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a> = <a href='../S/1656.html#L476' title='Defined at 476 in Zend/zend_execute_API.c.'>zend_get_executed_filename</a>();
+<a id='L219' name='L219'></a> 219 
+<a id='L220' name='L220'></a> 220                 <a href='../S/1632.html#L572' title='Defined at 572 in Zend/zend_API.h.'>ZVAL_STRING</a>(&amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[0], <a href='../D/10210.html' title='Multiple defined in 2 places.'>SAFE_STRING</a>(<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a>));
+<a id='L221' name='L221'></a> 221                 <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a> (&amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[1], <a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a>);
+<a id='L222' name='L222'></a> 222                 <a href='../S/1632.html#L572' title='Defined at 572 in Zend/zend_API.h.'>ZVAL_STRING</a>(&amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[2], <a href='../D/10210.html' title='Multiple defined in 2 places.'>SAFE_STRING</a>(<a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>));
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224                 <a href='../S/1731.html#L595' title='Defined at 595 in Zend/zend_types.h.'>ZVAL_FALSE</a>(&amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>);
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226                 <em class='comment'>/* XXX do we want to check for error here? */</em>
+<a id='L227' name='L227'></a> 227                 <strong class='reserved'>if</strong> (!<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) <em class='brace'>{</em>
+<a id='L228' name='L228'></a> 228                         <a href='../S/1656.html#L665' title='Defined at 665 in Zend/zend_execute_API.c.'>call_user_function</a>(<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../D/22596.html' title='Multiple defined in 2 places.'>function_table</a>), <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>), &amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>, 3, <a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>);
+<a id='L229' name='L229'></a> 229                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt;= 2; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L230' name='L230'></a> 230                                 <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;(<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]));
+<a id='L231' name='L231'></a> 231                         <em class='brace'>}</em>
+<a id='L232' name='L232'></a> 232                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L233' name='L233'></a> 233                         <a href='../S/1731.html#L620' title='Defined at 620 in Zend/zend_types.h.'>ZVAL_STR</a>(&amp;<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[3], <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>));
+<a id='L234' name='L234'></a> 234                         <a href='../S/1656.html#L665' title='Defined at 665 in Zend/zend_execute_API.c.'>call_user_function</a>(<a href='../D/845.html' title='Multiple defined in 2 places.'>CG</a>(<a href='../D/22596.html' title='Multiple defined in 2 places.'>function_table</a>), <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>), &amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>, 4, <a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>);
+<a id='L235' name='L235'></a> 235                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt;= 3; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L236' name='L236'></a> 236                                 <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;(<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]));
+<a id='L237' name='L237'></a> 237                         <em class='brace'>}</em>
+<a id='L238' name='L238'></a> 238                 <em class='brace'>}</em>
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>);
+<a id='L241' name='L241'></a> 241                 <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;<a href='../Y/34866.html' title='Multiple used in 2955 places.'>retval</a>);
+<a id='L242' name='L242'></a> 242         <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244         <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/17215.html' title='Multiple used in 684 places.'>exception</a>)) <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245                 <strong class='reserved'>if</strong> (!<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) <em class='brace'>{</em>
+<a id='L246' name='L246'></a> 246                         <a href='../S/1652.html#L920' title='Defined at 920 in Zend/zend_exceptions.c.'>zend_throw_exception</a>(<a href='../Y/12038.html' title='Multiple used in 4 places.'>assertion_error_ce</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L25' title='Defined at 25 in Zend/zend_errors.h.'>E_ERROR</a>);
+<a id='L247' name='L247'></a> 247                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) == <a href='../S/1731.html#L310' title='Defined at 310 in Zend/zend_types.h.'>IS_OBJECT</a> &amp;&amp;
+<a id='L248' name='L248'></a> 248                         <a href='../S/1706.html#L2129' title='Defined at 2129 in Zend/zend_operators.c.'>instanceof_function</a>(<a href='../S/1731.html#L543' title='Defined at 543 in Zend/zend_types.h.'>Z_OBJCE_P</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>), <a href='../Y/43708.html' title='Multiple used in 12 places.'>zend_ce_throwable</a>)) <em class='brace'>{</em>
+<a id='L249' name='L249'></a> 249                         <a href='../D/17793.html' title='Multiple defined in 3 places.'>Z_ADDREF_P</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>);
+<a id='L250' name='L250'></a> 250                         <a href='../S/1652.html#L1060' title='Defined at 1060 in Zend/zend_exceptions.c.'>zend_throw_exception_object</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>);
+<a id='L251' name='L251'></a> 251                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L252' name='L252'></a> 252                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>);
+<a id='L253' name='L253'></a> 253                         <a href='../S/1652.html#L920' title='Defined at 920 in Zend/zend_exceptions.c.'>zend_throw_exception</a>(<a href='../Y/12038.html' title='Multiple used in 4 places.'>assertion_error_ce</a>, <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>), <a href='../S/1651.html#L25' title='Defined at 25 in Zend/zend_errors.h.'>E_ERROR</a>);
+<a id='L254' name='L254'></a> 254                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>);
+<a id='L255' name='L255'></a> 255                 <em class='brace'>}</em>
+<a id='L256' name='L256'></a> 256         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/40612.html' title='Multiple used in 11 places.'>warning</a>)) <em class='brace'>{</em>
+<a id='L257' name='L257'></a> 257                 <strong class='reserved'>if</strong> (!<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>) <em class='brace'>{</em>
+<a id='L258' name='L258'></a> 258                         <strong class='reserved'>if</strong> (<a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>) <em class='brace'>{</em>
+<a id='L259' name='L259'></a> 259                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Assertion \"%s\" failed", <a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>);
+<a id='L260' name='L260'></a> 260                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L261' name='L261'></a> 261                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Assertion failed");
+<a id='L262' name='L262'></a> 262                         <em class='brace'>}</em>
+<a id='L263' name='L263'></a> 263                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L264' name='L264'></a> 264                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../Y/15570.html' title='Multiple used in 40 places.'>description</a>);
+<a id='L265' name='L265'></a> 265                         <strong class='reserved'>if</strong> (<a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>) <em class='brace'>{</em>
+<a id='L266' name='L266'></a> 266                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "%s: \"%s\" failed", <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>), <a href='../Y/27151.html' title='Multiple used in 10 places.'>myeval</a>);
+<a id='L267' name='L267'></a> 267                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L268' name='L268'></a> 268                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "%s failed", <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>));
+<a id='L269' name='L269'></a> 269                         <em class='brace'>}</em>
+<a id='L270' name='L270'></a> 270                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>);
+<a id='L271' name='L271'></a> 271                 <em class='brace'>}</em>
+<a id='L272' name='L272'></a> 272         <em class='brace'>}</em>
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274         <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/12434.html' title='Multiple used in 78 places.'>bail</a>)) <em class='brace'>{</em>
+<a id='L275' name='L275'></a> 275                 <a href='../S/1627.html#L221' title='Defined at 221 in Zend/zend.h.'>zend_bailout</a>();
+<a id='L276' name='L276'></a> 276         <em class='brace'>}</em>
+<a id='L277' name='L277'></a> 277         
+<a id='L278' name='L278'></a> 278         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L279' name='L279'></a> 279 <em class='brace'>}</em>
+<a id='L280' name='L280'></a> 280 <em class='comment'>/* }}} */</em>
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282 <em class='comment'>/* {{{ proto mixed assert_options(int what [, mixed value])</em>
+<a id='L283' name='L283'></a> 283 <em class='comment'>   Set/get the various assert flags */</em>
+<a id='L284' name='L284'></a> 284 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/12036.html' title='Multiple used in 3 places.'>assert_options</a>)
+<a id='L285' name='L285'></a> 285 <em class='brace'>{</em>
+<a id='L286' name='L286'></a> 286         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L287' name='L287'></a> 287         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>;
+<a id='L288' name='L288'></a> 288         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>;
+<a id='L289' name='L289'></a> 289         <strong class='reserved'>int</strong> <a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> = <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>();
+<a id='L290' name='L290'></a> 290         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>;
+<a id='L291' name='L291'></a> 291 
+<a id='L292' name='L292'></a> 292         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a>, "l|z", &amp;<a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>, &amp;<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L293' name='L293'></a> 293                 <strong class='reserved'>return</strong>;
+<a id='L294' name='L294'></a> 294         <em class='brace'>}</em>
+<a id='L295' name='L295'></a> 295 
+<a id='L296' name='L296'></a> 296         <strong class='reserved'>switch</strong> (<a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>) <em class='brace'>{</em>
+<a id='L297' name='L297'></a> 297         <strong class='reserved'>case</strong> <a href='../S/1061.html#L47' title='Defined at 47 in ext/standard/assert.c.'>ASSERT_ACTIVE</a>:
+<a id='L298' name='L298'></a> 298                 <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a> = <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/8774.html' title='Multiple used in 104 places.'>active</a>);
+<a id='L299' name='L299'></a> 299                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L300' name='L300'></a> 300                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L301' name='L301'></a> 301                         <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1725.html#L155' title='Defined at 155 in Zend/zend_string.h.'>zend_string_init</a>("assert.active", <strong class='reserved'>sizeof</strong>("assert.active")-1, 0);
+<a id='L302' name='L302'></a> 302                         <a href='../S/1673.html#L330' title='Defined at 330 in Zend/zend_ini.c.'>zend_alter_ini_entry_ex</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>, <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L79' title='Defined at 79 in main/php_ini.h.'>PHP_INI_STAGE_RUNTIME</a>, 0);
+<a id='L303' name='L303'></a> 303                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L304' name='L304'></a> 304                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>);
+<a id='L305' name='L305'></a> 305                 <em class='brace'>}</em>
+<a id='L306' name='L306'></a> 306                 <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>);
+<a id='L307' name='L307'></a> 307                 <strong class='reserved'>break</strong>;
+<a id='L308' name='L308'></a> 308 
+<a id='L309' name='L309'></a> 309         <strong class='reserved'>case</strong> <a href='../S/1061.html#L49' title='Defined at 49 in ext/standard/assert.c.'>ASSERT_BAIL</a>:
+<a id='L310' name='L310'></a> 310                 <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a> = <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/12434.html' title='Multiple used in 78 places.'>bail</a>);
+<a id='L311' name='L311'></a> 311                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L312' name='L312'></a> 312                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L313' name='L313'></a> 313                         <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1725.html#L155' title='Defined at 155 in Zend/zend_string.h.'>zend_string_init</a>("assert.bail", <strong class='reserved'>sizeof</strong>("assert.bail")-1, 0);
+<a id='L314' name='L314'></a> 314                         <a href='../S/1673.html#L330' title='Defined at 330 in Zend/zend_ini.c.'>zend_alter_ini_entry_ex</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>, <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L79' title='Defined at 79 in main/php_ini.h.'>PHP_INI_STAGE_RUNTIME</a>, 0);
+<a id='L315' name='L315'></a> 315                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L316' name='L316'></a> 316                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>);
+<a id='L317' name='L317'></a> 317                 <em class='brace'>}</em>
+<a id='L318' name='L318'></a> 318                 <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>);
+<a id='L319' name='L319'></a> 319                 <strong class='reserved'>break</strong>;
+<a id='L320' name='L320'></a> 320 
+<a id='L321' name='L321'></a> 321         <strong class='reserved'>case</strong> <a href='../S/1061.html#L51' title='Defined at 51 in ext/standard/assert.c.'>ASSERT_QUIET_EVAL</a>:
+<a id='L322' name='L322'></a> 322                 <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a> = <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/33891.html' title='Multiple used in 5 places.'>quiet_eval</a>);
+<a id='L323' name='L323'></a> 323                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L324' name='L324'></a> 324                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L325' name='L325'></a> 325                         <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1725.html#L155' title='Defined at 155 in Zend/zend_string.h.'>zend_string_init</a>("assert.quiet_eval", <strong class='reserved'>sizeof</strong>("assert.quiet_eval")-1, 0);
+<a id='L326' name='L326'></a> 326                         <a href='../S/1673.html#L330' title='Defined at 330 in Zend/zend_ini.c.'>zend_alter_ini_entry_ex</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>, <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L79' title='Defined at 79 in main/php_ini.h.'>PHP_INI_STAGE_RUNTIME</a>, 0);
+<a id='L327' name='L327'></a> 327                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L328' name='L328'></a> 328                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>);
+<a id='L329' name='L329'></a> 329                 <em class='brace'>}</em>
+<a id='L330' name='L330'></a> 330                 <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>);
+<a id='L331' name='L331'></a> 331                 <strong class='reserved'>break</strong>;
+<a id='L332' name='L332'></a> 332 
+<a id='L333' name='L333'></a> 333         <strong class='reserved'>case</strong> <a href='../S/1061.html#L50' title='Defined at 50 in ext/standard/assert.c.'>ASSERT_WARNING</a>:
+<a id='L334' name='L334'></a> 334                 <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a> = <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/40612.html' title='Multiple used in 11 places.'>warning</a>);
+<a id='L335' name='L335'></a> 335                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L336' name='L336'></a> 336                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L337' name='L337'></a> 337                         <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1725.html#L155' title='Defined at 155 in Zend/zend_string.h.'>zend_string_init</a>("assert.warning", <strong class='reserved'>sizeof</strong>("assert.warning")-1, 0);
+<a id='L338' name='L338'></a> 338                         <a href='../S/1673.html#L330' title='Defined at 330 in Zend/zend_ini.c.'>zend_alter_ini_entry_ex</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>, <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L79' title='Defined at 79 in main/php_ini.h.'>PHP_INI_STAGE_RUNTIME</a>, 0);
+<a id='L339' name='L339'></a> 339                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L340' name='L340'></a> 340                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/40104.html' title='Multiple used in 18 places.'>value_str</a>);
+<a id='L341' name='L341'></a> 341                 <em class='brace'>}</em>
+<a id='L342' name='L342'></a> 342                 <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>);
+<a id='L343' name='L343'></a> 343                 <strong class='reserved'>break</strong>;
+<a id='L344' name='L344'></a> 344 
+<a id='L345' name='L345'></a> 345         <strong class='reserved'>case</strong> <a href='../S/1061.html#L48' title='Defined at 48 in ext/standard/assert.c.'>ASSERT_CALLBACK</a>:
+<a id='L346' name='L346'></a> 346                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L336' title='Defined at 336 in Zend/zend_types.h.'>Z_TYPE</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>)) != <a href='../S/1731.html#L302' title='Defined at 302 in Zend/zend_types.h.'>IS_UNDEF</a>) <em class='brace'>{</em>
+<a id='L347' name='L347'></a> 347                         <a href='../S/1731.html#L857' title='Defined at 857 in Zend/zend_types.h.'>ZVAL_COPY</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, &amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L348' name='L348'></a> 348                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>)) <em class='brace'>{</em>
+<a id='L349' name='L349'></a> 349                         <a href='../S/1632.html#L619' title='Defined at 619 in Zend/zend_API.h.'>RETVAL_STRING</a>(<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13371.html' title='Multiple used in 127 places.'>cb</a>));
+<a id='L350' name='L350'></a> 350                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L351' name='L351'></a> 351                         <a href='../S/1632.html#L612' title='Defined at 612 in Zend/zend_API.h.'>RETVAL_NULL</a>();
+<a id='L352' name='L352'></a> 352                 <em class='brace'>}</em>
+<a id='L353' name='L353'></a> 353                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L354' name='L354'></a> 354                         <a href='../D/35150.html' title='Multiple defined in 3 places.'>zval_ptr_dtor</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>));
+<a id='L355' name='L355'></a> 355                         <a href='../S/1731.html#L857' title='Defined at 857 in Zend/zend_types.h.'>ZVAL_COPY</a>(&amp;<a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/13273.html' title='Multiple used in 113 places.'>callback</a>), <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L356' name='L356'></a> 356                 <em class='brace'>}</em>
+<a id='L357' name='L357'></a> 357                 <strong class='reserved'>return</strong>;
+<a id='L358' name='L358'></a> 358 
+<a id='L359' name='L359'></a> 359         <strong class='reserved'>case</strong> <a href='../S/1061.html#L52' title='Defined at 52 in ext/standard/assert.c.'>ASSERT_EXCEPTION</a>:
+<a id='L360' name='L360'></a> 360                 <a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a> = <a href='../S/1061.html#L42' title='Defined at 42 in ext/standard/assert.c.'>ASSERTG</a>(<a href='../Y/17215.html' title='Multiple used in 684 places.'>exception</a>);
+<a id='L361' name='L361'></a> 361                 <strong class='reserved'>if</strong> (<a href='../Y/8698.html' title='Multiple used in 51 places.'>ac</a> == 2) <em class='brace'>{</em>
+<a id='L362' name='L362'></a> 362                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1725.html#L155' title='Defined at 155 in Zend/zend_string.h.'>zend_string_init</a>("assert.exception", <strong class='reserved'>sizeof</strong>("assert.exception")-1, 0);
+<a id='L363' name='L363'></a> 363                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a> = <a href='../S/1707.html#L271' title='Defined at 271 in Zend/zend_operators.h.'>zval_get_string</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L364' name='L364'></a> 364                         <a href='../S/1673.html#L330' title='Defined at 330 in Zend/zend_ini.c.'>zend_alter_ini_entry_ex</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>, <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L79' title='Defined at 79 in main/php_ini.h.'>PHP_INI_STAGE_RUNTIME</a>, 0);
+<a id='L365' name='L365'></a> 365                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>);
+<a id='L366' name='L366'></a> 366                         <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L367' name='L367'></a> 367                 <em class='brace'>}</em>
+<a id='L368' name='L368'></a> 368                 <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29514.html' title='Multiple used in 11 places.'>oldint</a>);
+<a id='L369' name='L369'></a> 369                 <strong class='reserved'>break</strong>;
+<a id='L370' name='L370'></a> 370 
+<a id='L371' name='L371'></a> 371         <strong class='reserved'>default</strong>:
+<a id='L372' name='L372'></a> 372                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Unknown value %pd", <a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>);
+<a id='L373' name='L373'></a> 373                 <strong class='reserved'>break</strong>;
+<a id='L374' name='L374'></a> 374         <em class='brace'>}</em>
+<a id='L375' name='L375'></a> 375 
+<a id='L376' name='L376'></a> 376         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L377' name='L377'></a> 377 <em class='brace'>}</em>
+<a id='L378' name='L378'></a> 378 <em class='comment'>/* }}} */</em>
+<a id='L379' name='L379'></a> 379 
+<a id='L380' name='L380'></a> 380 <em class='comment'>/*</em>
+<a id='L381' name='L381'></a> 381 <em class='comment'> * Local variables:</em>
+<a id='L382' name='L382'></a> 382 <em class='comment'> * tab-width: 4</em>
+<a id='L383' name='L383'></a> 383 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L384' name='L384'></a> 384 <em class='comment'> * End:</em>
+<a id='L385' name='L385'></a> 385 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L386' name='L386'></a> 386 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L387' name='L387'></a> 387 <em class='comment'> */</em>
+<a id='L388' name='L388'></a> 388 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L55'>[^]</a><a href='#L284'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

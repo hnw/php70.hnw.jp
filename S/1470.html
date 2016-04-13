@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>sapi/fpm/fpm/fpm_arrays.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1861.html'>sapi</a>/<a href='../files/1866.html'>fpm</a>/<a href='../files/1867.html'>fpm</a>/fpm_arrays.h</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L18'>[^]</a><a href='#L107'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1596.html' title='Multiple included from 2 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L18' title='Defined at 18.'>fpm_array_init</a></li>
+<li><a href='#L48' title='Defined at 48.'>fpm_array_item</a></li>
+<li><a href='#L58' title='Defined at 58.'>fpm_array_item_last</a></li>
+<li><a href='#L64' title='Defined at 64.'>fpm_array_item_remove</a></li>
+<li><a href='#L83' title='Defined at 83.'>fpm_array_push</a></li>
+<li><a href='#L107' title='Defined at 107.'>fpm_array_free</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 
+<a id='L2' name='L2'></a>   2         <em class='comment'>/* $Id: fpm_arrays.h,v 1.2 2008/05/24 17:38:47 anight Exp $ */</em>
+<a id='L3' name='L3'></a>   3         <em class='comment'>/* (c) 2007,2008 Andrei Nigmatulin */</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='sharp'>#ifndef</em> <a href='../S/1470.html#L6' title='Defined at 6 in sapi/fpm/fpm/fpm_arrays.h.'>FPM_ARRAYS_H</a>
+<a id='L6' name='L6'></a>   6 <em class='sharp'>#define</em> <a href='../S/1470.html#L5' title='Referred from 5 in sapi/fpm/fpm/fpm_arrays.h.'>FPM_ARRAYS_H</a> 1
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L9' name='L9'></a>   9 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>struct</strong> <a href='../R/19111.html' title='Multiple referred from 9 places.'>fpm_array_s</a> <em class='brace'>{</em>
+<a id='L12' name='L12'></a>  12         <strong class='reserved'>void</strong> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L13' name='L13'></a>  13         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a>;
+<a id='L14' name='L14'></a>  14         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a>;
+<a id='L15' name='L15'></a>  15         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a>;
+<a id='L16' name='L16'></a>  16 <em class='brace'>}</em>;
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../S/1502.html#L330' title='Referred from 330 in sapi/fpm/fpm/fpm_sockets.c.'>fpm_array_init</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/23250.html' title='Multiple used in 3 places.'>initial_num</a>) <em class='comment'>/* {{{ */</em>
+<a id='L19' name='L19'></a>  19 <em class='brace'>{</em>
+<a id='L20' name='L20'></a>  20         <strong class='reserved'>void</strong> *<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = 0;
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22         <strong class='reserved'>if</strong> (!<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>) <em class='brace'>{</em>
+<a id='L23' name='L23'></a>  23                 <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a> = <a href='../S/1215.html#L35' title='Defined at 35 in ext/xmlrpc/libxmlrpc/base64.h.'>malloc</a>(<strong class='reserved'>sizeof</strong>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a>));
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25                 <strong class='reserved'>if</strong> (!<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>) <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26                         <strong class='reserved'>return</strong> 0;
+<a id='L27' name='L27'></a>  27                 <em class='brace'>}</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29                 <a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>;
+<a id='L30' name='L30'></a>  30         <em class='brace'>}</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a> = <a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a>;
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = <a href='../Y/13295.html' title='Multiple used in 43 places.'>calloc</a>(<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a>, <a href='../Y/23250.html' title='Multiple used in 3 places.'>initial_num</a>);
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36         <strong class='reserved'>if</strong> (!<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>) <em class='brace'>{</em>
+<a id='L37' name='L37'></a>  37                 <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a>);
+<a id='L38' name='L38'></a>  38                 <strong class='reserved'>return</strong> 0;
+<a id='L39' name='L39'></a>  39         <em class='brace'>}</em>
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = <a href='../Y/23250.html' title='Multiple used in 3 places.'>initial_num</a>;
+<a id='L42' name='L42'></a>  42         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> = 0;
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>return</strong> <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>;
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'>/* }}} */</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> *<a href='../R/19107.html' title='Multiple referred from 4 places.'>fpm_array_item</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>) <em class='comment'>/* {{{ */</em>
+<a id='L49' name='L49'></a>  49 <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>char</strong> *<a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = (<strong class='reserved'>char</strong> *) <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> + <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a> * <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>/* }}} */</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> *<a href='../S/1474.html#L40' title='Referred from 40 in sapi/fpm/fpm/fpm_cleanup.c.'>fpm_array_item_last</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>) <em class='comment'>/* {{{ */</em>
+<a id='L59' name='L59'></a>  59 <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>return</strong> <a href='../S/1470.html#L48' title='Defined at 48 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_item</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> - 1);
+<a id='L61' name='L61'></a>  61 <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'>/* }}} */</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>int</strong> <a href='../S/1502.html#L394' title='Referred from 394 in sapi/fpm/fpm/fpm_sockets.c.'>fpm_array_item_remove</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>) <em class='comment'>/* {{{ */</em>
+<a id='L65' name='L65'></a>  65 <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>int</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = -1;
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> &lt; <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> - 1) <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69                 <strong class='reserved'>void</strong> *<a href='../Y/24592.html' title='Multiple used in 291 places.'>last</a> = <a href='../S/1470.html#L48' title='Defined at 48 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_item</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> - 1);
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>void</strong> *<a href='../Y/38765.html' title='Multiple used in 2 places.'>to_remove</a> = <a href='../S/1470.html#L48' title='Defined at 48 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_item</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>);
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72                 <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/38765.html' title='Multiple used in 2 places.'>to_remove</a>, <a href='../Y/24592.html' title='Multiple used in 291 places.'>last</a>, <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a>);
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74                 <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L75' name='L75'></a>  75         <em class='brace'>}</em>
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77         --<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a>;
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L80' name='L80'></a>  80 <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>/* }}} */</em>
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> *<a href='../R/19110.html' title='Multiple referred from 2 places.'>fpm_array_push</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>) <em class='comment'>/* {{{ */</em>
+<a id='L84' name='L84'></a>  84 <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>void</strong> *<a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>if</strong> (<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> == <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a>) <em class='brace'>{</em>
+<a id='L88' name='L88'></a>  88                 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/28193.html' title='Multiple used in 3 places.'>new_allocated</a> = <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> ? <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> * 2 : 20;
+<a id='L89' name='L89'></a>  89                 <strong class='reserved'>void</strong> *<a href='../Y/28326.html' title='Multiple used in 46 places.'>new_ptr</a> = <a href='../Y/34145.html' title='Multiple used in 81 places.'>realloc</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a> * <a href='../Y/28193.html' title='Multiple used in 3 places.'>new_allocated</a>);
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91                 <strong class='reserved'>if</strong> (!<a href='../Y/28326.html' title='Multiple used in 46 places.'>new_ptr</a>) <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92                         <strong class='reserved'>return</strong> 0;
+<a id='L93' name='L93'></a>  93                 <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95                 <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = <a href='../Y/28326.html' title='Multiple used in 46 places.'>new_ptr</a>;
+<a id='L96' name='L96'></a>  96                 <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = <a href='../Y/28193.html' title='Multiple used in 3 places.'>new_allocated</a>;
+<a id='L97' name='L97'></a>  97         <em class='brace'>}</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99         <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = <a href='../S/1470.html#L48' title='Defined at 48 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_item</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>, <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a>);
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101         ++<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a>;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L104' name='L104'></a> 104 <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'>/* }}} */</em>
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107 <strong class='reserved'>static</strong> <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> <a href='../R/19105.html' title='Multiple referred from 2 places.'>fpm_array_free</a>(<strong class='reserved'>struct</strong> <a href='../S/1470.html#L11' title='Defined at 11 in sapi/fpm/fpm/fpm_arrays.h.'>fpm_array_s</a> *<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>) <em class='comment'>/* {{{ */</em>
+<a id='L108' name='L108'></a> 108 <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109         <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>);
+<a id='L110' name='L110'></a> 110         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = 0;
+<a id='L111' name='L111'></a> 111         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/38003.html' title='Multiple used in 205 places.'>sz</a> = 0;
+<a id='L112' name='L112'></a> 112         <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/39841.html' title='Multiple used in 200 places.'>used</a> = <a href='../Y/8435.html' title='Multiple used in 2308 places.'>a</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = 0;
+<a id='L113' name='L113'></a> 113 <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'>/* }}} */</em>
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116 <em class='sharp'>#endif</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L18'>[^]</a><a href='#L107'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

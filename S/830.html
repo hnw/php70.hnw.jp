@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/opcache/shared_alloc_shm.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1810.html'>opcache</a>/shared_alloc_shm.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L134'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L54' title='Defined at 54.'>create_segments</a></li>
+<li><a href='#L128' title='Defined at 128.'>detach_segment</a></li>
+<li><a href='#L134' title='Defined at 134.'>segment_type_size</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | Zend OPcache                                                         |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1998-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Andi Gutmans &lt;andi@zend.com&gt;                                |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Zeev Suraski &lt;zeev@zend.com&gt;                                |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |          Stanislav Malyshev &lt;stas@zend.com&gt;                          |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   |          Dmitry Stogov &lt;dmitry@zend.com&gt;                             |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>*/</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='848.html'>zend_shared_alloc.h</a>"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#ifdef</em> <a href='../D/14465.html' title='Multiple defined in 3 places.'>USE_SHM</a>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/7870.html' title='Multiple used in 11 places.'>__FreeBSD__</a>)
+<a id='L27' name='L27'></a>  27 <em class='sharp'># include</em> &lt;<a href='1602.html'>machine/param.h</a>&gt;
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#endif</em>
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;sys/types.h&gt;
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;sys/shm.h&gt;
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> &lt;sys/ipc.h&gt;
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> &lt;dirent.h&gt;
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> &lt;<a href='1616.html'>signal.h</a>&gt;
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> &lt;<a href='1622.html'>unistd.h</a>&gt;
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> &lt;errno.h&gt;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#include</em> &lt;sys/stat.h&gt;
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#include</em> &lt;fcntl.h&gt;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#ifndef</em> <a href='../D/5132.html' title='Multiple defined in 21 places.'>MIN</a>
+<a id='L43' name='L43'></a>  43 <em class='sharp'># define</em> <a href='../R/4470.html' title='Multiple referred from 147 places.'>MIN</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>, <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) ((<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>) &gt; (<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>)? (<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>) : (<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>))
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#define</em> <a href='../S/830.html#L64' title='Referred from 64 in ext/opcache/shared_alloc_shm.c.'>SEG_ALLOC_SIZE_MAX</a> 32*1024*1024
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#define</em> <a href='../R/9025.html' title='Multiple referred from 2 places.'>SEG_ALLOC_SIZE_MIN</a> 2*1024*1024
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong>  <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50     <a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> <a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>;
+<a id='L51' name='L51'></a>  51     <strong class='reserved'>int</strong> <a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a>;
+<a id='L52' name='L52'></a>  52 <em class='brace'>}</em> <a href='../R/31193.html' title='Multiple referred from 6 places.'>zend_shared_segment_shm</a>;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/17909.html' title='Multiple referred from 6 places.'>create_segments</a>(<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a> ***<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>, <strong class='reserved'>int</strong> *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>, <strong class='reserved'>char</strong> **<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>)
+<a id='L55' name='L55'></a>  55 <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L57' name='L57'></a>  57         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a> = 0, <a href='../Y/34438.html' title='Multiple used in 7 places.'>remaining_bytes</a> = <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a>;
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>int</strong> <a href='../Y/18037.html' title='Multiple used in 5 places.'>first_segment_id</a> = -1;
+<a id='L59' name='L59'></a>  59         <a href='../D/23762.html' title='Multiple defined in 2 places.'>key_t</a> <a href='../Y/18038.html' title='Multiple used in 2 places.'>first_segment_key</a> = -1;
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>struct</strong> <a href='../S/1589.html#L40' title='Defined at 40 in TSRM/tsrm_win32.h.'>shmid_ds</a> <a href='../Y/35543.html' title='Multiple used in 3 places.'>sds</a>;
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>int</strong> <a href='../Y/36058.html' title='Multiple used in 4 places.'>shmget_flags</a>;
+<a id='L62' name='L62'></a>  62         <a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a> *<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64     <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> = <a href='../S/830.html#L46' title='Defined at 46 in ext/opcache/shared_alloc_shm.c.'>SEG_ALLOC_SIZE_MAX</a>;
+<a id='L65' name='L65'></a>  65     <em class='comment'>/* determine segment size we _really_ need:</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>     * no more than to include requested_size</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>     */</em>
+<a id='L68' name='L68'></a>  68     <strong class='reserved'>while</strong> (<a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a> * 2 &lt;= <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> &amp;&amp; <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> &gt; <a href='../S/830.html#L47' title='Defined at 47 in ext/opcache/shared_alloc_shm.c.'>SEG_ALLOC_SIZE_MIN</a>) <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69         <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> &gt;&gt;= 1;
+<a id='L70' name='L70'></a>  70     <em class='brace'>}</em>
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <a href='../Y/36058.html' title='Multiple used in 4 places.'>shmget_flags</a> = <a href='../S/1589.html#L81' title='Defined at 81 in TSRM/tsrm_win32.h.'>IPC_CREAT</a>|<a href='../S/1589.html#L90' title='Defined at 90 in TSRM/tsrm_win32.h.'>SHM_R</a>|<a href='../S/1589.html#L91' title='Defined at 91 in TSRM/tsrm_win32.h.'>SHM_W</a>|<a href='../S/1589.html#L82' title='Defined at 82 in TSRM/tsrm_win32.h.'>IPC_EXCL</a>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <em class='comment'>/* try allocating this much, if not - try shrinking */</em>
+<a id='L75' name='L75'></a>  75         <strong class='reserved'>while</strong> (<a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> &gt;= <a href='../S/830.html#L47' title='Defined at 47 in ext/opcache/shared_alloc_shm.c.'>SEG_ALLOC_SIZE_MIN</a>) <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                 <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a> = <a href='../D/5132.html' title='Multiple defined in 21 places.'>MIN</a>(<a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a>);
+<a id='L77' name='L77'></a>  77                 <a href='../Y/18037.html' title='Multiple used in 5 places.'>first_segment_id</a> = <a href='../S/1588.html#L591' title='Defined at 591 in TSRM/tsrm_win32.c.'>shmget</a>(<a href='../Y/18038.html' title='Multiple used in 2 places.'>first_segment_key</a>, <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a>, <a href='../Y/36058.html' title='Multiple used in 4 places.'>shmget_flags</a>);
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>if</strong> (<a href='../Y/18037.html' title='Multiple used in 5 places.'>first_segment_id</a> != -1) <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                         <strong class='reserved'>break</strong>;
+<a id='L80' name='L80'></a>  80                 <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81                 <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a> &gt;&gt;= 1; <em class='comment'>/* shrink the allocated block */</em>
+<a id='L82' name='L82'></a>  82         <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>if</strong> (<a href='../Y/18037.html' title='Multiple used in 5 places.'>first_segment_id</a> == -1) <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "shmget";
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L87' name='L87'></a>  87         <em class='brace'>}</em>
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a> = ((<a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a> - 1) / <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a>) + 1;
+<a id='L90' name='L90'></a>  90         *<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a> = (<a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a> **) <a href='../Y/13295.html' title='Multiple used in 43 places.'>calloc</a>(1, (*<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>) * <strong class='reserved'>sizeof</strong>(<a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a>) + <strong class='reserved'>sizeof</strong>(<strong class='reserved'>void</strong> *) * (*<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>));
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>if</strong> (!*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>) <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "calloc";
+<a id='L93' name='L93'></a>  93                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L94' name='L94'></a>  94         <em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95         <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a> = (<a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a> *)((<strong class='reserved'>char</strong> *)(*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>) + <strong class='reserved'>sizeof</strong>(<strong class='reserved'>void</strong> *) * (*<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>));
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L97' name='L97'></a>  97                 (*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>)[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>] = <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a> + <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L98' name='L98'></a>  98         <em class='brace'>}</em>
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <a href='../Y/34438.html' title='Multiple used in 7 places.'>remaining_bytes</a> = <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>;
+<a id='L101' name='L101'></a> 101         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L102' name='L102'></a> 102                 <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a> = <a href='../D/5132.html' title='Multiple defined in 21 places.'>MIN</a>(<a href='../Y/34438.html' title='Multiple used in 7 places.'>remaining_bytes</a>, <a href='../Y/35630.html' title='Multiple used in 9 places.'>seg_allocate_size</a>);
+<a id='L103' name='L103'></a> 103                 <strong class='reserved'>if</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> != 0) <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104                         <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a> = <a href='../S/1588.html#L591' title='Defined at 591 in TSRM/tsrm_win32.c.'>shmget</a>(<a href='../S/1589.html#L80' title='Defined at 80 in TSRM/tsrm_win32.h.'>IPC_PRIVATE</a>, <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a>, <a href='../Y/36058.html' title='Multiple used in 4 places.'>shmget_flags</a>);
+<a id='L105' name='L105'></a> 105                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L106' name='L106'></a> 106                         <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a> = <a href='../Y/18037.html' title='Multiple used in 5 places.'>first_segment_id</a>;
+<a id='L107' name='L107'></a> 107                 <em class='brace'>}</em>
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109                 <strong class='reserved'>if</strong> (<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a> == -1) <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                         <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L111' name='L111'></a> 111                 <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113                 <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>.<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../S/1588.html#L665' title='Defined at 665 in TSRM/tsrm_win32.c.'>shmat</a>(<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, 0);
+<a id='L114' name='L114'></a> 114                 <strong class='reserved'>if</strong> (<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>.<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> == (<strong class='reserved'>void</strong> *)-1) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                         *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "shmat";
+<a id='L116' name='L116'></a> 116                         <a href='../S/1588.html#L697' title='Defined at 697 in TSRM/tsrm_win32.c.'>shmctl</a>(<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a>, <a href='../S/1589.html#L85' title='Defined at 85 in TSRM/tsrm_win32.h.'>IPC_RMID</a>, &amp;<a href='../Y/35543.html' title='Multiple used in 3 places.'>sds</a>);
+<a id='L117' name='L117'></a> 117                         <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L118' name='L118'></a> 118                 <em class='brace'>}</em>
+<a id='L119' name='L119'></a> 119                 <a href='../S/1588.html#L697' title='Defined at 697 in TSRM/tsrm_win32.c.'>shmctl</a>(<a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/36033.html' title='Multiple used in 32 places.'>shm_id</a>, <a href='../S/1589.html#L85' title='Defined at 85 in TSRM/tsrm_win32.h.'>IPC_RMID</a>, &amp;<a href='../Y/35543.html' title='Multiple used in 3 places.'>sds</a>);
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121                 <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>.<a href='../Y/33027.html' title='Multiple used in 1249 places.'>pos</a> = 0;
+<a id='L122' name='L122'></a> 122                 <a href='../Y/35998.html' title='Multiple used in 34 places.'>shared_segments</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>.<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a>;
+<a id='L123' name='L123'></a> 123                 <a href='../Y/34438.html' title='Multiple used in 7 places.'>remaining_bytes</a> -= <a href='../Y/9104.html' title='Multiple used in 9 places.'>allocate_size</a>;
+<a id='L124' name='L124'></a> 124         <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125         <strong class='reserved'>return</strong> <a href='../S/848.html#L67' title='Defined at 67 in ext/opcache/zend_shared_alloc.h.'>ALLOC_SUCCESS</a>;
+<a id='L126' name='L126'></a> 126 <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/18189.html' title='Multiple referred from 7 places.'>detach_segment</a>(<a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a> *<a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>)
+<a id='L129' name='L129'></a> 129 <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130         <a href='../S/1588.html#L682' title='Defined at 682 in TSRM/tsrm_win32.c.'>shmdt</a>(<a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>-&gt;<a href='../Y/14168.html' title='Multiple used in 2092 places.'>common</a>.<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>);
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>return</strong> 0;
+<a id='L132' name='L132'></a> 132 <em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 <strong class='reserved'>static</strong> <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../R/26349.html' title='Multiple referred from 9 places.'>segment_type_size</a>(<strong class='reserved'>void</strong>)
+<a id='L135' name='L135'></a> 135 <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136         <strong class='reserved'>return</strong> <strong class='reserved'>sizeof</strong>(<a href='../S/830.html#L52' title='Defined at 52 in ext/opcache/shared_alloc_shm.c.'>zend_shared_segment_shm</a>);
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139 <a href='../S/848.html#L86' title='Defined at 86 in ext/opcache/zend_shared_alloc.h.'>zend_shared_memory_handlers</a> <a href='../Y/43667.html' title='Multiple used in 3 places.'>zend_alloc_shm_handlers</a> = <em class='brace'>{</em>
+<a id='L140' name='L140'></a> 140         (<a href='../Y/14614.html' title='Multiple used in 4 places.'>create_segments_t</a>)<a href='../D/20724.html' title='Multiple defined in 4 places.'>create_segments</a>,
+<a id='L141' name='L141'></a> 141         (<a href='../Y/15640.html' title='Multiple used in 4 places.'>detach_segment_t</a>)<a href='../D/21013.html' title='Multiple defined in 4 places.'>detach_segment</a>,
+<a id='L142' name='L142'></a> 142         <a href='../D/29608.html' title='Multiple defined in 4 places.'>segment_type_size</a>
+<a id='L143' name='L143'></a> 143 <em class='brace'>}</em>;
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145 <em class='sharp'>#endif</em> <em class='comment'>/* USE_SHM */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L134'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

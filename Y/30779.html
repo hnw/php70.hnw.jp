@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pReadr</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L78367'>pReadr</a>           78367 ext/sqlite3/libsqlite/sqlite3.c static void vdbePmaReaderClear(PmaReader *pReadr){</span>
+<span class='curline'><a href='../S/1054.html#L78368'>pReadr</a>           78368 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pReadr-&gt;aAlloc);</span>
+<span class='curline'><a href='../S/1054.html#L78369'>pReadr</a>           78369 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_free(pReadr-&gt;aBuffer);</span>
+<span class='curline'><a href='../S/1054.html#L78370'>pReadr</a>           78370 ext/sqlite3/libsqlite/sqlite3.c   if( pReadr-&gt;aMap ) sqlite3OsUnfetch(pReadr-&gt;pFd, 0, pReadr-&gt;aMap);</span>
+<span class='curline'><a href='../S/1054.html#L78371'>pReadr</a>           78371 ext/sqlite3/libsqlite/sqlite3.c   vdbeIncrFree(pReadr-&gt;pIncr);</span>
+<span class='curline'><a href='../S/1054.html#L78372'>pReadr</a>           78372 ext/sqlite3/libsqlite/sqlite3.c   memset(pReadr, 0, sizeof(PmaReader));</span>
+<span class='curline'><a href='../S/1054.html#L78530'>pReadr</a>           78530 ext/sqlite3/libsqlite/sqlite3.c   PmaReader *pReadr,              /* Reader whose cursor is to be moved */</span>
+<span class='curline'><a href='../S/1054.html#L78536'>pReadr</a>           78536 ext/sqlite3/libsqlite/sqlite3.c   assert( pReadr-&gt;pIncr==0 || pReadr-&gt;pIncr-&gt;bEof==0 );</span>
+<span class='curline'><a href='../S/1054.html#L78539'>pReadr</a>           78539 ext/sqlite3/libsqlite/sqlite3.c   if( pReadr-&gt;aMap ){</span>
+<span class='curline'><a href='../S/1054.html#L78540'>pReadr</a>           78540 ext/sqlite3/libsqlite/sqlite3.c     sqlite3OsUnfetch(pReadr-&gt;pFd, 0, pReadr-&gt;aMap);</span>
+<span class='curline'><a href='../S/1054.html#L78541'>pReadr</a>           78541 ext/sqlite3/libsqlite/sqlite3.c     pReadr-&gt;aMap = 0;</span>
+<span class='curline'><a href='../S/1054.html#L78543'>pReadr</a>           78543 ext/sqlite3/libsqlite/sqlite3.c   pReadr-&gt;iReadOff = iOff;</span>
+<span class='curline'><a href='../S/1054.html#L78544'>pReadr</a>           78544 ext/sqlite3/libsqlite/sqlite3.c   pReadr-&gt;iEof = pFile-&gt;iEof;</span>
+<span class='curline'><a href='../S/1054.html#L78545'>pReadr</a>           78545 ext/sqlite3/libsqlite/sqlite3.c   pReadr-&gt;pFd = pFile-&gt;pFd;</span>
+<span class='curline'><a href='../S/1054.html#L78547'>pReadr</a>           78547 ext/sqlite3/libsqlite/sqlite3.c   rc = vdbeSorterMapFile(pTask, pFile, &amp;pReadr-&gt;aMap);</span>
+<span class='curline'><a href='../S/1054.html#L78548'>pReadr</a>           78548 ext/sqlite3/libsqlite/sqlite3.c   if( rc==SQLITE_OK &amp;&amp; pReadr-&gt;aMap==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L78550'>pReadr</a>           78550 ext/sqlite3/libsqlite/sqlite3.c     int iBuf = pReadr-&gt;iReadOff % pgsz;</span>
+<span class='curline'><a href='../S/1054.html#L78551'>pReadr</a>           78551 ext/sqlite3/libsqlite/sqlite3.c     if( pReadr-&gt;aBuffer==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L78552'>pReadr</a>           78552 ext/sqlite3/libsqlite/sqlite3.c       pReadr-&gt;aBuffer = (u8*)sqlite3Malloc(pgsz);</span>
+<span class='curline'><a href='../S/1054.html#L78553'>pReadr</a>           78553 ext/sqlite3/libsqlite/sqlite3.c       if( pReadr-&gt;aBuffer==0 ) rc = SQLITE_NOMEM;</span>
+<span class='curline'><a href='../S/1054.html#L78554'>pReadr</a>           78554 ext/sqlite3/libsqlite/sqlite3.c       pReadr-&gt;nBuffer = pgsz;</span>
+<span class='curline'><a href='../S/1054.html#L78558'>pReadr</a>           78558 ext/sqlite3/libsqlite/sqlite3.c       if( (pReadr-&gt;iReadOff + nRead) &gt; pReadr-&gt;iEof ){</span>
+<span class='curline'><a href='../S/1054.html#L78559'>pReadr</a>           78559 ext/sqlite3/libsqlite/sqlite3.c         nRead = (int)(pReadr-&gt;iEof - pReadr-&gt;iReadOff);</span>
+<span class='curline'><a href='../S/1054.html#L78562'>pReadr</a>           78562 ext/sqlite3/libsqlite/sqlite3.c           pReadr-&gt;pFd, &amp;pReadr-&gt;aBuffer[iBuf], nRead, pReadr-&gt;iReadOff</span>
+<span class='curline'><a href='../S/1054.html#L78575'>pReadr</a>           78575 ext/sqlite3/libsqlite/sqlite3.c static int vdbePmaReaderNext(PmaReader *pReadr){</span>
+<span class='curline'><a href='../S/1054.html#L78580'>pReadr</a>           78580 ext/sqlite3/libsqlite/sqlite3.c   if( pReadr-&gt;iReadOff&gt;=pReadr-&gt;iEof ){</span>
+<span class='curline'><a href='../S/1054.html#L78581'>pReadr</a>           78581 ext/sqlite3/libsqlite/sqlite3.c     IncrMerger *pIncr = pReadr-&gt;pIncr;</span>
+<span class='curline'><a href='../S/1054.html#L78587'>pReadr</a>           78587 ext/sqlite3/libsqlite/sqlite3.c             pIncr-&gt;pTask, pReadr, &amp;pIncr-&gt;aFile[0], pIncr-&gt;iStartOff</span>
+<span class='curline'><a href='../S/1054.html#L78595'>pReadr</a>           78595 ext/sqlite3/libsqlite/sqlite3.c       vdbePmaReaderClear(pReadr);</span>
+<span class='curline'><a href='../S/1054.html#L78602'>pReadr</a>           78602 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReadVarint(pReadr, &amp;nRec);</span>
+<span class='curline'><a href='../S/1054.html#L78605'>pReadr</a>           78605 ext/sqlite3/libsqlite/sqlite3.c     pReadr-&gt;nKey = (int)nRec;</span>
+<span class='curline'><a href='../S/1054.html#L78606'>pReadr</a>           78606 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReadBlob(pReadr, (int)nRec, &amp;pReadr-&gt;aKey);</span>
+<span class='curline'><a href='../S/1054.html#L78626'>pReadr</a>           78626 ext/sqlite3/libsqlite/sqlite3.c   PmaReader *pReadr,              /* PmaReader to populate */</span>
+<span class='curline'><a href='../S/1054.html#L78632'>pReadr</a>           78632 ext/sqlite3/libsqlite/sqlite3.c   assert( pReadr-&gt;aAlloc==0 &amp;&amp; pReadr-&gt;nAlloc==0 );</span>
+<span class='curline'><a href='../S/1054.html#L78633'>pReadr</a>           78633 ext/sqlite3/libsqlite/sqlite3.c   assert( pReadr-&gt;aBuffer==0 );</span>
+<span class='curline'><a href='../S/1054.html#L78634'>pReadr</a>           78634 ext/sqlite3/libsqlite/sqlite3.c   assert( pReadr-&gt;aMap==0 );</span>
+<span class='curline'><a href='../S/1054.html#L78636'>pReadr</a>           78636 ext/sqlite3/libsqlite/sqlite3.c   rc = vdbePmaReaderSeek(pTask, pReadr, pFile, iStart);</span>
+<span class='curline'><a href='../S/1054.html#L78639'>pReadr</a>           78639 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReadVarint(pReadr, &amp;nByte);</span>
+<span class='curline'><a href='../S/1054.html#L78640'>pReadr</a>           78640 ext/sqlite3/libsqlite/sqlite3.c     pReadr-&gt;iEof = pReadr-&gt;iReadOff + nByte;</span>
+<span class='curline'><a href='../S/1054.html#L78645'>pReadr</a>           78645 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReaderNext(pReadr);</span>
+<span class='curline'><a href='../S/1054.html#L79969'>pReadr</a>           79969 ext/sqlite3/libsqlite/sqlite3.c static int vdbePmaReaderIncrInit(PmaReader *pReadr, int eMode);</span>
+<span class='curline'><a href='../S/1054.html#L80060'>pReadr</a>           80060 ext/sqlite3/libsqlite/sqlite3.c static int vdbePmaReaderIncrMergeInit(PmaReader *pReadr, int eMode){</span>
+<span class='curline'><a href='../S/1054.html#L80062'>pReadr</a>           80062 ext/sqlite3/libsqlite/sqlite3.c   IncrMerger *pIncr = pReadr-&gt;pIncr;</span>
+<span class='curline'><a href='../S/1054.html#L80116'>pReadr</a>           80116 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReaderNext(pReadr);</span>
+<span class='curline'><a href='../S/1054.html#L80148'>pReadr</a>           80148 ext/sqlite3/libsqlite/sqlite3.c static int vdbePmaReaderIncrInit(PmaReader *pReadr, int eMode){</span>
+<span class='curline'><a href='../S/1054.html#L80149'>pReadr</a>           80149 ext/sqlite3/libsqlite/sqlite3.c   IncrMerger *pIncr = pReadr-&gt;pIncr;   /* Incremental merger */</span>
+<span class='curline'><a href='../S/1054.html#L80155'>pReadr</a>           80155 ext/sqlite3/libsqlite/sqlite3.c       void *pCtx = (void*)pReadr;</span>
+<span class='curline'><a href='../S/1054.html#L80160'>pReadr</a>           80160 ext/sqlite3/libsqlite/sqlite3.c       rc = vdbePmaReaderIncrMergeInit(pReadr, eMode);</span>
+<span class='curline'><a href='../S/1054.html#L80194'>pReadr</a>           80194 ext/sqlite3/libsqlite/sqlite3.c     PmaReader *pReadr = &amp;pNew-&gt;aReadr[i];</span>
+<span class='curline'><a href='../S/1054.html#L80195'>pReadr</a>           80195 ext/sqlite3/libsqlite/sqlite3.c     rc = vdbePmaReaderInit(pTask, &amp;pTask-&gt;file, iOff, pReadr, &amp;nDummy);</span>
+<span class='curline'><a href='../S/1054.html#L80196'>pReadr</a>           80196 ext/sqlite3/libsqlite/sqlite3.c     iOff = pReadr-&gt;iEof;</span>
+<span class='curline'><a href='../S/1054.html#L80256'>pReadr</a>           80256 ext/sqlite3/libsqlite/sqlite3.c     PmaReader *pReadr = &amp;p-&gt;aReadr[iIter];</span>
+<span class='curline'><a href='../S/1054.html#L80258'>pReadr</a>           80258 ext/sqlite3/libsqlite/sqlite3.c     if( pReadr-&gt;pIncr==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L80263'>pReadr</a>           80263 ext/sqlite3/libsqlite/sqlite3.c         rc = vdbeIncrMergerNew(pTask, pNew, &amp;pReadr-&gt;pIncr);</span>
+<span class='curline'><a href='../S/1054.html#L80267'>pReadr</a>           80267 ext/sqlite3/libsqlite/sqlite3.c       p = pReadr-&gt;pIncr-&gt;pMerger;</span>
+<span class='curline'><a href='../S/1054.html#L80389'>pReadr</a>           80389 ext/sqlite3/libsqlite/sqlite3.c       PmaReader *pReadr = 0;</span>
+<span class='curline'><a href='../S/1054.html#L80393'>pReadr</a>           80393 ext/sqlite3/libsqlite/sqlite3.c         pReadr = (PmaReader*)sqlite3DbMallocZero(db, sizeof(PmaReader));</span>
+<span class='curline'><a href='../S/1054.html#L80394'>pReadr</a>           80394 ext/sqlite3/libsqlite/sqlite3.c         pSorter-&gt;pReader = pReadr;</span>
+<span class='curline'><a href='../S/1054.html#L80395'>pReadr</a>           80395 ext/sqlite3/libsqlite/sqlite3.c         if( pReadr==0 ) rc = SQLITE_NOMEM;</span>
+<span class='curline'><a href='../S/1054.html#L80398'>pReadr</a>           80398 ext/sqlite3/libsqlite/sqlite3.c         rc = vdbeIncrMergerNew(pLast, pMain, &amp;pReadr-&gt;pIncr);</span>
+<span class='curline'><a href='../S/1054.html#L80400'>pReadr</a>           80400 ext/sqlite3/libsqlite/sqlite3.c           vdbeIncrMergerSetThreads(pReadr-&gt;pIncr);</span>
+<span class='curline'><a href='../S/1054.html#L80429'>pReadr</a>           80429 ext/sqlite3/libsqlite/sqlite3.c         rc = vdbePmaReaderIncrMergeInit(pReadr, INCRINIT_ROOT);</span>
+</pre>
+</body>
+</html>

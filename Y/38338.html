@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>thread_resources</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1580.html#L78'>thread_resources</a>   78 TSRM/TSRM.c    						unshuffled_offset, (long) thread_resources-&gt;thread_id, array[unshuffled_offset]));				\</span>
+<span class='curline'><a href='../S/1580.html#L82'>thread_resources</a>   82 TSRM/TSRM.c    						unshuffled_offset, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources-&gt;count-1)));	\</span>
+<span class='curline'><a href='../S/1580.html#L319'>thread_resources</a>  319 TSRM/TSRM.c    	tsrm_tls_entry *thread_resources;</span>
+<span class='curline'><a href='../S/1580.html#L336'>thread_resources</a>  336 TSRM/TSRM.c    		thread_resources = tsrm_tls_get();</span>
+<span class='curline'><a href='../S/1580.html#L338'>thread_resources</a>  338 TSRM/TSRM.c    		if (thread_resources) {</span>
+<span class='curline'><a href='../S/1580.html#L339'>thread_resources</a>  339 TSRM/TSRM.c    			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources-&gt;thread_id));</span>
+<span class='curline'><a href='../S/1580.html#L344'>thread_resources</a>  344 TSRM/TSRM.c    			TSRM_SAFE_RETURN_RSRC(thread_resources-&gt;storage, id, thread_resources-&gt;count);</span>
+<span class='curline'><a href='../S/1580.html#L355'>thread_resources</a>  355 TSRM/TSRM.c    	thread_resources = tsrm_tls_table[hash_value];</span>
+<span class='curline'><a href='../S/1580.html#L357'>thread_resources</a>  357 TSRM/TSRM.c    	if (!thread_resources) {</span>
+<span class='curline'><a href='../S/1580.html#L362'>thread_resources</a>  362 TSRM/TSRM.c    			if (thread_resources-&gt;thread_id == thread_id) {</span>
+<span class='curline'><a href='../S/1580.html#L365'>thread_resources</a>  365 TSRM/TSRM.c    			if (thread_resources-&gt;next) {</span>
+<span class='curline'><a href='../S/1580.html#L366'>thread_resources</a>  366 TSRM/TSRM.c    				thread_resources = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L368'>thread_resources</a>  368 TSRM/TSRM.c    				allocate_new_resource(&amp;thread_resources-&gt;next, thread_id);</span>
+<span class='curline'><a href='../S/1580.html#L375'>thread_resources</a>  375 TSRM/TSRM.c    		 } while (thread_resources);</span>
+<span class='curline'><a href='../S/1580.html#L382'>thread_resources</a>  382 TSRM/TSRM.c    	TSRM_SAFE_RETURN_RSRC(thread_resources-&gt;storage, id, thread_resources-&gt;count);</span>
+<span class='curline'><a href='../S/1580.html#L392'>thread_resources</a>  392 TSRM/TSRM.c    	tsrm_tls_entry *next, *thread_resources = (tsrm_tls_entry*)context;</span>
+<span class='curline'><a href='../S/1580.html#L395'>thread_resources</a>  395 TSRM/TSRM.c    	while (thread_resources) {</span>
+<span class='curline'><a href='../S/1580.html#L396'>thread_resources</a>  396 TSRM/TSRM.c    		next = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L398'>thread_resources</a>  398 TSRM/TSRM.c    		for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L400'>thread_resources</a>  400 TSRM/TSRM.c    				resource_types_table[i].dtor(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L403'>thread_resources</a>  403 TSRM/TSRM.c    		for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L404'>thread_resources</a>  404 TSRM/TSRM.c    			free(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L406'>thread_resources</a>  406 TSRM/TSRM.c    		free(thread_resources-&gt;storage);</span>
+<span class='curline'><a href='../S/1580.html#L407'>thread_resources</a>  407 TSRM/TSRM.c    		free(thread_resources);</span>
+<span class='curline'><a href='../S/1580.html#L408'>thread_resources</a>  408 TSRM/TSRM.c    		thread_resources = next;</span>
+<span class='curline'><a href='../S/1580.html#L451'>thread_resources</a>  451 TSRM/TSRM.c    	tsrm_tls_entry *thread_resources;</span>
+<span class='curline'><a href='../S/1580.html#L459'>thread_resources</a>  459 TSRM/TSRM.c    	thread_resources = tsrm_tls_table[hash_value];</span>
+<span class='curline'><a href='../S/1580.html#L461'>thread_resources</a>  461 TSRM/TSRM.c    	while (thread_resources) {</span>
+<span class='curline'><a href='../S/1580.html#L462'>thread_resources</a>  462 TSRM/TSRM.c    		if (thread_resources-&gt;thread_id == thread_id) {</span>
+<span class='curline'><a href='../S/1580.html#L463'>thread_resources</a>  463 TSRM/TSRM.c    			for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L465'>thread_resources</a>  465 TSRM/TSRM.c    					resource_types_table[i].dtor(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L468'>thread_resources</a>  468 TSRM/TSRM.c    			for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L469'>thread_resources</a>  469 TSRM/TSRM.c    				free(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L471'>thread_resources</a>  471 TSRM/TSRM.c    			free(thread_resources-&gt;storage);</span>
+<span class='curline'><a href='../S/1580.html#L473'>thread_resources</a>  473 TSRM/TSRM.c    				last-&gt;next = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L475'>thread_resources</a>  475 TSRM/TSRM.c    				tsrm_tls_table[hash_value] = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L478'>thread_resources</a>  478 TSRM/TSRM.c    			free(thread_resources);</span>
+<span class='curline'><a href='../S/1580.html#L481'>thread_resources</a>  481 TSRM/TSRM.c    		if (thread_resources-&gt;next) {</span>
+<span class='curline'><a href='../S/1580.html#L482'>thread_resources</a>  482 TSRM/TSRM.c    			last = thread_resources;</span>
+<span class='curline'><a href='../S/1580.html#L484'>thread_resources</a>  484 TSRM/TSRM.c    		thread_resources = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L493'>thread_resources</a>  493 TSRM/TSRM.c    	tsrm_tls_entry *thread_resources;</span>
+<span class='curline'><a href='../S/1580.html#L501'>thread_resources</a>  501 TSRM/TSRM.c    	thread_resources = tsrm_tls_table[hash_value];</span>
+<span class='curline'><a href='../S/1580.html#L503'>thread_resources</a>  503 TSRM/TSRM.c    	while (thread_resources) {</span>
+<span class='curline'><a href='../S/1580.html#L504'>thread_resources</a>  504 TSRM/TSRM.c    		if (thread_resources-&gt;thread_id != thread_id) {</span>
+<span class='curline'><a href='../S/1580.html#L505'>thread_resources</a>  505 TSRM/TSRM.c    			for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L507'>thread_resources</a>  507 TSRM/TSRM.c    					resource_types_table[i].dtor(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L510'>thread_resources</a>  510 TSRM/TSRM.c    			for (i=0; i&lt;thread_resources-&gt;count; i++) {</span>
+<span class='curline'><a href='../S/1580.html#L511'>thread_resources</a>  511 TSRM/TSRM.c    				free(thread_resources-&gt;storage[i]);</span>
+<span class='curline'><a href='../S/1580.html#L513'>thread_resources</a>  513 TSRM/TSRM.c    			free(thread_resources-&gt;storage);</span>
+<span class='curline'><a href='../S/1580.html#L515'>thread_resources</a>  515 TSRM/TSRM.c    				last-&gt;next = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L517'>thread_resources</a>  517 TSRM/TSRM.c    				tsrm_tls_table[hash_value] = thread_resources-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L519'>thread_resources</a>  519 TSRM/TSRM.c    			free(thread_resources);</span>
+<span class='curline'><a href='../S/1580.html#L521'>thread_resources</a>  521 TSRM/TSRM.c    				thread_resources = last-&gt;next;</span>
+<span class='curline'><a href='../S/1580.html#L523'>thread_resources</a>  523 TSRM/TSRM.c    				thread_resources = tsrm_tls_table[hash_value];</span>
+<span class='curline'><a href='../S/1580.html#L526'>thread_resources</a>  526 TSRM/TSRM.c    			if (thread_resources-&gt;next) {</span>
+<span class='curline'><a href='../S/1580.html#L527'>thread_resources</a>  527 TSRM/TSRM.c    				last = thread_resources;</span>
+<span class='curline'><a href='../S/1580.html#L529'>thread_resources</a>  529 TSRM/TSRM.c    			thread_resources = thread_resources-&gt;next;</span>
+</pre>
+</body>
+</html>

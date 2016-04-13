@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/mbstring/libmbfl/mbfl/mbfilter.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1794.html'>mbstring</a>/<a href='../files/1795.html'>libmbfl</a>/<a href='../files/1797.html'>mbfl</a>/mbfilter.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/750.html' title='Multiple included from 151 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/* charset=UTF-8</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * vim: encoding=utf-8:</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * */</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='comment'>/*</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * "streamable kanji code filter and converter"</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> *</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * Copyright (c) 1998,1999,2000,2001 HappySize, Inc. All rights reserved.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> *</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * This software is released under the GNU Lesser General Public License.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * (Version 2.1, February 1999)</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * Please read the following detail of the licence (in japanese).</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> *</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * ◆使用許諾条件◆</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * このソフトウェアは株式会社ハッピーサイズによって開発されました。株式会社ハッ</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * ピーサイズは、著作権法および万国著作権条約の定めにより、このソフトウェアに関</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * するすべての権利を留保する権利を持ち、ここに行使します。株式会社ハッピーサイ</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * ズは以下に明記した条件に従って、このソフトウェアを使用する排他的ではない権利</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * をお客様に許諾します。何人たりとも、以下の条件に反してこのソフトウェアを使用</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * することはできません。</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * このソフトウェアを「GNU Lesser General Public License (Version 2.1, February</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * 1999)」に示された条件で使用することを、全ての方に許諾します。「GNU Lesser</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * General Public License」を満たさない使用には、株式会社ハッピーサイズから書面</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * による許諾を得る必要があります。</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * 「GNU Lesser General Public License」の全文は以下のウェブページから取得でき</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * ます。「GNU Lesser General Public License」とは、これまでLibrary General</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * Public Licenseと呼ばれていたものです。</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> *     http://www.gnu.org/ --- GNUウェブサイト</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> *     http://www.gnu.org/copyleft/lesser.html --- ライセンス文面</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * このライセンスの内容がわからない方、守れない方には使用を許諾しません。</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> *</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * しかしながら、当社とGNUプロジェクトとの特定の関係を示唆または主張するもので</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * はありません。</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> *</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * ◆保証内容◆</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * このソフトウェアは、期待された動作・機能・性能を持つことを目標として設計され</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * 開発されていますが、これを保証するものではありません。このソフトウェアは「こ</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * のまま」の状態で提供されており、たとえばこのソフトウェアの有用性ないし特定の</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * 目的に合致することといった、何らかの保証内容が、明示されたり暗黙に示されてい</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> * る場合であっても、その保証は無効です。このソフトウェアを使用した結果ないし使</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * 用しなかった結果によって、直接あるいは間接に受けた身体的な傷害、財産上の損害</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * 、データの損失あるいはその他の全ての損害については、その損害の可能性が使用者</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * 、当社あるいは第三者によって警告されていた場合であっても、当社はその損害の賠</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * 償および補填を行いません。この規定は他の全ての、書面上または書面に無い保証・</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> * 契約・規定に優先します。</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> *</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * ◆著作権者の連絡先および使用条件についての問い合わせ先◆</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> *</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> * 〒102-0073</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> * 東京都千代田区九段北1-13-5日本地所第一ビル4F</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> * 株式会社ハッピーサイズ</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> * Phone: 03-3512-3655, Fax: 03-3512-3656</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> * Email: sales@happysize.co.jp</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> * Web: http://happysize.com/</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> *</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * ◆著者◆</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> *</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> * 金本　茂 &lt;sgk@happysize.co.jp&gt;</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> *</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> * ◆履歴◆</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> *</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> * 1998/11/10 sgk implementation in C++</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> * 1999/4/25  sgk Cで書きなおし。</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> * 1999/4/26  sgk 入力フィルタを実装。漢字コードを推定しながらフィルタを追加。</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * 1999/6/??      Unicodeサポート。</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> * 1999/6/22  sgk ライセンスをLGPLに変更。</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'> *</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'> */</em>
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74 <em class='comment'>/*</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'> * Unicode support</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'> *</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'> * Portions copyright (c) 1999,2000,2001 by the PHP3 internationalization team.</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'> * All rights reserved.</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'> *</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'> */</em>
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 <em class='comment'>/*</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'> *</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'> * streamable kanji code filter and converter</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'> *    mbfl : Multi Byte FiLter Liblary</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> *</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> */</em>
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 <em class='sharp'>#ifndef</em> <a href='../S/624.html#L90' title='Defined at 90 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>MBFL_MBFILTER_H</a>
+<a id='L90' name='L90'></a>  90 <em class='sharp'>#define</em> <a href='../S/624.html#L89' title='Referred from 89 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>MBFL_MBFILTER_H</a>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <em class='sharp'>#include</em> "<a href='636.html'>mbfl_defs.h</a>"
+<a id='L93' name='L93'></a>  93 <em class='sharp'>#include</em> "<a href='633.html'>mbfl_consts.h</a>"
+<a id='L94' name='L94'></a>  94 <em class='sharp'>#include</em> "<a href='632.html'>mbfl_allocators.h</a>"
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#include</em> "<a href='638.html'>mbfl_encoding.h</a>"
+<a id='L96' name='L96'></a>  96 <em class='sharp'>#include</em> "<a href='644.html'>mbfl_language.h</a>"
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#include</em> "<a href='648.html'>mbfl_string.h</a>"
+<a id='L98' name='L98'></a>  98 <em class='sharp'>#include</em> "<a href='635.html'>mbfl_convert.h</a>"
+<a id='L99' name='L99'></a>  99 <em class='sharp'>#include</em> "<a href='642.html'>mbfl_ident.h</a>"
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <em class='comment'>/*</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'> * version information</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'> */</em>
+<a id='L104' name='L104'></a> 104 <em class='sharp'>#define</em> <a href='../S/680.html#L1716' title='Referred from 1716 in ext/mbstring/mbstring.c.'>MBFL_VERSION_MAJOR</a> 1
+<a id='L105' name='L105'></a> 105 <em class='sharp'>#define</em> <a href='../S/680.html#L1716' title='Referred from 1716 in ext/mbstring/mbstring.c.'>MBFL_VERSION_MINOR</a> 3
+<a id='L106' name='L106'></a> 106 <em class='sharp'>#define</em> <a href='../S/680.html#L1716' title='Referred from 1716 in ext/mbstring/mbstring.c.'>MBFL_VERSION_TEENY</a> 2
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108 <em class='comment'>/*</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'> * convert filter</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'> */</em>
+<a id='L111' name='L111'></a> 111 <em class='sharp'>#define</em> <a href='../R/4341.html' title='Multiple referred from 76 places.'>MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE</a> 0
+<a id='L112' name='L112'></a> 112 <em class='sharp'>#define</em> <a href='../R/4338.html' title='Multiple referred from 11 places.'>MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR</a> 1
+<a id='L113' name='L113'></a> 113 <em class='sharp'>#define</em> <a href='../R/4340.html' title='Multiple referred from 7 places.'>MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG</a> 2
+<a id='L114' name='L114'></a> 114 <em class='sharp'>#define</em> <a href='../R/4339.html' title='Multiple referred from 7 places.'>MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY</a> 3
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116 <em class='comment'>/*</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'> * buffering converter</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'> */</em>
+<a id='L119' name='L119'></a> 119 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/624.html#L121' title='Defined at 121 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>_mbfl_buffer_converter</a> <a href='../R/21095.html' title='Multiple referred from 40 places.'>mbfl_buffer_converter</a>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121 <strong class='reserved'>struct</strong> <a href='../S/624.html#L119' title='Referred from 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>_mbfl_buffer_converter</a> <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122         <a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17916.html' title='Multiple used in 29 places.'>filter1</a>;
+<a id='L123' name='L123'></a> 123         <a href='../S/635.html#L38' title='Defined at 38 in ext/mbstring/libmbfl/mbfl/mbfl_convert.h.'>mbfl_convert_filter</a> *<a href='../Y/17917.html' title='Multiple used in 32 places.'>filter2</a>;
+<a id='L124' name='L124'></a> 124         <a href='../S/646.html#L44' title='Defined at 44 in ext/mbstring/libmbfl/mbfl/mbfl_memory_device.h.'>mbfl_memory_device</a> <a href='../Y/15657.html' title='Multiple used in 183 places.'>device</a>;
+<a id='L125' name='L125'></a> 125         <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *<a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>;
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>;
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>;
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> * <a href='../S/623.html#L126' title='Defined at 126 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_new</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>, <strong class='reserved'>int</strong> <a href='../Y/12986.html' title='Multiple used in 6 places.'>buf_initsz</a>);
+<a id='L130' name='L130'></a> 130 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> * <a href='../S/623.html#L138' title='Defined at 138 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_new2</a>(<strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *<a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>, <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>, <strong class='reserved'>int</strong> <a href='../Y/12986.html' title='Multiple used in 6 places.'>buf_initsz</a>);
+<a id='L131' name='L131'></a> 131 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>void</strong> <a href='../S/623.html#L184' title='Defined at 184 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_delete</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>);
+<a id='L132' name='L132'></a> 132 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>void</strong> <a href='../S/623.html#L199' title='Defined at 199 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_reset</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>);
+<a id='L133' name='L133'></a> 133 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L205' title='Defined at 205 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_illegal_mode</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <strong class='reserved'>int</strong> <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a>);
+<a id='L134' name='L134'></a> 134 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L221' title='Defined at 221 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_illegal_substchar</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <strong class='reserved'>int</strong> <a href='../Y/37842.html' title='Multiple used in 5 places.'>substchar</a>);
+<a id='L135' name='L135'></a> 135 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L237' title='Defined at 237 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_strncat</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>, <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>);
+<a id='L136' name='L136'></a> 136 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L259' title='Defined at 259 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_feed</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L137' name='L137'></a> 137 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L265' title='Defined at 265 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_feed2</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <strong class='reserved'>int</strong> *<a href='../Y/25266.html' title='Multiple used in 64 places.'>loc</a>);
+<a id='L138' name='L138'></a> 138 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L301' title='Defined at 301 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_flush</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>);
+<a id='L139' name='L139'></a> 139 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> * <a href='../S/623.html#L318' title='Defined at 318 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_getbuffer</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L140' name='L140'></a> 140 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> * <a href='../S/623.html#L332' title='Defined at 332 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_result</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L141' name='L141'></a> 141 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> * <a href='../S/623.html#L342' title='Defined at 342 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_converter_feed_result</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L142' name='L142'></a> 142 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L359' title='Defined at 359 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_buffer_illegalchars</a>(<a href='../S/624.html#L119' title='Defined at 119 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_buffer_converter</a> *<a href='../Y/14404.html' title='Multiple used in 155 places.'>convd</a>);
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <em class='comment'>/*</em>
+<a id='L145' name='L145'></a> 145 <em class='comment'> * encoding detector</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'> */</em>
+<a id='L147' name='L147'></a> 147 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/624.html#L149' title='Defined at 149 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>_mbfl_encoding_detector</a> <a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a>;
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149 <strong class='reserved'>struct</strong> <a href='../S/624.html#L147' title='Referred from 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>_mbfl_encoding_detector</a> <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150         <a href='../S/642.html#L40' title='Defined at 40 in ext/mbstring/libmbfl/mbfl/mbfl_ident.h.'>mbfl_identify_filter</a> **<a href='../Y/17940.html' title='Multiple used in 31 places.'>filter_list</a>;
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>int</strong> <a href='../Y/17942.html' title='Multiple used in 7 places.'>filter_list_size</a>;
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>int</strong> <a href='../Y/37667.html' title='Multiple used in 69 places.'>strict</a>;
+<a id='L153' name='L153'></a> 153 <em class='brace'>}</em>;
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> * <a href='../S/623.html#L382' title='Defined at 382 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_new</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> *<a href='../Y/16562.html' title='Multiple used in 28 places.'>elist</a>, <strong class='reserved'>int</strong> <a href='../Y/16563.html' title='Multiple used in 25 places.'>elistsz</a>, <strong class='reserved'>int</strong> <a href='../Y/37667.html' title='Multiple used in 69 places.'>strict</a>);
+<a id='L156' name='L156'></a> 156 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> * <a href='../S/623.html#L424' title='Defined at 424 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_new2</a>(<strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> **<a href='../Y/16562.html' title='Multiple used in 28 places.'>elist</a>, <strong class='reserved'>int</strong> <a href='../Y/16563.html' title='Multiple used in 25 places.'>elistsz</a>, <strong class='reserved'>int</strong> <a href='../Y/37667.html' title='Multiple used in 69 places.'>strict</a>);
+<a id='L157' name='L157'></a> 157 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>void</strong> <a href='../S/623.html#L467' title='Defined at 467 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_delete</a>(<a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> *<a href='../Y/22581.html' title='Multiple used in 57 places.'>identd</a>);
+<a id='L158' name='L158'></a> 158 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/623.html#L485' title='Defined at 485 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_feed</a>(<a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> *<a href='../Y/22581.html' title='Multiple used in 57 places.'>identd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L159' name='L159'></a> 159 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../S/623.html#L555' title='Defined at 555 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_judge</a>(<a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> *<a href='../Y/22581.html' title='Multiple used in 57 places.'>identd</a>);
+<a id='L160' name='L160'></a> 160 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *<a href='../S/623.html#L520' title='Defined at 520 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_encoding_detector_judge2</a>(<a href='../S/624.html#L147' title='Defined at 147 in ext/mbstring/libmbfl/mbfl/mbfilter.h.'>mbfl_encoding_detector</a> *<a href='../Y/22581.html' title='Multiple used in 57 places.'>identd</a>);
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163 <em class='comment'>/*</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'> * encoding converter</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'> */</em>
+<a id='L166' name='L166'></a> 166 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L167' name='L167'></a> 167 <a href='../S/623.html#L566' title='Defined at 566 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_convert_encoding</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/38777.html' title='Multiple used in 6 places.'>toenc</a>);
+<a id='L168' name='L168'></a> 168 
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170 <em class='comment'>/*</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'> * identify encoding</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'> */</em>
+<a id='L173' name='L173'></a> 173 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *
+<a id='L174' name='L174'></a> 174 <a href='../S/623.html#L635' title='Defined at 635 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_identify_encoding</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> *<a href='../Y/16562.html' title='Multiple used in 28 places.'>elist</a>, <strong class='reserved'>int</strong> <a href='../Y/16563.html' title='Multiple used in 25 places.'>elistsz</a>, <strong class='reserved'>int</strong> <a href='../Y/37667.html' title='Multiple used in 69 places.'>strict</a>);
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> *
+<a id='L177' name='L177'></a> 177 <a href='../S/623.html#L718' title='Defined at 718 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_identify_encoding2</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> **<a href='../Y/16562.html' title='Multiple used in 28 places.'>elist</a>, <strong class='reserved'>int</strong> <a href='../Y/16563.html' title='Multiple used in 25 places.'>elistsz</a>, <strong class='reserved'>int</strong> <a href='../Y/37667.html' title='Multiple used in 69 places.'>strict</a>);
+<a id='L178' name='L178'></a> 178 <em class='comment'>/*</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * strlen</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> */</em>
+<a id='L181' name='L181'></a> 181 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L182' name='L182'></a> 182 <a href='../S/623.html#L811' title='Defined at 811 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_strlen</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184 <em class='comment'>/*</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'> * oddlen</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'> */</em>
+<a id='L187' name='L187'></a> 187 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L188' name='L188'></a> 188 <a href='../S/623.html#L935' title='Defined at 935 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_oddlen</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L189' name='L189'></a> 189 
+<a id='L190' name='L190'></a> 190 <em class='comment'>/*</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'> * strpos</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'> */</em>
+<a id='L193' name='L193'></a> 193 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L194' name='L194'></a> 194 <a href='../S/623.html#L980' title='Defined at 980 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_strpos</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../Y/19864.html' title='Multiple used in 313 places.'>haystack</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../Y/28080.html' title='Multiple used in 263 places.'>needle</a>, <strong class='reserved'>int</strong> <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>, <strong class='reserved'>int</strong> <a href='../S/1375.html#L248' title='Defined at 248 in main/mergesort.c.'>reverse</a>);
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196 
+<a id='L197' name='L197'></a> 197 <em class='comment'>/*</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'> * substr_count</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'> */</em>
+<a id='L200' name='L200'></a> 200 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L201' name='L201'></a> 201 <a href='../S/623.html#L1191' title='Defined at 1191 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_substr_count</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../Y/19864.html' title='Multiple used in 313 places.'>haystack</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../Y/28080.html' title='Multiple used in 263 places.'>needle</a>);
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203 <em class='comment'>/*</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'> * substr</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'> */</em>
+<a id='L206' name='L206'></a> 206 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L207' name='L207'></a> 207 <a href='../S/623.html#L1301' title='Defined at 1301 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_substr</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>int</strong> <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>, <strong class='reserved'>int</strong> <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>);
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209 <em class='comment'>/*</em>
+<a id='L210' name='L210'></a> 210 <em class='comment'> * strcut</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'> */</em>
+<a id='L212' name='L212'></a> 212 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L213' name='L213'></a> 213 <a href='../S/623.html#L1459' title='Defined at 1459 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_strcut</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>int</strong> <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>, <strong class='reserved'>int</strong> <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>);
+<a id='L214' name='L214'></a> 214 
+<a id='L215' name='L215'></a> 215 <em class='comment'>/*</em>
+<a id='L216' name='L216'></a> 216 <em class='comment'> *  strwidth</em>
+<a id='L217' name='L217'></a> 217 <em class='comment'> */</em>
+<a id='L218' name='L218'></a> 218 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L219' name='L219'></a> 219 <a href='../S/623.html#L1778' title='Defined at 1778 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_strwidth</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221 <em class='comment'>/*</em>
+<a id='L222' name='L222'></a> 222 <em class='comment'> *  strimwidth</em>
+<a id='L223' name='L223'></a> 223 <em class='comment'> */</em>
+<a id='L224' name='L224'></a> 224 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L225' name='L225'></a> 225 <a href='../S/623.html#L1860' title='Defined at 1860 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_strimwidth</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../Y/25803.html' title='Multiple used in 65 places.'>marker</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>int</strong> <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>, <strong class='reserved'>int</strong> <a href='../Y/40713.html' title='Multiple used in 274 places.'>width</a>);
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227 <em class='comment'>/*</em>
+<a id='L228' name='L228'></a> 228 <em class='comment'> * MIME header encode</em>
+<a id='L229' name='L229'></a> 229 <em class='comment'> */</em>
+<a id='L230' name='L230'></a> 230 <strong class='reserved'>struct</strong> <a href='../S/623.html#L2069' title='Defined at 2069 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_data</a>;        <em class='comment'>/* forward declaration */</em>
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>struct</strong> <a href='../S/623.html#L2069' title='Defined at 2069 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_data</a> *
+<a id='L233' name='L233'></a> 233 <a href='../S/623.html#L2228' title='Defined at 2228 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_new</a>(
+<a id='L234' name='L234'></a> 234     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/23093.html' title='Multiple used in 11 places.'>incode</a>,
+<a id='L235' name='L235'></a> 235     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/30149.html' title='Multiple used in 19 places.'>outcode</a>,
+<a id='L236' name='L236'></a> 236     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/16726.html' title='Multiple used in 529 places.'>encoding</a>);
+<a id='L237' name='L237'></a> 237 
+<a id='L238' name='L238'></a> 238 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>void</strong>
+<a id='L239' name='L239'></a> 239 <a href='../S/623.html#L2318' title='Defined at 2318 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_delete</a>(<strong class='reserved'>struct</strong> <a href='../S/623.html#L2069' title='Defined at 2069 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_data</a> *<a href='../Y/31605.html' title='Multiple used in 213 places.'>pe</a>);
+<a id='L240' name='L240'></a> 240 
+<a id='L241' name='L241'></a> 241 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L242' name='L242'></a> 242 <a href='../S/623.html#L2334' title='Defined at 2334 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_feed</a>(<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <strong class='reserved'>struct</strong> <a href='../S/623.html#L2069' title='Defined at 2069 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_data</a> *<a href='../Y/31605.html' title='Multiple used in 213 places.'>pe</a>);
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L245' name='L245'></a> 245 <a href='../S/623.html#L2202' title='Defined at 2202 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_result</a>(<strong class='reserved'>struct</strong> <a href='../S/623.html#L2069' title='Defined at 2069 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_encoder_data</a> *<a href='../Y/31605.html' title='Multiple used in 213 places.'>pe</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L248' name='L248'></a> 248 <a href='../S/623.html#L2340' title='Defined at 2340 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_mime_header_encode</a>(
+<a id='L249' name='L249'></a> 249     <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,
+<a id='L250' name='L250'></a> 250     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/30149.html' title='Multiple used in 19 places.'>outcode</a>,
+<a id='L251' name='L251'></a> 251     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/16726.html' title='Multiple used in 529 places.'>encoding</a>,
+<a id='L252' name='L252'></a> 252     <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/25111.html' title='Multiple used in 9 places.'>linefeed</a>,
+<a id='L253' name='L253'></a> 253     <strong class='reserved'>int</strong> <a href='../Y/23104.html' title='Multiple used in 262 places.'>indent</a>);
+<a id='L254' name='L254'></a> 254 
+<a id='L255' name='L255'></a> 255 <em class='comment'>/*</em>
+<a id='L256' name='L256'></a> 256 <em class='comment'> * MIME header decode</em>
+<a id='L257' name='L257'></a> 257 <em class='comment'> */</em>
+<a id='L258' name='L258'></a> 258 <strong class='reserved'>struct</strong> <a href='../S/623.html#L2391' title='Defined at 2391 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_data</a>;        <em class='comment'>/* forward declaration */</em>
+<a id='L259' name='L259'></a> 259 
+<a id='L260' name='L260'></a> 260 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>struct</strong> <a href='../S/623.html#L2391' title='Defined at 2391 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_data</a> *
+<a id='L261' name='L261'></a> 261 <a href='../S/623.html#L2590' title='Defined at 2590 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_new</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/30149.html' title='Multiple used in 19 places.'>outcode</a>);
+<a id='L262' name='L262'></a> 262 
+<a id='L263' name='L263'></a> 263 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>void</strong>
+<a id='L264' name='L264'></a> 264 <a href='../S/623.html#L2621' title='Defined at 2621 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_delete</a>(<strong class='reserved'>struct</strong> <a href='../S/623.html#L2391' title='Defined at 2391 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_data</a> *<a href='../Y/31495.html' title='Multiple used in 199 places.'>pd</a>);
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong>
+<a id='L267' name='L267'></a> 267 <a href='../S/623.html#L2634' title='Defined at 2634 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_feed</a>(<strong class='reserved'>int</strong> <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <strong class='reserved'>struct</strong> <a href='../S/623.html#L2391' title='Defined at 2391 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_data</a> *<a href='../Y/31495.html' title='Multiple used in 199 places.'>pd</a>);
+<a id='L268' name='L268'></a> 268 
+<a id='L269' name='L269'></a> 269 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L270' name='L270'></a> 270 <a href='../S/623.html#L2564' title='Defined at 2564 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_result</a>(<strong class='reserved'>struct</strong> <a href='../S/623.html#L2391' title='Defined at 2391 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mime_header_decoder_data</a> *<a href='../Y/31495.html' title='Multiple used in 199 places.'>pd</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>);
+<a id='L271' name='L271'></a> 271 
+<a id='L272' name='L272'></a> 272 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L273' name='L273'></a> 273 <a href='../S/623.html#L2640' title='Defined at 2640 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_mime_header_decode</a>(
+<a id='L274' name='L274'></a> 274     <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>,
+<a id='L275' name='L275'></a> 275     <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>,
+<a id='L276' name='L276'></a> 276     <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/30149.html' title='Multiple used in 19 places.'>outcode</a>);
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278 <em class='comment'>/*</em>
+<a id='L279' name='L279'></a> 279 <em class='comment'> * convert HTML numeric entity</em>
+<a id='L280' name='L280'></a> 280 <em class='comment'> */</em>
+<a id='L281' name='L281'></a> 281 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L282' name='L282'></a> 282 <a href='../S/623.html#L3032' title='Defined at 3032 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_html_numeric_entity</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>int</strong> *<a href='../Y/14421.html' title='Multiple used in 17 places.'>convmap</a>, <strong class='reserved'>int</strong> <a href='../Y/25799.html' title='Multiple used in 13 places.'>mapsize</a>, <strong class='reserved'>int</strong> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>);
+<a id='L283' name='L283'></a> 283 
+<a id='L284' name='L284'></a> 284 <em class='comment'>/*</em>
+<a id='L285' name='L285'></a> 285 <em class='comment'> * convert of harfwidth and fullwidth for japanese</em>
+<a id='L286' name='L286'></a> 286 <em class='comment'> */</em>
+<a id='L287' name='L287'></a> 287 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *
+<a id='L288' name='L288'></a> 288 <a href='../S/623.html#L1961' title='Defined at 1961 in ext/mbstring/libmbfl/mbfl/mbfilter.c.'>mbfl_ja_jp_hantozen</a>(<a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../S/648.html#L46' title='Defined at 46 in ext/mbstring/libmbfl/mbfl/mbfl_string.h.'>mbfl_string</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <strong class='reserved'>int</strong> <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a>);
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290 <em class='sharp'>#endif</em>  <em class='comment'>/* MBFL_MBFILTER_H */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

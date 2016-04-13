@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>win32/sockets.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1871.html'>win32</a>/sockets.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L31'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L31' title='Defined at 31.'>socketpair</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Chris Vandomelen &lt;chrisv@b0rked.dhs.org&gt;                    |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Sterling Hughes  &lt;sterling@php.net&gt;                         |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |                                                                      |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   | WinSock: Daniel Beulshausen &lt;daniel@php4win.de&gt;                      |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='comment'>/* $Id$ */</em>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='comment'>/* Code originally from ext/sockets */</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;fcntl.h&gt;
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../R/26690.html' title='Multiple referred from 4 places.'>socketpair</a>(<strong class='reserved'>int</strong> <a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <strong class='reserved'>int</strong> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <strong class='reserved'>int</strong> <a href='../S/800.html#L911' title='Defined at 911 in ext/mysqlnd/mysqlnd_structs.h.'>protocol</a>, <a href='../S/1434.html#L14' title='Defined at 14 in netware/sendmail_nw.h.'>SOCKET</a> <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[2])
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>struct</strong> <a href='../Y/36479.html' title='Multiple used in 68 places.'>sockaddr_in</a> <a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>;
+<a id='L34' name='L34'></a>  34         <a href='../S/1434.html#L14' title='Defined at 14 in netware/sendmail_nw.h.'>SOCKET</a> <a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a>;
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>int</strong> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = <strong class='reserved'>sizeof</strong>(<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>);
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37         <strong class='reserved'>if</strong>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a> != <a href='../S/1089.html#L62' title='Defined at 62 in ext/standard/dns.c.'>AF_INET</a>) <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38                 <a href='../Y/7338.html' title='Multiple used in 4 places.'>WSASetLastError</a>(<a href='../Y/7309.html' title='Multiple used in 3 places.'>WSAENOPROTOOPT</a>);
+<a id='L39' name='L39'></a>  39                 <strong class='reserved'>return</strong> -1;
+<a id='L40' name='L40'></a>  40         <em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42         <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0] = <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[1] = <a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a> = <a href='../S/1434.html#L19' title='Defined at 19 in netware/sendmail_nw.h.'>INVALID_SOCKET</a>;
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45         <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0] = <a href='../Y/36486.html' title='Multiple used in 162 places.'>socket</a>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../S/800.html#L911' title='Defined at 911 in ext/mysqlnd/mysqlnd_structs.h.'>protocol</a>);
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>if</strong> (<a href='../S/1434.html#L19' title='Defined at 19 in netware/sendmail_nw.h.'>INVALID_SOCKET</a> == <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0]) <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L48' name='L48'></a>  48         <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         <a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>.<a href='../Y/36219.html' title='Multiple used in 40 places.'>sin_addr</a>.<a href='../Y/35196.html' title='Multiple used in 31 places.'>s_addr</a> = <a href='../Y/3315.html' title='Multiple used in 12 places.'>INADDR_ANY</a>;
+<a id='L51' name='L51'></a>  51         <a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>.<a href='../Y/36220.html' title='Multiple used in 14 places.'>sin_family</a>      = <a href='../S/1089.html#L62' title='Defined at 62 in ext/standard/dns.c.'>AF_INET</a>;
+<a id='L52' name='L52'></a>  52         <a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>.<a href='../Y/36221.html' title='Multiple used in 24 places.'>sin_port</a>        = 0;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>if</strong> (<a href='../Y/12613.html' title='Multiple used in 232 places.'>bind</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0], (<strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a>*)&amp;<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>)) != 0) <em class='brace'>{</em>
+<a id='L55' name='L55'></a>  55                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L56' name='L56'></a>  56         <em class='brace'>}</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>if</strong>(<a href='../Y/19288.html' title='Multiple used in 7 places.'>getsockname</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0], (<strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a> *)&amp;<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>, &amp;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>) != 0) <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L60' name='L60'></a>  60         <em class='brace'>}</em>
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>if</strong> (<a href='../Y/25174.html' title='Multiple used in 19 places.'>listen</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0], 2) != 0) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L64' name='L64'></a>  64         <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[1] = <a href='../Y/36486.html' title='Multiple used in 162 places.'>socket</a>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../S/800.html#L911' title='Defined at 911 in ext/mysqlnd/mysqlnd_structs.h.'>protocol</a>);
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>if</strong> (<a href='../S/1434.html#L19' title='Defined at 19 in netware/sendmail_nw.h.'>INVALID_SOCKET</a> == <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[1]) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L69' name='L69'></a>  69         <em class='brace'>}</em>
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>.<a href='../Y/36219.html' title='Multiple used in 40 places.'>sin_addr</a>.<a href='../Y/35196.html' title='Multiple used in 31 places.'>s_addr</a> = <a href='../Y/21989.html' title='Multiple used in 10 places.'>htonl</a>(<a href='../Y/3317.html' title='Multiple used in 2 places.'>INADDR_LOOPBACK</a>);
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>if</strong>(<a href='../D/20560.html' title='Multiple defined in 2 places.'>connect</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[1], (<strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a>*)&amp;<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>)) != 0) <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a> = <a href='../D/19418.html' title='Multiple defined in 2 places.'>accept</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0],(<strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a>*)&amp;<a href='../Y/8922.html' title='Multiple used in 87 places.'>address</a>, &amp;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>);
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>if</strong> (<a href='../S/1434.html#L19' title='Defined at 19 in netware/sendmail_nw.h.'>INVALID_SOCKET</a> == <a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a>) <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>goto</strong> <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L79' name='L79'></a>  79         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <a href='../D/20352.html' title='Multiple defined in 3 places.'>closesocket</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0]);
+<a id='L82' name='L82'></a>  82         <a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0] = <a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a>;
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>return</strong> 0;
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86 <a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>:
+<a id='L87' name='L87'></a>  87         <a href='../D/20352.html' title='Multiple defined in 3 places.'>closesocket</a>(<a href='../Y/34216.html' title='Multiple used in 6 places.'>redirect</a>);
+<a id='L88' name='L88'></a>  88         <a href='../D/20352.html' title='Multiple defined in 3 places.'>closesocket</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[0]);
+<a id='L89' name='L89'></a>  89         <a href='../D/20352.html' title='Multiple defined in 3 places.'>closesocket</a>(<a href='../Y/36466.html' title='Multiple used in 341 places.'>sock</a>[1]);
+<a id='L90' name='L90'></a>  90         <a href='../Y/7338.html' title='Multiple used in 4 places.'>WSASetLastError</a>(<a href='../Y/7288.html' title='Multiple used in 3 places.'>WSAECONNABORTED</a>);
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>return</strong> -1;
+<a id='L92' name='L92'></a>  92 <em class='brace'>}</em>
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94 <em class='comment'>/*</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'> * Local variables:</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'> * tab-width: 4</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'> * End:</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L31'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

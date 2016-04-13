@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/json/json.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1791.html'>json</a>/json.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L101'>[^]</a><a href='#L288'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L101' title='Defined at 101.'>PHP_MINIT_FUNCTION</a></li>
+<li><a href='#L144' title='Defined at 144.'>PHP_GINIT_FUNCTION</a></li>
+<li><a href='#L178' title='Defined at 178.'>ZEND_TSRMLS_CACHE_DEFINE</a></li>
+<li><a href='#L194' title='Defined at 194.'>php_json_encode</a></li>
+<li><a href='#L200' title='Defined at 200.'>php_json_decode_ex</a></li>
+<li><a href='#L215' title='Defined at 215.'>PHP_FUNCTION</a></li>
+<li><a href='#L244' title='Defined at 244.'>PHP_FUNCTION</a></li>
+<li><a href='#L276' title='Defined at 276.'>PHP_FUNCTION</a></li>
+<li><a href='#L288' title='Defined at 288.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>  | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: Omar Kilani &lt;omar@php.net&gt;                                   |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  |         Jakub Zelenka &lt;bukka@php.net&gt;                                |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>*/</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='comment'>/* $Id$ */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#endif</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='1114.html'>ext/standard/info.h</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='1107.html'>ext/standard/html.h</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='1715.html'>zend_smart_str.h</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='451.html'>php_json.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='452.html'>php_json_encoder.h</a>"
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='453.html'>php_json_parser.h</a>"
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;<a href='1653.html'>zend_exceptions.h</a>&gt;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> &lt;float.h&gt;
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/1360.html' title='Multiple used in 4 places.'>DBL_MANT_DIG</a>) &amp;&amp; <strong class='reserved'>defined</strong>(<a href='../Y/1361.html' title='Multiple used in 4 places.'>DBL_MIN_EXP</a>)
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#define</em> <a href='../R/5165.html' title='Multiple referred from 25 places.'>NUM_BUF_SIZE</a> (3 + <a href='../Y/1360.html' title='Multiple used in 4 places.'>DBL_MANT_DIG</a> - <a href='../Y/1361.html' title='Multiple used in 4 places.'>DBL_MIN_EXP</a>)
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#else</em>
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#define</em> <a href='../R/5165.html' title='Multiple referred from 25 places.'>NUM_BUF_SIZE</a> 1080
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#endif</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <strong class='reserved'>static</strong> <a href='../D/8307.html' title='Multiple defined in 78 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>);
+<a id='L45' name='L45'></a>  45 <strong class='reserved'>static</strong> <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/24380.html' title='Multiple used in 3 places.'>json_encode</a>);
+<a id='L46' name='L46'></a>  46 <strong class='reserved'>static</strong> <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/24379.html' title='Multiple used in 3 places.'>json_decode</a>);
+<a id='L47' name='L47'></a>  47 <strong class='reserved'>static</strong> <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/24383.html' title='Multiple used in 3 places.'>json_last_error</a>);
+<a id='L48' name='L48'></a>  48 <strong class='reserved'>static</strong> <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/24384.html' title='Multiple used in 3 places.'>json_last_error_msg</a>);
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <a href='../D/8184.html' title='Multiple defined in 2 places.'>PHP_JSON_API</a> <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/32418.html' title='Multiple used in 4 places.'>php_json_serializable_ce</a>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <a href='../D/8184.html' title='Multiple defined in 2 places.'>PHP_JSON_API</a> <a href='../D/16157.html' title='Multiple defined in 12 places.'>ZEND_DECLARE_MODULE_GLOBALS</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='comment'>/* {{{ arginfo */</em>
+<a id='L55' name='L55'></a>  55 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10524.html' title='Multiple used in 2 places.'>arginfo_json_encode</a>, 0, 0, 1)
+<a id='L56' name='L56'></a>  56         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>)
+<a id='L57' name='L57'></a>  57         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>)
+<a id='L58' name='L58'></a>  58         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>)
+<a id='L59' name='L59'></a>  59 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10523.html' title='Multiple used in 2 places.'>arginfo_json_decode</a>, 0, 0, 1)
+<a id='L62' name='L62'></a>  62         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L63' name='L63'></a>  63         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/12047.html' title='Multiple used in 6 places.'>assoc</a>)
+<a id='L64' name='L64'></a>  64         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>)
+<a id='L65' name='L65'></a>  65         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>)
+<a id='L66' name='L66'></a>  66 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 <a href='../S/1632.html#L120' title='Defined at 120 in Zend/zend_API.h.'>ZEND_BEGIN_ARG_INFO</a>(<a href='../Y/10525.html' title='Multiple used in 2 places.'>arginfo_json_last_error</a>, 0)
+<a id='L69' name='L69'></a>  69 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71 <a href='../S/1632.html#L120' title='Defined at 120 in Zend/zend_API.h.'>ZEND_BEGIN_ARG_INFO</a>(<a href='../Y/10526.html' title='Multiple used in 2 places.'>arginfo_json_last_error_msg</a>, 0)
+<a id='L72' name='L72'></a>  72 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L73' name='L73'></a>  73 <em class='comment'>/* }}} */</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <em class='comment'>/* {{{ json_functions[] */</em>
+<a id='L76' name='L76'></a>  76 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/24381.html' title='Multiple used in 2 places.'>json_functions</a>[] = <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/24380.html' title='Multiple used in 3 places.'>json_encode</a>, <a href='../Y/10524.html' title='Multiple used in 2 places.'>arginfo_json_encode</a>)
+<a id='L78' name='L78'></a>  78         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/24379.html' title='Multiple used in 3 places.'>json_decode</a>, <a href='../Y/10523.html' title='Multiple used in 2 places.'>arginfo_json_decode</a>)
+<a id='L79' name='L79'></a>  79         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/24383.html' title='Multiple used in 3 places.'>json_last_error</a>, <a href='../Y/10525.html' title='Multiple used in 2 places.'>arginfo_json_last_error</a>)
+<a id='L80' name='L80'></a>  80         <a href='../S/1378.html#L342' title='Defined at 342 in main/php.h.'>PHP_FE</a>(<a href='../Y/24384.html' title='Multiple used in 3 places.'>json_last_error_msg</a>, <a href='../Y/10526.html' title='Multiple used in 2 places.'>arginfo_json_last_error_msg</a>)
+<a id='L81' name='L81'></a>  81         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L82' name='L82'></a>  82 <em class='brace'>}</em>;
+<a id='L83' name='L83'></a>  83 <em class='comment'>/* }}} */</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <em class='comment'>/* {{{ JsonSerializable methods */</em>
+<a id='L86' name='L86'></a>  86 <a href='../S/1632.html#L120' title='Defined at 120 in Zend/zend_API.h.'>ZEND_BEGIN_ARG_INFO</a>(<a href='../Y/24387.html' title='Multiple used in 2 places.'>json_serialize_arginfo</a>, 0)
+<a id='L87' name='L87'></a>  87         <em class='comment'>/* No arguments */</em>
+<a id='L88' name='L88'></a>  88 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>();
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/24386.html' title='Multiple used in 2 places.'>json_serializable_interface</a>[] = <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91         <a href='../S/1378.html#L348' title='Defined at 348 in main/php.h.'>PHP_ABSTRACT_ME</a>(JsonSerializable, jsonSerialize, <a href='../Y/24387.html' title='Multiple used in 2 places.'>json_serialize_arginfo</a>)
+<a id='L92' name='L92'></a>  92         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L93' name='L93'></a>  93 <em class='brace'>}</em>;
+<a id='L94' name='L94'></a>  94 <em class='comment'>/* }}} */</em>
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96 <em class='comment'>/* Register constant for options and errors */</em>
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#define</em> <a href='../R/7258.html' title='Multiple referred from 24 places.'>PHP_JSON_REGISTER_CONSTANT</a>(<a href='../Y/8252.html' title='Multiple used in 22 places.'>_name</a>, <a href='../Y/8398.html' title='Multiple used in 8 places.'>_value</a>) \
+<a id='L98' name='L98'></a>  98         <a href='../S/1647.html#L42' title='Defined at 42 in Zend/zend_constants.h.'>REGISTER_LONG_CONSTANT</a>(<a href='../Y/8252.html' title='Multiple used in 22 places.'>_name</a>,  <a href='../Y/8398.html' title='Multiple used in 8 places.'>_value</a>, <a href='../S/1647.html#L27' title='Defined at 27 in Zend/zend_constants.h.'>CONST_CS</a> | <a href='../S/1647.html#L28' title='Defined at 28 in Zend/zend_constants.h.'>CONST_PERSISTENT</a>);
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100 <em class='comment'>/* {{{ MINIT */</em>
+<a id='L101' name='L101'></a> 101 <strong class='reserved'>static</strong> <a href='../R/7345.html' title='Multiple referred from 104 places.'>PHP_MINIT_FUNCTION</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L102' name='L102'></a> 102 <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103         <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>;
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <a href='../S/1632.html#L178' title='Defined at 178 in Zend/zend_API.h.'>INIT_CLASS_ENTRY</a>(<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>, "JsonSerializable", <a href='../Y/24386.html' title='Multiple used in 2 places.'>json_serializable_interface</a>);
+<a id='L106' name='L106'></a> 106         <a href='../Y/32418.html' title='Multiple used in 4 places.'>php_json_serializable_ce</a> = <a href='../S/1631.html#L2711' title='Defined at 2711 in Zend/zend_API.c.'>zend_register_internal_interface</a>(&amp;<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>);
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108         <em class='comment'>/* options for json_encode */</em>
+<a id='L109' name='L109'></a> 109         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_HEX_TAG",  <a href='../S/451.html#L59' title='Defined at 59 in ext/json/php_json.h.'>PHP_JSON_HEX_TAG</a>);
+<a id='L110' name='L110'></a> 110         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_HEX_AMP",  <a href='../S/451.html#L60' title='Defined at 60 in ext/json/php_json.h.'>PHP_JSON_HEX_AMP</a>);
+<a id='L111' name='L111'></a> 111         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_HEX_APOS", <a href='../S/451.html#L61' title='Defined at 61 in ext/json/php_json.h.'>PHP_JSON_HEX_APOS</a>);
+<a id='L112' name='L112'></a> 112         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_HEX_QUOT", <a href='../S/451.html#L62' title='Defined at 62 in ext/json/php_json.h.'>PHP_JSON_HEX_QUOT</a>);
+<a id='L113' name='L113'></a> 113         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_FORCE_OBJECT", <a href='../S/451.html#L63' title='Defined at 63 in ext/json/php_json.h.'>PHP_JSON_FORCE_OBJECT</a>);
+<a id='L114' name='L114'></a> 114         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_NUMERIC_CHECK", <a href='../S/451.html#L64' title='Defined at 64 in ext/json/php_json.h.'>PHP_JSON_NUMERIC_CHECK</a>);
+<a id='L115' name='L115'></a> 115         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_UNESCAPED_SLASHES", <a href='../S/451.html#L65' title='Defined at 65 in ext/json/php_json.h.'>PHP_JSON_UNESCAPED_SLASHES</a>);
+<a id='L116' name='L116'></a> 116         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_PRETTY_PRINT", <a href='../S/451.html#L66' title='Defined at 66 in ext/json/php_json.h.'>PHP_JSON_PRETTY_PRINT</a>);
+<a id='L117' name='L117'></a> 117         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_UNESCAPED_UNICODE", <a href='../S/451.html#L67' title='Defined at 67 in ext/json/php_json.h.'>PHP_JSON_UNESCAPED_UNICODE</a>);
+<a id='L118' name='L118'></a> 118         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_PARTIAL_OUTPUT_ON_ERROR", <a href='../S/451.html#L68' title='Defined at 68 in ext/json/php_json.h.'>PHP_JSON_PARTIAL_OUTPUT_ON_ERROR</a>);
+<a id='L119' name='L119'></a> 119         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_PRESERVE_ZERO_FRACTION", <a href='../S/451.html#L69' title='Defined at 69 in ext/json/php_json.h.'>PHP_JSON_PRESERVE_ZERO_FRACTION</a>);
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121         <em class='comment'>/* options for json_decode */</em>
+<a id='L122' name='L122'></a> 122         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_OBJECT_AS_ARRAY", <a href='../S/451.html#L72' title='Defined at 72 in ext/json/php_json.h.'>PHP_JSON_OBJECT_AS_ARRAY</a>);
+<a id='L123' name='L123'></a> 123         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_BIGINT_AS_STRING", <a href='../S/451.html#L73' title='Defined at 73 in ext/json/php_json.h.'>PHP_JSON_BIGINT_AS_STRING</a>);
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125         <em class='comment'>/* json error constants */</em>
+<a id='L126' name='L126'></a> 126         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_NONE", <a href='../S/451.html#L45' title='Defined at 45 in ext/json/php_json.h.'>PHP_JSON_ERROR_NONE</a>);
+<a id='L127' name='L127'></a> 127         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_DEPTH", <a href='../S/451.html#L46' title='Defined at 46 in ext/json/php_json.h.'>PHP_JSON_ERROR_DEPTH</a>);
+<a id='L128' name='L128'></a> 128         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_STATE_MISMATCH", <a href='../S/451.html#L47' title='Defined at 47 in ext/json/php_json.h.'>PHP_JSON_ERROR_STATE_MISMATCH</a>);
+<a id='L129' name='L129'></a> 129         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_CTRL_CHAR", <a href='../S/451.html#L48' title='Defined at 48 in ext/json/php_json.h.'>PHP_JSON_ERROR_CTRL_CHAR</a>);
+<a id='L130' name='L130'></a> 130         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_SYNTAX", <a href='../S/451.html#L49' title='Defined at 49 in ext/json/php_json.h.'>PHP_JSON_ERROR_SYNTAX</a>);
+<a id='L131' name='L131'></a> 131         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_UTF8", <a href='../S/451.html#L50' title='Defined at 50 in ext/json/php_json.h.'>PHP_JSON_ERROR_UTF8</a>);
+<a id='L132' name='L132'></a> 132         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_RECURSION", <a href='../S/451.html#L51' title='Defined at 51 in ext/json/php_json.h.'>PHP_JSON_ERROR_RECURSION</a>);
+<a id='L133' name='L133'></a> 133         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_INF_OR_NAN", <a href='../S/451.html#L52' title='Defined at 52 in ext/json/php_json.h.'>PHP_JSON_ERROR_INF_OR_NAN</a>);
+<a id='L134' name='L134'></a> 134         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_UNSUPPORTED_TYPE", <a href='../S/451.html#L53' title='Defined at 53 in ext/json/php_json.h.'>PHP_JSON_ERROR_UNSUPPORTED_TYPE</a>);
+<a id='L135' name='L135'></a> 135         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_INVALID_PROPERTY_NAME", <a href='../S/451.html#L54' title='Defined at 54 in ext/json/php_json.h.'>PHP_JSON_ERROR_INVALID_PROPERTY_NAME</a>);
+<a id='L136' name='L136'></a> 136         <a href='../S/446.html#L97' title='Defined at 97 in ext/json/json.c.'>PHP_JSON_REGISTER_CONSTANT</a>("JSON_ERROR_UTF16", <a href='../S/451.html#L55' title='Defined at 55 in ext/json/php_json.h.'>PHP_JSON_ERROR_UTF16</a>);
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L139' name='L139'></a> 139 <em class='brace'>}</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>/* }}} */</em>
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 <em class='comment'>/* {{{ PHP_GINIT_FUNCTION</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'>*/</em>
+<a id='L144' name='L144'></a> 144 <strong class='reserved'>static</strong> <a href='../R/7072.html' title='Multiple referred from 40 places.'>PHP_GINIT_FUNCTION</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L145' name='L145'></a> 145 <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/496.html' title='Multiple used in 3 places.'>COMPILE_DL_JSON</a>) &amp;&amp; <strong class='reserved'>defined</strong>(<a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>)
+<a id='L147' name='L147'></a> 147         <a href='../D/17346.html' title='Multiple defined in 2 places.'>ZEND_TSRMLS_CACHE_UPDATE</a>();
+<a id='L148' name='L148'></a> 148 <em class='sharp'>#endif</em>
+<a id='L149' name='L149'></a> 149         <a href='../Y/24382.html' title='Multiple used in 3 places.'>json_globals</a>-&gt;<a href='../Y/16723.html' title='Multiple used in 6 places.'>encoder_depth</a> = 0;
+<a id='L150' name='L150'></a> 150         <a href='../Y/24382.html' title='Multiple used in 3 places.'>json_globals</a>-&gt;<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a> = 0;
+<a id='L151' name='L151'></a> 151         <a href='../Y/24382.html' title='Multiple used in 3 places.'>json_globals</a>-&gt;<a href='../Y/16712.html' title='Multiple used in 4 places.'>encode_max_depth</a> = 0;
+<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'>/* }}} */</em>
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156 <em class='comment'>/* {{{ json_module_entry</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'> */</em>
+<a id='L158' name='L158'></a> 158 <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/24385.html' title='Multiple used in 3 places.'>json_module_entry</a> = <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159         <a href='../S/1695.html#L44' title='Defined at 44 in Zend/zend_modules.h.'>STANDARD_MODULE_HEADER</a>,
+<a id='L160' name='L160'></a> 160         "json",
+<a id='L161' name='L161'></a> 161         <a href='../Y/24381.html' title='Multiple used in 2 places.'>json_functions</a>,
+<a id='L162' name='L162'></a> 162         <a href='../S/1378.html#L365' title='Defined at 365 in main/php.h.'>PHP_MINIT</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>),
+<a id='L163' name='L163'></a> 163         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L164' name='L164'></a> 164         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L165' name='L165'></a> 165         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L166' name='L166'></a> 166         <a href='../S/1378.html#L369' title='Defined at 369 in main/php.h.'>PHP_MINFO</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>),
+<a id='L167' name='L167'></a> 167         <a href='../S/451.html#L25' title='Defined at 25 in ext/json/php_json.h.'>PHP_JSON_VERSION</a>,
+<a id='L168' name='L168'></a> 168         <a href='../S/1378.html#L381' title='Defined at 381 in main/php.h.'>PHP_MODULE_GLOBALS</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>),
+<a id='L169' name='L169'></a> 169         <a href='../S/1378.html#L370' title='Defined at 370 in main/php.h.'>PHP_GINIT</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>),
+<a id='L170' name='L170'></a> 170         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L171' name='L171'></a> 171         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L172' name='L172'></a> 172         <a href='../S/1695.html#L51' title='Defined at 51 in Zend/zend_modules.h.'>STANDARD_MODULE_PROPERTIES_EX</a>
+<a id='L173' name='L173'></a> 173 <em class='brace'>}</em>;
+<a id='L174' name='L174'></a> 174 <em class='comment'>/* }}} */</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176 <em class='sharp'>#ifdef</em> <a href='../Y/496.html' title='Multiple used in 3 places.'>COMPILE_DL_JSON</a>
+<a id='L177' name='L177'></a> 177 <em class='sharp'>#ifdef</em> <a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>
+<a id='L178' name='L178'></a> 178 <a href='../R/14982.html' title='Multiple referred from 17 places.'>ZEND_TSRMLS_CACHE_DEFINE</a>()
+<a id='L179' name='L179'></a> 179 <em class='sharp'>#endif</em>
+<a id='L180' name='L180'></a> 180 <a href='../D/16546.html' title='Multiple defined in 30 places.'>ZEND_GET_MODULE</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L181' name='L181'></a> 181 <em class='sharp'>#endif</em>
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183 <em class='comment'>/* {{{ PHP_MINFO_FUNCTION</em>
+<a id='L184' name='L184'></a> 184 <em class='comment'> */</em>
+<a id='L185' name='L185'></a> 185 <strong class='reserved'>static</strong> <a href='../D/8307.html' title='Multiple defined in 78 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/24377.html' title='Multiple used in 15 places.'>json</a>)
+<a id='L186' name='L186'></a> 186 <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187         <a href='../S/1113.html#L1097' title='Defined at 1097 in ext/standard/info.c.'>php_info_print_table_start</a>();
+<a id='L188' name='L188'></a> 188         <a href='../S/1113.html#L1251' title='Defined at 1251 in ext/standard/info.c.'>php_info_print_table_row</a>(2, "json support", "enabled");
+<a id='L189' name='L189'></a> 189         <a href='../S/1113.html#L1251' title='Defined at 1251 in ext/standard/info.c.'>php_info_print_table_row</a>(2, "json version", <a href='../S/451.html#L25' title='Defined at 25 in ext/json/php_json.h.'>PHP_JSON_VERSION</a>);
+<a id='L190' name='L190'></a> 190         <a href='../S/1113.html#L1107' title='Defined at 1107 in ext/standard/info.c.'>php_info_print_table_end</a>();
+<a id='L191' name='L191'></a> 191 <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'>/* }}} */</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194 <a href='../D/8184.html' title='Multiple defined in 2 places.'>PHP_JSON_API</a> <strong class='reserved'>void</strong> <a href='../R/23923.html' title='Multiple referred from 6 places.'>php_json_encode</a>(<a href='../S/1716.html#L25' title='Defined at 25 in Zend/zend_smart_str_public.h.'>smart_str</a> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>, <strong class='reserved'>int</strong> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>) <em class='comment'>/* {{{ */</em>
+<a id='L195' name='L195'></a> 195 <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196         <a href='../S/447.html#L495' title='Defined at 495 in ext/json/json_encoder.c.'>php_json_encode_zval</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>);
+<a id='L197' name='L197'></a> 197 <em class='brace'>}</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'>/* }}} */</em>
+<a id='L199' name='L199'></a> 199 
+<a id='L200' name='L200'></a> 200 <a href='../D/8184.html' title='Multiple defined in 2 places.'>PHP_JSON_API</a> <strong class='reserved'>void</strong> <a href='../R/23921.html' title='Multiple referred from 3 places.'>php_json_decode_ex</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <strong class='reserved'>char</strong> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>) <em class='comment'>/* {{{ */</em>
+<a id='L201' name='L201'></a> 201 <em class='brace'>{</em>
+<a id='L202' name='L202'></a> 202         <a href='../S/453.html#L30' title='Defined at 30 in ext/json/php_json_parser.h.'>php_json_parser</a> <a href='../Y/31227.html' title='Multiple used in 684 places.'>parser</a>;
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204         <a href='../S/449.html#L230' title='Defined at 230 in ext/json/json_parser.y.'>php_json_parser_init</a>(&amp;<a href='../Y/31227.html' title='Multiple used in 684 places.'>parser</a>, <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, (<strong class='reserved'>int</strong>)<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, (<strong class='reserved'>int</strong>)<a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>);
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         <strong class='reserved'>if</strong> (<a href='../Y/32420.html' title='Multiple used in 3 places.'>php_json_yyparse</a>(&amp;<a href='../Y/31227.html' title='Multiple used in 684 places.'>parser</a>)) <em class='brace'>{</em>
+<a id='L207' name='L207'></a> 207                 <a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>) = <a href='../S/449.html#L239' title='Defined at 239 in ext/json/json_parser.y.'>php_json_parser_error_code</a>(&amp;<a href='../Y/31227.html' title='Multiple used in 684 places.'>parser</a>);
+<a id='L208' name='L208'></a> 208                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L209' name='L209'></a> 209         <em class='brace'>}</em>
+<a id='L210' name='L210'></a> 210 <em class='brace'>}</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'>/* }}} */</em>
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213 <em class='comment'>/* {{{ proto string json_encode(mixed data [, int options[, int depth]])</em>
+<a id='L214' name='L214'></a> 214 <em class='comment'>   Returns the JSON representation of a value */</em>
+<a id='L215' name='L215'></a> 215 <strong class='reserved'>static</strong> <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/24380.html' title='Multiple used in 3 places.'>json_encode</a>)
+<a id='L216' name='L216'></a> 216 <em class='brace'>{</em>
+<a id='L217' name='L217'></a> 217         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/31160.html' title='Multiple used in 354 places.'>parameter</a>;
+<a id='L218' name='L218'></a> 218         <a href='../S/1716.html#L25' title='Defined at 25 in Zend/zend_smart_str_public.h.'>smart_str</a> <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a> = <em class='brace'>{</em>0<em class='brace'>}</em>;
+<a id='L219' name='L219'></a> 219         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> = 0;
+<a id='L220' name='L220'></a> 220         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a> = <a href='../S/451.html#L80' title='Defined at 80 in ext/json/php_json.h.'>PHP_JSON_PARSER_DEFAULT_DEPTH</a>;
+<a id='L221' name='L221'></a> 221 
+<a id='L222' name='L222'></a> 222         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "z|ll", &amp;<a href='../Y/31160.html' title='Multiple used in 354 places.'>parameter</a>, &amp;<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, &amp;<a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223                 <strong class='reserved'>return</strong>;
+<a id='L224' name='L224'></a> 224         <em class='brace'>}</em>
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226         <a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>) = <a href='../S/451.html#L45' title='Defined at 45 in ext/json/php_json.h.'>PHP_JSON_ERROR_NONE</a>;
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228         <a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/16712.html' title='Multiple used in 4 places.'>encode_max_depth</a>) = (<strong class='reserved'>int</strong>)<a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>;
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230         <a href='../S/446.html#L194' title='Defined at 194 in ext/json/json.c.'>php_json_encode</a>(&amp;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/31160.html' title='Multiple used in 354 places.'>parameter</a>, (<strong class='reserved'>int</strong>)<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>);
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232         <strong class='reserved'>if</strong> (<a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>) != <a href='../S/451.html#L45' title='Defined at 45 in ext/json/php_json.h.'>PHP_JSON_ERROR_NONE</a> &amp;&amp; !(<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> &amp; <a href='../S/451.html#L68' title='Defined at 68 in ext/json/php_json.h.'>PHP_JSON_PARTIAL_OUTPUT_ON_ERROR</a>)) <em class='brace'>{</em>
+<a id='L233' name='L233'></a> 233                 <a href='../S/1715.html#L68' title='Defined at 68 in Zend/zend_smart_str.h.'>smart_str_free</a>(&amp;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>);
+<a id='L234' name='L234'></a> 234                 <a href='../S/1731.html#L595' title='Defined at 595 in Zend/zend_types.h.'>ZVAL_FALSE</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L235' name='L235'></a> 235         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L236' name='L236'></a> 236                 <a href='../S/1715.html#L76' title='Defined at 76 in Zend/zend_smart_str.h.'>smart_str_0</a>(&amp;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>); <em class='comment'>/* copy? */</em>
+<a id='L237' name='L237'></a> 237                 <a href='../S/1731.html#L637' title='Defined at 637 in Zend/zend_types.h.'>ZVAL_NEW_STR</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>.<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>);
+<a id='L238' name='L238'></a> 238         <em class='brace'>}</em>
+<a id='L239' name='L239'></a> 239 <em class='brace'>}</em>
+<a id='L240' name='L240'></a> 240 <em class='comment'>/* }}} */</em>
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242 <em class='comment'>/* {{{ proto mixed json_decode(string json [, bool assoc [, long depth]])</em>
+<a id='L243' name='L243'></a> 243 <em class='comment'>   Decodes the JSON representation into a PHP value */</em>
+<a id='L244' name='L244'></a> 244 <strong class='reserved'>static</strong> <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/24379.html' title='Multiple used in 3 places.'>json_decode</a>)
+<a id='L245' name='L245'></a> 245 <em class='brace'>{</em>
+<a id='L246' name='L246'></a> 246         <strong class='reserved'>char</strong> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>;
+<a id='L247' name='L247'></a> 247         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>;
+<a id='L248' name='L248'></a> 248         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/12047.html' title='Multiple used in 6 places.'>assoc</a> = 0; <em class='comment'>/* return JS objects as PHP objects by default */</em>
+<a id='L249' name='L249'></a> 249         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a> = <a href='../S/451.html#L80' title='Defined at 80 in ext/json/php_json.h.'>PHP_JSON_PARSER_DEFAULT_DEPTH</a>;
+<a id='L250' name='L250'></a> 250         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> = 0;
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "s|bll", &amp;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, &amp;<a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, &amp;<a href='../Y/12047.html' title='Multiple used in 6 places.'>assoc</a>, &amp;<a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>, &amp;<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L253' name='L253'></a> 253                 <strong class='reserved'>return</strong>;
+<a id='L254' name='L254'></a> 254         <em class='brace'>}</em>
+<a id='L255' name='L255'></a> 255 
+<a id='L256' name='L256'></a> 256         <a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>) = 0;
+<a id='L257' name='L257'></a> 257 
+<a id='L258' name='L258'></a> 258         <strong class='reserved'>if</strong> (!<a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>) <em class='brace'>{</em>
+<a id='L259' name='L259'></a> 259                 <a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>) = <a href='../S/451.html#L49' title='Defined at 49 in ext/json/php_json.h.'>PHP_JSON_ERROR_SYNTAX</a>;
+<a id='L260' name='L260'></a> 260                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L261' name='L261'></a> 261         <em class='brace'>}</em>
+<a id='L262' name='L262'></a> 262 
+<a id='L263' name='L263'></a> 263         <em class='comment'>/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */</em>
+<a id='L264' name='L264'></a> 264         <strong class='reserved'>if</strong> (<a href='../Y/12047.html' title='Multiple used in 6 places.'>assoc</a>) <em class='brace'>{</em>
+<a id='L265' name='L265'></a> 265                 <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |=  <a href='../S/451.html#L72' title='Defined at 72 in ext/json/php_json.h.'>PHP_JSON_OBJECT_AS_ARRAY</a>;
+<a id='L266' name='L266'></a> 266         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L267' name='L267'></a> 267                 <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> &amp;= ~<a href='../S/451.html#L72' title='Defined at 72 in ext/json/php_json.h.'>PHP_JSON_OBJECT_AS_ARRAY</a>;
+<a id='L268' name='L268'></a> 268         <em class='brace'>}</em>
+<a id='L269' name='L269'></a> 269 
+<a id='L270' name='L270'></a> 270         <a href='../S/446.html#L200' title='Defined at 200 in ext/json/json.c.'>php_json_decode_ex</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>, <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <a href='../Y/15551.html' title='Multiple used in 101 places.'>depth</a>);
+<a id='L271' name='L271'></a> 271 <em class='brace'>}</em>
+<a id='L272' name='L272'></a> 272 <em class='comment'>/* }}} */</em>
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274 <em class='comment'>/* {{{ proto int json_last_error()</em>
+<a id='L275' name='L275'></a> 275 <em class='comment'>   Returns the error code of the last json_encode() or json_decode() call. */</em>
+<a id='L276' name='L276'></a> 276 <strong class='reserved'>static</strong> <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/24383.html' title='Multiple used in 3 places.'>json_last_error</a>)
+<a id='L277' name='L277'></a> 277 <em class='brace'>{</em>
+<a id='L278' name='L278'></a> 278         <strong class='reserved'>if</strong> (<a href='../D/34452.html' title='Multiple defined in 2 places.'>zend_parse_parameters_none</a>() == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L279' name='L279'></a> 279                 <strong class='reserved'>return</strong>;
+<a id='L280' name='L280'></a> 280         <em class='brace'>}</em>
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282         <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>));
+<a id='L283' name='L283'></a> 283 <em class='brace'>}</em>
+<a id='L284' name='L284'></a> 284 <em class='comment'>/* }}} */</em>
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286 <em class='comment'>/* {{{ proto string json_last_error_msg()</em>
+<a id='L287' name='L287'></a> 287 <em class='comment'>   Returns the error string of the last json_encode() or json_decode() call. */</em>
+<a id='L288' name='L288'></a> 288 <strong class='reserved'>static</strong> <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/24384.html' title='Multiple used in 3 places.'>json_last_error_msg</a>)
+<a id='L289' name='L289'></a> 289 <em class='brace'>{</em>
+<a id='L290' name='L290'></a> 290         <strong class='reserved'>if</strong> (<a href='../D/34452.html' title='Multiple defined in 2 places.'>zend_parse_parameters_none</a>() == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L291' name='L291'></a> 291                 <strong class='reserved'>return</strong>;
+<a id='L292' name='L292'></a> 292         <em class='brace'>}</em>
+<a id='L293' name='L293'></a> 293 
+<a id='L294' name='L294'></a> 294         <strong class='reserved'>switch</strong>(<a href='../S/451.html#L89' title='Defined at 89 in ext/json/php_json.h.'>JSON_G</a>(<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>)) <em class='brace'>{</em>
+<a id='L295' name='L295'></a> 295                 <strong class='reserved'>case</strong> <a href='../S/451.html#L45' title='Defined at 45 in ext/json/php_json.h.'>PHP_JSON_ERROR_NONE</a>:
+<a id='L296' name='L296'></a> 296                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("No error");
+<a id='L297' name='L297'></a> 297                 <strong class='reserved'>case</strong> <a href='../S/451.html#L46' title='Defined at 46 in ext/json/php_json.h.'>PHP_JSON_ERROR_DEPTH</a>:
+<a id='L298' name='L298'></a> 298                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Maximum stack depth exceeded");
+<a id='L299' name='L299'></a> 299                 <strong class='reserved'>case</strong> <a href='../S/451.html#L47' title='Defined at 47 in ext/json/php_json.h.'>PHP_JSON_ERROR_STATE_MISMATCH</a>:
+<a id='L300' name='L300'></a> 300                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("State mismatch (invalid or malformed JSON)");
+<a id='L301' name='L301'></a> 301                 <strong class='reserved'>case</strong> <a href='../S/451.html#L48' title='Defined at 48 in ext/json/php_json.h.'>PHP_JSON_ERROR_CTRL_CHAR</a>:
+<a id='L302' name='L302'></a> 302                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Control character error, possibly incorrectly encoded");
+<a id='L303' name='L303'></a> 303                 <strong class='reserved'>case</strong> <a href='../S/451.html#L49' title='Defined at 49 in ext/json/php_json.h.'>PHP_JSON_ERROR_SYNTAX</a>:
+<a id='L304' name='L304'></a> 304                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Syntax error");
+<a id='L305' name='L305'></a> 305                 <strong class='reserved'>case</strong> <a href='../S/451.html#L50' title='Defined at 50 in ext/json/php_json.h.'>PHP_JSON_ERROR_UTF8</a>:
+<a id='L306' name='L306'></a> 306                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Malformed UTF-8 characters, possibly incorrectly encoded");
+<a id='L307' name='L307'></a> 307                 <strong class='reserved'>case</strong> <a href='../S/451.html#L51' title='Defined at 51 in ext/json/php_json.h.'>PHP_JSON_ERROR_RECURSION</a>:
+<a id='L308' name='L308'></a> 308                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Recursion detected");
+<a id='L309' name='L309'></a> 309                 <strong class='reserved'>case</strong> <a href='../S/451.html#L52' title='Defined at 52 in ext/json/php_json.h.'>PHP_JSON_ERROR_INF_OR_NAN</a>:
+<a id='L310' name='L310'></a> 310                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Inf and NaN cannot be JSON encoded");
+<a id='L311' name='L311'></a> 311                 <strong class='reserved'>case</strong> <a href='../S/451.html#L53' title='Defined at 53 in ext/json/php_json.h.'>PHP_JSON_ERROR_UNSUPPORTED_TYPE</a>:
+<a id='L312' name='L312'></a> 312                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Type is not supported");
+<a id='L313' name='L313'></a> 313                 <strong class='reserved'>case</strong> <a href='../S/451.html#L54' title='Defined at 54 in ext/json/php_json.h.'>PHP_JSON_ERROR_INVALID_PROPERTY_NAME</a>:
+<a id='L314' name='L314'></a> 314                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("The decoded property name is invalid");
+<a id='L315' name='L315'></a> 315                 <strong class='reserved'>case</strong> <a href='../S/451.html#L55' title='Defined at 55 in ext/json/php_json.h.'>PHP_JSON_ERROR_UTF16</a>:
+<a id='L316' name='L316'></a> 316                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Single unpaired UTF-16 surrogate in unicode escape");
+<a id='L317' name='L317'></a> 317                 <strong class='reserved'>default</strong>:
+<a id='L318' name='L318'></a> 318                         <a href='../S/1632.html#L637' title='Defined at 637 in Zend/zend_API.h.'>RETURN_STRING</a>("Unknown error");
+<a id='L319' name='L319'></a> 319         <em class='brace'>}</em>
+<a id='L320' name='L320'></a> 320 
+<a id='L321' name='L321'></a> 321 <em class='brace'>}</em>
+<a id='L322' name='L322'></a> 322 <em class='comment'>/* }}} */</em>
+<a id='L323' name='L323'></a> 323 
+<a id='L324' name='L324'></a> 324 <em class='comment'>/*</em>
+<a id='L325' name='L325'></a> 325 <em class='comment'> * Local variables:</em>
+<a id='L326' name='L326'></a> 326 <em class='comment'> * tab-width: 4</em>
+<a id='L327' name='L327'></a> 327 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L328' name='L328'></a> 328 <em class='comment'> * End:</em>
+<a id='L329' name='L329'></a> 329 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L330' name='L330'></a> 330 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L331' name='L331'></a> 331 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L101'>[^]</a><a href='#L288'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

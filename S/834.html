@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/opcache/zend_accelerator_debug.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1810.html'>opcache</a>/zend_accelerator_debug.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L31'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L31' title='Defined at 31.'>zend_accel_error</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | Zend OPcache                                                         |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1998-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Andi Gutmans &lt;andi@zend.com&gt;                                |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Zeev Suraski &lt;zeev@zend.com&gt;                                |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |          Stanislav Malyshev &lt;stas@zend.com&gt;                          |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   |          Dmitry Stogov &lt;dmitry@zend.com&gt;                             |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>*/</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> &lt;stdarg.h&gt;
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;<a href='1621.html'>time.h</a>&gt;
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#ifdef</em> <a href='../Y/7680.html' title='Multiple used in 149 places.'>ZEND_WIN32</a>
+<a id='L27' name='L27'></a>  27 <em class='sharp'># include</em> &lt;process.h&gt;
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#endif</em>
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='850.html'>ZendAccelerator.h</a>"
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>void</strong> <a href='../R/29867.html' title='Multiple referred from 79 places.'>zend_accel_error</a>(<strong class='reserved'>int</strong> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, ...)
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33     <a href='../Y/40035.html' title='Multiple used in 223 places.'>va_list</a> <a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>;
+<a id='L34' name='L34'></a>  34         <a href='../Y/38483.html' title='Multiple used in 174 places.'>time_t</a> <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>;
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>char</strong> *<a href='../Y/38482.html' title='Multiple used in 5 places.'>time_string</a>;
+<a id='L36' name='L36'></a>  36         <a href='../Y/2301.html' title='Multiple used in 249 places.'>FILE</a> * <a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38         <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &gt; <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/25389.html' title='Multiple used in 4 places.'>log_verbosity_level</a>) <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39                 <strong class='reserved'>return</strong>;
+<a id='L40' name='L40'></a>  40         <em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42         <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a> = <a href='../Y/38467.html' title='Multiple used in 649 places.'>time</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L43' name='L43'></a>  43         <a href='../Y/38482.html' title='Multiple used in 5 places.'>time_string</a> = <a href='../Y/12024.html' title='Multiple used in 3 places.'>asctime</a>(<a href='../S/1054.html#L35207' title='Defined at 35207 in ext/sqlite3/libsqlite/sqlite3.c.'>localtime</a>(&amp;<a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>));
+<a id='L44' name='L44'></a>  44         <a href='../Y/38482.html' title='Multiple used in 5 places.'>time_string</a>[24] = 0;
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>if</strong> (!<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17070.html' title='Multiple used in 27 places.'>error_log</a> ||
+<a id='L47' name='L47'></a>  47             !*<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17070.html' title='Multiple used in 27 places.'>error_log</a> ||
+<a id='L48' name='L48'></a>  48             <a href='../Y/37561.html' title='Multiple used in 563 places.'>strcmp</a>(<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17070.html' title='Multiple used in 27 places.'>error_log</a>, "stderr") == 0) <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50                 <a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a> = <a href='../Y/37429.html' title='Multiple used in 447 places.'>stderr</a>;
+<a id='L51' name='L51'></a>  51         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52                 <a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a> = <a href='../Y/18163.html' title='Multiple used in 78 places.'>fopen</a>(<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17070.html' title='Multiple used in 27 places.'>error_log</a>, "a+");
+<a id='L53' name='L53'></a>  53                 <strong class='reserved'>if</strong> (!<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>) <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54                         <a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a> = <a href='../Y/37429.html' title='Multiple used in 447 places.'>stderr</a>;
+<a id='L55' name='L55'></a>  55                 <em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56         <em class='brace'>}</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <em class='sharp'>#ifdef</em> <a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>
+<a id='L59' name='L59'></a>  59     <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "%s (" <a href='../D/17356.html' title='Multiple defined in 2 places.'>ZEND_ULONG_FMT</a> "): ", <a href='../Y/38482.html' title='Multiple used in 5 places.'>time_string</a>, (<a href='../D/34840.html' title='Multiple defined in 2 places.'>zend_ulong</a>)<a href='../S/1580.html#L577' title='Defined at 577 in TSRM/TSRM.c.'>tsrm_thread_id</a>());
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#else</em>
+<a id='L61' name='L61'></a>  61     <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "%s (%d): ", <a href='../Y/38482.html' title='Multiple used in 5 places.'>time_string</a>, <a href='../D/23251.html' title='Multiple defined in 2 places.'>getpid</a>());
+<a id='L62' name='L62'></a>  62 <em class='sharp'>#endif</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>switch</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>) <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>case</strong> <a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>:
+<a id='L66' name='L66'></a>  66                         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "Fatal Error ");
+<a id='L67' name='L67'></a>  67                         <strong class='reserved'>break</strong>;
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>case</strong> <a href='../S/835.html#L26' title='Defined at 26 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_ERROR</a>:
+<a id='L69' name='L69'></a>  69                         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "Error ");
+<a id='L70' name='L70'></a>  70                         <strong class='reserved'>break</strong>;
+<a id='L71' name='L71'></a>  71                 <strong class='reserved'>case</strong> <a href='../S/835.html#L27' title='Defined at 27 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_WARNING</a>:
+<a id='L72' name='L72'></a>  72                         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "Warning ");
+<a id='L73' name='L73'></a>  73                         <strong class='reserved'>break</strong>;
+<a id='L74' name='L74'></a>  74                 <strong class='reserved'>case</strong> <a href='../S/835.html#L28' title='Defined at 28 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_INFO</a>:
+<a id='L75' name='L75'></a>  75                         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "Message ");
+<a id='L76' name='L76'></a>  76                         <strong class='reserved'>break</strong>;
+<a id='L77' name='L77'></a>  77                 <strong class='reserved'>case</strong> <a href='../S/835.html#L29' title='Defined at 29 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_DEBUG</a>:
+<a id='L78' name='L78'></a>  78                         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "Debug ");
+<a id='L79' name='L79'></a>  79                         <strong class='reserved'>break</strong>;
+<a id='L80' name='L80'></a>  80         <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82     <a href='../Y/40036.html' title='Multiple used in 129 places.'>va_start</a>(<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>, <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>);
+<a id='L83' name='L83'></a>  83     <a href='../Y/40248.html' title='Multiple used in 9 places.'>vfprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>);
+<a id='L84' name='L84'></a>  84     <a href='../Y/40034.html' title='Multiple used in 142 places.'>va_end</a>(<a href='../Y/11895.html' title='Multiple used in 1378 places.'>args</a>);
+<a id='L85' name='L85'></a>  85         <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>, "\n");
+<a id='L86' name='L86'></a>  86         <strong class='reserved'>switch</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>) <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87                 <strong class='reserved'>case</strong> <a href='../S/835.html#L26' title='Defined at 26 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_ERROR</a>:
+<a id='L88' name='L88'></a>  88                         <a href='../S/1627.html#L221' title='Defined at 221 in Zend/zend.h.'>zend_bailout</a>();
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>break</strong>;
+<a id='L90' name='L90'></a>  90                 <strong class='reserved'>case</strong> <a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>:
+<a id='L91' name='L91'></a>  91                         <a href='../Y/17281.html' title='Multiple used in 135 places.'>exit</a>(-2);
+<a id='L92' name='L92'></a>  92                         <strong class='reserved'>break</strong>;
+<a id='L93' name='L93'></a>  93         <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94         <a href='../Y/17769.html' title='Multiple used in 58 places.'>fflush</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>);
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>if</strong> (<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a> != <a href='../Y/37429.html' title='Multiple used in 447 places.'>stderr</a>) <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96                 <a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/17451.html' title='Multiple used in 17 places.'>fLog</a>);
+<a id='L97' name='L97'></a>  97         <em class='brace'>}</em>
+<a id='L98' name='L98'></a>  98 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L31'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

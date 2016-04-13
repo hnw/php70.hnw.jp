@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/date/lib/astro.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1752.html'>date</a>/<a href='../files/1753.html'>lib</a>/astro.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L74'>[^]</a><a href='#L298'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L74' title='Defined at 74.'>astro_revolution</a></li>
+<li><a href='#L82' title='Defined at 82.'>astro_rev180</a></li>
+<li><a href='#L113' title='Defined at 113.'>astro_GMST0</a></li>
+<li><a href='#L133' title='Defined at 133.'>astro_sunpos</a></li>
+<li><a href='#L160' title='Defined at 160.'>astro_sun_RA_dec</a></li>
+<li><a href='#L212' title='Defined at 212.'>timelib_astro_rise_set_altitude</a></li>
+<li><a href='#L298' title='Defined at 298.'>timelib_ts_to_juliandate</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * The MIT License (MIT)</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> *</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * Copyright (c) 2015 Derick Rethans</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> *</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * Permission is hereby granted, free of charge, to any person obtaining a copy</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * of this software and associated documentation files (the "Software"), to deal</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * in the Software without restriction, including without limitation the rights</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * copies of the Software, and to permit persons to whom the Software is</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * furnished to do so, subject to the following conditions:</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> *</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * The above copyright notice and this permission notice shall be included in</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * all copies or substantial portions of the Software.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * THE SOFTWARE.</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> */</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>/*</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>   | Algorithms are taken from a public domain source by Paul             |</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>   | Schlyter, who wrote this in December 1992                            |</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> */</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;math.h&gt;
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='73.html'>timelib.h</a>"
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#define</em> days_since_2000_Jan_0(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>,<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>,<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>) \
+<a id='L34' name='L34'></a>  34         (367L*(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>)-((7*((<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>)+(((<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>)+9)/12)))/4)+((275*(<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>))/9)+(<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)-730530L)
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#ifndef</em> <a href='../D/8941.html' title='Multiple defined in 3 places.'>PI</a>
+<a id='L37' name='L37'></a>  37 <em class='sharp'> #define</em> <a href='../R/7950.html' title='Multiple referred from 6 places.'>PI</a>        3.1415926535897932384
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#endif</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#define</em> <a href='../R/8427.html' title='Multiple referred from 5 places.'>RADEG</a>     ( 180.0 / <a href='../D/8941.html' title='Multiple defined in 3 places.'>PI</a> )
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#define</em> <a href='../R/1377.html' title='Multiple referred from 3 places.'>DEGRAD</a>    ( <a href='../D/8941.html' title='Multiple defined in 3 places.'>PI</a> / 180.0 )
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='comment'>/* The trigonometric functions in degrees */</em>
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#define</em> <a href='../R/26525.html' title='Multiple referred from 5 places.'>sind</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)  <a href='../Y/36211.html' title='Multiple used in 73 places.'>sin</a>((<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)*<a href='../S/64.html#L41' title='Defined at 41 in ext/date/lib/astro.c.'>DEGRAD</a>)
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#define</em> <a href='../R/17837.html' title='Multiple referred from 5 places.'>cosd</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)  <a href='../Y/14468.html' title='Multiple used in 31 places.'>cos</a>((<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)*<a href='../S/64.html#L41' title='Defined at 41 in ext/date/lib/astro.c.'>DEGRAD</a>)
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#define</em> tand(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)  <a href='../Y/38127.html' title='Multiple used in 9 places.'>tan</a>((<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)*<a href='../S/64.html#L41' title='Defined at 41 in ext/date/lib/astro.c.'>DEGRAD</a>)
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#define</em> atand(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)    (<a href='../S/64.html#L40' title='Defined at 40 in ext/date/lib/astro.c.'>RADEG</a>*<a href='../Y/12063.html' title='Multiple used in 5 places.'>atan</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>))
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#define</em> asind(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)    (<a href='../S/64.html#L40' title='Defined at 40 in ext/date/lib/astro.c.'>RADEG</a>*<a href='../Y/12026.html' title='Multiple used in 5 places.'>asin</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>))
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#define</em> <a href='../S/64.html#L280' title='Referred from 280 in ext/date/lib/astro.c.'>acosd</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)    (<a href='../S/64.html#L40' title='Defined at 40 in ext/date/lib/astro.c.'>RADEG</a>*<a href='../Y/8758.html' title='Multiple used in 5 places.'>acos</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>))
+<a id='L52' name='L52'></a>  52 <em class='sharp'>#define</em> <a href='../R/17030.html' title='Multiple referred from 3 places.'>atan2d</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>,<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>) (<a href='../S/64.html#L40' title='Defined at 40 in ext/date/lib/astro.c.'>RADEG</a>*<a href='../Y/12064.html' title='Multiple used in 10 places.'>atan2</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>,<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>))
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='comment'>/* Following are some macros around the "workhorse" function __daylen__ */</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>/* They mainly fill in the desired values for the reference altitude    */</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>/* below the horizon, and also selects whether this altitude should     */</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>/* refer to the Sun's center or its upper limb.                         */</em>
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 <em class='sharp'>#include</em> "<a href='65.html'>astro.h</a>"
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 <em class='comment'>/******************************************************************/</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>/* This function reduces any angle to within the first revolution */</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>/* by subtracting or adding even multiples of 360.0 until the     */</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>/* result is &gt;= 0.0 and &lt; 360.0                                   */</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>/******************************************************************/</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69 <em class='sharp'>#define</em> <a href='../R/3392.html' title='Multiple referred from 2 places.'>INV360</a>    (1.0 / 360.0)
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71 <em class='comment'>/*****************************************/</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'>/* Reduce angle to within 0..360 degrees */</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>/*****************************************/</em>
+<a id='L74' name='L74'></a>  74 <strong class='reserved'>static</strong> <strong class='reserved'>double</strong> <a href='../R/17027.html' title='Multiple referred from 3 places.'>astro_revolution</a>(<strong class='reserved'>double</strong> <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)
+<a id='L75' name='L75'></a>  75 <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>return</strong> (<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> - 360.0 * <a href='../Y/18102.html' title='Multiple used in 31 places.'>floor</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> * <a href='../S/64.html#L69' title='Defined at 69 in ext/date/lib/astro.c.'>INV360</a>));
+<a id='L77' name='L77'></a>  77 <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79 <em class='comment'>/*********************************************/</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>/* Reduce angle to within +180..+180 degrees */</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>/*********************************************/</em>
+<a id='L82' name='L82'></a>  82 <strong class='reserved'>static</strong> <strong class='reserved'>double</strong> <a href='../S/64.html#L252' title='Referred from 252 in ext/date/lib/astro.c.'>astro_rev180</a>( <strong class='reserved'>double</strong> <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> )
+<a id='L83' name='L83'></a>  83 <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>return</strong> (<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> - 360.0 * <a href='../Y/18102.html' title='Multiple used in 31 places.'>floor</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> * <a href='../S/64.html#L69' title='Defined at 69 in ext/date/lib/astro.c.'>INV360</a> + 0.5));
+<a id='L85' name='L85'></a>  85 <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 <em class='comment'>/*******************************************************************/</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>/* This function computes GMST0, the Greenwich Mean Sidereal Time  */</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>/* at 0h UT (i.e. the sidereal time at the Greenwhich meridian at  */</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>/* 0h UT).  GMST is then the sidereal time at Greenwich at any     */</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>/* time of the day.  I've generalized GMST0 as well, and define it */</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>/* as:  GMST0 = GMST - UT  --  this allows GMST0 to be computed at */</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'>/* other times than 0h UT as well.  While this sounds somewhat     */</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'>/* contradictory, it is very practical:  instead of computing      */</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>/* GMST like:                                                      */</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>/*                                                                 */</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>/*  GMST = (GMST0) + UT * (366.2422/365.2422)                      */</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>/*                                                                 */</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>/* where (GMST0) is the GMST last time UT was 0 hours, one simply  */</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>/* computes:                                                       */</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>/*                                                                 */</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'>/*  GMST = GMST0 + UT                                              */</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'>/*                                                                 */</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'>/* where GMST0 is the GMST "at 0h UT" but at the current moment!   */</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'>/* Defined in this way, GMST0 will increase with about 4 min a     */</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'>/* day.  It also happens that GMST0 (in degrees, 1 hr = 15 degr)   */</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'>/* is equal to the Sun's mean longitude plus/minus 180 degrees!    */</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>/* (if we neglect aberration, which amounts to 20 seconds of arc   */</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>/* or 1.33 seconds of time)                                        */</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'>/*                                                                 */</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'>/*******************************************************************/</em>
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113 <strong class='reserved'>static</strong> <strong class='reserved'>double</strong> <a href='../S/64.html#L246' title='Referred from 246 in ext/date/lib/astro.c.'>astro_GMST0</a>(<strong class='reserved'>double</strong> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>)
+<a id='L114' name='L114'></a> 114 <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>double</strong> <a href='../Y/36133.html' title='Multiple used in 3 places.'>sidtim0</a>;
+<a id='L116' name='L116'></a> 116         <em class='comment'>/* Sidtime at 0h UT = L (Sun's mean longitude) + 180.0 degr  */</em>
+<a id='L117' name='L117'></a> 117         <em class='comment'>/* L = M + w, as defined in sunpos().  Since I'm too lazy to */</em>
+<a id='L118' name='L118'></a> 118         <em class='comment'>/* add these numbers, I'll let the C compiler do it for me.  */</em>
+<a id='L119' name='L119'></a> 119         <em class='comment'>/* Any decent C compiler will add the constants at compile   */</em>
+<a id='L120' name='L120'></a> 120         <em class='comment'>/* time, imposing no runtime or code overhead.               */</em>
+<a id='L121' name='L121'></a> 121         <a href='../Y/36133.html' title='Multiple used in 3 places.'>sidtim0</a> = <a href='../S/64.html#L74' title='Defined at 74 in ext/date/lib/astro.c.'>astro_revolution</a>((180.0 + 356.0470 + 282.9404) + (0.9856002585 + 4.70935E-5) * <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>);
+<a id='L122' name='L122'></a> 122         <strong class='reserved'>return</strong> <a href='../Y/36133.html' title='Multiple used in 3 places.'>sidtim0</a>;
+<a id='L123' name='L123'></a> 123 <em class='brace'>}</em>
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125 <em class='comment'>/* This function computes the Sun's position at any instant */</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <em class='comment'>/******************************************************/</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>/* Computes the Sun's ecliptic longitude and distance */</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'>/* at an instant given in d, number of days since     */</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'>/* 2000 Jan 0.0.  The Sun's ecliptic latitude is not  */</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'>/* computed, since it's always very near 0.           */</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'>/******************************************************/</em>
+<a id='L133' name='L133'></a> 133 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/64.html#L165' title='Referred from 165 in ext/date/lib/astro.c.'>astro_sunpos</a>(<strong class='reserved'>double</strong> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, <strong class='reserved'>double</strong> *<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>, <strong class='reserved'>double</strong> *<a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>)
+<a id='L134' name='L134'></a> 134 <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>double</strong> <a href='../S/1169.html#L143' title='Defined at 143 in ext/standard/rand.c.'>M</a>,         <em class='comment'>/* Mean anomaly of the Sun */</em>
+<a id='L136' name='L136'></a> 136                <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a>,         <em class='comment'>/* Mean longitude of perihelion */</em>
+<a id='L137' name='L137'></a> 137                           <em class='comment'>/* Note: Sun's mean longitude = M + w */</em>
+<a id='L138' name='L138'></a> 138                <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>,         <em class='comment'>/* Eccentricity of Earth's orbit */</em>
+<a id='L139' name='L139'></a> 139                <a href='../Y/1674.html' title='Multiple used in 68 places.'>E</a>,         <em class='comment'>/* Eccentric anomaly */</em>
+<a id='L140' name='L140'></a> 140                <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>, <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>,      <em class='comment'>/* x, y coordinates in orbit */</em>
+<a id='L141' name='L141'></a> 141                <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>;         <em class='comment'>/* True anomaly */</em>
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143         <em class='comment'>/* Compute mean elements */</em>
+<a id='L144' name='L144'></a> 144         <a href='../S/1169.html#L143' title='Defined at 143 in ext/standard/rand.c.'>M</a> = <a href='../S/64.html#L74' title='Defined at 74 in ext/date/lib/astro.c.'>astro_revolution</a>(356.0470 + 0.9856002585 * <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>);
+<a id='L145' name='L145'></a> 145         <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a> = 282.9404 + 4.70935E-5 * <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>;
+<a id='L146' name='L146'></a> 146         <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a> = 0.016709 - 1.151E-9 * <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>;
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <em class='comment'>/* Compute true longitude and radius vector */</em>
+<a id='L149' name='L149'></a> 149         <a href='../Y/1674.html' title='Multiple used in 68 places.'>E</a> = <a href='../S/1169.html#L143' title='Defined at 143 in ext/standard/rand.c.'>M</a> + <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a> * <a href='../S/64.html#L40' title='Defined at 40 in ext/date/lib/astro.c.'>RADEG</a> * <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../S/1169.html#L143' title='Defined at 143 in ext/standard/rand.c.'>M</a>) * (1.0 + <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a> * <a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../S/1169.html#L143' title='Defined at 143 in ext/standard/rand.c.'>M</a>));
+<a id='L150' name='L150'></a> 150         <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> = <a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../Y/1674.html' title='Multiple used in 68 places.'>E</a>) - <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>;
+<a id='L151' name='L151'></a> 151         <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> = <a href='../Y/36947.html' title='Multiple used in 19 places.'>sqrt</a>(1.0 - <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>*<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>) * <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/1674.html' title='Multiple used in 68 places.'>E</a>);
+<a id='L152' name='L152'></a> 152         *<a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/36947.html' title='Multiple used in 19 places.'>sqrt</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>*<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> + <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>*<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>);              <em class='comment'>/* Solar distance */</em>
+<a id='L153' name='L153'></a> 153         <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a> = <a href='../S/64.html#L52' title='Defined at 52 in ext/date/lib/astro.c.'>atan2d</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>);                  <em class='comment'>/* True anomaly */</em>
+<a id='L154' name='L154'></a> 154         *<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a> = <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a> + <a href='../Y/40535.html' title='Multiple used in 1140 places.'>w</a>;                        <em class='comment'>/* True solar longitude */</em>
+<a id='L155' name='L155'></a> 155         <strong class='reserved'>if</strong> (*<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a> &gt;= 360.0) <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156                 *<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a> -= 360.0;                   <em class='comment'>/* Make it 0..360 degrees */</em>
+<a id='L157' name='L157'></a> 157         <em class='brace'>}</em>
+<a id='L158' name='L158'></a> 158 <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/64.html#L249' title='Referred from 249 in ext/date/lib/astro.c.'>astro_sun_RA_dec</a>(<strong class='reserved'>double</strong> <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, <strong class='reserved'>double</strong> *<a href='../S/901.html#L72' title='Defined at 72 in ext/pcre/pcrelib/sljit/sljitNativeTILEGX_64.c.'>RA</a>, <strong class='reserved'>double</strong> *<a href='../Y/15334.html' title='Multiple used in 22 places.'>dec</a>, <strong class='reserved'>double</strong> *<a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>)
+<a id='L161' name='L161'></a> 161 <em class='brace'>{</em>
+<a id='L162' name='L162'></a> 162         <strong class='reserved'>double</strong> <a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>, <a href='../Y/29067.html' title='Multiple used in 4 places.'>obl_ecl</a>, <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>, <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../Y/43256.html' title='Multiple used in 1919 places.'>z</a>;
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <em class='comment'>/* Compute Sun's ecliptical coordinates */</em>
+<a id='L165' name='L165'></a> 165         <a href='../S/64.html#L133' title='Defined at 133 in ext/date/lib/astro.c.'>astro_sunpos</a>(<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, &amp;<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>);
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167         <em class='comment'>/* Compute ecliptic rectangular coordinates (z=0) */</em>
+<a id='L168' name='L168'></a> 168         <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> = *<a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> * <a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>);
+<a id='L169' name='L169'></a> 169         <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> = *<a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> * <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>);
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171         <em class='comment'>/* Compute obliquity of ecliptic (inclination of Earth's axis) */</em>
+<a id='L172' name='L172'></a> 172         <a href='../Y/29067.html' title='Multiple used in 4 places.'>obl_ecl</a> = 23.4393 - 3.563E-7 * <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>;
+<a id='L173' name='L173'></a> 173 
+<a id='L174' name='L174'></a> 174         <em class='comment'>/* Convert to equatorial rectangular coordinates - x is unchanged */</em>
+<a id='L175' name='L175'></a> 175         <a href='../Y/43256.html' title='Multiple used in 1919 places.'>z</a> = <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> * <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/29067.html' title='Multiple used in 4 places.'>obl_ecl</a>);
+<a id='L176' name='L176'></a> 176         <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> = <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> * <a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../Y/29067.html' title='Multiple used in 4 places.'>obl_ecl</a>);
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178         <em class='comment'>/* Convert to spherical coordinates */</em>
+<a id='L179' name='L179'></a> 179         *<a href='../S/901.html#L72' title='Defined at 72 in ext/pcre/pcrelib/sljit/sljitNativeTILEGX_64.c.'>RA</a> = <a href='../S/64.html#L52' title='Defined at 52 in ext/date/lib/astro.c.'>atan2d</a>(<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>, <a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>);
+<a id='L180' name='L180'></a> 180         *<a href='../Y/15334.html' title='Multiple used in 22 places.'>dec</a> = <a href='../S/64.html#L52' title='Defined at 52 in ext/date/lib/astro.c.'>atan2d</a>(<a href='../Y/43256.html' title='Multiple used in 1919 places.'>z</a>, <a href='../Y/36947.html' title='Multiple used in 19 places.'>sqrt</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>*<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a> + <a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>*<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>));
+<a id='L181' name='L181'></a> 181 <em class='brace'>}</em>
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183 <em class='comment'>/**</em>
+<a id='L184' name='L184'></a> 184 <em class='comment'> * Note: timestamp = unixtimestamp (NEEDS to be 00:00:00 UT)</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'> *       Eastern longitude positive, Western longitude negative</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'> *       Northern latitude positive, Southern latitude negative</em>
+<a id='L187' name='L187'></a> 187 <em class='comment'> *       The longitude value IS critical in this function!</em>
+<a id='L188' name='L188'></a> 188 <em class='comment'> *       altit = the altitude which the Sun should cross</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'> *               Set to -35/60 degrees for rise/set, -6 degrees</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'> *               for civil, -12 degrees for nautical and -18</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'> *               degrees for astronomical twilight.</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'> *         upper_limb: non-zero -&gt; upper limb, zero -&gt; center</em>
+<a id='L193' name='L193'></a> 193 <em class='comment'> *               Set to non-zero (e.g. 1) when computing rise/set</em>
+<a id='L194' name='L194'></a> 194 <em class='comment'> *               times, and to zero when computing start/end of</em>
+<a id='L195' name='L195'></a> 195 <em class='comment'> *               twilight.</em>
+<a id='L196' name='L196'></a> 196 <em class='comment'> *        *rise = where to store the rise time</em>
+<a id='L197' name='L197'></a> 197 <em class='comment'> *        *set  = where to store the set  time</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'> *                Both times are relative to the specified altitude,</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'> *                and thus this function can be used to compute</em>
+<a id='L200' name='L200'></a> 200 <em class='comment'> *                various twilight times, as well as rise/set times</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'> * Return value:  0 = sun rises/sets this day, times stored at</em>
+<a id='L202' name='L202'></a> 202 <em class='comment'> *                    *trise and *tset.</em>
+<a id='L203' name='L203'></a> 203 <em class='comment'> *               +1 = sun above the specified "horizon" 24 hours.</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'> *                    *trise set to time when the sun is at south,</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'> *                    minus 12 hours while *tset is set to the south</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'> *                    time plus 12 hours. "Day" length = 24 hours</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'> *               -1 = sun is below the specified "horizon" 24 hours</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'> *                    "Day" length = 0 hours, *trise and *tset are</em>
+<a id='L209' name='L209'></a> 209 <em class='comment'> *                    both set to the time when the sun is at south.</em>
+<a id='L210' name='L210'></a> 210 <em class='comment'> *</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'> */</em>
+<a id='L212' name='L212'></a> 212 <strong class='reserved'>int</strong> <a href='../R/28570.html' title='Multiple referred from 10 places.'>timelib_astro_rise_set_altitude</a>(<a href='../D/31964.html' title='Multiple defined in 2 places.'>timelib_time</a> *<a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>, <strong class='reserved'>double</strong> <a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>, <strong class='reserved'>double</strong> <a href='../Y/24703.html' title='Multiple used in 19 places.'>lat</a>, <strong class='reserved'>double</strong> <a href='../Y/9185.html' title='Multiple used in 4 places.'>altit</a>, <strong class='reserved'>int</strong> <a href='../Y/39701.html' title='Multiple used in 3 places.'>upper_limb</a>, <strong class='reserved'>double</strong> *<a href='../Y/19635.html' title='Multiple used in 6 places.'>h_rise</a>, <strong class='reserved'>double</strong> *<a href='../Y/19641.html' title='Multiple used in 6 places.'>h_set</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> *<a href='../Y/39020.html' title='Multiple used in 5 places.'>ts_rise</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> *<a href='../Y/39022.html' title='Multiple used in 5 places.'>ts_set</a>, <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> *<a href='../Y/39023.html' title='Multiple used in 3 places.'>ts_transit</a>)
+<a id='L213' name='L213'></a> 213 <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214         <strong class='reserved'>double</strong>  <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>,  <em class='comment'>/* Days since 2000 Jan 0.0 (negative before) */</em>
+<a id='L215' name='L215'></a> 215         <a href='../Y/36948.html' title='Multiple used in 14 places.'>sr</a>,         <em class='comment'>/* Solar distance, astronomical units */</em>
+<a id='L216' name='L216'></a> 216         <a href='../Y/35185.html' title='Multiple used in 3 places.'>sRA</a>,        <em class='comment'>/* Sun's Right Ascension */</em>
+<a id='L217' name='L217'></a> 217         <a href='../Y/35524.html' title='Multiple used in 3 places.'>sdec</a>,       <em class='comment'>/* Sun's declination */</em>
+<a id='L218' name='L218'></a> 218         <a href='../Y/36950.html' title='Multiple used in 3 places.'>sradius</a>,    <em class='comment'>/* Sun's apparent radius */</em>
+<a id='L219' name='L219'></a> 219         <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>,          <em class='comment'>/* Diurnal arc */</em>
+<a id='L220' name='L220'></a> 220         <a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a>,     <em class='comment'>/* Time when Sun is at south */</em>
+<a id='L221' name='L221'></a> 221         <a href='../Y/36134.html' title='Multiple used in 3 places.'>sidtime</a>;    <em class='comment'>/* Local sidereal time */</em>
+<a id='L222' name='L222'></a> 222         <a href='../D/31964.html' title='Multiple defined in 2 places.'>timelib_time</a> *<a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>;
+<a id='L223' name='L223'></a> 223         <a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a>   <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>, <a href='../Y/29477.html' title='Multiple used in 3 places.'>old_sse</a>;
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225         <strong class='reserved'>int</strong> <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = 0; <em class='comment'>/* Return cde from function - usually 0 */</em>
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227         <em class='comment'>/* Normalize time */</em>
+<a id='L228' name='L228'></a> 228         <a href='../Y/29477.html' title='Multiple used in 3 places.'>old_sse</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a>;
+<a id='L229' name='L229'></a> 229         <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a> = 12;
+<a id='L230' name='L230'></a> 230         <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> = 0;
+<a id='L231' name='L231'></a> 231         <a href='../S/77.html#L441' title='Defined at 441 in ext/date/lib/tm2unixtime.c.'>timelib_update_ts</a>(<a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233         <em class='comment'>/* Calculate TS belonging to UTC 00:00 of the current day */</em>
+<a id='L234' name='L234'></a> 234         <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a> = <a href='../S/72.html#L39' title='Defined at 39 in ext/date/lib/timelib.c.'>timelib_time_ctor</a>();
+<a id='L235' name='L235'></a> 235         <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/41650.html' title='Multiple used in 1352 places.'>y</a>;
+<a id='L236' name='L236'></a> 236         <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>;
+<a id='L237' name='L237'></a> 237         <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>;
+<a id='L238' name='L238'></a> 238         <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a> = <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> = 0;
+<a id='L239' name='L239'></a> 239         <a href='../S/77.html#L441' title='Defined at 441 in ext/date/lib/tm2unixtime.c.'>timelib_update_ts</a>(<a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L240' name='L240'></a> 240 
+<a id='L241' name='L241'></a> 241         <em class='comment'>/* Compute d of 12h local mean solar time */</em>
+<a id='L242' name='L242'></a> 242         <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a>;
+<a id='L243' name='L243'></a> 243         <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a> = <a href='../S/64.html#L298' title='Defined at 298 in ext/date/lib/astro.c.'>timelib_ts_to_juliandate</a>(<a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>) - <a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>/360.0;
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         <em class='comment'>/* Compute local sidereal time of this moment */</em>
+<a id='L246' name='L246'></a> 246         <a href='../Y/36134.html' title='Multiple used in 3 places.'>sidtime</a> = <a href='../S/64.html#L74' title='Defined at 74 in ext/date/lib/astro.c.'>astro_revolution</a>(<a href='../S/64.html#L113' title='Defined at 113 in ext/date/lib/astro.c.'>astro_GMST0</a>(<a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>) + 180.0 + <a href='../Y/25400.html' title='Multiple used in 28 places.'>lon</a>);
+<a id='L247' name='L247'></a> 247 
+<a id='L248' name='L248'></a> 248         <em class='comment'>/* Compute Sun's RA + Decl at this moment */</em>
+<a id='L249' name='L249'></a> 249         <a href='../S/64.html#L160' title='Defined at 160 in ext/date/lib/astro.c.'>astro_sun_RA_dec</a>( <a href='../Y/14948.html' title='Multiple used in 1519 places.'>d</a>, &amp;<a href='../Y/35185.html' title='Multiple used in 3 places.'>sRA</a>, &amp;<a href='../Y/35524.html' title='Multiple used in 3 places.'>sdec</a>, &amp;<a href='../Y/36948.html' title='Multiple used in 14 places.'>sr</a> );
+<a id='L250' name='L250'></a> 250 
+<a id='L251' name='L251'></a> 251         <em class='comment'>/* Compute time when Sun is at south - in hours UT */</em>
+<a id='L252' name='L252'></a> 252         <a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> = 12.0 - <a href='../S/64.html#L82' title='Defined at 82 in ext/date/lib/astro.c.'>astro_rev180</a>(<a href='../Y/36134.html' title='Multiple used in 3 places.'>sidtime</a> - <a href='../Y/35185.html' title='Multiple used in 3 places.'>sRA</a>) / 15.0;
+<a id='L253' name='L253'></a> 253 
+<a id='L254' name='L254'></a> 254         <em class='comment'>/* Compute the Sun's apparent radius, degrees */</em>
+<a id='L255' name='L255'></a> 255         <a href='../Y/36950.html' title='Multiple used in 3 places.'>sradius</a> = 0.2666 / <a href='../Y/36948.html' title='Multiple used in 14 places.'>sr</a>;
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257         <em class='comment'>/* Do correction to upper limb, if necessary */</em>
+<a id='L258' name='L258'></a> 258         <strong class='reserved'>if</strong> (<a href='../Y/39701.html' title='Multiple used in 3 places.'>upper_limb</a>) <em class='brace'>{</em>
+<a id='L259' name='L259'></a> 259                 <a href='../Y/9185.html' title='Multiple used in 4 places.'>altit</a> -= <a href='../Y/36950.html' title='Multiple used in 3 places.'>sradius</a>;
+<a id='L260' name='L260'></a> 260         <em class='brace'>}</em>
+<a id='L261' name='L261'></a> 261 
+<a id='L262' name='L262'></a> 262         <em class='comment'>/* Compute the diurnal arc that the Sun traverses to reach */</em>
+<a id='L263' name='L263'></a> 263         <em class='comment'>/* the specified altitude altit: */</em>
+<a id='L264' name='L264'></a> 264         <em class='brace'>{</em>
+<a id='L265' name='L265'></a> 265                 <strong class='reserved'>double</strong> <a href='../Y/14472.html' title='Multiple used in 23 places.'>cost</a>;
+<a id='L266' name='L266'></a> 266                 <a href='../Y/14472.html' title='Multiple used in 23 places.'>cost</a> = (<a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/9185.html' title='Multiple used in 4 places.'>altit</a>) - <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/24703.html' title='Multiple used in 19 places.'>lat</a>) * <a href='../S/64.html#L45' title='Defined at 45 in ext/date/lib/astro.c.'>sind</a>(<a href='../Y/35524.html' title='Multiple used in 3 places.'>sdec</a>)) / (<a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../Y/24703.html' title='Multiple used in 19 places.'>lat</a>) * <a href='../S/64.html#L46' title='Defined at 46 in ext/date/lib/astro.c.'>cosd</a>(<a href='../Y/35524.html' title='Multiple used in 3 places.'>sdec</a>));
+<a id='L267' name='L267'></a> 267                 *<a href='../Y/39023.html' title='Multiple used in 3 places.'>ts_transit</a> = <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a> + (<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> * 3600);
+<a id='L268' name='L268'></a> 268                 <strong class='reserved'>if</strong> (<a href='../Y/14472.html' title='Multiple used in 23 places.'>cost</a> &gt;= 1.0) <em class='brace'>{</em>
+<a id='L269' name='L269'></a> 269                         <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = -1;
+<a id='L270' name='L270'></a> 270                         <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a> = 0.0;       <em class='comment'>/* Sun always below altit */</em>
+<a id='L271' name='L271'></a> 271 
+<a id='L272' name='L272'></a> 272                         *<a href='../Y/39020.html' title='Multiple used in 5 places.'>ts_rise</a> = *<a href='../Y/39022.html' title='Multiple used in 5 places.'>ts_set</a> = <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a> + (<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> * 3600);
+<a id='L273' name='L273'></a> 273                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/14472.html' title='Multiple used in 23 places.'>cost</a> &lt;= -1.0) <em class='brace'>{</em>
+<a id='L274' name='L274'></a> 274                         <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = +1;
+<a id='L275' name='L275'></a> 275                         <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a> = 12.0;      <em class='comment'>/* Sun always above altit */</em>
+<a id='L276' name='L276'></a> 276 
+<a id='L277' name='L277'></a> 277                         *<a href='../Y/39020.html' title='Multiple used in 5 places.'>ts_rise</a> = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a> - (12 * 3600);
+<a id='L278' name='L278'></a> 278                         *<a href='../Y/39022.html' title='Multiple used in 5 places.'>ts_set</a>  = <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a> + (12 * 3600);
+<a id='L279' name='L279'></a> 279                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L280' name='L280'></a> 280                         <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a> = <a href='../S/64.html#L51' title='Defined at 51 in ext/date/lib/astro.c.'>acosd</a>(<a href='../Y/14472.html' title='Multiple used in 23 places.'>cost</a>) / 15.0;   <em class='comment'>/* The diurnal arc, hours */</em>
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282                         <em class='comment'>/* Store rise and set times - as Unix Timestamp */</em>
+<a id='L283' name='L283'></a> 283                         *<a href='../Y/39020.html' title='Multiple used in 5 places.'>ts_rise</a> = ((<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> - <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>) * 3600) + <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a>;
+<a id='L284' name='L284'></a> 284                         *<a href='../Y/39022.html' title='Multiple used in 5 places.'>ts_set</a>  = ((<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> + <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>) * 3600) + <a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a>;
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286                         *<a href='../Y/19635.html' title='Multiple used in 6 places.'>h_rise</a> = (<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> - <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>);
+<a id='L287' name='L287'></a> 287                         *<a href='../Y/19641.html' title='Multiple used in 6 places.'>h_set</a>  = (<a href='../Y/39031.html' title='Multiple used in 8 places.'>tsouth</a> + <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>);
+<a id='L288' name='L288'></a> 288                 <em class='brace'>}</em>
+<a id='L289' name='L289'></a> 289         <em class='brace'>}</em>
+<a id='L290' name='L290'></a> 290 
+<a id='L291' name='L291'></a> 291         <em class='comment'>/* Kill temporary time and restore original sse */</em>
+<a id='L292' name='L292'></a> 292         <a href='../S/72.html#L104' title='Defined at 104 in ext/date/lib/timelib.c.'>timelib_time_dtor</a>(<a href='../Y/38073.html' title='Multiple used in 12 places.'>t_utc</a>);
+<a id='L293' name='L293'></a> 293         <a href='../Y/38068.html' title='Multiple used in 12 places.'>t_loc</a>-&gt;<a href='../Y/37040.html' title='Multiple used in 66 places.'>sse</a> = <a href='../Y/29477.html' title='Multiple used in 3 places.'>old_sse</a>;
+<a id='L294' name='L294'></a> 294 
+<a id='L295' name='L295'></a> 295         <strong class='reserved'>return</strong> <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>;
+<a id='L296' name='L296'></a> 296 <em class='brace'>}</em>
+<a id='L297' name='L297'></a> 297 
+<a id='L298' name='L298'></a> 298 <strong class='reserved'>double</strong> <a href='../R/28653.html' title='Multiple referred from 2 places.'>timelib_ts_to_juliandate</a>(<a href='../D/31955.html' title='Multiple defined in 2 places.'>timelib_sll</a> <a href='../Y/39016.html' title='Multiple used in 247 places.'>ts</a>)
+<a id='L299' name='L299'></a> 299 <em class='brace'>{</em>
+<a id='L300' name='L300'></a> 300         <strong class='reserved'>double</strong> <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a>;
+<a id='L301' name='L301'></a> 301 
+<a id='L302' name='L302'></a> 302         <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> = <a href='../Y/39016.html' title='Multiple used in 247 places.'>ts</a>;
+<a id='L303' name='L303'></a> 303         <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> /= 86400;
+<a id='L304' name='L304'></a> 304         <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> += 2440587.5;
+<a id='L305' name='L305'></a> 305         <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a> -= 2451543;
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307         <strong class='reserved'>return</strong> <a href='../Y/38586.html' title='Multiple used in 3516 places.'>tmp</a>;
+<a id='L308' name='L308'></a> 308 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L74'>[^]</a><a href='#L298'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

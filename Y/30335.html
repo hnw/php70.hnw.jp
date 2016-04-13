@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pCheck</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L11513'>pCheck</a>           11513 ext/sqlite3/libsqlite/sqlite3.c   ExprList *pCheck;    /* All CHECK constraints */</span>
+<span class='curline'><a href='../S/1054.html#L61414'>pCheck</a>           61414 ext/sqlite3/libsqlite/sqlite3.c   IntegrityCk *pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61420'>pCheck</a>           61420 ext/sqlite3/libsqlite/sqlite3.c   if( !pCheck-&gt;mxErr ) return;</span>
+<span class='curline'><a href='../S/1054.html#L61421'>pCheck</a>           61421 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;mxErr--;</span>
+<span class='curline'><a href='../S/1054.html#L61422'>pCheck</a>           61422 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;nErr++;</span>
+<span class='curline'><a href='../S/1054.html#L61424'>pCheck</a>           61424 ext/sqlite3/libsqlite/sqlite3.c   if( pCheck-&gt;errMsg.nChar ){</span>
+<span class='curline'><a href='../S/1054.html#L61425'>pCheck</a>           61425 ext/sqlite3/libsqlite/sqlite3.c     sqlite3StrAccumAppend(&amp;pCheck-&gt;errMsg, "\n", 1);</span>
+<span class='curline'><a href='../S/1054.html#L61427'>pCheck</a>           61427 ext/sqlite3/libsqlite/sqlite3.c   if( pCheck-&gt;zPfx ){</span>
+<span class='curline'><a href='../S/1054.html#L61428'>pCheck</a>           61428 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_snprintf(sizeof(zBuf), zBuf, pCheck-&gt;zPfx, pCheck-&gt;v1, pCheck-&gt;v2);</span>
+<span class='curline'><a href='../S/1054.html#L61429'>pCheck</a>           61429 ext/sqlite3/libsqlite/sqlite3.c     sqlite3StrAccumAppendAll(&amp;pCheck-&gt;errMsg, zBuf);</span>
+<span class='curline'><a href='../S/1054.html#L61431'>pCheck</a>           61431 ext/sqlite3/libsqlite/sqlite3.c   sqlite3VXPrintf(&amp;pCheck-&gt;errMsg, 1, zFormat, ap);</span>
+<span class='curline'><a href='../S/1054.html#L61433'>pCheck</a>           61433 ext/sqlite3/libsqlite/sqlite3.c   if( pCheck-&gt;errMsg.accError==STRACCUM_NOMEM ){</span>
+<span class='curline'><a href='../S/1054.html#L61434'>pCheck</a>           61434 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;mallocFailed = 1;</span>
+<span class='curline'><a href='../S/1054.html#L61445'>pCheck</a>           61445 ext/sqlite3/libsqlite/sqlite3.c static int getPageReferenced(IntegrityCk *pCheck, Pgno iPg){</span>
+<span class='curline'><a href='../S/1054.html#L61446'>pCheck</a>           61446 ext/sqlite3/libsqlite/sqlite3.c   assert( iPg&lt;=pCheck-&gt;nPage &amp;&amp; sizeof(pCheck-&gt;aPgRef[0])==1 );</span>
+<span class='curline'><a href='../S/1054.html#L61447'>pCheck</a>           61447 ext/sqlite3/libsqlite/sqlite3.c   return (pCheck-&gt;aPgRef[iPg/8] &amp; (1 &lt;&lt; (iPg &amp; 0x07)));</span>
+<span class='curline'><a href='../S/1054.html#L61453'>pCheck</a>           61453 ext/sqlite3/libsqlite/sqlite3.c static void setPageReferenced(IntegrityCk *pCheck, Pgno iPg){</span>
+<span class='curline'><a href='../S/1054.html#L61454'>pCheck</a>           61454 ext/sqlite3/libsqlite/sqlite3.c   assert( iPg&lt;=pCheck-&gt;nPage &amp;&amp; sizeof(pCheck-&gt;aPgRef[0])==1 );</span>
+<span class='curline'><a href='../S/1054.html#L61455'>pCheck</a>           61455 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;aPgRef[iPg/8] |= (1 &lt;&lt; (iPg &amp; 0x07));</span>
+<span class='curline'><a href='../S/1054.html#L61467'>pCheck</a>           61467 ext/sqlite3/libsqlite/sqlite3.c static int checkRef(IntegrityCk *pCheck, Pgno iPage){</span>
+<span class='curline'><a href='../S/1054.html#L61469'>pCheck</a>           61469 ext/sqlite3/libsqlite/sqlite3.c   if( iPage&gt;pCheck-&gt;nPage ){</span>
+<span class='curline'><a href='../S/1054.html#L61470'>pCheck</a>           61470 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck, "invalid page number %d", iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61473'>pCheck</a>           61473 ext/sqlite3/libsqlite/sqlite3.c   if( getPageReferenced(pCheck, iPage) ){</span>
+<span class='curline'><a href='../S/1054.html#L61474'>pCheck</a>           61474 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck, "2nd reference to page %d", iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61477'>pCheck</a>           61477 ext/sqlite3/libsqlite/sqlite3.c   setPageReferenced(pCheck, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61488'>pCheck</a>           61488 ext/sqlite3/libsqlite/sqlite3.c   IntegrityCk *pCheck,   /* Integrity check context */</span>
+<span class='curline'><a href='../S/1054.html#L61497'>pCheck</a>           61497 ext/sqlite3/libsqlite/sqlite3.c   rc = ptrmapGet(pCheck-&gt;pBt, iChild, &amp;ePtrmapType, &amp;iPtrmapParent);</span>
+<span class='curline'><a href='../S/1054.html#L61499'>pCheck</a>           61499 ext/sqlite3/libsqlite/sqlite3.c     if( rc==SQLITE_NOMEM || rc==SQLITE_IOERR_NOMEM ) pCheck-&gt;mallocFailed = 1;</span>
+<span class='curline'><a href='../S/1054.html#L61500'>pCheck</a>           61500 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck, "Failed to read ptrmap key=%d", iChild);</span>
+<span class='curline'><a href='../S/1054.html#L61505'>pCheck</a>           61505 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61517'>pCheck</a>           61517 ext/sqlite3/libsqlite/sqlite3.c   IntegrityCk *pCheck,  /* Integrity checking context */</span>
+<span class='curline'><a href='../S/1054.html#L61525'>pCheck</a>           61525 ext/sqlite3/libsqlite/sqlite3.c   while( N-- &gt; 0 &amp;&amp; pCheck-&gt;mxErr ){</span>
+<span class='curline'><a href='../S/1054.html#L61529'>pCheck</a>           61529 ext/sqlite3/libsqlite/sqlite3.c       checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61534'>pCheck</a>           61534 ext/sqlite3/libsqlite/sqlite3.c     if( checkRef(pCheck, iPage) ) break;</span>
+<span class='curline'><a href='../S/1054.html#L61535'>pCheck</a>           61535 ext/sqlite3/libsqlite/sqlite3.c     if( sqlite3PagerGet(pCheck-&gt;pPager, (Pgno)iPage, &amp;pOvflPage) ){</span>
+<span class='curline'><a href='../S/1054.html#L61536'>pCheck</a>           61536 ext/sqlite3/libsqlite/sqlite3.c       checkAppendMsg(pCheck, "failed to get page %d", iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61543'>pCheck</a>           61543 ext/sqlite3/libsqlite/sqlite3.c       if( pCheck-&gt;pBt-&gt;autoVacuum ){</span>
+<span class='curline'><a href='../S/1054.html#L61544'>pCheck</a>           61544 ext/sqlite3/libsqlite/sqlite3.c         checkPtrmap(pCheck, iPage, PTRMAP_FREEPAGE, 0);</span>
+<span class='curline'><a href='../S/1054.html#L61547'>pCheck</a>           61547 ext/sqlite3/libsqlite/sqlite3.c       if( n&gt;(int)pCheck-&gt;pBt-&gt;usableSize/4-2 ){</span>
+<span class='curline'><a href='../S/1054.html#L61548'>pCheck</a>           61548 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61555'>pCheck</a>           61555 ext/sqlite3/libsqlite/sqlite3.c           if( pCheck-&gt;pBt-&gt;autoVacuum ){</span>
+<span class='curline'><a href='../S/1054.html#L61556'>pCheck</a>           61556 ext/sqlite3/libsqlite/sqlite3.c             checkPtrmap(pCheck, iFreePage, PTRMAP_FREEPAGE, 0);</span>
+<span class='curline'><a href='../S/1054.html#L61559'>pCheck</a>           61559 ext/sqlite3/libsqlite/sqlite3.c           checkRef(pCheck, iFreePage);</span>
+<span class='curline'><a href='../S/1054.html#L61570'>pCheck</a>           61570 ext/sqlite3/libsqlite/sqlite3.c       if( pCheck-&gt;pBt-&gt;autoVacuum &amp;&amp; N&gt;0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61572'>pCheck</a>           61572 ext/sqlite3/libsqlite/sqlite3.c         checkPtrmap(pCheck, i, PTRMAP_OVERFLOW2, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61653'>pCheck</a>           61653 ext/sqlite3/libsqlite/sqlite3.c   IntegrityCk *pCheck,  /* Context for the sanity check */</span>
+<span class='curline'><a href='../S/1054.html#L61669'>pCheck</a>           61669 ext/sqlite3/libsqlite/sqlite3.c   const char *saved_zPfx = pCheck-&gt;zPfx;</span>
+<span class='curline'><a href='../S/1054.html#L61670'>pCheck</a>           61670 ext/sqlite3/libsqlite/sqlite3.c   int saved_v1 = pCheck-&gt;v1;</span>
+<span class='curline'><a href='../S/1054.html#L61671'>pCheck</a>           61671 ext/sqlite3/libsqlite/sqlite3.c   int saved_v2 = pCheck-&gt;v2;</span>
+<span class='curline'><a href='../S/1054.html#L61675'>pCheck</a>           61675 ext/sqlite3/libsqlite/sqlite3.c   pBt = pCheck-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L61678'>pCheck</a>           61678 ext/sqlite3/libsqlite/sqlite3.c   if( checkRef(pCheck, iPage) ) return 0;</span>
+<span class='curline'><a href='../S/1054.html#L61679'>pCheck</a>           61679 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;zPfx = "Page %d: ";</span>
+<span class='curline'><a href='../S/1054.html#L61680'>pCheck</a>           61680 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;v1 = iPage;</span>
+<span class='curline'><a href='../S/1054.html#L61682'>pCheck</a>           61682 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61693'>pCheck</a>           61693 ext/sqlite3/libsqlite/sqlite3.c     checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61703'>pCheck</a>           61703 ext/sqlite3/libsqlite/sqlite3.c   for(i=0; i&lt;pPage-&gt;nCell &amp;&amp; pCheck-&gt;mxErr; i++){</span>
+<span class='curline'><a href='../S/1054.html#L61710'>pCheck</a>           61710 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;zPfx = "On tree page %d cell %d: ";</span>
+<span class='curline'><a href='../S/1054.html#L61711'>pCheck</a>           61711 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;v1 = iPage;</span>
+<span class='curline'><a href='../S/1054.html#L61712'>pCheck</a>           61712 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;v2 = i;</span>
+<span class='curline'><a href='../S/1054.html#L61722'>pCheck</a>           61722 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61734'>pCheck</a>           61734 ext/sqlite3/libsqlite/sqlite3.c         checkPtrmap(pCheck, pgnoOvfl, PTRMAP_OVERFLOW1, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61737'>pCheck</a>           61737 ext/sqlite3/libsqlite/sqlite3.c       checkList(pCheck, 0, pgnoOvfl, nPage);</span>
+<span class='curline'><a href='../S/1054.html#L61746'>pCheck</a>           61746 ext/sqlite3/libsqlite/sqlite3.c         checkPtrmap(pCheck, pgno, PTRMAP_BTREE, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61749'>pCheck</a>           61749 ext/sqlite3/libsqlite/sqlite3.c       d2 = checkTreePage(pCheck, pgno, &amp;nMinKey, i==0?NULL:&amp;nMaxKey);</span>
+<span class='curline'><a href='../S/1054.html#L61751'>pCheck</a>           61751 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck, "Child page depth differs");</span>
+<span class='curline'><a href='../S/1054.html#L61759'>pCheck</a>           61759 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;zPfx = "On page %d at right child: ";</span>
+<span class='curline'><a href='../S/1054.html#L61760'>pCheck</a>           61760 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;v1 = iPage;</span>
+<span class='curline'><a href='../S/1054.html#L61763'>pCheck</a>           61763 ext/sqlite3/libsqlite/sqlite3.c       checkPtrmap(pCheck, pgno, PTRMAP_BTREE, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L61766'>pCheck</a>           61766 ext/sqlite3/libsqlite/sqlite3.c     checkTreePage(pCheck, pgno, NULL, !pPage-&gt;nCell?NULL:&amp;nMaxKey);</span>
+<span class='curline'><a href='../S/1054.html#L61772'>pCheck</a>           61772 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;zPfx = "Page %d: ";</span>
+<span class='curline'><a href='../S/1054.html#L61773'>pCheck</a>           61773 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;v1 = iPage;</span>
+<span class='curline'><a href='../S/1054.html#L61780'>pCheck</a>           61780 ext/sqlite3/libsqlite/sqlite3.c           checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61786'>pCheck</a>           61786 ext/sqlite3/libsqlite/sqlite3.c           checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61791'>pCheck</a>           61791 ext/sqlite3/libsqlite/sqlite3.c           checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61800'>pCheck</a>           61800 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61812'>pCheck</a>           61812 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;zPfx = 0;</span>
+<span class='curline'><a href='../S/1054.html#L61814'>pCheck</a>           61814 ext/sqlite3/libsqlite/sqlite3.c     pCheck-&gt;mallocFailed = 1;</span>
+<span class='curline'><a href='../S/1054.html#L61835'>pCheck</a>           61835 ext/sqlite3/libsqlite/sqlite3.c         pCheck-&gt;zPfx = 0;</span>
+<span class='curline'><a href='../S/1054.html#L61836'>pCheck</a>           61836 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61869'>pCheck</a>           61869 ext/sqlite3/libsqlite/sqlite3.c         checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61884'>pCheck</a>           61884 ext/sqlite3/libsqlite/sqlite3.c       checkAppendMsg(pCheck,</span>
+<span class='curline'><a href='../S/1054.html#L61893'>pCheck</a>           61893 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;zPfx = saved_zPfx;</span>
+<span class='curline'><a href='../S/1054.html#L61894'>pCheck</a>           61894 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;v1 = saved_v1;</span>
+<span class='curline'><a href='../S/1054.html#L61895'>pCheck</a>           61895 ext/sqlite3/libsqlite/sqlite3.c   pCheck-&gt;v2 = saved_v2;</span>
+<span class='curline'><a href='../S/1054.html#L91438'>pCheck</a>           91438 ext/sqlite3/libsqlite/sqlite3.c   sqlite3ExprListDelete(db, pTable-&gt;pCheck);</span>
+<span class='curline'><a href='../S/1054.html#L92161'>pCheck</a>           92161 ext/sqlite3/libsqlite/sqlite3.c     pTab-&gt;pCheck = sqlite3ExprListAppend(pParse, pTab-&gt;pCheck, pCheckExpr);</span>
+<span class='curline'><a href='../S/1054.html#L92163'>pCheck</a>           92163 ext/sqlite3/libsqlite/sqlite3.c       sqlite3ExprListSetName(pParse, pTab-&gt;pCheck, &amp;pParse-&gt;constraintName, 1);</span>
+<span class='curline'><a href='../S/1054.html#L92661'>pCheck</a>           92661 ext/sqlite3/libsqlite/sqlite3.c   if( p-&gt;pCheck ){</span>
+<span class='curline'><a href='../S/1054.html#L92662'>pCheck</a>           92662 ext/sqlite3/libsqlite/sqlite3.c     sqlite3ResolveSelfReference(pParse, p, NC_IsCheck, 0, p-&gt;pCheck);</span>
+<span class='curline'><a href='../S/1054.html#L100862'>pCheck</a>           100862 ext/sqlite3/libsqlite/sqlite3.c   if( pTab-&gt;pCheck &amp;&amp; (db-&gt;flags &amp; SQLITE_IgnoreChecks)==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L100863'>pCheck</a>           100863 ext/sqlite3/libsqlite/sqlite3.c     ExprList *pCheck = pTab-&gt;pCheck;</span>
+<span class='curline'><a href='../S/1054.html#L100866'>pCheck</a>           100866 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; i&lt;pCheck-&gt;nExpr; i++){</span>
+<span class='curline'><a href='../S/1054.html#L100868'>pCheck</a>           100868 ext/sqlite3/libsqlite/sqlite3.c       sqlite3ExprIfTrue(pParse, pCheck-&gt;a[i].pExpr, allOk, SQLITE_JUMPIFNULL);</span>
+<span class='curline'><a href='../S/1054.html#L100872'>pCheck</a>           100872 ext/sqlite3/libsqlite/sqlite3.c         char *zName = pCheck-&gt;a[i].zName;</span>
+<span class='curline'><a href='../S/1054.html#L101538'>pCheck</a>           101538 ext/sqlite3/libsqlite/sqlite3.c   if( pDest-&gt;pCheck &amp;&amp; sqlite3ExprListCompare(pSrc-&gt;pCheck,pDest-&gt;pCheck,-1) ){</span>
+<span class='curline'><a href='../S/1054.html#L147087'>pCheck</a>           147087 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pCheck = 0;       /* Statement to query database with */</span>
+<span class='curline'><a href='../S/1054.html#L147090'>pCheck</a>           147090 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_SEGMENT_IS_APPENDABLE, &amp;pCheck, 0);</span>
+<span class='curline'><a href='../S/1054.html#L147092'>pCheck</a>           147092 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pCheck, 1, iEnd);</span>
+<span class='curline'><a href='../S/1054.html#L147093'>pCheck</a>           147093 ext/sqlite3/libsqlite/sqlite3.c     if( SQLITE_ROW==sqlite3_step(pCheck) ) bRes = 1;</span>
+<span class='curline'><a href='../S/1054.html#L147094'>pCheck</a>           147094 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pCheck);</span>
+</pre>
+</body>
+</html>

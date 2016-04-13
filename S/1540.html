@@ -1,0 +1,1003 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>sapi/phpdbg/phpdbg_help.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1861.html'>sapi</a>/<a href='../files/1870.html'>phpdbg</a>/phpdbg_help.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L44'>[^]</a><a href='#L262'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L44' title='Defined at 44.'>pretty_print</a></li>
+<li><a href='#L145' title='Defined at 145.'>summary_print</a></li>
+<li><a href='#L154' title='Defined at 154.'>get_help</a></li>
+<li><a href='#L179' title='Defined at 179.'>get_command</a></li>
+<li><a href='#L212' title='Defined at 212.'>PHPDBG_COMMAND</a></li>
+<li><a href='#L262' title='Defined at 262.'>PHPDBG_HELP</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Felipe Pena &lt;felipe@php.net&gt;                                |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   | Authors: Joe Watkins &lt;joe.watkins@live.co.uk&gt;                        |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   | Authors: Bob Weinand &lt;bwoebi@php.net&gt;                                |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   | Authors: Terry Ellison &lt;terry@ellisons.org.uk&gt;                       |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>*/</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1527.html'>phpdbg.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='1541.html'>phpdbg_help.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1559.html'>phpdbg_prompt.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1537.html'>phpdbg_eol.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1627.html'>zend.h</a>"
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <a href='../D/16228.html' title='Multiple defined in 14 places.'>ZEND_EXTERN_MODULE_GLOBALS</a>(<a href='../Y/32648.html' title='Multiple used in 47 places.'>phpdbg</a>)
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='comment'>/* {{{ Commands Table */</em>
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#define</em> <a href='../R/6709.html' title='Multiple referred from 5 places.'>PHPDBG_COMMAND_HELP_D</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>, <a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>) \
+<a id='L32' name='L32'></a>  32         <em class='brace'>{</em><a href='../S/1535.html#L109' title='Defined at 109 in sapi/phpdbg/phpdbg_cmd.h.'>PHPDBG_STRL</a>(#<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>), <a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>)-1, <a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/8767.html' title='Multiple used in 87 places.'>action</a>, &amp;<a href='../Y/32699.html' title='Multiple used in 16 places.'>phpdbg_prompt_commands</a>[16], 0<em class='brace'>}</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>const</strong> <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> <a href='../Y/32684.html' title='Multiple used in 4 places.'>phpdbg_help_commands</a>[] = <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35         <a href='../S/1540.html#L31' title='Defined at 31 in sapi/phpdbg/phpdbg_help.c.'>PHPDBG_COMMAND_HELP_D</a>(<a href='../Y/9070.html' title='Multiple used in 21 places.'>aliases</a>,    "show alias list", 'a', phpdbg_do_help_aliases),
+<a id='L36' name='L36'></a>  36         <a href='../S/1540.html#L31' title='Defined at 31 in sapi/phpdbg/phpdbg_help.c.'>PHPDBG_COMMAND_HELP_D</a>(<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>,    "command line options", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>),
+<a id='L37' name='L37'></a>  37         <a href='../S/1540.html#L31' title='Defined at 31 in sapi/phpdbg/phpdbg_help.c.'>PHPDBG_COMMAND_HELP_D</a>(overview,   "help overview", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>),
+<a id='L38' name='L38'></a>  38         <a href='../S/1540.html#L31' title='Defined at 31 in sapi/phpdbg/phpdbg_help.c.'>PHPDBG_COMMAND_HELP_D</a>(phpdbginit, "phpdbginit file format", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>),
+<a id='L39' name='L39'></a>  39         <a href='../S/1540.html#L31' title='Defined at 31 in sapi/phpdbg/phpdbg_help.c.'>PHPDBG_COMMAND_HELP_D</a>(<a href='../Y/37955.html' title='Multiple used in 141 places.'>syntax</a>,     "syntax overview", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>),
+<a id='L40' name='L40'></a>  40         <a href='../S/1535.html#L175' title='Defined at 175 in sapi/phpdbg/phpdbg_cmd.h.'>PHPDBG_END_COMMAND</a>
+<a id='L41' name='L41'></a>  41 <em class='brace'>}</em>;  <em class='comment'>/* }}} */</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='comment'>/* {{{ pretty_print.  Formatting escapes and wrapping text in a string before printing it. */</em>
+<a id='L44' name='L44'></a>  44 <strong class='reserved'>void</strong> <a href='../R/25582.html' title='Multiple referred from 6 places.'>pretty_print</a>(<strong class='reserved'>char</strong> *<a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>)
+<a id='L45' name='L45'></a>  45 <em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>char</strong> *<a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>, *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>, *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>;
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>  *<a href='../Y/33460.html' title='Multiple used in 3 places.'>prompt_escape</a> = <a href='../S/1568.html#L299' title='Defined at 299 in sapi/phpdbg/phpdbg_utils.c.'>phpdbg_get_prompt</a>();
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/33461.html' title='Multiple used in 4 places.'>prompt_escape_len</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/33460.html' title='Multiple used in 3 places.'>prompt_escape</a>);
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/33462.html' title='Multiple used in 8 places.'>prompt_len</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/33458.html' title='Multiple used in 66 places.'>prompt</a>)[0]);
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>  *<a href='../Y/12808.html' title='Multiple used in 3 places.'>bold_on_escape</a>  = <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>) &amp; <a href='../S/1527.html#L173' title='Defined at 173 in sapi/phpdbg/phpdbg.h.'>PHPDBG_IS_COLOURED</a> ? "\033[1m" : "";
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>  *<a href='../Y/12807.html' title='Multiple used in 2 places.'>bold_off_escape</a> = <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>) &amp; <a href='../S/1527.html#L173' title='Defined at 173 in sapi/phpdbg/phpdbg.h.'>PHPDBG_IS_COLOURED</a> ? "\033[0m" : "";
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/12806.html' title='Multiple used in 5 places.'>bold_escape_len</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/12808.html' title='Multiple used in 3 places.'>bold_on_escape</a>);
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/38252.html' title='Multiple used in 2 places.'>term_width</a> = <a href='../S/1568.html#L336' title='Defined at 336 in sapi/phpdbg/phpdbg_utils.c.'>phpdbg_get_terminal_width</a>();
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = 0;
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59         <strong class='reserved'>int</strong> <a href='../Y/22996.html' title='Multiple used in 3 places.'>in_bold</a> = 0;
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>char</strong> *<a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;          <em class='comment'>/* position in new buffer of last blank char */</em>
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/24609.html' title='Multiple used in 5 places.'>last_blank_count</a> = 0;    <em class='comment'>/* printable char offset of last blank char */</em>
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a> = 0;          <em class='comment'>/* number printable chars on current line */</em>
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65         <strong class='reserved'>if</strong> (<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>) &amp; <a href='../S/1527.html#L190' title='Defined at 190 in sapi/phpdbg/phpdbg.h.'>PHPDBG_WRITE_XML</a>) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <a href='../S/1553.html#L49' title='Defined at 49 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_xml</a>("&lt;help %r msg=\"%s\" /&gt;", <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>);
+<a id='L67' name='L67'></a>  67                 <strong class='reserved'>return</strong>;
+<a id='L68' name='L68'></a>  68         <em class='brace'>}</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70         <em class='comment'>/* First pass calculates a safe size for the pretty print version */</em>
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>for</strong> (<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>; *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++) <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '*') &amp;&amp; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[1] == '*') <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                         <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> += <a href='../Y/12806.html' title='Multiple used in 5 places.'>bold_escape_len</a> - 2;
+<a id='L74' name='L74'></a>  74                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L75' name='L75'></a>  75                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '$') &amp;&amp; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[1] == 'P') <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                         <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> += <a href='../Y/33461.html' title='Multiple used in 4 places.'>prompt_escape_len</a> - 2;
+<a id='L77' name='L77'></a>  77                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L78' name='L78'></a>  78                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '\\')) <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L80' name='L80'></a>  80                 <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81         <em class='brace'>}</em>
+<a id='L82' name='L82'></a>  82         <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> += (<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>-<a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>)+1;
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a> = <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>);
+<a id='L85' name='L85'></a>  85         <em class='comment'>/*</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'>         * Second pass substitutes the bold and prompt escape sequences and line wrap</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'>         *</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         * ** toggles bold on and off if PHPDBG_IS_COLOURED flag is set</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         * $P substitutes the prompt sequence</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         * Lines are wrapped by replacing the last blank with a CR before &lt;term width&gt;</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         * characters.  (This defaults to 100 if the width can't be detected).  In the</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>         * pathelogical case where no blanks are found, then the wrap occurs at the</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'>         * first blank.</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'>         */</em>
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>for</strong> (<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>, <a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a> = <a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>; *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++) <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96                 <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(*<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> == ' ')) <em class='brace'>{</em>
+<a id='L97' name='L97'></a>  97                         <a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a> = <a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>;
+<a id='L98' name='L98'></a>  98                         <a href='../Y/24609.html' title='Multiple used in 5 places.'>last_blank_count</a> = <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a>++;
+<a id='L99' name='L99'></a>  99                         *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>++ = ' ';
+<a id='L100' name='L100'></a> 100                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(*<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> == '\n')) <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                         <a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L102' name='L102'></a> 102                         *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>++ = *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L103' name='L103'></a> 103                         <a href='../Y/24609.html' title='Multiple used in 5 places.'>last_blank_count</a> = 0;
+<a id='L104' name='L104'></a> 104                         <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a> = 0;
+<a id='L105' name='L105'></a> 105                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '*') &amp;&amp; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[1] == '*') <em class='brace'>{</em>
+<a id='L106' name='L106'></a> 106                         <strong class='reserved'>if</strong> (<a href='../Y/12806.html' title='Multiple used in 5 places.'>bold_escape_len</a>) <em class='brace'>{</em>
+<a id='L107' name='L107'></a> 107                                 <a href='../Y/22996.html' title='Multiple used in 3 places.'>in_bold</a> = !<a href='../Y/22996.html' title='Multiple used in 3 places.'>in_bold</a>;
+<a id='L108' name='L108'></a> 108                                 <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a> (<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>, <a href='../Y/22996.html' title='Multiple used in 3 places.'>in_bold</a> ? <a href='../Y/12808.html' title='Multiple used in 3 places.'>bold_on_escape</a> : <a href='../Y/12807.html' title='Multiple used in 2 places.'>bold_off_escape</a>, <a href='../Y/12806.html' title='Multiple used in 5 places.'>bold_escape_len</a>);
+<a id='L109' name='L109'></a> 109                                 <a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a> += <a href='../Y/12806.html' title='Multiple used in 5 places.'>bold_escape_len</a>;
+<a id='L110' name='L110'></a> 110                                 <em class='comment'>/* bold on/off has zero print width so line count is unchanged */</em>
+<a id='L111' name='L111'></a> 111                         <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L113' name='L113'></a> 113                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '$') &amp;&amp; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[1] == 'P') <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a> (<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>, <a href='../Y/33460.html' title='Multiple used in 3 places.'>prompt_escape</a>, <a href='../Y/33461.html' title='Multiple used in 4 places.'>prompt_escape_len</a>);
+<a id='L115' name='L115'></a> 115                         <a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a> += <a href='../Y/33461.html' title='Multiple used in 4 places.'>prompt_escape_len</a>;
+<a id='L116' name='L116'></a> 116                         <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a> += <a href='../Y/33462.html' title='Multiple used in 8 places.'>prompt_len</a>;
+<a id='L117' name='L117'></a> 117                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L118' name='L118'></a> 118                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>[0] == '\\')) <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L120' name='L120'></a> 120                         *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>++ = *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L121' name='L121'></a> 121                         <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a>++;
+<a id='L122' name='L122'></a> 122                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                         *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>++ = *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L124' name='L124'></a> 124                         <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a>++;
+<a id='L125' name='L125'></a> 125                 <em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127                 <strong class='reserved'>if</strong> (<a href='../D/14338.html' title='Multiple defined in 2 places.'>UNEXPECTED</a>(<a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a>&gt;=<a href='../Y/38252.html' title='Multiple used in 2 places.'>term_width</a>) &amp;&amp; <a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a>) <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128                         *<a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a> = '\n';
+<a id='L129' name='L129'></a> 129                         <a href='../Y/24655.html' title='Multiple used in 6 places.'>last_new_blank</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L130' name='L130'></a> 130                         <a href='../Y/25101.html' title='Multiple used in 8 places.'>line_count</a> -= <a href='../Y/24609.html' title='Multiple used in 5 places.'>last_blank_count</a>;
+<a id='L131' name='L131'></a> 131                         <a href='../Y/24609.html' title='Multiple used in 5 places.'>last_blank_count</a> = 0;
+<a id='L132' name='L132'></a> 132                 <em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133         <em class='brace'>}</em>
+<a id='L134' name='L134'></a> 134         *<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>++ = '\0';
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136         <strong class='reserved'>if</strong> ((<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a>-<a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>)&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>) <em class='brace'>{</em>
+<a id='L137' name='L137'></a> 137                 <a href='../S/1553.html#L43' title='Defined at 43 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_error</a>("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((<a href='../Y/33830.html' title='Multiple used in 943 places.'>q</a> - <a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>) - <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>));
+<a id='L138' name='L138'></a> 138         <em class='brace'>}</em>
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140         <a href='../S/1553.html#L50' title='Defined at 50 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_out</a>("%s\n", <a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>);
+<a id='L141' name='L141'></a> 141         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/28159.html' title='Multiple used in 102 places.'>new</a>);
+<a id='L142' name='L142'></a> 142 <em class='brace'>}</em>  <em class='comment'>/* }}} */</em>
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <em class='comment'>/* {{{ summary_print.  Print a summary line giving, the command, its alias and tip */</em>
+<a id='L145' name='L145'></a> 145 <strong class='reserved'>void</strong> <a href='../R/28456.html' title='Multiple referred from 2 places.'>summary_print</a>(<a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> <strong class='reserved'>const</strong> * <strong class='reserved'>const</strong> <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>)
+<a id='L146' name='L146'></a> 146 <em class='brace'>{</em>
+<a id='L147' name='L147'></a> 147         <strong class='reserved'>char</strong> *<a href='../Y/37881.html' title='Multiple used in 4 places.'>summary</a>;
+<a id='L148' name='L148'></a> 148         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>(&amp;<a href='../Y/37881.html' title='Multiple used in 4 places.'>summary</a>, 0, "Command: **%s**  Alias: **%c**  **%s**\n", <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>);
+<a id='L149' name='L149'></a> 149         <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../Y/37881.html' title='Multiple used in 4 places.'>summary</a>);
+<a id='L150' name='L150'></a> 150         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37881.html' title='Multiple used in 4 places.'>summary</a>);
+<a id='L151' name='L151'></a> 151 <em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153 <em class='comment'>/* {{{ get_help. Retries and formats text from the phpdbg help text table */</em>
+<a id='L154' name='L154'></a> 154 <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> *<a href='../R/20244.html' title='Multiple referred from 5 places.'>get_help</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <strong class='reserved'>const</strong> <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>)
+<a id='L155' name='L155'></a> 155 <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156         <a href='../S/1541.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_help.h.'>phpdbg_help_text_t</a> *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158         <em class='comment'>/* Note that phpdbg_help_text is not assumed to be collated in key order.  This is an</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'>           inconvience that means that help can't be logically grouped Not worth</em>
+<a id='L160' name='L160'></a> 160 <em class='comment'>           the savings */</em>
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162         <strong class='reserved'>for</strong> (<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/32685.html' title='Multiple used in 3 places.'>phpdbg_help_text</a>; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>-&gt;<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>; <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++) <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163                 <strong class='reserved'>if</strong> (!<a href='../Y/37561.html' title='Multiple used in 563 places.'>strcmp</a>(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>-&gt;<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>)) <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164                         <strong class='reserved'>return</strong> <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>-&gt;<a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>;
+<a id='L165' name='L165'></a> 165                 <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167         <strong class='reserved'>return</strong> "";   <em class='comment'>/* return empty string to denote no match found */</em>
+<a id='L168' name='L168'></a> 168 <em class='brace'>}</em> <em class='comment'>/* }}} */</em>
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170 <em class='comment'>/* {{{ get_command.  Return number of matching commands from a command table.</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'> * Unlike the command parser, the help search is sloppy that is partial matches can occur</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'> *   * Any single character key is taken as an alias.</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'> *   * Other keys are matched again the table on the first len characters.</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'> *   * This means that non-unique keys can generate multiple matches.</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'> *   * The first matching command is returned as an OUT parameter. *</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'> * The rationale here is to assist users in finding help on commands. So unique matches</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'> * will be used to generate a help message but non-unique one will be used to list alternatives.</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'> */</em>
+<a id='L179' name='L179'></a> 179 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/20218.html' title='Multiple referred from 3 places.'>get_command</a>(
+<a id='L180' name='L180'></a> 180         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>,      <em class='comment'>/* pointer and length of key */</em>
+<a id='L181' name='L181'></a> 181         <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> <strong class='reserved'>const</strong> **<a href='../D/20459.html' title='Multiple defined in 3 places.'>command</a>, <em class='comment'>/* address of first matching command  */</em>
+<a id='L182' name='L182'></a> 182         <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> <strong class='reserved'>const</strong> * <a href='../Y/14154.html' title='Multiple used in 6 places.'>commands</a> <em class='comment'>/* command table to be scanned */</em>
+<a id='L183' name='L183'></a> 183         )
+<a id='L184' name='L184'></a> 184 <em class='brace'>{</em>
+<a id='L185' name='L185'></a> 185         <strong class='reserved'>const</strong> <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> *<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a> = 0;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188         <strong class='reserved'>if</strong> (<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> == 1) <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                 <strong class='reserved'>for</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>=<a href='../Y/14154.html' title='Multiple used in 6 places.'>commands</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>++) <em class='brace'>{</em>
+<a id='L190' name='L190'></a> 190                         <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a> == <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>[0]) <em class='brace'>{</em>
+<a id='L191' name='L191'></a> 191                                 <a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a>++;
+<a id='L192' name='L192'></a> 192                                 <strong class='reserved'>if</strong> ( <a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a> == 1 &amp;&amp; <a href='../D/20459.html' title='Multiple defined in 3 places.'>command</a>) <em class='brace'>{</em>
+<a id='L193' name='L193'></a> 193                                         *<a href='../D/20459.html' title='Multiple defined in 3 places.'>command</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L194' name='L194'></a> 194                                 <em class='brace'>}</em>
+<a id='L195' name='L195'></a> 195                         <em class='brace'>}</em>
+<a id='L196' name='L196'></a> 196                 <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198                 <strong class='reserved'>for</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>=<a href='../Y/14154.html' title='Multiple used in 6 places.'>commands</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>++) <em class='brace'>{</em>
+<a id='L199' name='L199'></a> 199                         <strong class='reserved'>if</strong> (!<a href='../S/868.html#L370' title='Defined at 370 in ext/pcre/pcrelib/pcre_internal.h.'>strncmp</a>(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>)) <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200                                 ++<a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a>;
+<a id='L201' name='L201'></a> 201                                 <strong class='reserved'>if</strong> ( <a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a> == 1 &amp;&amp; <a href='../D/20459.html' title='Multiple defined in 3 places.'>command</a>) <em class='brace'>{</em>
+<a id='L202' name='L202'></a> 202                                         *<a href='../D/20459.html' title='Multiple defined in 3 places.'>command</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>;
+<a id='L203' name='L203'></a> 203                                 <em class='brace'>}</em>
+<a id='L204' name='L204'></a> 204                         <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205                 <em class='brace'>}</em>
+<a id='L206' name='L206'></a> 206         <em class='brace'>}</em>
+<a id='L207' name='L207'></a> 207 
+<a id='L208' name='L208'></a> 208         <strong class='reserved'>return</strong> <a href='../Y/28894.html' title='Multiple used in 6 places.'>num_matches</a>;
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210 <em class='brace'>}</em> <em class='comment'>/* }}} */</em>
+<a id='L211' name='L211'></a> 211 
+<a id='L212' name='L212'></a> 212 <a href='../R/6703.html' title='Multiple referred from 36 places.'>PHPDBG_COMMAND</a>(<a href='../Y/19952.html' title='Multiple used in 5 places.'>help</a>) <em class='comment'>/* {{{ */</em>
+<a id='L213' name='L213'></a> 213 <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214         <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> <strong class='reserved'>const</strong> *<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>;
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>if</strong> (!<a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a> || <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> == <a href='../S/1535.html#L34' title='Defined at 34 in sapi/phpdbg/phpdbg_cmd.h.'>EMPTY_PARAM</a>) <em class='brace'>{</em>
+<a id='L218' name='L218'></a> 218                 <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../S/1540.html#L154' title='Defined at 154 in sapi/phpdbg/phpdbg_help.c.'>get_help</a>("overview!"));
+<a id='L219' name='L219'></a> 219                 <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L220' name='L220'></a> 220         <em class='brace'>}</em>
+<a id='L221' name='L221'></a> 221 
+<a id='L222' name='L222'></a> 222         <strong class='reserved'>if</strong> (<a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a> &amp;&amp; <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> == <a href='../S/1535.html#L39' title='Defined at 39 in sapi/phpdbg/phpdbg_cmd.h.'>STR_PARAM</a>) <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223             <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = <a href='../S/1540.html#L179' title='Defined at 179 in sapi/phpdbg/phpdbg_help.c.'>get_command</a>(<a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, &amp;<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>, <a href='../Y/32699.html' title='Multiple used in 16 places.'>phpdbg_prompt_commands</a>);
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225                 <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>==1) <em class='brace'>{</em>
+<a id='L226' name='L226'></a> 226                         <a href='../S/1540.html#L145' title='Defined at 145 in sapi/phpdbg/phpdbg_help.c.'>summary_print</a>(<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>);
+<a id='L227' name='L227'></a> 227                         <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../S/1540.html#L154' title='Defined at 154 in sapi/phpdbg/phpdbg_help.c.'>get_help</a>(<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>));
+<a id='L228' name='L228'></a> 228                         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>&gt;1) <em class='brace'>{</em>
+<a id='L231' name='L231'></a> 231                         <strong class='reserved'>if</strong> (<a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> &gt; 1) <em class='brace'>{</em>
+<a id='L232' name='L232'></a> 232                                 <strong class='reserved'>for</strong> (<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>=<a href='../Y/32699.html' title='Multiple used in 16 places.'>phpdbg_prompt_commands</a>; <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>; <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>++) <em class='brace'>{</em>
+<a id='L233' name='L233'></a> 233                                         <strong class='reserved'>if</strong> (!<a href='../S/868.html#L370' title='Defined at 370 in ext/pcre/pcrelib/pcre_internal.h.'>strncmp</a>(<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>)) <em class='brace'>{</em>
+<a id='L234' name='L234'></a> 234                                                 <a href='../S/1540.html#L145' title='Defined at 145 in sapi/phpdbg/phpdbg_help.c.'>summary_print</a>(<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>);
+<a id='L235' name='L235'></a> 235                                         <em class='brace'>}</em>
+<a id='L236' name='L236'></a> 236                                 <em class='brace'>}</em>
+<a id='L237' name='L237'></a> 237                                 <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../S/1540.html#L154' title='Defined at 154 in sapi/phpdbg/phpdbg_help.c.'>get_help</a>("duplicate!"));
+<a id='L238' name='L238'></a> 238                                 <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L239' name='L239'></a> 239                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240                                 <a href='../S/1553.html#L43' title='Defined at 43 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_error</a>("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>[0]);
+<a id='L241' name='L241'></a> 241                                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L242' name='L242'></a> 242                         <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em> <em class='comment'>/* no prompt command found so try help topic */</em>
+<a id='L245' name='L245'></a> 245                     <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = <a href='../S/1540.html#L179' title='Defined at 179 in sapi/phpdbg/phpdbg_help.c.'>get_command</a>( <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>-&gt;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, &amp;<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>, <a href='../Y/32684.html' title='Multiple used in 4 places.'>phpdbg_help_commands</a>);
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247                         <strong class='reserved'>if</strong> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>&gt;0) <em class='brace'>{</em>
+<a id='L248' name='L248'></a> 248                                 <strong class='reserved'>if</strong> (<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a> == 'a') <em class='brace'>{</em>   <em class='comment'>/* help aliases executes a canned routine */</em>
+<a id='L249' name='L249'></a> 249                                         <strong class='reserved'>return</strong> <a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../Y/19675.html' title='Multiple used in 270 places.'>handler</a>(<a href='../Y/31129.html' title='Multiple used in 1225 places.'>param</a>);
+<a id='L250' name='L250'></a> 250                                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L251' name='L251'></a> 251                                         <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../S/1540.html#L154' title='Defined at 154 in sapi/phpdbg/phpdbg_help.c.'>get_help</a>(<a href='../Y/13921.html' title='Multiple used in 170 places.'>cmd</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>));
+<a id='L252' name='L252'></a> 252                                         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L253' name='L253'></a> 253                                 <em class='brace'>}</em>
+<a id='L254' name='L254'></a> 254                         <em class='brace'>}</em>
+<a id='L255' name='L255'></a> 255                 <em class='brace'>}</em>
+<a id='L256' name='L256'></a> 256         <em class='brace'>}</em>
+<a id='L257' name='L257'></a> 257 
+<a id='L258' name='L258'></a> 258         <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L259' name='L259'></a> 259 
+<a id='L260' name='L260'></a> 260 <em class='brace'>}</em> <em class='comment'>/* }}} */</em>
+<a id='L261' name='L261'></a> 261 
+<a id='L262' name='L262'></a> 262 <a href='../S/1541.html#L33' title='Referred from 33 in sapi/phpdbg/phpdbg_help.h.'>PHPDBG_HELP</a>(<a href='../Y/9070.html' title='Multiple used in 21 places.'>aliases</a>) <em class='comment'>/* {{{ */</em>
+<a id='L263' name='L263'></a> 263 <em class='brace'>{</em>
+<a id='L264' name='L264'></a> 264         <strong class='reserved'>const</strong> <a href='../S/1535.html#L93' title='Defined at 93 in sapi/phpdbg/phpdbg_cmd.h.'>phpdbg_command_t</a> *<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, *<a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>;
+<a id='L265' name='L265'></a> 265         <strong class='reserved'>int</strong> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L266' name='L266'></a> 266 
+<a id='L267' name='L267'></a> 267         <em class='comment'>/* Print out aliases for all commands except help as this one comes last */</em>
+<a id='L268' name='L268'></a> 268         <a href='../S/1553.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_writeln</a>("help", "", "Below are the aliased, short versions of all supported commands");
+<a id='L269' name='L269'></a> 269         <a href='../S/1553.html#L49' title='Defined at 49 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_xml</a>("&lt;helpcommands %r&gt;");
+<a id='L270' name='L270'></a> 270         <strong class='reserved'>for</strong>(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a> = <a href='../Y/32699.html' title='Multiple used in 16 places.'>phpdbg_prompt_commands</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>++) <em class='brace'>{</em>
+<a id='L271' name='L271'></a> 271                 <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a> &amp;&amp; <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a> != 'h') <em class='brace'>{</em>
+<a id='L272' name='L272'></a> 272                         <a href='../S/1553.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_writeln</a>("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>);
+<a id='L273' name='L273'></a> 273                         <strong class='reserved'>if</strong> (<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/37839.html' title='Multiple used in 6 places.'>subs</a>) <em class='brace'>{</em>
+<a id='L274' name='L274'></a> 274                                 <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = 20 - 1 - <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>;
+<a id='L275' name='L275'></a> 275                                 <strong class='reserved'>for</strong>(<a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/37839.html' title='Multiple used in 6 places.'>subs</a>; <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>; <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>++) <em class='brace'>{</em>
+<a id='L276' name='L276'></a> 276                                         <strong class='reserved'>if</strong> (<a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>) <em class='brace'>{</em>
+<a id='L277' name='L277'></a> 277                                                 <a href='../S/1553.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_writeln</a>("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+<a id='L278' name='L278'></a> 278                                                         <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>);
+<a id='L279' name='L279'></a> 279                                         <em class='brace'>}</em>
+<a id='L280' name='L280'></a> 280                                 <em class='brace'>}</em>
+<a id='L281' name='L281'></a> 281                         <em class='brace'>}</em>
+<a id='L282' name='L282'></a> 282                 <em class='brace'>}</em>
+<a id='L283' name='L283'></a> 283         <em class='brace'>}</em>
+<a id='L284' name='L284'></a> 284 
+<a id='L285' name='L285'></a> 285         <a href='../S/1553.html#L49' title='Defined at 49 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_xml</a>("&lt;/helpcommands&gt;");
+<a id='L286' name='L286'></a> 286 
+<a id='L287' name='L287'></a> 287         <em class='comment'>/* Print out aliases for help as this one comes last, with the added text on how aliases are used */</em>
+<a id='L288' name='L288'></a> 288         <a href='../S/1540.html#L179' title='Defined at 179 in sapi/phpdbg/phpdbg_help.c.'>get_command</a>("h", 1, &amp;<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>, <a href='../Y/32699.html' title='Multiple used in 16 places.'>phpdbg_prompt_commands</a>);
+<a id='L289' name='L289'></a> 289         <a href='../S/1553.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_writeln</a>("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>);
+<a id='L290' name='L290'></a> 290 
+<a id='L291' name='L291'></a> 291         <a href='../S/1553.html#L49' title='Defined at 49 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_xml</a>("&lt;helpaliases&gt;");
+<a id='L292' name='L292'></a> 292 
+<a id='L293' name='L293'></a> 293         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = 20 - 1 - <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>;
+<a id='L294' name='L294'></a> 294         <strong class='reserved'>for</strong>(<a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a> = <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/37839.html' title='Multiple used in 6 places.'>subs</a>; <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>; <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>++) <em class='brace'>{</em>
+<a id='L295' name='L295'></a> 295                 <strong class='reserved'>if</strong> (<a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>) <em class='brace'>{</em>
+<a id='L296' name='L296'></a> 296                         <a href='../S/1553.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_writeln</a>("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+<a id='L297' name='L297'></a> 297                                 <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/9061.html' title='Multiple used in 280 places.'>alias</a>, <a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/13170.html' title='Multiple used in 7 places.'>c_sub</a>-&gt;<a href='../Y/38547.html' title='Multiple used in 14 places.'>tip</a>);
+<a id='L298' name='L298'></a> 298                 <em class='brace'>}</em>
+<a id='L299' name='L299'></a> 299         <em class='brace'>}</em>
+<a id='L300' name='L300'></a> 300 
+<a id='L301' name='L301'></a> 301         <a href='../S/1553.html#L49' title='Defined at 49 in sapi/phpdbg/phpdbg_out.h.'>phpdbg_xml</a>("&lt;/helpaliases&gt;");
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303         <a href='../S/1540.html#L44' title='Defined at 44 in sapi/phpdbg/phpdbg_help.c.'>pretty_print</a>(<a href='../S/1540.html#L154' title='Defined at 154 in sapi/phpdbg/phpdbg_help.c.'>get_help</a>("aliases!"));
+<a id='L304' name='L304'></a> 304         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L305' name='L305'></a> 305 <em class='brace'>}</em> <em class='comment'>/* }}} */</em>
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308 <em class='comment'>/* {{{ Help Text Table</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'> * Contains help text entries keyed by a lowercase ascii key.</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'> * Text is in ascii and enriched by a simple markup:</em>
+<a id='L311' name='L311'></a> 311 <em class='comment'> *   ** toggles bold font emphasis.</em>
+<a id='L312' name='L312'></a> 312 <em class='comment'> *   $P insert an bold phpdbg&gt; prompt.</em>
+<a id='L313' name='L313'></a> 313 <em class='comment'> *   \  escapes the following character. Note that this is itself escaped inside string</em>
+<a id='L314' name='L314'></a> 314 <em class='comment'> *      constants so \\\\ is required to output a single \ e.g. as in namespace names.</em>
+<a id='L315' name='L315'></a> 315 <em class='comment'> *</em>
+<a id='L316' name='L316'></a> 316 <em class='comment'> * Text will be wrapped according to the STDOUT terminal width, so paragraphs are</em>
+<a id='L317' name='L317'></a> 317 <em class='comment'> * flowed using the C stringizing and the CR definition.  Also note that entries</em>
+<a id='L318' name='L318'></a> 318 <em class='comment'> * are collated in alphabetic order on key.</em>
+<a id='L319' name='L319'></a> 319 <em class='comment'> *</em>
+<a id='L320' name='L320'></a> 320 <em class='comment'> * Also note the convention that help text not directly referenceable as a help param</em>
+<a id='L321' name='L321'></a> 321 <em class='comment'> * has a key ending in !</em>
+<a id='L322' name='L322'></a> 322 <em class='comment'> */</em>
+<a id='L323' name='L323'></a> 323 <em class='sharp'>#define</em> <a href='../R/1091.html' title='Multiple referred from 364 places.'>CR</a> "\n"
+<a id='L324' name='L324'></a> 324 <a href='../S/1541.html#L45' title='Defined at 45 in sapi/phpdbg/phpdbg_help.h.'>phpdbg_help_text_t</a> <a href='../Y/32685.html' title='Multiple used in 3 places.'>phpdbg_help_text</a>[] = <em class='brace'>{</em>
+<a id='L325' name='L325'></a> 325 
+<a id='L326' name='L326'></a> 326 <em class='comment'>/******************************** General Help Topics ********************************/</em>
+<a id='L327' name='L327'></a> 327 <em class='brace'>{</em>"overview!", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L328' name='L328'></a> 328 "**phpdbg** is a lightweight, powerful and easy to use debugging platform for PHP5.4+" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L329' name='L329'></a> 329 "It supports the following commands:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L330' name='L330'></a> 330 
+<a id='L331' name='L331'></a> 331 "**Information**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L332' name='L332'></a> 332 "  **list**     list PHP source" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L333' name='L333'></a> 333 "  **info**     displays information on the debug session" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L334' name='L334'></a> 334 "  **print**    show opcodes" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L335' name='L335'></a> 335 "  **frame**    select a stack frame and print a stack frame summary" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L336' name='L336'></a> 336 "  **back**     shows the current backtrace" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L337' name='L337'></a> 337 "  **help**     provide help on a topic" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L338' name='L338'></a> 338 
+<a id='L339' name='L339'></a> 339 "**Starting and Stopping Execution**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L340' name='L340'></a> 340 "  **exec**     set execution context" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L341' name='L341'></a> 341 "  **run**      attempt execution" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L342' name='L342'></a> 342 "  **step**     continue execution until other line is reached" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L343' name='L343'></a> 343 "  **continue** continue execution" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L344' name='L344'></a> 344 "  **until**    continue execution up to the given location" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L345' name='L345'></a> 345 "  **next**     continue execution up to the given location and halt on the first line after it" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L346' name='L346'></a> 346 "  **finish**   continue up to end of the current execution frame" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L347' name='L347'></a> 347 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L348' name='L348'></a> 348 "  **break**    set a breakpoint at the specified target" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L349' name='L349'></a> 349 "  **watch**    set a watchpoint on $variable" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L350' name='L350'></a> 350 "  **clear**    clear one or all breakpoints" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L351' name='L351'></a> 351 "  **clean**    clean the execution environment" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L352' name='L352'></a> 352 
+<a id='L353' name='L353'></a> 353 "**Miscellaneous**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L354' name='L354'></a> 354 "  **set**      set the phpdbg configuration" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L355' name='L355'></a> 355 "  **source**   execute a phpdbginit script" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L356' name='L356'></a> 356 "  **register** register a phpdbginit function as a command alias" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L357' name='L357'></a> 357 "  **sh**       shell a command" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L358' name='L358'></a> 358 "  **ev**       evaluate some code" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L359' name='L359'></a> 359 "  **quit**     exit phpdbg" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L360' name='L360'></a> 360 
+<a id='L361' name='L361'></a> 361 "Type **help &lt;command&gt;** or (**help alias**) to get detailed help on any of the above commands, "
+<a id='L362' name='L362'></a> 362 "for example **help list** or **h l**.  Note that help will also match partial commands if unique "
+<a id='L363' name='L363'></a> 363 "(and list out options if not unique), so **help clea** will give help on the **clean** command, "
+<a id='L364' name='L364'></a> 364 "but **help cl** will list the summary for **clean** and **clear**." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L365' name='L365'></a> 365 
+<a id='L366' name='L366'></a> 366 "Type **help aliases** to show a full alias list, including any registered phpdginit functions" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L367' name='L367'></a> 367 "Type **help syntax** for a general introduction to the command syntax." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L368' name='L368'></a> 368 "Type **help options** for a list of phpdbg command line options." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L369' name='L369'></a> 369 "Type **help phpdbginit** to show how to customise the debugger environment."
+<a id='L370' name='L370'></a> 370 <em class='brace'>}</em>,
+<a id='L371' name='L371'></a> 371 <em class='brace'>{</em>"options", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L372' name='L372'></a> 372 "Below are the command line options supported by phpdbg" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L373' name='L373'></a> 373                           <em class='comment'>/* note the extra 4 space index in because of the extra **** */</em>
+<a id='L374' name='L374'></a> 374 "**Command Line Options and Flags**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L375' name='L375'></a> 375 "  **Option**  **Example Argument**    **Description**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L376' name='L376'></a> 376 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L377' name='L377'></a> 377 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L378' name='L378'></a> 378 "  **-n**                          Disable default php.ini" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L379' name='L379'></a> 379 "  **-q**                          Suppress welcome banner" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L380' name='L380'></a> 380 "  **-v**                          Enable oplog output" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L381' name='L381'></a> 381 "  **-b**                          Disable colour" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L382' name='L382'></a> 382 "  **-i**      **-i**my.init           Set .phpdbginit file" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L383' name='L383'></a> 383 "  **-I**                          Ignore default .phpdbginit" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L384' name='L384'></a> 384 "  **-O**      **-O**my.oplog          Sets oplog output file" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L385' name='L385'></a> 385 "  **-r**                          Run execution context" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L386' name='L386'></a> 386 "  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L387' name='L387'></a> 387 "  **-e**                          Generate extended information for debugger/profiler" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L388' name='L388'></a> 388 "  **-E**                          Enable step through eval, careful!" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L389' name='L389'></a> 389 "  **-S**      **-S**cli               Override SAPI name, careful!" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L390' name='L390'></a> 390 "  **-l**      **-l**4000              Setup remote console ports" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L391' name='L391'></a> 391 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L392' name='L392'></a> 392 "  **-x**                          Enable xml output (instead of normal text output)" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L393' name='L393'></a> 393 "  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L394' name='L394'></a> 394 "  **-h**                          Print the help overview" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L395' name='L395'></a> 395 "  **-V**                          Print version number" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L396' name='L396'></a> 396 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
+<a id='L397' name='L397'></a> 397 "argument after it" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L398' name='L398'></a> 398 
+<a id='L399' name='L399'></a> 399 "**Remote Console Mode**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L400' name='L400'></a> 400 
+<a id='L401' name='L401'></a> 401 "This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
+<a id='L402' name='L402'></a> 402 "interface by default, and this can only be overridden by explicitly setting the remote console "
+<a id='L403' name='L403'></a> 403 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
+<a id='L404' name='L404'></a> 404 "will bind to all available interfaces.  You should be aware of the security implications of "
+<a id='L405' name='L405'></a> 405 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
+<a id='L406' name='L406'></a> 406 "interface/port." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L407' name='L407'></a> 407 
+<a id='L408' name='L408'></a> 408 "**Opcode output**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L409' name='L409'></a> 409 
+<a id='L410' name='L410'></a> 410 "Outputting opcodes requires that a file path is passed as last argument. Modes of execution:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L411' name='L411'></a> 411 "**-p** Outputs the main execution context" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L412' name='L412'></a> 412 "**-p* **Outputs all opcodes in the whole file (including classes and functions)" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L413' name='L413'></a> 413 "**-p=function_name** Outputs opcodes of a given function in the file" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L414' name='L414'></a> 414 "**-p=class_name::** Outputs opcodes of all the methods of a given class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L415' name='L415'></a> 415 "**-p=class_name::method** Outputs opcodes of a given method"
+<a id='L416' name='L416'></a> 416 <em class='brace'>}</em>,
+<a id='L417' name='L417'></a> 417 
+<a id='L418' name='L418'></a> 418 <em class='brace'>{</em>"phpdbginit", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L419' name='L419'></a> 419 "Phpdgb uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
+<a id='L420' name='L420'></a> 420 "for the file named **.phpdbginit** in the current working directory.  This location can be "
+<a id='L421' name='L421'></a> 421 "overridden on the command line using the **-i** switch (see **help options** for a more "
+<a id='L422' name='L422'></a> 422 "details)." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L423' name='L423'></a> 423 
+<a id='L424' name='L424'></a> 424 "Debugger scripts can also be executed using the **source** command." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L425' name='L425'></a> 425 
+<a id='L426' name='L426'></a> 426 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
+<a id='L427' name='L427'></a> 427 "code. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L428' name='L428'></a> 428 
+<a id='L429' name='L429'></a> 429 "Comment lines are prefixed by the **#** character.  Note that comments are only allowed in script "
+<a id='L430' name='L430'></a> 430 "files and not in interactive sessions." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L431' name='L431'></a> 431 
+<a id='L432' name='L432'></a> 432 "PHP code is delimited by the start and end escape tags **&lt;:** and **:&gt;**. PHP code can be used "
+<a id='L433' name='L433'></a> 433 "to define application context for a debugging session and also to extend the debugger by defining "
+<a id='L434' name='L434'></a> 434 "and **register** PHP functions as new commands." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L435' name='L435'></a> 435 
+<a id='L436' name='L436'></a> 436 "Also note that executing a **clear** command will cause the current **phpdbginit** to be reparsed "
+<a id='L437' name='L437'></a> 437 "/ reloaded."
+<a id='L438' name='L438'></a> 438 <em class='brace'>}</em>,
+<a id='L439' name='L439'></a> 439 
+<a id='L440' name='L440'></a> 440 <em class='brace'>{</em>"syntax", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L441' name='L441'></a> 441 "Commands start with a keyword, and some (**break**, "
+<a id='L442' name='L442'></a> 442 "**info**, **set**, **print** and **list**) may include a subcommand keyword.  All keywords are "
+<a id='L443' name='L443'></a> 443 "lower case but also have a single letter alias that may be used as an alternative to typing in the"
+<a id='L444' name='L444'></a> 444 "keyword in full.  Note some aliases are uppercase, and that keywords cannot be abbreviated other "
+<a id='L445' name='L445'></a> 445 "than by substitution by the alias." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L446' name='L446'></a> 446 
+<a id='L447' name='L447'></a> 447 "Some commands take an argument.  Arguments are typed according to their format:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L448' name='L448'></a> 448 "     *  **omitted**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L449' name='L449'></a> 449 "     *  **address**      **0x** followed by a hex string" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L450' name='L450'></a> 450 "     *  **number**       an optionally signed number" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L451' name='L451'></a> 451 "     *  **method**       a valid **Class::methodName** expression" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L452' name='L452'></a> 452 "     *  **func#op**      a valid **Function name** follow by # and an integer" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L453' name='L453'></a> 453 "     *  **method#op**    a valid **Class::methodName** follow by # and an integer" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L454' name='L454'></a> 454 "     *  **string**       a general string" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L455' name='L455'></a> 455 "     *  **function**     a valid **Function name**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L456' name='L456'></a> 456 "     *  **file:line**    a valid **filename** follow by : and an integer" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L457' name='L457'></a> 457 
+<a id='L458' name='L458'></a> 458 "In some cases the type of the argument enables the second keyword to be omitted." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L459' name='L459'></a> 459 
+<a id='L460' name='L460'></a> 460 "Type **help** for an overview of all commands and type **help &lt;command&gt;** to get detailed help "
+<a id='L461' name='L461'></a> 461 "on any specific command." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L462' name='L462'></a> 462 
+<a id='L463' name='L463'></a> 463 "**Valid Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L464' name='L464'></a> 464 
+<a id='L465' name='L465'></a> 465 "     $P quit" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L466' name='L466'></a> 466 "     $P q" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L467' name='L467'></a> 467 "     Quit the debugger" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L468' name='L468'></a> 468 
+<a id='L469' name='L469'></a> 469 "     $P ev $total[2]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L470' name='L470'></a> 470 "     Evaluate and print the variable $total[2] in the current stack frame" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L471' name='L471'></a> 471 "    " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L472' name='L472'></a> 472 "     $P break 200" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L473' name='L473'></a> 473 "     $P b my_source.php:200" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L474' name='L474'></a> 474 "     Break at line 200 in the current source and in file **my_source.php**. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L475' name='L475'></a> 475 
+<a id='L476' name='L476'></a> 476 "     $P b @ ClassX::get_args if $arg[0] == \"fred\"" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L477' name='L477'></a> 477 "     $P b ~ 3" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L478' name='L478'></a> 478 "     Break at ClassX::get_args() if $arg[0] == \"fred\" and delete breakpoint 3" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L479' name='L479'></a> 479 
+<a id='L480' name='L480'></a> 480 "**Examples of invalid commands**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L481' name='L481'></a> 481 
+<a id='L482' name='L482'></a> 482 "     $P #This is a comment" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L483' name='L483'></a> 483 "     Comments introduced by the **#** character are only allowed in **phpdbginit** script files."
+<a id='L484' name='L484'></a> 484 <em class='brace'>}</em>,
+<a id='L485' name='L485'></a> 485 
+<a id='L486' name='L486'></a> 486 <em class='comment'>/******************************** Help Codicils ********************************/</em>
+<a id='L487' name='L487'></a> 487 <em class='brace'>{</em>"aliases!", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L488' name='L488'></a> 488 "Note that aliases can be used for either command or sub-command keywords or both, so **info b** "
+<a id='L489' name='L489'></a> 489 "is a synomyn for **info break** and **l func** for **list func**, etc." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L490' name='L490'></a> 490 
+<a id='L491' name='L491'></a> 491 "Note that help will also accept any alias as a parameter and provide help on that command, for example **h p** will provide help on the print command."
+<a id='L492' name='L492'></a> 492 <em class='brace'>}</em>,
+<a id='L493' name='L493'></a> 493 
+<a id='L494' name='L494'></a> 494 <em class='brace'>{</em>"duplicate!", <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L495' name='L495'></a> 495 "Parameter is not unique. For detailed help select help on one of the above commands."
+<a id='L496' name='L496'></a> 496 <em class='brace'>}</em>,
+<a id='L497' name='L497'></a> 497 
+<a id='L498' name='L498'></a> 498 <em class='comment'>/******************************** Help on Commands ********************************/</em>
+<a id='L499' name='L499'></a> 499 <em class='brace'>{</em>"back",
+<a id='L500' name='L500'></a> 500 "Provide a formatted backtrace using the standard debug_backtrace() functionality.  An optional "
+<a id='L501' name='L501'></a> 501 "unsigned integer argument specifying the maximum number of frames to be traced; if omitted then "
+<a id='L502' name='L502'></a> 502 "a complete backtrace is given." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L503' name='L503'></a> 503 
+<a id='L504' name='L504'></a> 504 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L505' name='L505'></a> 505 "    $P back 5" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L506' name='L506'></a> 506 "    $P t " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L507' name='L507'></a> 507 " " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L508' name='L508'></a> 508 "A backtrace can be executed at any time during execution."
+<a id='L509' name='L509'></a> 509 <em class='brace'>}</em>,
+<a id='L510' name='L510'></a> 510 
+<a id='L511' name='L511'></a> 511 <em class='brace'>{</em>"break",
+<a id='L512' name='L512'></a> 512 "Breakpoints can be set at a range of targets within the execution environment.  Execution will "
+<a id='L513' name='L513'></a> 513 "be paused if the program flow hits a breakpoint.  The break target can be one of the following "
+<a id='L514' name='L514'></a> 514 "types:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L515' name='L515'></a> 515 
+<a id='L516' name='L516'></a> 516 "  **Target**   **Alias** **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L517' name='L517'></a> 517 "  **at**       **A**     specify breakpoint by location and condition" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L518' name='L518'></a> 518 "  **del**      **d**     delete breakpoint by breakpoint identifier number" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L519' name='L519'></a> 519 
+<a id='L520' name='L520'></a> 520 "**Break at** takes two arguments. The first is any valid target. The second "
+<a id='L521' name='L521'></a> 521 "is a valid PHP expression which will trigger the break in "
+<a id='L522' name='L522'></a> 522 "execution, if evaluated as true in a boolean context at the specified target." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L523' name='L523'></a> 523 
+<a id='L524' name='L524'></a> 524 "Note that breakpoints can also be disabled and re-enabled by the **set break** command." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L525' name='L525'></a> 525 
+<a id='L526' name='L526'></a> 526 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L527' name='L527'></a> 527 "    $P break test.php:100" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L528' name='L528'></a> 528 "    $P b test.php:100" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L529' name='L529'></a> 529 "    Break execution at line 100 of test.php" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L530' name='L530'></a> 530 
+<a id='L531' name='L531'></a> 531 "    $P break 200" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L532' name='L532'></a> 532 "    $P b 200" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L533' name='L533'></a> 533 "    Break execution at line 200 of the currently PHP script file" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L534' name='L534'></a> 534 
+<a id='L535' name='L535'></a> 535 "    $P break \\\\mynamespace\\\\my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L536' name='L536'></a> 536 "    $P b \\\\mynamespace\\\\my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L537' name='L537'></a> 537 "    Break execution on entry to \\\\mynamespace\\\\my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L538' name='L538'></a> 538 
+<a id='L539' name='L539'></a> 539 "    $P break classX::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L540' name='L540'></a> 540 "    $P b classX::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L541' name='L541'></a> 541 "    Break execution on entry to classX::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L542' name='L542'></a> 542 
+<a id='L543' name='L543'></a> 543 "    $P break 0x7ff68f570e08" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L544' name='L544'></a> 544 "    $P b 0x7ff68f570e08" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L545' name='L545'></a> 545 "    Break at the opline at the address 0x7ff68f570e08" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L546' name='L546'></a> 546 
+<a id='L547' name='L547'></a> 547 "    $P break my_function#14" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L548' name='L548'></a> 548 "    $P b my_function#14" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L549' name='L549'></a> 549 "    Break at the opline #14 of the function my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L550' name='L550'></a> 550 
+<a id='L551' name='L551'></a> 551 "    $P break \\\\my\\\\class::method#2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L552' name='L552'></a> 552 "    $P b \\\\my\\\\class::method#2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L553' name='L553'></a> 553 "    Break at the opline #2 of the method \\\\my\\\\class::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L554' name='L554'></a> 554 
+<a id='L555' name='L555'></a> 555 "    $P break test.php:#3" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L556' name='L556'></a> 556 "    $P b test.php:#3" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L557' name='L557'></a> 557 "    Break at opline #3 in test.php" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L558' name='L558'></a> 558 
+<a id='L559' name='L559'></a> 559 "    $P break if $cnt &gt; 10" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L560' name='L560'></a> 560 "    $P b if $cnt &gt; 10" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L561' name='L561'></a> 561 "    Break when the condition ($cnt &gt; 10) evaluates to true" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L562' name='L562'></a> 562 
+<a id='L563' name='L563'></a> 563 "    $P break at phpdbg::isGreat if $opt == 'S'" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L564' name='L564'></a> 564 "    $P break @ phpdbg::isGreat if $opt == 'S'" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L565' name='L565'></a> 565 "    Break at any opcode in phpdbg::isGreat when the condition ($opt == 'S') is true" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L566' name='L566'></a> 566 
+<a id='L567' name='L567'></a> 567 "    $P break at test.php:20 if !isset($x)" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L568' name='L568'></a> 568 "    Break at every opcode on line 20 of test.php when the condition evaluates to true" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L569' name='L569'></a> 569 
+<a id='L570' name='L570'></a> 570 "    $P break ZEND_ADD" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L571' name='L571'></a> 571 "    $P b ZEND_ADD" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L572' name='L572'></a> 572 "    Break on any occurrence of the opcode ZEND_ADD" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L573' name='L573'></a> 573 
+<a id='L574' name='L574'></a> 574 "    $P break del 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L575' name='L575'></a> 575 "    $P b ~ 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L576' name='L576'></a> 576 "    Remove breakpoint 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L577' name='L577'></a> 577 
+<a id='L578' name='L578'></a> 578 "Note: Conditional breaks are costly in terms of runtime overhead. Use them only when required "
+<a id='L579' name='L579'></a> 579 "as they significantly slow execution." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L580' name='L580'></a> 580 
+<a id='L581' name='L581'></a> 581 "Note: An address is only valid for the current compilation."
+<a id='L582' name='L582'></a> 582 <em class='brace'>}</em>,
+<a id='L583' name='L583'></a> 583 
+<a id='L584' name='L584'></a> 584 <em class='brace'>{</em>"clean",
+<a id='L585' name='L585'></a> 585 "Classes, constants or functions can only be declared once in PHP.  You may experience errors "
+<a id='L586' name='L586'></a> 586 "during a debug session if you attempt to recompile a PHP source.  The clean command clears "
+<a id='L587' name='L587'></a> 587 "the Zend runtime tables which holds the sets of compiled classes, constants and functions, "
+<a id='L588' name='L588'></a> 588 "releasing any associated storage back into the storage pool.  This enables recompilation to "
+<a id='L589' name='L589'></a> 589 "take place." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L590' name='L590'></a> 590 
+<a id='L591' name='L591'></a> 591 "Note that you cannot selectively trim any of these resource pools. You can only do a complete "
+<a id='L592' name='L592'></a> 592 "clean."
+<a id='L593' name='L593'></a> 593 <em class='brace'>}</em>,
+<a id='L594' name='L594'></a> 594 
+<a id='L595' name='L595'></a> 595 <em class='brace'>{</em>"clear",
+<a id='L596' name='L596'></a> 596 "Clearing breakpoints means you can once again run code without interruption." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L597' name='L597'></a> 597 
+<a id='L598' name='L598'></a> 598 "Note: use break delete N to clear a specific breakpoint." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L599' name='L599'></a> 599 
+<a id='L600' name='L600'></a> 600 "Note: if all breakpoints are cleared, then the PHP script will run until normal completion."
+<a id='L601' name='L601'></a> 601 <em class='brace'>}</em>,
+<a id='L602' name='L602'></a> 602 
+<a id='L603' name='L603'></a> 603 <em class='brace'>{</em>"ev",
+<a id='L604' name='L604'></a> 604 "The **ev** command takes a string expression which it evaluates and then displays. It "
+<a id='L605' name='L605'></a> 605 "evaluates in the context of the lowest (that is the executing) frame, unless this has first "
+<a id='L606' name='L606'></a> 606 "been explicitly changed by issuing a **frame** command. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L607' name='L607'></a> 607 
+<a id='L608' name='L608'></a> 608 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L609' name='L609'></a> 609 "    $P ev $variable" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L610' name='L610'></a> 610 "    Will print_r($variable) on the console, if it is defined" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L611' name='L611'></a> 611 
+<a id='L612' name='L612'></a> 612 "    $P ev $variable = \"Hello phpdbg :)\"" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L613' name='L613'></a> 613 "    Will set $variable in the current scope" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L614' name='L614'></a> 614 
+<a id='L615' name='L615'></a> 615 "Note that **ev** allows any valid PHP expression including assignments, function calls and "
+<a id='L616' name='L616'></a> 616 "other write statements.  This enables you to change the environment during execution, so care "
+<a id='L617' name='L617'></a> 617 "is needed here.  You can even call PHP functions which have breakpoints defined. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L618' name='L618'></a> 618 
+<a id='L619' name='L619'></a> 619 "Note: **ev** will always show the result, so do not prefix the code with **return**"
+<a id='L620' name='L620'></a> 620 <em class='brace'>}</em>,
+<a id='L621' name='L621'></a> 621 
+<a id='L622' name='L622'></a> 622 <em class='brace'>{</em>"exec",
+<a id='L623' name='L623'></a> 623 "The **exec** command sets the execution context, that is the script to be executed.  The "
+<a id='L624' name='L624'></a> 624 "execution context must be defined either by executing the **exec** command or by using the "
+<a id='L625' name='L625'></a> 625 "**-e** command line option." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L626' name='L626'></a> 626 
+<a id='L627' name='L627'></a> 627 "Note that the **exec** command also can be used to replace a previously defined execution "
+<a id='L628' name='L628'></a> 628 "context." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L629' name='L629'></a> 629 
+<a id='L630' name='L630'></a> 630 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L631' name='L631'></a> 631 
+<a id='L632' name='L632'></a> 632 "    $P exec /tmp/script.php" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L633' name='L633'></a> 633 "    $P e /tmp/script.php" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L634' name='L634'></a> 634 "    Set the execution context to **/tmp/script.php**"
+<a id='L635' name='L635'></a> 635 <em class='brace'>}</em>,
+<a id='L636' name='L636'></a> 636 
+<a id='L637' name='L637'></a> 637 <em class='comment'>//*********** Does F skip any breakpoints lower stack frames or only the current??</em>
+<a id='L638' name='L638'></a> 638 <em class='brace'>{</em>"finish",
+<a id='L639' name='L639'></a> 639 "The **finish** command causes control to be passed back to the vm, continuing execution.  Any "
+<a id='L640' name='L640'></a> 640 "breakpoints that are encountered within the current stack frame will be skipped.  Execution "
+<a id='L641' name='L641'></a> 641 "will then continue until the next breakpoint after leaving the stack frame or until "
+<a id='L642' name='L642'></a> 642 "completion of the script" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L643' name='L643'></a> 643 
+<a id='L644' name='L644'></a> 644 "Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
+<a id='L645' name='L645'></a> 645 "skipped. "<a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L646' name='L646'></a> 646 
+<a id='L647' name='L647'></a> 647 "Note **finish** will trigger a \"not executing\" error if not executing."
+<a id='L648' name='L648'></a> 648 <em class='brace'>}</em>,
+<a id='L649' name='L649'></a> 649 
+<a id='L650' name='L650'></a> 650 <em class='brace'>{</em>"frame",
+<a id='L651' name='L651'></a> 651 "The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
+<a id='L652' name='L652'></a> 652 "If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+<a id='L653' name='L653'></a> 653 "This can be used to allowing access to the variables in a higher stack frame than that currently being executed." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L654' name='L654'></a> 654 
+<a id='L655' name='L655'></a> 655 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L656' name='L656'></a> 656 "    $P frame 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L657' name='L657'></a> 657 "    $P ev $count" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L658' name='L658'></a> 658 "    Go to frame 2 and print out variable **$count** in that frame" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L659' name='L659'></a> 659 
+<a id='L660' name='L660'></a> 660 "Note that this frame scope is discarded when execution continues, with the execution frame "
+<a id='L661' name='L661'></a> 661 "then reset to the lowest executiong frame."
+<a id='L662' name='L662'></a> 662 <em class='brace'>}</em>,
+<a id='L663' name='L663'></a> 663 
+<a id='L664' name='L664'></a> 664 <em class='brace'>{</em>"info",
+<a id='L665' name='L665'></a> 665 "**info** commands provide quick access to various types of information about the PHP environment" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L666' name='L666'></a> 666 "By default general information about environment and PHP build is shown." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L667' name='L667'></a> 667 "Specific info commands are show below:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L668' name='L668'></a> 668 
+<a id='L669' name='L669'></a> 669 "  **Target**   **Alias**  **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L670' name='L670'></a> 670 "  **break**      **b**      show current breakpoints" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L671' name='L671'></a> 671 "  **files**      **F**      show included files" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L672' name='L672'></a> 672 "  **classes**    **c**      show loaded classes" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L673' name='L673'></a> 673 "  **funcs**      **f**      show loaded functions" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L674' name='L674'></a> 674 "  **error**      **e**      show last error" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L675' name='L675'></a> 675 "  **constants**  **d**      show user-defined constants" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L676' name='L676'></a> 676 "  **vars**       **v**      show active variables" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L677' name='L677'></a> 677 "  **globals**    **g**      show superglobal variables" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L678' name='L678'></a> 678 "  **literal**    **l**      show active literal constants" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L679' name='L679'></a> 679 "  **memory**     **m**      show memory manager stats"
+<a id='L680' name='L680'></a> 680 <em class='brace'>}</em>,
+<a id='L681' name='L681'></a> 681 
+<a id='L682' name='L682'></a> 682 <em class='comment'>// ******** same issue about breakpoints in called frames</em>
+<a id='L683' name='L683'></a> 683 <em class='brace'>{</em>"leave",
+<a id='L684' name='L684'></a> 684 "The **leave** command causes control to be passed back to the vm, continuing execution.  Any "
+<a id='L685' name='L685'></a> 685 "breakpoints that are encountered within the current stack frame will be skipped.  In effect a "
+<a id='L686' name='L686'></a> 686 "temporary breakpoint is associated with any return opcode, so that a break in execution occurs "
+<a id='L687' name='L687'></a> 687 "before leaving the current stack frame. This allows inspection / modification of any frame "
+<a id='L688' name='L688'></a> 688 "variables including the return value before it is returned" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L689' name='L689'></a> 689 
+<a id='L690' name='L690'></a> 690 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L691' name='L691'></a> 691 
+<a id='L692' name='L692'></a> 692 "    $P leave" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L693' name='L693'></a> 693 "    $P L" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L694' name='L694'></a> 694 
+<a id='L695' name='L695'></a> 695 "Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
+<a id='L696' name='L696'></a> 696 "skipped. "<a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L697' name='L697'></a> 697 
+<a id='L698' name='L698'></a> 698 "Note **leave** will trigger a \"not executing\" error if not executing."
+<a id='L699' name='L699'></a> 699 <em class='brace'>}</em>,
+<a id='L700' name='L700'></a> 700 
+<a id='L701' name='L701'></a> 701 <em class='brace'>{</em>"list",
+<a id='L702' name='L702'></a> 702 "The list command displays source code for the given argument.  The target type is specficied by "
+<a id='L703' name='L703'></a> 703 "a second subcommand keyword:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L704' name='L704'></a> 704 
+<a id='L705' name='L705'></a> 705 "  **Type**     **Alias**  **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L706' name='L706'></a> 706 "  **lines**    **l**      List N lines from the current execution point" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L707' name='L707'></a> 707 "  **func**     **f**      List the complete source for a specified function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L708' name='L708'></a> 708 "  **method**   **m**      List the complete source for a specified class::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L709' name='L709'></a> 709 "  **class**    **c**      List the complete source for a specified class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L710' name='L710'></a> 710 
+<a id='L711' name='L711'></a> 711 "Note that the context of **lines**, **func** and **method** can be determined by parsing the "
+<a id='L712' name='L712'></a> 712 "argument, so these subcommands are optional.  However, you must specify the **class** keyword "
+<a id='L713' name='L713'></a> 713 "to list off a class." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L714' name='L714'></a> 714 
+<a id='L715' name='L715'></a> 715 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L716' name='L716'></a> 716 "    $P list 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L717' name='L717'></a> 717 "    $P l l 2" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L718' name='L718'></a> 718 "    List the next 2 lines from the current file" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L719' name='L719'></a> 719 
+<a id='L720' name='L720'></a> 720 "    $P list my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L721' name='L721'></a> 721 "    $P l f my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L722' name='L722'></a> 722 "    List the source of the function **my_function**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L723' name='L723'></a> 723 
+<a id='L724' name='L724'></a> 724 <em class='comment'>//************ ????</em>
+<a id='L725' name='L725'></a> 725 "    $P list func .mine" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L726' name='L726'></a> 726 "    $P l f .mine" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L727' name='L727'></a> 727 "    List the source of the method **mine** from the active class in scope" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L728' name='L728'></a> 728 
+<a id='L729' name='L729'></a> 729 "    $P list m my::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L730' name='L730'></a> 730 "    $P l my::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L731' name='L731'></a> 731 "    List the source of **my::method**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L732' name='L732'></a> 732 
+<a id='L733' name='L733'></a> 733 "    $P list c myClass" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L734' name='L734'></a> 734 "    $P l c myClass" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L735' name='L735'></a> 735 "    List the source of **myClass**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L736' name='L736'></a> 736 
+<a id='L737' name='L737'></a> 737 "Note that functions and classes can only be listed if the corresponding classes and functions "
+<a id='L738' name='L738'></a> 738 "table in the Zend executor has a corresponding entry.  You can use the compile command to "
+<a id='L739' name='L739'></a> 739 "populate these tables for a given execution context."
+<a id='L740' name='L740'></a> 740 <em class='brace'>}</em>,
+<a id='L741' name='L741'></a> 741 
+<a id='L742' name='L742'></a> 742 <em class='brace'>{</em>"continue",
+<a id='L743' name='L743'></a> 743 "Continue with execution after hitting a break or watchpoint" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L744' name='L744'></a> 744 
+<a id='L745' name='L745'></a> 745 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L746' name='L746'></a> 746 "    $P continue" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L747' name='L747'></a> 747 "    $P c" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L748' name='L748'></a> 748 "    Continue executing until the next break or watchpoint" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L749' name='L749'></a> 749 
+<a id='L750' name='L750'></a> 750 "Note **continue** will trigger a \"not running\" error if not executing."
+<a id='L751' name='L751'></a> 751 <em class='brace'>}</em>,
+<a id='L752' name='L752'></a> 752 
+<a id='L753' name='L753'></a> 753 <em class='brace'>{</em>"print",
+<a id='L754' name='L754'></a> 754 "By default, print will show the opcodes of the current execution context." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L755' name='L755'></a> 755 "Other printing commands give access to instruction information." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L756' name='L756'></a> 756 "Specific printers loaded are show below:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L757' name='L757'></a> 757 
+<a id='L758' name='L758'></a> 758 "  **Type**    **Alias**  **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L759' name='L759'></a> 759 "  **exec**    **e**      print out the instructions in the execution context" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L760' name='L760'></a> 760 "  **opline**  **o**      print out the instruction in the current opline" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L761' name='L761'></a> 761 "  **class**   **c**      print out the instructions in the specified class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L762' name='L762'></a> 762 "  **method**  **m**      print out the instructions in the specified method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L763' name='L763'></a> 763 "  **func**    **f**      print out the instructions in the specified function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L764' name='L764'></a> 764 "  **stack**   **s**      print out the instructions in the current stack" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L765' name='L765'></a> 765 
+<a id='L766' name='L766'></a> 766 "In case passed argument does not match a specific printing command, it will treat it as function or method name and print its opcodes" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L767' name='L767'></a> 767 
+<a id='L768' name='L768'></a> 768 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L769' name='L769'></a> 769 "    $P print class \\\\my\\\\class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L770' name='L770'></a> 770 "    $P p c \\\\my\\\\class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L771' name='L771'></a> 771 "    Print the instructions for the methods in \\\\my\\\\class" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L772' name='L772'></a> 772 
+<a id='L773' name='L773'></a> 773 "    $P print method \\\\my\\\\class::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L774' name='L774'></a> 774 "    $P p m \\\\my\\\\class::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L775' name='L775'></a> 775 "    Print the instructions for \\\\my\\\\class::method" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L776' name='L776'></a> 776 
+<a id='L777' name='L777'></a> 777 "    $P print func .getSomething" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L778' name='L778'></a> 778 "    $P p f .getSomething" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L779' name='L779'></a> 779 <em class='comment'>//************* Check this local method scope</em>
+<a id='L780' name='L780'></a> 780 "    Print the instructions for ::getSomething in the active scope" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L781' name='L781'></a> 781 
+<a id='L782' name='L782'></a> 782 "    $P print func my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L783' name='L783'></a> 783 "    $P p f my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L784' name='L784'></a> 784 "    Print the instructions for the global function my_function" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L785' name='L785'></a> 785 
+<a id='L786' name='L786'></a> 786 "    $P print opline" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L787' name='L787'></a> 787 "    $P p o" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L788' name='L788'></a> 788 "    Print the instruction for the current opline" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L789' name='L789'></a> 789 
+<a id='L790' name='L790'></a> 790 "    $P print exec" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L791' name='L791'></a> 791 "    $P p e" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L792' name='L792'></a> 792 "    Print the instructions for the execution context" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L793' name='L793'></a> 793 
+<a id='L794' name='L794'></a> 794 "    $P print stack" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L795' name='L795'></a> 795 "    $P p s" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L796' name='L796'></a> 796 "    Print the instructions for the current stack"
+<a id='L797' name='L797'></a> 797 <em class='brace'>}</em>,
+<a id='L798' name='L798'></a> 798 
+<a id='L799' name='L799'></a> 799 <em class='brace'>{</em>"register",
+<a id='L800' name='L800'></a> 800 <em class='comment'>//******* Needs a general explanation of the how registered functions work</em>
+<a id='L801' name='L801'></a> 801 "Register any global function for use as a command in phpdbg console" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L802' name='L802'></a> 802 
+<a id='L803' name='L803'></a> 803 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L804' name='L804'></a> 804 "    $P register scandir" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L805' name='L805'></a> 805 "    $P R scandir" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L806' name='L806'></a> 806 "    Will register the scandir function for use in phpdbg" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L807' name='L807'></a> 807 
+<a id='L808' name='L808'></a> 808 "Note: arguments passed as strings, return (if present) print_r'd on console"
+<a id='L809' name='L809'></a> 809 <em class='brace'>}</em>,
+<a id='L810' name='L810'></a> 810 
+<a id='L811' name='L811'></a> 811 <em class='brace'>{</em>"run",
+<a id='L812' name='L812'></a> 812 "Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
+<a id='L813' name='L813'></a> 813 "or completion of the script. Add parameters you want to use as $argv"
+<a id='L814' name='L814'></a> 814 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L815' name='L815'></a> 815 "    $P run" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L816' name='L816'></a> 816 "    $P r" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L817' name='L817'></a> 817 "    Will cause execution of the context, if it is set" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L818' name='L818'></a> 818 "    $P r test" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L819' name='L819'></a> 819 "    Will execute with $argv[1] == \"test\"" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L820' name='L820'></a> 820 
+<a id='L821' name='L821'></a> 821 "Note that the execution context must be set. If not previously compiled, then the script will "
+<a id='L822' name='L822'></a> 822 "be compiled before execution." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L823' name='L823'></a> 823 
+<a id='L824' name='L824'></a> 824 "Note that attempting to run a script that is already executing will result in an \"execution "
+<a id='L825' name='L825'></a> 825 "in progress\" error."
+<a id='L826' name='L826'></a> 826 <em class='brace'>}</em>,
+<a id='L827' name='L827'></a> 827 
+<a id='L828' name='L828'></a> 828 <em class='brace'>{</em>"set",
+<a id='L829' name='L829'></a> 829 "The **set** command is used to configure how phpdbg looks and behaves.  Specific set commands "
+<a id='L830' name='L830'></a> 830 "are as follows:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L831' name='L831'></a> 831 
+<a id='L832' name='L832'></a> 832 "   **Type**    **Alias**    **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L833' name='L833'></a> 833 "   **prompt**     **p**     set the prompt" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L834' name='L834'></a> 834 "   **color**      **c**     set color  &lt;element&gt; &lt;color&gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L835' name='L835'></a> 835 "   **colors**     **C**     set colors [&lt;on|off&gt;]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L836' name='L836'></a> 836 "   **oplog**      **O**     set oplog [output]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L837' name='L837'></a> 837 "   **break**      **b**     set break **id** &lt;on|off&gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L838' name='L838'></a> 838 "   **breaks**     **B**     set breaks [&lt;on|off&gt;]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L839' name='L839'></a> 839 "   **quiet**      **q**     set quiet [&lt;on|off&gt;]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L840' name='L840'></a> 840 "   **stepping**   **s**     set stepping [&lt;opcode|line&gt;]" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L841' name='L841'></a> 841 "   **refcount**   **r**     set refcount [&lt;on|off&gt;] " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L842' name='L842'></a> 842 
+<a id='L843' name='L843'></a> 843 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "
+<a id='L844' name='L844'></a> 844 "**cyan** and **black**.  All colours except **none** can be followed by an optional "
+<a id='L845' name='L845'></a> 845 "**-bold** or **-underline** qualifier." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L846' name='L846'></a> 846 
+<a id='L847' name='L847'></a> 847 "Color elements can be one of **prompt**, **notice**, or **error**." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L848' name='L848'></a> 848 
+<a id='L849' name='L849'></a> 849 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L850' name='L850'></a> 850 "     $P S C on" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L851' name='L851'></a> 851 "     Set colors on" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L852' name='L852'></a> 852 
+<a id='L853' name='L853'></a> 853 "     $P set p &gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L854' name='L854'></a> 854 "     $P set color prompt white-bold" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L855' name='L855'></a> 855 "     Set the prompt to a bold &gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L856' name='L856'></a> 856 
+<a id='L857' name='L857'></a> 857 "     $P S c error red-bold" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L858' name='L858'></a> 858 "     Use red bold for errors" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L859' name='L859'></a> 859 
+<a id='L860' name='L860'></a> 860 "     $P S refcount on" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L861' name='L861'></a> 861 "     Enable refcount display when hitting watchpoints" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L862' name='L862'></a> 862 
+<a id='L863' name='L863'></a> 863 "     $P S b 4 off" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L864' name='L864'></a> 864 "     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L865' name='L865'></a> 865 <em class='comment'>//*********** check oplog syntax</em>
+<a id='L866' name='L866'></a> 866 <em class='brace'>}</em>,
+<a id='L867' name='L867'></a> 867 
+<a id='L868' name='L868'></a> 868 <em class='brace'>{</em>"sh",
+<a id='L869' name='L869'></a> 869 "Direct access to shell commands saves having to switch windows/consoles" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L870' name='L870'></a> 870 
+<a id='L871' name='L871'></a> 871 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L872' name='L872'></a> 872 "    $P sh ls /usr/src/php-src" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L873' name='L873'></a> 873 "    Will execute ls /usr/src/php-src, displaying the output in the console"
+<a id='L874' name='L874'></a> 874 <em class='comment'>//*********** what does this mean????Note: read only commands please!</em>
+<a id='L875' name='L875'></a> 875 <em class='brace'>}</em>,
+<a id='L876' name='L876'></a> 876 
+<a id='L877' name='L877'></a> 877 <em class='brace'>{</em>"source",
+<a id='L878' name='L878'></a> 878 "Sourcing a **phpdbginit** script during your debugging session might save some time." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L879' name='L879'></a> 879 
+<a id='L880' name='L880'></a> 880 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L881' name='L881'></a> 881 
+<a id='L882' name='L882'></a> 882 "    $P source /my/init" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L883' name='L883'></a> 883 "    $P &lt; /my/init" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L884' name='L884'></a> 884 "    Will execute the phpdbginit file at /my/init" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L885' name='L885'></a> 885 <em class='brace'>}</em>,
+<a id='L886' name='L886'></a> 886 
+<a id='L887' name='L887'></a> 887 <em class='brace'>{</em>"export",
+<a id='L888' name='L888'></a> 888 "Exporting breakpoints allows you to share, and or save your current debugging session" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L889' name='L889'></a> 889 
+<a id='L890' name='L890'></a> 890 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L891' name='L891'></a> 891 
+<a id='L892' name='L892'></a> 892 "    $P export /my/exports" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L893' name='L893'></a> 893 "    $P &gt; /my/exports" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L894' name='L894'></a> 894 "    Will export all breakpoints to /my/exports" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L895' name='L895'></a> 895 <em class='brace'>}</em>,
+<a id='L896' name='L896'></a> 896 
+<a id='L897' name='L897'></a> 897 <em class='brace'>{</em>"step",
+<a id='L898' name='L898'></a> 898 "Execute opcodes until next line" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L899' name='L899'></a> 899 
+<a id='L900' name='L900'></a> 900 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L901' name='L901'></a> 901 
+<a id='L902' name='L902'></a> 902 "    $P s" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L903' name='L903'></a> 903 "    Will continue and break again in the next encountered line" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L904' name='L904'></a> 904 <em class='brace'>}</em>,
+<a id='L905' name='L905'></a> 905 <em class='brace'>{</em>"next",
+<a id='L906' name='L906'></a> 906 "The **next** command causes control to be passed back to the vm, continuing execution. Any "
+<a id='L907' name='L907'></a> 907 "breakpoints that are encountered before the next source line will be skipped. Execution will"
+<a id='L908' name='L908'></a> 908 "be stopped when that line is left." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L909' name='L909'></a> 909 
+<a id='L910' name='L910'></a> 910 "Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "<a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L911' name='L911'></a> 911 
+<a id='L912' name='L912'></a> 912 "Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+<a id='L913' name='L913'></a> 913 "skipped. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L914' name='L914'></a> 914 
+<a id='L915' name='L915'></a> 915 "Note **next** will trigger a \"not executing\" error if not executing."
+<a id='L916' name='L916'></a> 916 
+<a id='L917' name='L917'></a> 917 <em class='brace'>}</em>,
+<a id='L918' name='L918'></a> 918 <em class='brace'>{</em>"until",
+<a id='L919' name='L919'></a> 919 "The **until** command causes control to be passed back to the vm, continuing execution. Any "
+<a id='L920' name='L920'></a> 920 "breakpoints that are encountered before the next source line will be skipped. Execution "
+<a id='L921' name='L921'></a> 921 "will then continue until the next breakpoint or completion of the script" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L922' name='L922'></a> 922 
+<a id='L923' name='L923'></a> 923 "Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "<a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L924' name='L924'></a> 924 
+<a id='L925' name='L925'></a> 925 "Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+<a id='L926' name='L926'></a> 926 "skipped. " <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L927' name='L927'></a> 927 
+<a id='L928' name='L928'></a> 928 "Note **until** will trigger a \"not executing\" error if not executing."
+<a id='L929' name='L929'></a> 929 
+<a id='L930' name='L930'></a> 930 <em class='brace'>}</em>,
+<a id='L931' name='L931'></a> 931 <em class='brace'>{</em>"watch",
+<a id='L932' name='L932'></a> 932 "Sets watchpoints on variables as long as they are defined" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L933' name='L933'></a> 933 "Passing no parameter to **watch**, lists all actually active watchpoints" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L934' name='L934'></a> 934 
+<a id='L935' name='L935'></a> 935 "**Format for $variable**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L936' name='L936'></a> 936 "   **$var**      Variable $var" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L937' name='L937'></a> 937 "   **$var[]**    All array elements of $var" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L938' name='L938'></a> 938 "   **$var-&gt;**    All properties of $var" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L939' name='L939'></a> 939 "   **$var-&gt;a**   Property $var-&gt;a" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L940' name='L940'></a> 940 "   **$var[b]**   Array element with key b in array $var" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L941' name='L941'></a> 941 
+<a id='L942' name='L942'></a> 942 "Subcommands of **watch**:" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L943' name='L943'></a> 943 
+<a id='L944' name='L944'></a> 944 "   **Type**     **Alias**      **Purpose**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L945' name='L945'></a> 945 "   **array**       **a**       Sets watchpoint on array/object to observe if an entry is added or removed" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L946' name='L946'></a> 946 "   **recursive**   **r**       Watches variable recursively and automatically adds watchpoints if some entry is added to an array/object" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L947' name='L947'></a> 947 "   **delete**      **d**       Removes watchpoint" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L948' name='L948'></a> 948 
+<a id='L949' name='L949'></a> 949 "Note when **recursive** watchpoints are removed, watchpoints on all the children are removed too" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L950' name='L950'></a> 950 
+<a id='L951' name='L951'></a> 951 "**Examples**" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L952' name='L952'></a> 952 "     $P watch" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L953' name='L953'></a> 953 "     List currently active watchpoints" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L954' name='L954'></a> 954 
+<a id='L955' name='L955'></a> 955 "     $P watch $array" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L956' name='L956'></a> 956 "     $P w $array" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L957' name='L957'></a> 957 "     Set watchpoint on $array" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L958' name='L958'></a> 958 
+<a id='L959' name='L959'></a> 959 "     $P watch recursive $obj-&gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L960' name='L960'></a> 960 "     $P w r $obj-&gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L961' name='L961'></a> 961 "     Set recursive watchpoint on $obj-&gt;" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L962' name='L962'></a> 962 
+<a id='L963' name='L963'></a> 963 "     $P watch delete $obj-&gt;a" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L964' name='L964'></a> 964 "     $P w d $obj-&gt;a" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L965' name='L965'></a> 965 "     Remove watchpoint $obj-&gt;a" <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a> <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L966' name='L966'></a> 966 
+<a id='L967' name='L967'></a> 967 "Technical note: If using this feature with a debugger, you will get many segmentation faults, each time when a memory page containing a watched address is hit." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L968' name='L968'></a> 968 "                You then you can continue, phpdbg will remove the write protection, so that the program can continue." <a href='../D/1314.html' title='Multiple defined in 2 places.'>CR</a>
+<a id='L969' name='L969'></a> 969 "                If phpdbg could not handle that segfault, the same segfault is triggered again and this time phpdbg will abort."
+<a id='L970' name='L970'></a> 970 <em class='brace'>}</em>,
+<a id='L971' name='L971'></a> 971 <em class='brace'>{</em><a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> <em class='comment'>/* end of table marker */</em><em class='brace'>}</em>
+<a id='L972' name='L972'></a> 972 <em class='brace'>}</em>;  <em class='comment'>/* }}} */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L44'>[^]</a><a href='#L262'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

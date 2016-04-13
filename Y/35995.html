@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>shared_segment</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/828.html#L38'>shared_segment</a>     38 ext/opcache/shared_alloc_mmap.c 	zend_shared_segment *shared_segment;</span>
+<span class='curline'><a href='../S/828.html#L46'>shared_segment</a>     46 ext/opcache/shared_alloc_mmap.c 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));</span>
+<span class='curline'><a href='../S/828.html#L47'>shared_segment</a>     47 ext/opcache/shared_alloc_mmap.c 	(*shared_segments_p)[0] = shared_segment;</span>
+<span class='curline'><a href='../S/828.html#L56'>shared_segment</a>     56 ext/opcache/shared_alloc_mmap.c 	shared_segment-&gt;p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);</span>
+<span class='curline'><a href='../S/828.html#L57'>shared_segment</a>     57 ext/opcache/shared_alloc_mmap.c 	if (shared_segment-&gt;p != MAP_FAILED) {</span>
+<span class='curline'><a href='../S/828.html#L58'>shared_segment</a>     58 ext/opcache/shared_alloc_mmap.c 		shared_segment-&gt;pos = 0;</span>
+<span class='curline'><a href='../S/828.html#L59'>shared_segment</a>     59 ext/opcache/shared_alloc_mmap.c 		shared_segment-&gt;size = requested_size;</span>
+<span class='curline'><a href='../S/828.html#L65'>shared_segment</a>     65 ext/opcache/shared_alloc_mmap.c 	shared_segment-&gt;p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);</span>
+<span class='curline'><a href='../S/828.html#L66'>shared_segment</a>     66 ext/opcache/shared_alloc_mmap.c 	if (shared_segment-&gt;p == MAP_FAILED) {</span>
+<span class='curline'><a href='../S/828.html#L71'>shared_segment</a>     71 ext/opcache/shared_alloc_mmap.c 	shared_segment-&gt;pos = 0;</span>
+<span class='curline'><a href='../S/828.html#L72'>shared_segment</a>     72 ext/opcache/shared_alloc_mmap.c 	shared_segment-&gt;size = requested_size;</span>
+<span class='curline'><a href='../S/828.html#L77'>shared_segment</a>     77 ext/opcache/shared_alloc_mmap.c static int detach_segment(zend_shared_segment *shared_segment)</span>
+<span class='curline'><a href='../S/828.html#L79'>shared_segment</a>     79 ext/opcache/shared_alloc_mmap.c 	munmap(shared_segment-&gt;p, shared_segment-&gt;size);</span>
+<span class='curline'><a href='../S/829.html#L41'>shared_segment</a>     41 ext/opcache/shared_alloc_posix.c 	zend_shared_segment_posix *shared_segment;</span>
+<span class='curline'><a href='../S/829.html#L50'>shared_segment</a>     50 ext/opcache/shared_alloc_posix.c 	shared_segment = (zend_shared_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));</span>
+<span class='curline'><a href='../S/829.html#L51'>shared_segment</a>     51 ext/opcache/shared_alloc_posix.c 	(*shared_segments_p)[0] = shared_segment;</span>
+<span class='curline'><a href='../S/829.html#L54'>shared_segment</a>     54 ext/opcache/shared_alloc_posix.c 	shared_segment-&gt;shm_fd = shm_open(shared_segment_name, O_RDWR|O_CREAT|O_TRUNC, 0600);</span>
+<span class='curline'><a href='../S/829.html#L55'>shared_segment</a>     55 ext/opcache/shared_alloc_posix.c 	if (shared_segment-&gt;shm_fd == -1) {</span>
+<span class='curline'><a href='../S/829.html#L60'>shared_segment</a>     60 ext/opcache/shared_alloc_posix.c 	if (ftruncate(shared_segment-&gt;shm_fd, requested_size) != 0) {</span>
+<span class='curline'><a href='../S/829.html#L66'>shared_segment</a>     66 ext/opcache/shared_alloc_posix.c 	shared_segment-&gt;common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment-&gt;shm_fd, 0);</span>
+<span class='curline'><a href='../S/829.html#L67'>shared_segment</a>     67 ext/opcache/shared_alloc_posix.c 	if (shared_segment-&gt;common.p == MAP_FAILED) {</span>
+<span class='curline'><a href='../S/829.html#L74'>shared_segment</a>     74 ext/opcache/shared_alloc_posix.c 	shared_segment-&gt;common.pos = 0;</span>
+<span class='curline'><a href='../S/829.html#L75'>shared_segment</a>     75 ext/opcache/shared_alloc_posix.c 	shared_segment-&gt;common.size = requested_size;</span>
+<span class='curline'><a href='../S/829.html#L80'>shared_segment</a>     80 ext/opcache/shared_alloc_posix.c static int detach_segment(zend_shared_segment_posix *shared_segment)</span>
+<span class='curline'><a href='../S/829.html#L82'>shared_segment</a>     82 ext/opcache/shared_alloc_posix.c 	munmap(shared_segment-&gt;common.p, shared_segment-&gt;common.size);</span>
+<span class='curline'><a href='../S/829.html#L83'>shared_segment</a>     83 ext/opcache/shared_alloc_posix.c 	close(shared_segment-&gt;shm_fd);</span>
+<span class='curline'><a href='../S/830.html#L128'>shared_segment</a>    128 ext/opcache/shared_alloc_shm.c static int detach_segment(zend_shared_segment_shm *shared_segment)</span>
+<span class='curline'><a href='../S/830.html#L130'>shared_segment</a>    130 ext/opcache/shared_alloc_shm.c 	shmdt(shared_segment-&gt;common.p);</span>
+<span class='curline'><a href='../S/831.html#L201'>shared_segment</a>    201 ext/opcache/shared_alloc_win32.c 	zend_shared_segment *shared_segment;</span>
+<span class='curline'><a href='../S/831.html#L261'>shared_segment</a>    261 ext/opcache/shared_alloc_win32.c 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));</span>
+<span class='curline'><a href='../S/831.html#L262'>shared_segment</a>    262 ext/opcache/shared_alloc_win32.c 	(*shared_segments_p)[0] = shared_segment;</span>
+<span class='curline'><a href='../S/831.html#L294'>shared_segment</a>    294 ext/opcache/shared_alloc_win32.c 		shared_segment-&gt;p = mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, *wanted_mapping_base);</span>
+<span class='curline'><a href='../S/831.html#L321'>shared_segment</a>    321 ext/opcache/shared_alloc_win32.c 	shared_segment-&gt;pos = 0;</span>
+<span class='curline'><a href='../S/831.html#L322'>shared_segment</a>    322 ext/opcache/shared_alloc_win32.c 	shared_segment-&gt;size = requested_size;</span>
+<span class='curline'><a href='../S/831.html#L329'>shared_segment</a>    329 ext/opcache/shared_alloc_win32.c static int detach_segment(zend_shared_segment *shared_segment)</span>
+<span class='curline'><a href='../S/848.html#L80'>shared_segment</a>     80 ext/opcache/zend_shared_alloc.h typedef int (*detach_segment_t)(zend_shared_segment *shared_segment);</span>
+</pre>
+</body>
+</html>

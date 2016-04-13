@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>Zend/zend_iterators.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1742.html'>Zend</a>/zend_iterators.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='1627.html#L40' title='Included from 40 in Zend/zend.h.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | Zend Engine                                                          |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 2.00 of the Zend license,     |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.zend.com/license/2_00.txt.                                |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the Zend license and are unable to  |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@zend.com so we can mail you a copy immediately.              |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Wez Furlong &lt;wez@thebrainroom.com&gt;                           |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |         Marcus Boerger &lt;helly@php.net&gt;                               |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>*/</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='comment'>/* $Id$ */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='comment'>/* These iterators were designed to operate within the foreach()</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * structures provided by the engine, but could be extended for use</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * with other iterative engine opcodes.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * These methods have similar semantics to the zend_hash API functions</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * with similar names.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * */</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/1684.html#L57' title='Defined at 57 in Zend/zend_iterators.h.'>_zend_object_iterator</a> <a href='../R/30939.html' title='Multiple referred from 251 places.'>zend_object_iterator</a>;
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _zend_object_iterator_funcs <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32         <em class='comment'>/* release all resources associated with this iterator instance */</em>
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>void</strong> (*<a href='../D/21289.html' title='Multiple defined in 3 places.'>dtor</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35         <em class='comment'>/* check for end of iteration (FAILURE or SUCCESS if data is valid) */</em>
+<a id='L36' name='L36'></a>  36         <strong class='reserved'>int</strong> (*<a href='../Y/40050.html' title='Multiple used in 128 places.'>valid</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38         <em class='comment'>/* fetch the item data for the current element */</em>
+<a id='L39' name='L39'></a>  39         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *(*<a href='../Y/19168.html' title='Multiple used in 19 places.'>get_current_data</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41         <em class='comment'>/* fetch the key for the current element (optional, may be NULL). The key</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'>         * should be written into the provided zval* using the ZVAL_* macros. If</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'>         * this handler is not provided auto-incrementing integer keys will be</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'>         * used. */</em>
+<a id='L45' name='L45'></a>  45         <strong class='reserved'>void</strong> (*<a href='../Y/19169.html' title='Multiple used in 33 places.'>get_current_key</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>);
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <em class='comment'>/* step forwards to next element */</em>
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>void</strong> (*<a href='../Y/26812.html' title='Multiple used in 16 places.'>move_forward</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         <em class='comment'>/* rewind to start of data (optional, may be NULL) */</em>
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>void</strong> (*<a href='../Y/34892.html' title='Multiple used in 100 places.'>rewind</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53         <em class='comment'>/* invalidate current value/key (optional, may be NULL) */</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>void</strong> (*<a href='../Y/23539.html' title='Multiple used in 3 places.'>invalidate_current</a>)(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em> <a href='../R/30940.html' title='Multiple referred from 22 places.'>zend_object_iterator_funcs</a>;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>struct</strong> <a href='../S/1684.html#L29' title='Referred from 29 in Zend/zend_iterators.h.'>_zend_object_iterator</a> <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> <a href='../Y/37422.html' title='Multiple used in 412 places.'>std</a>;
+<a id='L59' name='L59'></a>  59         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L60' name='L60'></a>  60         <a href='../S/1684.html#L55' title='Defined at 55 in Zend/zend_iterators.h.'>zend_object_iterator_funcs</a> *<a href='../Y/18768.html' title='Multiple used in 221 places.'>funcs</a>;
+<a id='L61' name='L61'></a>  61         <a href='../D/34840.html' title='Multiple defined in 2 places.'>zend_ulong</a> <a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>; <em class='comment'>/* private to fe_reset/fe_fetch opcodes */</em>
+<a id='L62' name='L62'></a>  62 <em class='brace'>}</em>;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _zend_class_iterator_funcs <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65         <a href='../S/1684.html#L55' title='Defined at 55 in Zend/zend_iterators.h.'>zend_object_iterator_funcs</a>  *<a href='../Y/18768.html' title='Multiple used in 221 places.'>funcs</a>;
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43935.html' title='Multiple used in 6 places.'>zf_new_iterator</a>;
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43938.html' title='Multiple used in 10 places.'>zf_valid</a>;
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43933.html' title='Multiple used in 11 places.'>zf_current</a>;
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43934.html' title='Multiple used in 9 places.'>zf_key</a>;
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43936.html' title='Multiple used in 9 places.'>zf_next</a>;
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>union</strong> <a href='../S/1643.html#L404' title='Defined at 404 in Zend/zend_compile.h.'>_zend_function</a> *<a href='../Y/43937.html' title='Multiple used in 9 places.'>zf_rewind</a>;
+<a id='L72' name='L72'></a>  72 <em class='brace'>}</em> <a href='../S/1627.html#L161' title='Referred from 161 in Zend/zend.h.'>zend_class_iterator_funcs</a>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74 <a href='../D/355.html' title='Multiple defined in 15 places.'>BEGIN_EXTERN_C</a>()
+<a id='L75' name='L75'></a>  75 <em class='comment'>/* given a zval, returns stuff that can be used to iterate it. */</em>
+<a id='L76' name='L76'></a>  76 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a>* <a href='../S/1683.html#L91' title='Defined at 91 in Zend/zend_iterators.c.'>zend_iterator_unwrap</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/11987.html' title='Multiple used in 247 places.'>array_ptr</a>);
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78 <em class='comment'>/* given an iterator, wrap it up as a zval for use by the engine opcodes */</em>
+<a id='L79' name='L79'></a>  79 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1683.html#L76' title='Defined at 76 in Zend/zend_iterators.c.'>zend_iterator_init</a>(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L80' name='L80'></a>  80 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1683.html#L82' title='Defined at 82 in Zend/zend_iterators.c.'>zend_iterator_dtor</a>(<a href='../S/1684.html#L29' title='Defined at 29 in Zend/zend_iterators.h.'>zend_object_iterator</a> *<a href='../Y/24214.html' title='Multiple used in 815 places.'>iter</a>);
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1683.html#L61' title='Defined at 61 in Zend/zend_iterators.c.'>zend_register_iterator_wrapper</a>(<strong class='reserved'>void</strong>);
+<a id='L83' name='L83'></a>  83 <a href='../D/1951.html' title='Multiple defined in 10 places.'>END_EXTERN_C</a>()
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <em class='comment'>/*</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> * Local variables:</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> * tab-width: 4</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> * indent-tabs-mode: t</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> * End:</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

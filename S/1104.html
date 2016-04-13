@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/standard/head.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1842.html'>standard</a>/head.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L293'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L39' title='Defined at 39.'>PHP_FUNCTION</a></li>
+<li><a href='#L56' title='Defined at 56.'>PHP_FUNCTION</a></li>
+<li><a href='#L70' title='Defined at 70.'>php_header</a></li>
+<li><a href='#L80' title='Defined at 80.'>php_setcookie</a></li>
+<li><a href='#L188' title='Defined at 188.'>PHP_FUNCTION</a></li>
+<li><a href='#L209' title='Defined at 209.'>PHP_FUNCTION</a></li>
+<li><a href='#L231' title='Defined at 231.'>PHP_FUNCTION</a></li>
+<li><a href='#L269' title='Defined at 269.'>php_head_apply_header_list_to_hash</a></li>
+<li><a href='#L280' title='Defined at 280.'>PHP_FUNCTION</a></li>
+<li><a href='#L293' title='Defined at 293.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Rasmus Lerdorf &lt;rasmus@lerdorf.on.ca&gt;                        |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>/* $Id$ */</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1159.html'>ext/standard/php_standard.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='80.html'>ext/date/php_date.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1408.html'>SAPI.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1386.html'>php_main.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1105.html'>head.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#ifdef</em> <a href='../Y/6569.html' title='Multiple used in 2 places.'>TM_IN_SYS_TIME</a>
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;<a href='1621.html'>sys/time.h</a>&gt;
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#else</em>
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;<a href='1621.html'>time.h</a>&gt;
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#endif</em>
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='1383.html'>php_globals.h</a>"
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='comment'>/* Implementation of the language Header() function */</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>/* {{{ proto void header(string header [, bool replace, [int http_response_code]])</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>   Sends a raw HTTP header */</em>
+<a id='L39' name='L39'></a>  39 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>)
+<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/34480.html' title='Multiple used in 12 places.'>rep</a> = 1;
+<a id='L42' name='L42'></a>  42         <a href='../Y/35306.html' title='Multiple used in 12 places.'>sapi_header_line</a> <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a> = <em class='brace'>{</em>0<em class='brace'>}</em>;
+<a id='L43' name='L43'></a>  43         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "s|bl", &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>,
+<a id='L46' name='L46'></a>  46                                 &amp;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, &amp;<a href='../Y/34480.html' title='Multiple used in 12 places.'>rep</a>, &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/34687.html' title='Multiple used in 37 places.'>response_code</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>)
+<a id='L47' name='L47'></a>  47                 <strong class='reserved'>return</strong>;
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49         <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> = (<a href='../D/32380.html' title='Multiple defined in 3 places.'>uint</a>)<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L50' name='L50'></a>  50         <a href='../S/1407.html#L660' title='Defined at 660 in main/SAPI.c.'>sapi_header_op</a>(<a href='../Y/34480.html' title='Multiple used in 12 places.'>rep</a> ? <a href='../S/1408.html#L176' title='Defined at 176 in main/SAPI.h.'>SAPI_HEADER_REPLACE</a>:<a href='../D/10220.html' title='Multiple defined in 2 places.'>SAPI_HEADER_ADD</a>, &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>);
+<a id='L51' name='L51'></a>  51 <em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>/* }}} */</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='comment'>/* {{{ proto void header_remove([string name])</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>   Removes an HTTP header previously set using header() */</em>
+<a id='L56' name='L56'></a>  56 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/19914.html' title='Multiple used in 3 places.'>header_remove</a>)
+<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <a href='../Y/35306.html' title='Multiple used in 12 places.'>sapi_header_line</a> <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a> = <em class='brace'>{</em>0<em class='brace'>}</em>;
+<a id='L59' name='L59'></a>  59         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = 0;
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "|s", &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>,
+<a id='L62' name='L62'></a>  62                                   &amp;<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>)
+<a id='L63' name='L63'></a>  63                 <strong class='reserved'>return</strong>;
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65         <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> = (<a href='../D/32380.html' title='Multiple defined in 3 places.'>uint</a>)<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>;
+<a id='L66' name='L66'></a>  66         <a href='../S/1407.html#L660' title='Defined at 660 in main/SAPI.c.'>sapi_header_op</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>() == 0 ? <a href='../S/1408.html#L179' title='Defined at 179 in main/SAPI.h.'>SAPI_HEADER_DELETE_ALL</a> : <a href='../S/1408.html#L178' title='Defined at 178 in main/SAPI.h.'>SAPI_HEADER_DELETE</a>, &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>);
+<a id='L67' name='L67'></a>  67 <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>/* }}} */</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../R/23784.html' title='Multiple referred from 4 places.'>php_header</a>(<strong class='reserved'>void</strong>)
+<a id='L71' name='L71'></a>  71 <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>if</strong> (<a href='../S/1407.html#L846' title='Defined at 846 in main/SAPI.c.'>sapi_send_headers</a>()==<a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> || <a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/34574.html' title='Multiple used in 350 places.'>request_info</a>).<a href='../Y/19929.html' title='Multiple used in 9 places.'>headers_only</a>) <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                 <strong class='reserved'>return</strong> 0; <em class='comment'>/* don't allow output */</em>
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                 <strong class='reserved'>return</strong> 1; <em class='comment'>/* allow output */</em>
+<a id='L76' name='L76'></a>  76         <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77 <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../R/24611.html' title='Multiple referred from 3 places.'>php_setcookie</a>(<a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, <a href='../Y/38483.html' title='Multiple used in 174 places.'>time_t</a> <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <strong class='reserved'>int</strong> <a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>, <strong class='reserved'>int</strong> <a href='../Y/39745.html' title='Multiple used in 4 places.'>url_encode</a>, <strong class='reserved'>int</strong> <a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>)
+<a id='L81' name='L81'></a>  81 <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>char</strong> *<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>;
+<a id='L83' name='L83'></a>  83         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> = <strong class='reserved'>sizeof</strong>("Set-Cookie: ");
+<a id='L84' name='L84'></a>  84         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>;
+<a id='L85' name='L85'></a>  85         <a href='../Y/35306.html' title='Multiple used in 12 places.'>sapi_header_line</a> <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a> = <em class='brace'>{</em>0<em class='brace'>}</em>;
+<a id='L86' name='L86'></a>  86         <strong class='reserved'>int</strong> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L87' name='L87'></a>  87         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>if</strong> (!<a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>( <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Cookie names must not be empty" );
+<a id='L91' name='L91'></a>  91                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L92' name='L92'></a>  92         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/37732.html' title='Multiple used in 22 places.'>strpbrk</a>(<a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>), "=,; \t\r\n\013\014") != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>   <em class='comment'>/* man isspace for \013 and \014 */</em>
+<a id='L93' name='L93'></a>  93                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>(<a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
+<a id='L94' name='L94'></a>  94                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L95' name='L95'></a>  95         <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>if</strong> (!<a href='../Y/39745.html' title='Multiple used in 4 places.'>url_encode</a> &amp;&amp; <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> &amp;&amp;
+<a id='L98' name='L98'></a>  98                         <a href='../Y/37732.html' title='Multiple used in 22 places.'>strpbrk</a>(<a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>), ",; \t\r\n\013\014") != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em> <em class='comment'>/* man isspace for \013 and \014 */</em>
+<a id='L99' name='L99'></a>  99                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>(<a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Cookie values cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
+<a id='L100' name='L100'></a> 100                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L101' name='L101'></a> 101         <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> += <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>if</strong> (<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>) <em class='brace'>{</em>
+<a id='L105' name='L105'></a> 105                 <strong class='reserved'>if</strong> (<a href='../Y/39745.html' title='Multiple used in 4 places.'>url_encode</a>) <em class='brace'>{</em>
+<a id='L106' name='L106'></a> 106                         <a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a> = <a href='../S/1184.html#L487' title='Defined at 487 in ext/standard/url.c.'>php_url_encode</a>(<a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>), <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>));
+<a id='L107' name='L107'></a> 107                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> += <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>);
+<a id='L108' name='L108'></a> 108                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109                         <a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a> = <a href='../S/1725.html#L164' title='Defined at 164 in Zend/zend_string.h.'>zend_string_copy</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L110' name='L110'></a> 110                         <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> += <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>);
+<a id='L111' name='L111'></a> 111                 <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112         <em class='brace'>}</em>
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>if</strong> (<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> += <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>);
+<a id='L116' name='L116'></a> 116         <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>if</strong> (<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>) <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118                 <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> += <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>);
+<a id='L119' name='L119'></a> 119         <em class='brace'>}</em>
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121         <a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a> = <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>if</strong> (<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> || <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>) == 0) <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124                 <em class='comment'>/*</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'>                 * MSIE doesn't delete a cookie when you set it to a null value</em>
+<a id='L126' name='L126'></a> 126 <em class='comment'>                 * so in order to force cookies to be deleted, even on MSIE, we</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>                 * pick an expiry date in the past</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>                 */</em>
+<a id='L129' name='L129'></a> 129                 <a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a> = <a href='../S/79.html#L1247' title='Defined at 1247 in ext/date/php_date.c.'>php_format_date</a>("D, d-M-Y H:i:s T", <strong class='reserved'>sizeof</strong>("D, d-M-Y H:i:s T")-1, 1, 0);
+<a id='L130' name='L130'></a> 130                 <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>), <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>));
+<a id='L131' name='L131'></a> 131                 <a href='../S/1725.html#L259' title='Defined at 259 in Zend/zend_string.h.'>zend_string_free</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>);
+<a id='L132' name='L132'></a> 132         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                 <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100, "Set-Cookie: %s=%s", <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>), <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> ? <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>) : "");
+<a id='L134' name='L134'></a> 134                 <strong class='reserved'>if</strong> (<a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a> &gt; 0) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L136' name='L136'></a> 136                         <strong class='reserved'>char</strong> <a href='../Y/39027.html' title='Multiple used in 3 places.'>tsdelta</a>[13];
+<a id='L137' name='L137'></a> 137                         <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L24' title='Defined at 24 in ext/standard/head.h.'>COOKIE_EXPIRES</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L138' name='L138'></a> 138                         <a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a> = <a href='../S/79.html#L1247' title='Defined at 1247 in ext/date/php_date.c.'>php_format_date</a>("D, d-M-Y H:i:s T", <strong class='reserved'>sizeof</strong>("D, d-M-Y H:i:s T")-1, <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, 0);
+<a id='L139' name='L139'></a> 139                         <em class='comment'>/* check to make sure that the year does not exceed 4 digits in length */</em>
+<a id='L140' name='L140'></a> 140                         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../S/1707.html#L186' title='Defined at 186 in Zend/zend_operators.h.'>zend_memrchr</a>(<a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>), '-', <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>));
+<a id='L141' name='L141'></a> 141                         <strong class='reserved'>if</strong> (!<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> || *(<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> + 5) != ' ') <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142                                 <a href='../S/1725.html#L259' title='Defined at 259 in Zend/zend_string.h.'>zend_string_free</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>);
+<a id='L143' name='L143'></a> 143                                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>);
+<a id='L144' name='L144'></a> 144                                 <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>);
+<a id='L145' name='L145'></a> 145                                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>(<a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Expiry date cannot have a year greater than 9999");
+<a id='L146' name='L146'></a> 146                                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L147' name='L147'></a> 147                         <em class='brace'>}</em>
+<a id='L148' name='L148'></a> 148                         <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>), <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L149' name='L149'></a> 149                         <a href='../S/1725.html#L259' title='Defined at 259 in Zend/zend_string.h.'>zend_string_free</a>(<a href='../Y/16262.html' title='Multiple used in 15 places.'>dt</a>);
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151                         <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/39027.html' title='Multiple used in 3 places.'>tsdelta</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/39027.html' title='Multiple used in 3 places.'>tsdelta</a>), <a href='../D/16871.html' title='Multiple defined in 2 places.'>ZEND_LONG_FMT</a>, (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>) difftime(<a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, <a href='../Y/38467.html' title='Multiple used in 649 places.'>time</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)));
+<a id='L152' name='L152'></a> 152                         <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L25' title='Defined at 25 in ext/standard/head.h.'>COOKIE_MAX_AGE</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L153' name='L153'></a> 153                         <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../Y/39027.html' title='Multiple used in 3 places.'>tsdelta</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L154' name='L154'></a> 154                 <em class='brace'>}</em>
+<a id='L155' name='L155'></a> 155         <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>if</strong> (<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <a href='../S/1725.html#L267' title='Defined at 267 in Zend/zend_string.h.'>zend_string_release</a>(<a href='../Y/16720.html' title='Multiple used in 9 places.'>encoded_value</a>);
+<a id='L159' name='L159'></a> 159         <em class='brace'>}</em>
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161         <strong class='reserved'>if</strong> (<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a> &amp;&amp; <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>)) <em class='brace'>{</em>
+<a id='L162' name='L162'></a> 162                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L27' title='Defined at 27 in ext/standard/head.h.'>COOKIE_PATH</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L163' name='L163'></a> 163                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>), <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L164' name='L164'></a> 164         <em class='brace'>}</em>
+<a id='L165' name='L165'></a> 165         <strong class='reserved'>if</strong> (<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a> &amp;&amp; <a href='../S/1725.html#L41' title='Defined at 41 in Zend/zend_string.h.'>ZSTR_LEN</a>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>)) <em class='brace'>{</em>
+<a id='L166' name='L166'></a> 166                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L26' title='Defined at 26 in ext/standard/head.h.'>COOKIE_DOMAIN</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L167' name='L167'></a> 167                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1725.html#L40' title='Defined at 40 in Zend/zend_string.h.'>ZSTR_VAL</a>(<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>), <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L168' name='L168'></a> 168         <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169         <strong class='reserved'>if</strong> (<a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>) <em class='brace'>{</em>
+<a id='L170' name='L170'></a> 170                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L28' title='Defined at 28 in ext/standard/head.h.'>COOKIE_SECURE</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L171' name='L171'></a> 171         <em class='brace'>}</em>
+<a id='L172' name='L172'></a> 172         <strong class='reserved'>if</strong> (<a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>) <em class='brace'>{</em>
+<a id='L173' name='L173'></a> 173                 <a href='../S/1378.html#L136' title='Defined at 136 in main/php.h.'>strlcat</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>, <a href='../S/1105.html#L29' title='Defined at 29 in ext/standard/head.h.'>COOKIE_HTTPONLY</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a> + 100);
+<a id='L174' name='L174'></a> 174         <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176         <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a> = <a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>;
+<a id='L177' name='L177'></a> 177         <a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>.<a href='../Y/25104.html' title='Multiple used in 72 places.'>line_len</a> = (<a href='../D/32380.html' title='Multiple defined in 3 places.'>uint</a>)<a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>);
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> = <a href='../S/1407.html#L660' title='Defined at 660 in main/SAPI.c.'>sapi_header_op</a>(<a href='../D/10220.html' title='Multiple defined in 2 places.'>SAPI_HEADER_ADD</a>, &amp;<a href='../Y/14675.html' title='Multiple used in 52 places.'>ctr</a>);
+<a id='L180' name='L180'></a> 180         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/14422.html' title='Multiple used in 69 places.'>cookie</a>);
+<a id='L181' name='L181'></a> 181         <strong class='reserved'>return</strong> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L182' name='L182'></a> 182 <em class='brace'>}</em>
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184 
+<a id='L185' name='L185'></a> 185 <em class='comment'>/* php_set_cookie(name, value, expires, path, domain, secure) */</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'>/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])</em>
+<a id='L187' name='L187'></a> 187 <em class='comment'>   Send a cookie */</em>
+<a id='L188' name='L188'></a> 188 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/35936.html' title='Multiple used in 3 places.'>setcookie</a>)
+<a id='L189' name='L189'></a> 189 <em class='brace'>{</em>
+<a id='L190' name='L190'></a> 190         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L191' name='L191'></a> 191         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a> = 0;
+<a id='L192' name='L192'></a> 192         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a> = 0, <a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a> = 0;
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "S|SlSSbb",
+<a id='L195' name='L195'></a> 195                                 &amp;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, &amp;<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, &amp;<a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, &amp;<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, &amp;<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, &amp;<a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>, &amp;<a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196                 <strong class='reserved'>return</strong>;
+<a id='L197' name='L197'></a> 197         <em class='brace'>}</em>
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199         <strong class='reserved'>if</strong> (<a href='../S/1104.html#L80' title='Defined at 80 in ext/standard/head.c.'>php_setcookie</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>, 1, <a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>) == <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>) <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200                 <a href='../S/1632.html#L627' title='Defined at 627 in Zend/zend_API.h.'>RETVAL_TRUE</a>;
+<a id='L201' name='L201'></a> 201         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L202' name='L202'></a> 202                 <a href='../S/1632.html#L626' title='Defined at 626 in Zend/zend_API.h.'>RETVAL_FALSE</a>;
+<a id='L203' name='L203'></a> 203         <em class='brace'>}</em>
+<a id='L204' name='L204'></a> 204 <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>/* }}} */</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 <em class='comment'>/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'>   Send a cookie with no url encoding of the value */</em>
+<a id='L209' name='L209'></a> 209 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/35948.html' title='Multiple used in 3 places.'>setrawcookie</a>)
+<a id='L210' name='L210'></a> 210 <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L212' name='L212'></a> 212         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a> = 0;
+<a id='L213' name='L213'></a> 213         <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a> = 0, <a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a> = 0;
+<a id='L214' name='L214'></a> 214 
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "S|SlSSbb",
+<a id='L216' name='L216'></a> 216                                 &amp;<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, &amp;<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, &amp;<a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, &amp;<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, &amp;<a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, &amp;<a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>, &amp;<a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L217' name='L217'></a> 217                 <strong class='reserved'>return</strong>;
+<a id='L218' name='L218'></a> 218         <em class='brace'>}</em>
+<a id='L219' name='L219'></a> 219 
+<a id='L220' name='L220'></a> 220         <strong class='reserved'>if</strong> (<a href='../S/1104.html#L80' title='Defined at 80 in ext/standard/head.c.'>php_setcookie</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, <a href='../Y/17327.html' title='Multiple used in 30 places.'>expires</a>, <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/16092.html' title='Multiple used in 87 places.'>domain</a>, <a href='../Y/35595.html' title='Multiple used in 15 places.'>secure</a>, 0, <a href='../Y/22030.html' title='Multiple used in 15 places.'>httponly</a>) == <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>) <em class='brace'>{</em>
+<a id='L221' name='L221'></a> 221                 <a href='../S/1632.html#L627' title='Defined at 627 in Zend/zend_API.h.'>RETVAL_TRUE</a>;
+<a id='L222' name='L222'></a> 222         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223                 <a href='../S/1632.html#L626' title='Defined at 626 in Zend/zend_API.h.'>RETVAL_FALSE</a>;
+<a id='L224' name='L224'></a> 224         <em class='brace'>}</em>
+<a id='L225' name='L225'></a> 225 <em class='brace'>}</em>
+<a id='L226' name='L226'></a> 226 <em class='comment'>/* }}} */</em>
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228 
+<a id='L229' name='L229'></a> 229 <em class='comment'>/* {{{ proto bool headers_sent([string &amp;$file [, int &amp;$line]])</em>
+<a id='L230' name='L230'></a> 230 <em class='comment'>   Returns true if headers have already been sent, false otherwise */</em>
+<a id='L231' name='L231'></a> 231 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/19933.html' title='Multiple used in 34 places.'>headers_sent</a>)
+<a id='L232' name='L232'></a> 232 <em class='brace'>{</em>
+<a id='L233' name='L233'></a> 233         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/9417.html' title='Multiple used in 385 places.'>arg1</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../Y/9420.html' title='Multiple used in 278 places.'>arg2</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L234' name='L234'></a> 234         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/17806.html' title='Multiple used in 617 places.'>file</a>="";
+<a id='L235' name='L235'></a> 235         <strong class='reserved'>int</strong> <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>=0;
+<a id='L236' name='L236'></a> 236 
+<a id='L237' name='L237'></a> 237         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "|z/z/", &amp;<a href='../Y/9417.html' title='Multiple used in 385 places.'>arg1</a>, &amp;<a href='../Y/9420.html' title='Multiple used in 278 places.'>arg2</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>)
+<a id='L238' name='L238'></a> 238                 <strong class='reserved'>return</strong>;
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>if</strong> (<a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/19933.html' title='Multiple used in 34 places.'>headers_sent</a>)) <em class='brace'>{</em>
+<a id='L241' name='L241'></a> 241                 <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a> = <a href='../S/1377.html#L752' title='Defined at 752 in main/output.c.'>php_output_get_start_lineno</a>();
+<a id='L242' name='L242'></a> 242                 <a href='../Y/17806.html' title='Multiple used in 617 places.'>file</a> = <a href='../S/1377.html#L744' title='Defined at 744 in main/output.c.'>php_output_get_start_filename</a>();
+<a id='L243' name='L243'></a> 243         <em class='brace'>}</em>
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         <strong class='reserved'>switch</strong>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>()) <em class='brace'>{</em>
+<a id='L246' name='L246'></a> 246         <strong class='reserved'>case</strong> 2:
+<a id='L247' name='L247'></a> 247                 <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(<a href='../Y/9420.html' title='Multiple used in 278 places.'>arg2</a>);
+<a id='L248' name='L248'></a> 248                 <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a>(<a href='../Y/9420.html' title='Multiple used in 278 places.'>arg2</a>, <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>);
+<a id='L249' name='L249'></a> 249         <strong class='reserved'>case</strong> 1:
+<a id='L250' name='L250'></a> 250                 <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(<a href='../Y/9417.html' title='Multiple used in 385 places.'>arg1</a>);
+<a id='L251' name='L251'></a> 251                 <strong class='reserved'>if</strong> (<a href='../Y/17806.html' title='Multiple used in 617 places.'>file</a>) <em class='brace'>{</em>
+<a id='L252' name='L252'></a> 252                         <a href='../S/1632.html#L572' title='Defined at 572 in Zend/zend_API.h.'>ZVAL_STRING</a>(<a href='../Y/9417.html' title='Multiple used in 385 places.'>arg1</a>, <a href='../Y/17806.html' title='Multiple used in 617 places.'>file</a>);
+<a id='L253' name='L253'></a> 253                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L254' name='L254'></a> 254                         <a href='../S/1632.html#L577' title='Defined at 577 in Zend/zend_API.h.'>ZVAL_EMPTY_STRING</a>(<a href='../Y/9417.html' title='Multiple used in 385 places.'>arg1</a>);
+<a id='L255' name='L255'></a> 255                 <em class='brace'>}</em>
+<a id='L256' name='L256'></a> 256                 <strong class='reserved'>break</strong>;
+<a id='L257' name='L257'></a> 257         <em class='brace'>}</em>
+<a id='L258' name='L258'></a> 258 
+<a id='L259' name='L259'></a> 259         <strong class='reserved'>if</strong> (<a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/19933.html' title='Multiple used in 34 places.'>headers_sent</a>)) <em class='brace'>{</em>
+<a id='L260' name='L260'></a> 260                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L261' name='L261'></a> 261         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L262' name='L262'></a> 262                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L263' name='L263'></a> 263         <em class='brace'>}</em>
+<a id='L264' name='L264'></a> 264 <em class='brace'>}</em>
+<a id='L265' name='L265'></a> 265 <em class='comment'>/* }}} */</em>
+<a id='L266' name='L266'></a> 266 
+<a id='L267' name='L267'></a> 267 <em class='comment'>/* {{{ php_head_apply_header_list_to_hash</em>
+<a id='L268' name='L268'></a> 268 <em class='comment'>   Turn an llist of sapi_header_struct headers into a numerically indexed zval hash */</em>
+<a id='L269' name='L269'></a> 269 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1104.html#L287' title='Referred from 287 in ext/standard/head.c.'>php_head_apply_header_list_to_hash</a>(<strong class='reserved'>void</strong> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <strong class='reserved'>void</strong> *<a href='../D/19680.html' title='Multiple defined in 2 places.'>arg</a>)
+<a id='L270' name='L270'></a> 270 <em class='brace'>{</em>
+<a id='L271' name='L271'></a> 271         <a href='../S/1408.html#L56' title='Defined at 56 in main/SAPI.h.'>sapi_header_struct</a> *<a href='../Y/35305.html' title='Multiple used in 35 places.'>sapi_header</a> = (<a href='../S/1408.html#L56' title='Defined at 56 in main/SAPI.h.'>sapi_header_struct</a> *)<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L272' name='L272'></a> 272 
+<a id='L273' name='L273'></a> 273         <strong class='reserved'>if</strong> (<a href='../D/19680.html' title='Multiple defined in 2 places.'>arg</a> &amp;&amp; <a href='../Y/35305.html' title='Multiple used in 35 places.'>sapi_header</a>) <em class='brace'>{</em>
+<a id='L274' name='L274'></a> 274                 <a href='../S/1631.html#L1547' title='Defined at 1547 in Zend/zend_API.c.'>add_next_index_string</a>((<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *)<a href='../D/19680.html' title='Multiple defined in 2 places.'>arg</a>, (<strong class='reserved'>char</strong> *)(<a href='../Y/35305.html' title='Multiple used in 35 places.'>sapi_header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>));
+<a id='L275' name='L275'></a> 275         <em class='brace'>}</em>
+<a id='L276' name='L276'></a> 276 <em class='brace'>}</em>
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278 <em class='comment'>/* {{{ proto array headers_list(void)</em>
+<a id='L279' name='L279'></a> 279 <em class='comment'>   Return list of headers to be sent / already sent */</em>
+<a id='L280' name='L280'></a> 280 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/19928.html' title='Multiple used in 3 places.'>headers_list</a>)
+<a id='L281' name='L281'></a> 281 <em class='brace'>{</em>
+<a id='L282' name='L282'></a> 282         <strong class='reserved'>if</strong> (<a href='../D/34452.html' title='Multiple defined in 2 places.'>zend_parse_parameters_none</a>() == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L283' name='L283'></a> 283                 <strong class='reserved'>return</strong>;
+<a id='L284' name='L284'></a> 284         <em class='brace'>}</em>
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286         <a href='../S/1632.html#L375' title='Defined at 375 in Zend/zend_API.h.'>array_init</a>(<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L287' name='L287'></a> 287         <a href='../S/1692.html#L231' title='Defined at 231 in Zend/zend_llist.c.'>zend_llist_apply_with_argument</a>(&amp;<a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/35307.html' title='Multiple used in 180 places.'>sapi_headers</a>).<a href='../Y/19923.html' title='Multiple used in 212 places.'>headers</a>, <a href='../S/1104.html#L269' title='Defined at 269 in ext/standard/head.c.'>php_head_apply_header_list_to_hash</a>, <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L288' name='L288'></a> 288 <em class='brace'>}</em>
+<a id='L289' name='L289'></a> 289 <em class='comment'>/* }}} */</em>
+<a id='L290' name='L290'></a> 290 
+<a id='L291' name='L291'></a> 291 <em class='comment'>/* {{{ proto long http_response_code([int response_code])</em>
+<a id='L292' name='L292'></a> 292 <em class='comment'>   Sets a response code, or returns the current HTTP response code */</em>
+<a id='L293' name='L293'></a> 293 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/22020.html' title='Multiple used in 62 places.'>http_response_code</a>)
+<a id='L294' name='L294'></a> 294 <em class='brace'>{</em>
+<a id='L295' name='L295'></a> 295         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/34687.html' title='Multiple used in 37 places.'>response_code</a> = 0;
+<a id='L296' name='L296'></a> 296 
+<a id='L297' name='L297'></a> 297         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L954' title='Defined at 954 in Zend/zend_API.c.'>zend_parse_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), "|l", &amp;<a href='../Y/34687.html' title='Multiple used in 37 places.'>response_code</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L298' name='L298'></a> 298                 <strong class='reserved'>return</strong>;
+<a id='L299' name='L299'></a> 299         <em class='brace'>}</em>
+<a id='L300' name='L300'></a> 300 
+<a id='L301' name='L301'></a> 301         <strong class='reserved'>if</strong> (<a href='../Y/34687.html' title='Multiple used in 37 places.'>response_code</a>)
+<a id='L302' name='L302'></a> 302         <em class='brace'>{</em>
+<a id='L303' name='L303'></a> 303                 <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/29464.html' title='Multiple used in 4 places.'>old_response_code</a>;
+<a id='L304' name='L304'></a> 304 
+<a id='L305' name='L305'></a> 305                 <a href='../Y/29464.html' title='Multiple used in 4 places.'>old_response_code</a> = <a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/35307.html' title='Multiple used in 180 places.'>sapi_headers</a>).<a href='../Y/22020.html' title='Multiple used in 62 places.'>http_response_code</a>;
+<a id='L306' name='L306'></a> 306                 <a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/35307.html' title='Multiple used in 180 places.'>sapi_headers</a>).<a href='../Y/22020.html' title='Multiple used in 62 places.'>http_response_code</a> = (<strong class='reserved'>int</strong>)<a href='../Y/34687.html' title='Multiple used in 37 places.'>response_code</a>;
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308                 <strong class='reserved'>if</strong> (<a href='../Y/29464.html' title='Multiple used in 4 places.'>old_response_code</a>) <em class='brace'>{</em>
+<a id='L309' name='L309'></a> 309                         <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../Y/29464.html' title='Multiple used in 4 places.'>old_response_code</a>);
+<a id='L310' name='L310'></a> 310                 <em class='brace'>}</em>
+<a id='L311' name='L311'></a> 311 
+<a id='L312' name='L312'></a> 312                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L313' name='L313'></a> 313         <em class='brace'>}</em>
+<a id='L314' name='L314'></a> 314 
+<a id='L315' name='L315'></a> 315         <strong class='reserved'>if</strong> (!<a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/35307.html' title='Multiple used in 180 places.'>sapi_headers</a>).<a href='../Y/22020.html' title='Multiple used in 62 places.'>http_response_code</a>) <em class='brace'>{</em>
+<a id='L316' name='L316'></a> 316                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L317' name='L317'></a> 317         <em class='brace'>}</em>
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319         <a href='../S/1632.html#L631' title='Defined at 631 in Zend/zend_API.h.'>RETURN_LONG</a>(<a href='../D/10494.html' title='Multiple defined in 2 places.'>SG</a>(<a href='../Y/35307.html' title='Multiple used in 180 places.'>sapi_headers</a>).<a href='../Y/22020.html' title='Multiple used in 62 places.'>http_response_code</a>);
+<a id='L320' name='L320'></a> 320 <em class='brace'>}</em>
+<a id='L321' name='L321'></a> 321 <em class='comment'>/* }}} */</em>
+<a id='L322' name='L322'></a> 322 
+<a id='L323' name='L323'></a> 323 <em class='comment'>/*</em>
+<a id='L324' name='L324'></a> 324 <em class='comment'> * Local variables:</em>
+<a id='L325' name='L325'></a> 325 <em class='comment'> * tab-width: 4</em>
+<a id='L326' name='L326'></a> 326 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L327' name='L327'></a> 327 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L328' name='L328'></a> 328 <em class='comment'> * vim&lt;600: sw=4 ts=4 * End:</em>
+<a id='L329' name='L329'></a> 329 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L293'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

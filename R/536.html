@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>Bitmask</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L12116'>Bitmask</a>          12116 ext/sqlite3/libsqlite/sqlite3.c #define BMS  ((int)(sizeof(Bitmask)*8))</span>
+<span class='curline'><a href='../S/1054.html#L12121'>Bitmask</a>          12121 ext/sqlite3/libsqlite/sqlite3.c #define MASKBIT(n)   (((Bitmask)1)&lt;&lt;(n))</span>
+<span class='curline'><a href='../S/1054.html#L12167'>Bitmask</a>          12167 ext/sqlite3/libsqlite/sqlite3.c     Bitmask colUsed;  /* Bit N (1&lt;&lt;N) set if column N of pTab is used */</span>
+<span class='curline'><a href='../S/1054.html#L81792'>Bitmask</a>          81792 ext/sqlite3/libsqlite/sqlite3.c     pMatch-&gt;colUsed |= ((Bitmask)1)&lt;&lt;n;</span>
+<span class='curline'><a href='../S/1054.html#L81838'>Bitmask</a>          81838 ext/sqlite3/libsqlite/sqlite3.c       pItem-&gt;colUsed |= ((Bitmask)1)&lt;&lt;(iCol&gt;=BMS ? BMS-1 : iCol);</span>
+<span class='curline'><a href='../S/1054.html#L115810'>Bitmask</a>          115810 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady;          /* FROM entries not usable at this level */</span>
+<span class='curline'><a href='../S/1054.html#L115831'>Bitmask</a>          115831 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereq;       /* Bitmask of other loops that must run first */</span>
+<span class='curline'><a href='../S/1054.html#L115832'>Bitmask</a>          115832 ext/sqlite3/libsqlite/sqlite3.c   Bitmask maskSelf;     /* Bitmask identifying table iTab */</span>
+<span class='curline'><a href='../S/1054.html#L115870'>Bitmask</a>          115870 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereq;     /* Prerequisites */</span>
+<span class='curline'><a href='../S/1054.html#L115908'>Bitmask</a>          115908 ext/sqlite3/libsqlite/sqlite3.c   Bitmask maskLoop;     /* Bitmask of all WhereLoop objects in this path */</span>
+<span class='curline'><a href='../S/1054.html#L115909'>Bitmask</a>          115909 ext/sqlite3/libsqlite/sqlite3.c   Bitmask revLoop;      /* aLoop[]s that should be reversed for ORDER BY */</span>
+<span class='curline'><a href='../S/1054.html#L115982'>Bitmask</a>          115982 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereqRight;    /* Bitmask of tables used by pExpr-&gt;pRight */</span>
+<span class='curline'><a href='../S/1054.html#L115983'>Bitmask</a>          115983 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereqAll;      /* Bitmask of tables referenced by pExpr */</span>
+<span class='curline'><a href='../S/1054.html#L116053'>Bitmask</a>          116053 ext/sqlite3/libsqlite/sqlite3.c   Bitmask indexable;       /* Bitmask of all indexable tables in the clause */</span>
+<span class='curline'><a href='../S/1054.html#L116127'>Bitmask</a>          116127 ext/sqlite3/libsqlite/sqlite3.c   Bitmask revMask;          /* Mask of ORDER BY terms that need reversing */</span>
+<span class='curline'><a href='../S/1054.html#L116273'>Bitmask</a>          116273 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereq,        /* Prerequisites of the new entry */</span>
+<span class='curline'><a href='../S/1054.html#L116452'>Bitmask</a>          116452 ext/sqlite3/libsqlite/sqlite3.c static Bitmask getMask(WhereMaskSet *pMaskSet, int iCursor){</span>
+<span class='curline'><a href='../S/1054.html#L116454'>Bitmask</a>          116454 ext/sqlite3/libsqlite/sqlite3.c   assert( pMaskSet-&gt;n&lt;=(int)sizeof(Bitmask)*8 );</span>
+<span class='curline'><a href='../S/1054.html#L116481'>Bitmask</a>          116481 ext/sqlite3/libsqlite/sqlite3.c static Bitmask exprListTableUsage(WhereMaskSet*, ExprList*);</span>
+<span class='curline'><a href='../S/1054.html#L116482'>Bitmask</a>          116482 ext/sqlite3/libsqlite/sqlite3.c static Bitmask exprSelectTableUsage(WhereMaskSet*, Select*);</span>
+<span class='curline'><a href='../S/1054.html#L116483'>Bitmask</a>          116483 ext/sqlite3/libsqlite/sqlite3.c static Bitmask exprTableUsage(WhereMaskSet *pMaskSet, Expr *p){</span>
+<span class='curline'><a href='../S/1054.html#L116484'>Bitmask</a>          116484 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mask = 0;</span>
+<span class='curline'><a href='../S/1054.html#L116499'>Bitmask</a>          116499 ext/sqlite3/libsqlite/sqlite3.c static Bitmask exprListTableUsage(WhereMaskSet *pMaskSet, ExprList *pList){</span>
+<span class='curline'><a href='../S/1054.html#L116501'>Bitmask</a>          116501 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mask = 0;</span>
+<span class='curline'><a href='../S/1054.html#L116509'>Bitmask</a>          116509 ext/sqlite3/libsqlite/sqlite3.c static Bitmask exprSelectTableUsage(WhereMaskSet *pMaskSet, Select *pS){</span>
+<span class='curline'><a href='../S/1054.html#L116510'>Bitmask</a>          116510 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mask = 0;</span>
+<span class='curline'><a href='../S/1054.html#L116761'>Bitmask</a>          116761 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady,     /* RHS must not overlap with this mask */</span>
+<span class='curline'><a href='../S/1054.html#L117123'>Bitmask</a>          117123 ext/sqlite3/libsqlite/sqlite3.c   Bitmask chngToIN;         /* Tables that might satisfy case 1 */</span>
+<span class='curline'><a href='../S/1054.html#L117124'>Bitmask</a>          117124 ext/sqlite3/libsqlite/sqlite3.c   Bitmask indexable;        /* Tables that are indexable, satisfying case 2 */</span>
+<span class='curline'><a href='../S/1054.html#L117146'>Bitmask</a>          117146 ext/sqlite3/libsqlite/sqlite3.c   indexable = ~(Bitmask)0;</span>
+<span class='curline'><a href='../S/1054.html#L117147'>Bitmask</a>          117147 ext/sqlite3/libsqlite/sqlite3.c   chngToIN = ~(Bitmask)0;</span>
+<span class='curline'><a href='../S/1054.html#L117158'>Bitmask</a>          117158 ext/sqlite3/libsqlite/sqlite3.c         Bitmask b = 0;</span>
+<span class='curline'><a href='../S/1054.html#L117182'>Bitmask</a>          117182 ext/sqlite3/libsqlite/sqlite3.c       Bitmask b;</span>
+<span class='curline'><a href='../S/1054.html#L117380'>Bitmask</a>          117380 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereqLeft;              /* Prerequesites of the pExpr-&gt;pLeft */</span>
+<span class='curline'><a href='../S/1054.html#L117381'>Bitmask</a>          117381 ext/sqlite3/libsqlite/sqlite3.c   Bitmask prereqAll;               /* Prerequesites of pExpr */</span>
+<span class='curline'><a href='../S/1054.html#L117382'>Bitmask</a>          117382 ext/sqlite3/libsqlite/sqlite3.c   Bitmask extraRight = 0;          /* Extra dependencies on LEFT JOIN */</span>
+<span class='curline'><a href='../S/1054.html#L117413'>Bitmask</a>          117413 ext/sqlite3/libsqlite/sqlite3.c     Bitmask x = getMask(pMaskSet, pExpr-&gt;iRightJoinTable);</span>
+<span class='curline'><a href='../S/1054.html#L117614'>Bitmask</a>          117614 ext/sqlite3/libsqlite/sqlite3.c     Bitmask prereqColumn, prereqExpr;</span>
+<span class='curline'><a href='../S/1054.html#L117770'>Bitmask</a>          117770 ext/sqlite3/libsqlite/sqlite3.c       if( 0==findTerm(pWC, iBase, iCol, ~(Bitmask)0, WO_EQ, pIdx) ){</span>
+<span class='curline'><a href='../S/1054.html#L117848'>Bitmask</a>          117848 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady               /* Tables in outer loops of the join */</span>
+<span class='curline'><a href='../S/1054.html#L117872'>Bitmask</a>          117872 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady,           /* Mask of cursors that are not available */</span>
+<span class='curline'><a href='../S/1054.html#L117890'>Bitmask</a>          117890 ext/sqlite3/libsqlite/sqlite3.c   Bitmask idxCols;            /* Bitmap of columns used for indexing */</span>
+<span class='curline'><a href='../S/1054.html#L117891'>Bitmask</a>          117891 ext/sqlite3/libsqlite/sqlite3.c   Bitmask extraCols;          /* Bitmap of additional columns */</span>
+<span class='curline'><a href='../S/1054.html#L117923'>Bitmask</a>          117923 ext/sqlite3/libsqlite/sqlite3.c       Bitmask cMask = iCol&gt;=BMS ? MASKBIT(BMS-1) : MASKBIT(iCol);</span>
+<span class='curline'><a href='../S/1054.html#L117976'>Bitmask</a>          117976 ext/sqlite3/libsqlite/sqlite3.c       Bitmask cMask = iCol&gt;=BMS ? MASKBIT(BMS-1) : MASKBIT(iCol);</span>
+<span class='curline'><a href='../S/1054.html#L119417'>Bitmask</a>          119417 ext/sqlite3/libsqlite/sqlite3.c static Bitmask codeOneLoopStart(</span>
+<span class='curline'><a href='../S/1054.html#L119420'>Bitmask</a>          119420 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady     /* Which tables are currently available */</span>
+<span class='curline'><a href='../S/1054.html#L120803'>Bitmask</a>          120803 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notAllowed = ~(pLoop-&gt;prereq|pLoop-&gt;maskSelf);</span>
+<span class='curline'><a href='../S/1054.html#L120877'>Bitmask</a>          120877 ext/sqlite3/libsqlite/sqlite3.c   Bitmask saved_prereq;           /* Original value of pNew-&gt;prereq */</span>
+<span class='curline'><a href='../S/1054.html#L121170'>Bitmask</a>          121170 ext/sqlite3/libsqlite/sqlite3.c static Bitmask columnsInIndex(Index *pIdx){</span>
+<span class='curline'><a href='../S/1054.html#L121171'>Bitmask</a>          121171 ext/sqlite3/libsqlite/sqlite3.c   Bitmask m = 0;</span>
+<span class='curline'><a href='../S/1054.html#L121239'>Bitmask</a>          121239 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mExtra              /* Extra prerequesites for using this table */</span>
+<span class='curline'><a href='../S/1054.html#L121381'>Bitmask</a>          121381 ext/sqlite3/libsqlite/sqlite3.c       Bitmask m;</span>
+<span class='curline'><a href='../S/1054.html#L121440'>Bitmask</a>          121440 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mExtra</span>
+<span class='curline'><a href='../S/1054.html#L121606'>Bitmask</a>          121606 ext/sqlite3/libsqlite/sqlite3.c static int whereLoopAddOr(WhereLoopBuilder *pBuilder, Bitmask mExtra){</span>
+<span class='curline'><a href='../S/1054.html#L121729'>Bitmask</a>          121729 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mExtra = 0;</span>
+<span class='curline'><a href='../S/1054.html#L121730'>Bitmask</a>          121730 ext/sqlite3/libsqlite/sqlite3.c   Bitmask mPrior = 0;</span>
+<span class='curline'><a href='../S/1054.html#L121789'>Bitmask</a>          121789 ext/sqlite3/libsqlite/sqlite3.c   Bitmask *pRevMask     /* OUT: Mask of WhereLoops to run in reverse order */</span>
+<span class='curline'><a href='../S/1054.html#L121810'>Bitmask</a>          121810 ext/sqlite3/libsqlite/sqlite3.c   Bitmask obSat = 0;    /* Mask of ORDER BY terms satisfied so far */</span>
+<span class='curline'><a href='../S/1054.html#L121811'>Bitmask</a>          121811 ext/sqlite3/libsqlite/sqlite3.c   Bitmask obDone;       /* Mask of all ORDER BY terms */</span>
+<span class='curline'><a href='../S/1054.html#L121812'>Bitmask</a>          121812 ext/sqlite3/libsqlite/sqlite3.c   Bitmask orderDistinctMask;  /* Mask of all well-ordered loops */</span>
+<span class='curline'><a href='../S/1054.html#L121813'>Bitmask</a>          121813 ext/sqlite3/libsqlite/sqlite3.c   Bitmask ready;              /* Mask of inner loops */</span>
+<span class='curline'><a href='../S/1054.html#L121999'>Bitmask</a>          121999 ext/sqlite3/libsqlite/sqlite3.c         Bitmask mTerm;</span>
+<span class='curline'><a href='../S/1054.html#L122013'>Bitmask</a>          122013 ext/sqlite3/libsqlite/sqlite3.c       Bitmask m = MASKBIT(i) - 1;</span>
+<span class='curline'><a href='../S/1054.html#L122211'>Bitmask</a>          122211 ext/sqlite3/libsqlite/sqlite3.c         Bitmask maskNew;                  /* Mask of src visited by (..) */</span>
+<span class='curline'><a href='../S/1054.html#L122212'>Bitmask</a>          122212 ext/sqlite3/libsqlite/sqlite3.c         Bitmask revMask = 0;              /* Mask of rev-order loops for (..) */</span>
+<span class='curline'><a href='../S/1054.html#L122407'>Bitmask</a>          122407 ext/sqlite3/libsqlite/sqlite3.c     Bitmask notUsed;</span>
+<span class='curline'><a href='../S/1054.html#L122427'>Bitmask</a>          122427 ext/sqlite3/libsqlite/sqlite3.c       Bitmask revMask = 0;</span>
+<span class='curline'><a href='../S/1054.html#L122633'>Bitmask</a>          122633 ext/sqlite3/libsqlite/sqlite3.c   Bitmask notReady;          /* Cursors that are not yet positioned */</span>
+<span class='curline'><a href='../S/1054.html#L122755'>Bitmask</a>          122755 ext/sqlite3/libsqlite/sqlite3.c     Bitmask toTheLeft = 0;</span>
+<span class='curline'><a href='../S/1054.html#L122757'>Bitmask</a>          122757 ext/sqlite3/libsqlite/sqlite3.c       Bitmask m = getMask(pMaskSet, pTabList-&gt;a[ii].iCursor);</span>
+<span class='curline'><a href='../S/1054.html#L122823'>Bitmask</a>          122823 ext/sqlite3/libsqlite/sqlite3.c      pWInfo-&gt;revMask = (Bitmask)(-1);</span>
+<span class='curline'><a href='../S/1054.html#L122859'>Bitmask</a>          122859 ext/sqlite3/libsqlite/sqlite3.c     Bitmask tabUsed = exprListTableUsage(pMaskSet, pResultSet);</span>
+<span class='curline'><a href='../S/1054.html#L122905'>Bitmask</a>          122905 ext/sqlite3/libsqlite/sqlite3.c   notReady = ~(Bitmask)0;</span>
+<span class='curline'><a href='../S/1054.html#L122939'>Bitmask</a>          122939 ext/sqlite3/libsqlite/sqlite3.c         Bitmask b = pTabItem-&gt;colUsed;</span>
+<span class='curline'><a href='../S/1054.html#L123003'>Bitmask</a>          123003 ext/sqlite3/libsqlite/sqlite3.c   notReady = ~(Bitmask)0;</span>
+</pre>
+</body>
+</html>

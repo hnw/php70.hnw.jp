@@ -1,0 +1,703 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>za</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1251.html#L47'>za</a>                 47 ext/zip/lib/zip_add.c zip_add(zip_t *za, const char *name, zip_source_t *source)</span>
+<span class='curline'><a href='../S/1251.html#L49'>za</a>                 49 ext/zip/lib/zip_add.c     return zip_file_add(za, name, source, 0);</span>
+<span class='curline'><a href='../S/1252.html#L42'>za</a>                 42 ext/zip/lib/zip_add_dir.c zip_add_dir(zip_t *za, const char *name)</span>
+<span class='curline'><a href='../S/1252.html#L44'>za</a>                 44 ext/zip/lib/zip_add_dir.c     return zip_dir_add(za, name, 0);</span>
+<span class='curline'><a href='../S/1253.html#L43'>za</a>                 43 ext/zip/lib/zip_add_entry.c _zip_add_entry(zip_t *za)</span>
+<span class='curline'><a href='../S/1253.html#L47'>za</a>                 47 ext/zip/lib/zip_add_entry.c     if (za-&gt;nentry+1 &gt;= za-&gt;nentry_alloc) {</span>
+<span class='curline'><a href='../S/1253.html#L49'>za</a>                 49 ext/zip/lib/zip_add_entry.c 	zip_uint64_t nalloc = za-&gt;nentry_alloc;</span>
+<span class='curline'><a href='../S/1253.html#L63'>za</a>                 63 ext/zip/lib/zip_add_entry.c 	if (sizeof(struct zip_entry) * (size_t)za-&gt;nentry_alloc &gt; realloc_size) {</span>
+<span class='curline'><a href='../S/1253.html#L64'>za</a>                 64 ext/zip/lib/zip_add_entry.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1253.html#L67'>za</a>                 67 ext/zip/lib/zip_add_entry.c 	rentries = (zip_entry_t *)realloc(za-&gt;entry, sizeof(struct zip_entry) * (size_t)nalloc);</span>
+<span class='curline'><a href='../S/1253.html#L69'>za</a>                 69 ext/zip/lib/zip_add_entry.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1253.html#L72'>za</a>                 72 ext/zip/lib/zip_add_entry.c 	za-&gt;entry = rentries;</span>
+<span class='curline'><a href='../S/1253.html#L73'>za</a>                 73 ext/zip/lib/zip_add_entry.c 	za-&gt;nentry_alloc = nalloc;</span>
+<span class='curline'><a href='../S/1253.html#L76'>za</a>                 76 ext/zip/lib/zip_add_entry.c     idx = za-&gt;nentry++;</span>
+<span class='curline'><a href='../S/1253.html#L78'>za</a>                 78 ext/zip/lib/zip_add_entry.c     _zip_entry_init(za-&gt;entry+idx);</span>
+<span class='curline'><a href='../S/1255.html#L64'>za</a>                 64 ext/zip/lib/zip_close.c zip_close(zip_t *za)</span>
+<span class='curline'><a href='../S/1255.html#L72'>za</a>                 72 ext/zip/lib/zip_close.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1255.html#L75'>za</a>                 75 ext/zip/lib/zip_close.c     changed = _zip_changed(za, &amp;survivors);</span>
+<span class='curline'><a href='../S/1255.html#L79'>za</a>                 79 ext/zip/lib/zip_close.c 	if ((za-&gt;open_flags &amp; ZIP_TRUNCATE) || changed) {</span>
+<span class='curline'><a href='../S/1255.html#L80'>za</a>                 80 ext/zip/lib/zip_close.c 	    if (zip_source_remove(za-&gt;src) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L81'>za</a>                 81 ext/zip/lib/zip_close.c 		_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L85'>za</a>                 85 ext/zip/lib/zip_close.c 	zip_discard(za);</span>
+<span class='curline'><a href='../S/1255.html#L90'>za</a>                 90 ext/zip/lib/zip_close.c 	zip_discard(za);</span>
+<span class='curline'><a href='../S/1255.html#L94'>za</a>                 94 ext/zip/lib/zip_close.c     if (survivors &gt; za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1255.html#L95'>za</a>                 95 ext/zip/lib/zip_close.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1255.html#L103'>za</a>                103 ext/zip/lib/zip_close.c     for (i=j=0; i&lt;za-&gt;nentry; i++) {</span>
+<span class='curline'><a href='../S/1255.html#L104'>za</a>                104 ext/zip/lib/zip_close.c 	if (za-&gt;entry[i].deleted)</span>
+<span class='curline'><a href='../S/1255.html#L109'>za</a>                109 ext/zip/lib/zip_close.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1255.html#L118'>za</a>                118 ext/zip/lib/zip_close.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1255.html#L122'>za</a>                122 ext/zip/lib/zip_close.c     if (zip_source_begin_write(za-&gt;src) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L123'>za</a>                123 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L135'>za</a>                135 ext/zip/lib/zip_close.c 	entry = za-&gt;entry+i;</span>
+<span class='curline'><a href='../S/1255.html#L142'>za</a>                142 ext/zip/lib/zip_close.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1255.html#L149'>za</a>                149 ext/zip/lib/zip_close.c 	if (_zip_read_local_ef(za, i) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L154'>za</a>                154 ext/zip/lib/zip_close.c         if ((off = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L165'>za</a>                165 ext/zip/lib/zip_close.c 		if ((zs=_zip_source_zip_new(za, za, i, ZIP_FL_UNCHANGED, 0, 0, NULL)) == NULL) {</span>
+<span class='curline'><a href='../S/1255.html#L172'>za</a>                172 ext/zip/lib/zip_close.c 	    if (add_data(za, zs ? zs : entry-&gt;source, de) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L186'>za</a>                186 ext/zip/lib/zip_close.c 	    if (_zip_dirent_write(za, de, ZIP_FL_LOCAL) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L190'>za</a>                190 ext/zip/lib/zip_close.c 	    if ((offset=_zip_file_get_offset(za, i, &amp;za-&gt;error)) == 0) {</span>
+<span class='curline'><a href='../S/1255.html#L194'>za</a>                194 ext/zip/lib/zip_close.c 	    if (zip_source_seek(za-&gt;src, (zip_int64_t)offset, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L195'>za</a>                195 ext/zip/lib/zip_close.c 		_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L199'>za</a>                199 ext/zip/lib/zip_close.c 	    if (copy_data(za, de-&gt;comp_size) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L207'>za</a>                207 ext/zip/lib/zip_close.c 	if (write_cdir(za, filelist, survivors) &lt; 0)</span>
+<span class='curline'><a href='../S/1255.html#L214'>za</a>                214 ext/zip/lib/zip_close.c 	if (zip_source_commit_write(za-&gt;src) != 0) {</span>
+<span class='curline'><a href='../S/1255.html#L215'>za</a>                215 ext/zip/lib/zip_close.c 	    _zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L221'>za</a>                221 ext/zip/lib/zip_close.c 	zip_source_rollback_write(za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L225'>za</a>                225 ext/zip/lib/zip_close.c     zip_discard(za);</span>
+<span class='curline'><a href='../S/1255.html#L232'>za</a>                232 ext/zip/lib/zip_close.c add_data(zip_t *za, zip_source_t *src, zip_dirent_t *de)</span>
+<span class='curline'><a href='../S/1255.html#L242'>za</a>                242 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, src);</span>
+<span class='curline'><a href='../S/1255.html#L279'>za</a>                279 ext/zip/lib/zip_close.c     if ((offstart = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L285'>za</a>                285 ext/zip/lib/zip_close.c     if ((is_zip64=_zip_dirent_write(za, de, flags)) &lt; 0)</span>
+<span class='curline'><a href='../S/1255.html#L295'>za</a>                295 ext/zip/lib/zip_close.c 		zip_error_set(&amp;za-&gt;error, ZIP_ER_COMPNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1255.html#L298'>za</a>                298 ext/zip/lib/zip_close.c 	    if ((s_store=comp_impl(za, src, st.comp_method, ZIP_CODEC_DECODE)) == NULL) {</span>
+<span class='curline'><a href='../S/1255.html#L309'>za</a>                309 ext/zip/lib/zip_close.c 	s_crc = zip_source_crc(za, s_store, 0);</span>
+<span class='curline'><a href='../S/1255.html#L317'>za</a>                317 ext/zip/lib/zip_close.c 		zip_error_set(&amp;za-&gt;error, ZIP_ER_COMPNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1255.html#L321'>za</a>                321 ext/zip/lib/zip_close.c 	    s2 = comp_impl(za, s_crc, de-&gt;comp_method, ZIP_CODEC_ENCODE);</span>
+<span class='curline'><a href='../S/1255.html#L336'>za</a>                336 ext/zip/lib/zip_close.c     if ((offdata = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L340'>za</a>                340 ext/zip/lib/zip_close.c     ret = copy_source(za, s2);</span>
+<span class='curline'><a href='../S/1255.html#L350'>za</a>                350 ext/zip/lib/zip_close.c     if ((offend = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L354'>za</a>                354 ext/zip/lib/zip_close.c     if (zip_source_seek_write(za-&gt;src, offstart, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L355'>za</a>                355 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L360'>za</a>                360 ext/zip/lib/zip_close.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1255.html#L375'>za</a>                375 ext/zip/lib/zip_close.c     if ((ret=_zip_dirent_write(za, de, flags)) &lt; 0)</span>
+<span class='curline'><a href='../S/1255.html#L380'>za</a>                380 ext/zip/lib/zip_close.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1255.html#L385'>za</a>                385 ext/zip/lib/zip_close.c     if (zip_source_seek_write(za-&gt;src, offend, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L386'>za</a>                386 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1255.html#L395'>za</a>                395 ext/zip/lib/zip_close.c copy_data(zip_t *za, zip_uint64_t len)</span>
+<span class='curline'><a href='../S/1255.html#L402'>za</a>                402 ext/zip/lib/zip_close.c 	if (_zip_read(za-&gt;src, buf, n, &amp;za-&gt;error) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L406'>za</a>                406 ext/zip/lib/zip_close.c 	if (_zip_write(za, buf, n) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L418'>za</a>                418 ext/zip/lib/zip_close.c copy_source(zip_t *za, zip_source_t *src)</span>
+<span class='curline'><a href='../S/1255.html#L425'>za</a>                425 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, src);</span>
+<span class='curline'><a href='../S/1255.html#L431'>za</a>                431 ext/zip/lib/zip_close.c 	if (_zip_write(za, buf, (zip_uint64_t)n) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L438'>za</a>                438 ext/zip/lib/zip_close.c 	_zip_error_set_from_source(&amp;za-&gt;error, src);</span>
+<span class='curline'><a href='../S/1255.html#L449'>za</a>                449 ext/zip/lib/zip_close.c write_cdir(zip_t *za, const zip_filelist_t *filelist, zip_uint64_t survivors)</span>
+<span class='curline'><a href='../S/1255.html#L453'>za</a>                453 ext/zip/lib/zip_close.c     if ((cd_start = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L457'>za</a>                457 ext/zip/lib/zip_close.c     if ((size=_zip_cdir_write(za, filelist, survivors)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L461'>za</a>                461 ext/zip/lib/zip_close.c     if ((end = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1255.html#L470'>za</a>                470 ext/zip/lib/zip_close.c _zip_changed(const zip_t *za, zip_uint64_t *survivorsp)</span>
+<span class='curline'><a href='../S/1255.html#L478'>za</a>                478 ext/zip/lib/zip_close.c     if (za-&gt;comment_changed || za-&gt;ch_flags != za-&gt;flags)</span>
+<span class='curline'><a href='../S/1255.html#L481'>za</a>                481 ext/zip/lib/zip_close.c     for (i=0; i&lt;za-&gt;nentry; i++) {</span>
+<span class='curline'><a href='../S/1255.html#L482'>za</a>                482 ext/zip/lib/zip_close.c 	if (za-&gt;entry[i].deleted || za-&gt;entry[i].source || (za-&gt;entry[i].changes &amp;&amp; za-&gt;entry[i].changes-&gt;changed != 0))</span>
+<span class='curline'><a href='../S/1255.html#L484'>za</a>                484 ext/zip/lib/zip_close.c 	if (!za-&gt;entry[i].deleted)</span>
+<span class='curline'><a href='../S/1256.html#L39'>za</a>                 39 ext/zip/lib/zip_delete.c zip_delete(zip_t *za, zip_uint64_t idx)</span>
+<span class='curline'><a href='../S/1256.html#L43'>za</a>                 43 ext/zip/lib/zip_delete.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1256.html#L44'>za</a>                 44 ext/zip/lib/zip_delete.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1256.html#L48'>za</a>                 48 ext/zip/lib/zip_delete.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1256.html#L49'>za</a>                 49 ext/zip/lib/zip_delete.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1256.html#L53'>za</a>                 53 ext/zip/lib/zip_delete.c     if ((name=_zip_get_name(za, idx, 0, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1256.html#L57'>za</a>                 57 ext/zip/lib/zip_delete.c     if (!_zip_hash_delete(za-&gt;names, (const zip_uint8_t *)name, &amp;za-&gt;error)) {</span>
+<span class='curline'><a href='../S/1256.html#L63'>za</a>                 63 ext/zip/lib/zip_delete.c     if (_zip_unchange(za, idx, 1) != 0)</span>
+<span class='curline'><a href='../S/1256.html#L66'>za</a>                 66 ext/zip/lib/zip_delete.c     za-&gt;entry[idx].deleted = 1;</span>
+<span class='curline'><a href='../S/1257.html#L44'>za</a>                 44 ext/zip/lib/zip_dir_add.c zip_dir_add(zip_t *za, const char *name, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1257.html#L51'>za</a>                 51 ext/zip/lib/zip_dir_add.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1257.html#L52'>za</a>                 52 ext/zip/lib/zip_dir_add.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1257.html#L57'>za</a>                 57 ext/zip/lib/zip_dir_add.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1257.html#L66'>za</a>                 66 ext/zip/lib/zip_dir_add.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1257.html#L74'>za</a>                 74 ext/zip/lib/zip_dir_add.c     if ((source=zip_source_buffer(za, NULL, 0, 0)) == NULL) {</span>
+<span class='curline'><a href='../S/1257.html#L79'>za</a>                 79 ext/zip/lib/zip_dir_add.c     idx = _zip_file_replace(za, ZIP_UINT64_MAX, s ? s : name, source, flags);</span>
+<span class='curline'><a href='../S/1257.html#L86'>za</a>                 86 ext/zip/lib/zip_dir_add.c 	if (zip_file_set_external_attributes(za, (zip_uint64_t)idx, 0, ZIP_OPSYS_DEFAULT, ZIP_EXT_ATTRIB_DEFAULT_DIR) &lt; 0) {</span>
+<span class='curline'><a href='../S/1257.html#L87'>za</a>                 87 ext/zip/lib/zip_dir_add.c 	    zip_delete(za, (zip_uint64_t)idx);</span>
+<span class='curline'><a href='../S/1258.html#L95'>za</a>                 95 ext/zip/lib/zip_dirent.c _zip_cdir_write(zip_t *za, const zip_filelist_t *filelist, zip_uint64_t survivors)</span>
+<span class='curline'><a href='../S/1258.html#L106'>za</a>                106 ext/zip/lib/zip_dirent.c     if ((off = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L107'>za</a>                107 ext/zip/lib/zip_dirent.c         _zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1258.html#L115'>za</a>                115 ext/zip/lib/zip_dirent.c 	zip_entry_t *entry = za-&gt;entry+filelist[i].idx;</span>
+<span class='curline'><a href='../S/1258.html#L117'>za</a>                117 ext/zip/lib/zip_dirent.c 	if ((ret=_zip_dirent_write(za, entry-&gt;changes ? entry-&gt;changes : entry-&gt;orig, ZIP_FL_CENTRAL)) &lt; 0)</span>
+<span class='curline'><a href='../S/1258.html#L123'>za</a>                123 ext/zip/lib/zip_dirent.c     if ((off = zip_source_tell_write(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L124'>za</a>                124 ext/zip/lib/zip_dirent.c         _zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1258.html#L134'>za</a>                134 ext/zip/lib/zip_dirent.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1258.html#L162'>za</a>                162 ext/zip/lib/zip_dirent.c     comment = za-&gt;comment_changed ? za-&gt;comment_changes : za-&gt;comment_orig;</span>
+<span class='curline'><a href='../S/1258.html#L167'>za</a>                167 ext/zip/lib/zip_dirent.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1258.html#L172'>za</a>                172 ext/zip/lib/zip_dirent.c     if (_zip_write(za, _zip_buffer_data(buffer), _zip_buffer_offset(buffer)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L180'>za</a>                180 ext/zip/lib/zip_dirent.c 	if (_zip_write(za, comment-&gt;raw, comment-&gt;length) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L614'>za</a>                614 ext/zip/lib/zip_dirent.c _zip_dirent_write(zip_t *za, zip_dirent_t *de, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1258.html#L638'>za</a>                638 ext/zip/lib/zip_dirent.c 	    ef = _zip_ef_utf8(ZIP_EF_UTF_8_NAME, de-&gt;filename, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1258.html#L643'>za</a>                643 ext/zip/lib/zip_dirent.c 	    zip_extra_field_t *ef2 = _zip_ef_utf8(ZIP_EF_UTF_8_COMMENT, de-&gt;comment, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1258.html#L660'>za</a>                660 ext/zip/lib/zip_dirent.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1258.html#L686'>za</a>                686 ext/zip/lib/zip_dirent.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1258.html#L699'>za</a>                699 ext/zip/lib/zip_dirent.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1258.html#L760'>za</a>                760 ext/zip/lib/zip_dirent.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1258.html#L766'>za</a>                766 ext/zip/lib/zip_dirent.c     if (_zip_write(za, buf, _zip_buffer_offset(buffer)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L775'>za</a>                775 ext/zip/lib/zip_dirent.c 	if (_zip_string_write(za, de-&gt;filename) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L782'>za</a>                782 ext/zip/lib/zip_dirent.c 	if (_zip_ef_write(za, ef, ZIP_EF_BOTH) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L789'>za</a>                789 ext/zip/lib/zip_dirent.c 	if (_zip_ef_write(za, de-&gt;extra_fields, flags) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L796'>za</a>                796 ext/zip/lib/zip_dirent.c 	    if (_zip_string_write(za, de-&gt;comment) &lt; 0) {</span>
+<span class='curline'><a href='../S/1258.html#L870'>za</a>                870 ext/zip/lib/zip_dirent.c _zip_get_dirent(zip_t *za, zip_uint64_t idx, zip_flags_t flags, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1258.html#L873'>za</a>                873 ext/zip/lib/zip_dirent.c 	error = &amp;za-&gt;error;</span>
+<span class='curline'><a href='../S/1258.html#L875'>za</a>                875 ext/zip/lib/zip_dirent.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1258.html#L880'>za</a>                880 ext/zip/lib/zip_dirent.c     if ((flags &amp; ZIP_FL_UNCHANGED) || za-&gt;entry[idx].changes == NULL) {</span>
+<span class='curline'><a href='../S/1258.html#L881'>za</a>                881 ext/zip/lib/zip_dirent.c 	if (za-&gt;entry[idx].orig == NULL) {</span>
+<span class='curline'><a href='../S/1258.html#L885'>za</a>                885 ext/zip/lib/zip_dirent.c 	if (za-&gt;entry[idx].deleted &amp;&amp; (flags &amp; ZIP_FL_UNCHANGED) == 0) {</span>
+<span class='curline'><a href='../S/1258.html#L889'>za</a>                889 ext/zip/lib/zip_dirent.c 	return za-&gt;entry[idx].orig;</span>
+<span class='curline'><a href='../S/1258.html#L892'>za</a>                892 ext/zip/lib/zip_dirent.c 	return za-&gt;entry[idx].changes;</span>
+<span class='curline'><a href='../S/1259.html#L45'>za</a>                 45 ext/zip/lib/zip_discard.c zip_discard(zip_t *za)</span>
+<span class='curline'><a href='../S/1259.html#L49'>za</a>                 49 ext/zip/lib/zip_discard.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1259.html#L52'>za</a>                 52 ext/zip/lib/zip_discard.c     if (za-&gt;src) {</span>
+<span class='curline'><a href='../S/1259.html#L53'>za</a>                 53 ext/zip/lib/zip_discard.c 	zip_source_close(za-&gt;src);</span>
+<span class='curline'><a href='../S/1259.html#L54'>za</a>                 54 ext/zip/lib/zip_discard.c 	zip_source_free(za-&gt;src);</span>
+<span class='curline'><a href='../S/1259.html#L57'>za</a>                 57 ext/zip/lib/zip_discard.c     free(za-&gt;default_password);</span>
+<span class='curline'><a href='../S/1259.html#L58'>za</a>                 58 ext/zip/lib/zip_discard.c     _zip_string_free(za-&gt;comment_orig);</span>
+<span class='curline'><a href='../S/1259.html#L59'>za</a>                 59 ext/zip/lib/zip_discard.c     _zip_string_free(za-&gt;comment_changes);</span>
+<span class='curline'><a href='../S/1259.html#L61'>za</a>                 61 ext/zip/lib/zip_discard.c     _zip_hash_free(za-&gt;names);</span>
+<span class='curline'><a href='../S/1259.html#L63'>za</a>                 63 ext/zip/lib/zip_discard.c     if (za-&gt;entry) {</span>
+<span class='curline'><a href='../S/1259.html#L64'>za</a>                 64 ext/zip/lib/zip_discard.c 	for (i=0; i&lt;za-&gt;nentry; i++)</span>
+<span class='curline'><a href='../S/1259.html#L65'>za</a>                 65 ext/zip/lib/zip_discard.c 	    _zip_entry_finalize(za-&gt;entry+i);</span>
+<span class='curline'><a href='../S/1259.html#L66'>za</a>                 66 ext/zip/lib/zip_discard.c 	free(za-&gt;entry);</span>
+<span class='curline'><a href='../S/1259.html#L69'>za</a>                 69 ext/zip/lib/zip_discard.c     for (i=0; i&lt;za-&gt;nopen_source; i++) {</span>
+<span class='curline'><a href='../S/1259.html#L70'>za</a>                 70 ext/zip/lib/zip_discard.c 	_zip_source_invalidate(za-&gt;open_source[i]);</span>
+<span class='curline'><a href='../S/1259.html#L72'>za</a>                 72 ext/zip/lib/zip_discard.c     free(za-&gt;open_source);</span>
+<span class='curline'><a href='../S/1259.html#L74'>za</a>                 74 ext/zip/lib/zip_discard.c     zip_error_fini(&amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1259.html#L76'>za</a>                 76 ext/zip/lib/zip_discard.c     free(za);</span>
+<span class='curline'><a href='../S/1263.html#L39'>za</a>                 39 ext/zip/lib/zip_error_clear.c zip_error_clear(zip_t *za)</span>
+<span class='curline'><a href='../S/1263.html#L41'>za</a>                 41 ext/zip/lib/zip_error_clear.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1263.html#L44'>za</a>                 44 ext/zip/lib/zip_error_clear.c     _zip_error_clear(&amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1264.html#L40'>za</a>                 40 ext/zip/lib/zip_error_get.c zip_error_get(zip_t *za, int *zep, int *sep)</span>
+<span class='curline'><a href='../S/1264.html#L42'>za</a>                 42 ext/zip/lib/zip_error_get.c     _zip_error_get(&amp;za-&gt;error, zep, sep);</span>
+<span class='curline'><a href='../S/1264.html#L47'>za</a>                 47 ext/zip/lib/zip_error_get.c zip_get_error(zip_t *za)</span>
+<span class='curline'><a href='../S/1264.html#L49'>za</a>                 49 ext/zip/lib/zip_error_get.c     return &amp;za-&gt;error;</span>
+<span class='curline'><a href='../S/1268.html#L324'>za</a>                324 ext/zip/lib/zip_extra_field.c _zip_ef_write(zip_t *za, const zip_extra_field_t *ef, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1268.html#L339'>za</a>                339 ext/zip/lib/zip_extra_field.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1268.html#L343'>za</a>                343 ext/zip/lib/zip_extra_field.c 	    if (_zip_write(za, b, 4) &lt; 0) {</span>
+<span class='curline'><a href='../S/1268.html#L348'>za</a>                348 ext/zip/lib/zip_extra_field.c 		if (_zip_write(za, ef-&gt;data, ef-&gt;size) &lt; 0) {</span>
+<span class='curline'><a href='../S/1268.html#L362'>za</a>                362 ext/zip/lib/zip_extra_field.c _zip_read_local_ef(zip_t *za, zip_uint64_t idx)</span>
+<span class='curline'><a href='../S/1268.html#L369'>za</a>                369 ext/zip/lib/zip_extra_field.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1268.html#L370'>za</a>                370 ext/zip/lib/zip_extra_field.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1268.html#L374'>za</a>                374 ext/zip/lib/zip_extra_field.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1268.html#L380'>za</a>                380 ext/zip/lib/zip_extra_field.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_SEEK, EFBIG);</span>
+<span class='curline'><a href='../S/1268.html#L384'>za</a>                384 ext/zip/lib/zip_extra_field.c     if (zip_source_seek(za-&gt;src, (zip_int64_t)(e-&gt;orig-&gt;offset + 26), SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1268.html#L385'>za</a>                385 ext/zip/lib/zip_extra_field.c 	_zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1268.html#L389'>za</a>                389 ext/zip/lib/zip_extra_field.c     if ((buffer = _zip_buffer_new_from_source(za-&gt;src, sizeof(b), b, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1268.html#L398'>za</a>                398 ext/zip/lib/zip_extra_field.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1268.html#L408'>za</a>                408 ext/zip/lib/zip_extra_field.c 	if (zip_source_seek(za-&gt;src, fname_len, SEEK_CUR) &lt; 0) {</span>
+<span class='curline'><a href='../S/1268.html#L409'>za</a>                409 ext/zip/lib/zip_extra_field.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_SEEK, errno);</span>
+<span class='curline'><a href='../S/1268.html#L413'>za</a>                413 ext/zip/lib/zip_extra_field.c 	ef_raw = _zip_read_data(NULL, za-&gt;src, ef_len, 0, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1268.html#L418'>za</a>                418 ext/zip/lib/zip_extra_field.c 	if (!_zip_ef_parse(ef_raw, ef_len, ZIP_EF_LOCAL, &amp;ef, &amp;za-&gt;error)) {</span>
+<span class='curline'><a href='../S/1269.html#L39'>za</a>                 39 ext/zip/lib/zip_extra_field_api.c zip_file_extra_field_delete(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_idx, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L44'>za</a>                 44 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L49'>za</a>                 49 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L53'>za</a>                 53 ext/zip/lib/zip_extra_field_api.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L56'>za</a>                 56 ext/zip/lib/zip_extra_field_api.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1269.html#L57'>za</a>                 57 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1269.html#L61'>za</a>                 61 ext/zip/lib/zip_extra_field_api.c     if (_zip_file_extra_field_prepare_for_change(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L64'>za</a>                 64 ext/zip/lib/zip_extra_field_api.c     de = za-&gt;entry[idx].changes;</span>
+<span class='curline'><a href='../S/1269.html#L72'>za</a>                 72 ext/zip/lib/zip_extra_field_api.c zip_file_extra_field_delete_by_id(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_uint16_t ef_idx, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L77'>za</a>                 77 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L82'>za</a>                 82 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L86'>za</a>                 86 ext/zip/lib/zip_extra_field_api.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L89'>za</a>                 89 ext/zip/lib/zip_extra_field_api.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1269.html#L90'>za</a>                 90 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1269.html#L94'>za</a>                 94 ext/zip/lib/zip_extra_field_api.c     if (_zip_file_extra_field_prepare_for_change(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L97'>za</a>                 97 ext/zip/lib/zip_extra_field_api.c     de = za-&gt;entry[idx].changes;</span>
+<span class='curline'><a href='../S/1269.html#L105'>za</a>                105 ext/zip/lib/zip_extra_field_api.c zip_file_extra_field_get(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_idx, zip_uint16_t *idp, zip_uint16_t *lenp, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L114'>za</a>                114 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L118'>za</a>                118 ext/zip/lib/zip_extra_field_api.c     if ((de=_zip_get_dirent(za, idx, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L122'>za</a>                122 ext/zip/lib/zip_extra_field_api.c 	if (_zip_read_local_ef(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L144'>za</a>                144 ext/zip/lib/zip_extra_field_api.c     zip_error_set(&amp;za-&gt;error, ZIP_ER_NOENT, 0);</span>
+<span class='curline'><a href='../S/1269.html#L151'>za</a>                151 ext/zip/lib/zip_extra_field_api.c zip_file_extra_field_get_by_id(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_uint16_t ef_idx, zip_uint16_t *lenp, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L156'>za</a>                156 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L160'>za</a>                160 ext/zip/lib/zip_extra_field_api.c     if ((de=_zip_get_dirent(za, idx, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L164'>za</a>                164 ext/zip/lib/zip_extra_field_api.c 	if (_zip_read_local_ef(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L167'>za</a>                167 ext/zip/lib/zip_extra_field_api.c     return _zip_ef_get_by_id(de-&gt;extra_fields, lenp, ef_id, ef_idx, flags, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1269.html#L172'>za</a>                172 ext/zip/lib/zip_extra_field_api.c zip_file_extra_fields_count(zip_t *za, zip_uint64_t idx, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L179'>za</a>                179 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L183'>za</a>                183 ext/zip/lib/zip_extra_field_api.c     if ((de=_zip_get_dirent(za, idx, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L187'>za</a>                187 ext/zip/lib/zip_extra_field_api.c 	if (_zip_read_local_ef(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L200'>za</a>                200 ext/zip/lib/zip_extra_field_api.c zip_file_extra_fields_count_by_id(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L207'>za</a>                207 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L211'>za</a>                211 ext/zip/lib/zip_extra_field_api.c     if ((de=_zip_get_dirent(za, idx, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L215'>za</a>                215 ext/zip/lib/zip_extra_field_api.c 	if (_zip_read_local_ef(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L228'>za</a>                228 ext/zip/lib/zip_extra_field_api.c zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_uint16_t ef_idx, const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1269.html#L236'>za</a>                236 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L240'>za</a>                240 ext/zip/lib/zip_extra_field_api.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1269.html#L243'>za</a>                243 ext/zip/lib/zip_extra_field_api.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1269.html#L244'>za</a>                244 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1269.html#L249'>za</a>                249 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L253'>za</a>                253 ext/zip/lib/zip_extra_field_api.c     if (_zip_file_extra_field_prepare_for_change(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L256'>za</a>                256 ext/zip/lib/zip_extra_field_api.c     de = za-&gt;entry[idx].changes;</span>
+<span class='curline'><a href='../S/1269.html#L275'>za</a>                275 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L294'>za</a>                294 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L299'>za</a>                299 ext/zip/lib/zip_extra_field_api.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1269.html#L332'>za</a>                332 ext/zip/lib/zip_extra_field_api.c _zip_file_extra_field_prepare_for_change(zip_t *za, zip_uint64_t idx)</span>
+<span class='curline'><a href='../S/1269.html#L336'>za</a>                336 ext/zip/lib/zip_extra_field_api.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1269.html#L337'>za</a>                337 ext/zip/lib/zip_extra_field_api.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1269.html#L341'>za</a>                341 ext/zip/lib/zip_extra_field_api.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1269.html#L347'>za</a>                347 ext/zip/lib/zip_extra_field_api.c 	if (_zip_read_local_ef(za, idx) &lt; 0)</span>
+<span class='curline'><a href='../S/1269.html#L353'>za</a>                353 ext/zip/lib/zip_extra_field_api.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1269.html#L359'>za</a>                359 ext/zip/lib/zip_extra_field_api.c 	if ((e-&gt;changes-&gt;extra_fields=_zip_ef_clone(e-&gt;orig-&gt;extra_fields, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1271.html#L46'>za</a>                 46 ext/zip/lib/zip_fdopen.c     zip_t *za;</span>
+<span class='curline'><a href='../S/1271.html#L76'>za</a>                 76 ext/zip/lib/zip_fdopen.c     if ((za = zip_open_from_source(src, _flags, &amp;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1271.html#L84'>za</a>                 84 ext/zip/lib/zip_fdopen.c     return za;</span>
+<span class='curline'><a href='../S/1272.html#L45'>za</a>                 45 ext/zip/lib/zip_file_add.c zip_file_add(zip_t *za, const char *name, zip_source_t *source, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1272.html#L48'>za</a>                 48 ext/zip/lib/zip_file_add.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1272.html#L52'>za</a>                 52 ext/zip/lib/zip_file_add.c     return _zip_file_replace(za, ZIP_UINT64_MAX, name, source, flags);</span>
+<span class='curline'><a href='../S/1275.html#L40'>za</a>                 40 ext/zip/lib/zip_file_get_comment.c zip_file_get_comment(zip_t *za, zip_uint64_t idx, zip_uint32_t *lenp, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1275.html#L46'>za</a>                 46 ext/zip/lib/zip_file_get_comment.c     if ((de=_zip_get_dirent(za, idx, flags, NULL)) == NULL)</span>
+<span class='curline'><a href='../S/1275.html#L49'>za</a>                 49 ext/zip/lib/zip_file_get_comment.c     if ((str=_zip_string_get(de-&gt;comment, &amp;len, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1276.html#L37'>za</a>                 37 ext/zip/lib/zip_file_get_external_attributes.c zip_file_get_external_attributes(zip_t *za, zip_uint64_t idx, zip_flags_t flags, zip_uint8_t *opsys, zip_uint32_t *attributes)</span>
+<span class='curline'><a href='../S/1276.html#L41'>za</a>                 41 ext/zip/lib/zip_file_get_external_attributes.c     if ((de=_zip_get_dirent(za, idx, flags, NULL)) == NULL)</span>
+<span class='curline'><a href='../S/1277.html#L51'>za</a>                 51 ext/zip/lib/zip_file_get_offset.c _zip_file_get_offset(const zip_t *za, zip_uint64_t idx, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1277.html#L56'>za</a>                 56 ext/zip/lib/zip_file_get_offset.c     offset = za-&gt;entry[idx].orig-&gt;offset;</span>
+<span class='curline'><a href='../S/1277.html#L58'>za</a>                 58 ext/zip/lib/zip_file_get_offset.c     if (zip_source_seek(za-&gt;src, (zip_int64_t)offset, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1277.html#L59'>za</a>                 59 ext/zip/lib/zip_file_get_offset.c 	_zip_error_set_from_source(error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1277.html#L64'>za</a>                 64 ext/zip/lib/zip_file_get_offset.c     if ((size=_zip_dirent_size(za-&gt;src, ZIP_EF_LOCAL, error)) &lt; 0)</span>
+<span class='curline'><a href='../S/1278.html#L41'>za</a>                 41 ext/zip/lib/zip_file_rename.c zip_file_rename(zip_t *za, zip_uint64_t idx, const char *name, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1278.html#L46'>za</a>                 46 ext/zip/lib/zip_file_rename.c     if (idx &gt;= za-&gt;nentry || (name != NULL &amp;&amp; strlen(name) &gt; ZIP_UINT16_MAX)) {</span>
+<span class='curline'><a href='../S/1278.html#L47'>za</a>                 47 ext/zip/lib/zip_file_rename.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1278.html#L51'>za</a>                 51 ext/zip/lib/zip_file_rename.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1278.html#L52'>za</a>                 52 ext/zip/lib/zip_file_rename.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1278.html#L56'>za</a>                 56 ext/zip/lib/zip_file_rename.c     if ((old_name=zip_get_name(za, idx, 0)) == NULL)</span>
+<span class='curline'><a href='../S/1278.html#L63'>za</a>                 63 ext/zip/lib/zip_file_rename.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1278.html#L67'>za</a>                 67 ext/zip/lib/zip_file_rename.c     return _zip_set_name(za, idx, name, flags);</span>
+<span class='curline'><a href='../S/1279.html#L39'>za</a>                 39 ext/zip/lib/zip_file_replace.c zip_file_replace(zip_t *za, zip_uint64_t idx, zip_source_t *source, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1279.html#L41'>za</a>                 41 ext/zip/lib/zip_file_replace.c     if (idx &gt;= za-&gt;nentry || source == NULL) {</span>
+<span class='curline'><a href='../S/1279.html#L42'>za</a>                 42 ext/zip/lib/zip_file_replace.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1279.html#L46'>za</a>                 46 ext/zip/lib/zip_file_replace.c     if (_zip_file_replace(za, idx, NULL, source, flags) == -1)</span>
+<span class='curline'><a href='../S/1279.html#L57'>za</a>                 57 ext/zip/lib/zip_file_replace.c _zip_file_replace(zip_t *za, zip_uint64_t idx, const char *name, zip_source_t *source, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1279.html#L61'>za</a>                 61 ext/zip/lib/zip_file_replace.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1279.html#L62'>za</a>                 62 ext/zip/lib/zip_file_replace.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1279.html#L66'>za</a>                 66 ext/zip/lib/zip_file_replace.c     za_nentry_prev = za-&gt;nentry;</span>
+<span class='curline'><a href='../S/1279.html#L71'>za</a>                 71 ext/zip/lib/zip_file_replace.c 	    i = _zip_name_locate(za, name, flags, NULL);</span>
+<span class='curline'><a href='../S/1279.html#L75'>za</a>                 75 ext/zip/lib/zip_file_replace.c 	    if ((i=_zip_add_entry(za)) &lt; 0)</span>
+<span class='curline'><a href='../S/1279.html#L81'>za</a>                 81 ext/zip/lib/zip_file_replace.c     if (name &amp;&amp; _zip_set_name(za, idx, name, flags) != 0) {</span>
+<span class='curline'><a href='../S/1279.html#L82'>za</a>                 82 ext/zip/lib/zip_file_replace.c 	if (za-&gt;nentry != za_nentry_prev) {</span>
+<span class='curline'><a href='../S/1279.html#L83'>za</a>                 83 ext/zip/lib/zip_file_replace.c 	    _zip_entry_finalize(za-&gt;entry+idx);</span>
+<span class='curline'><a href='../S/1279.html#L84'>za</a>                 84 ext/zip/lib/zip_file_replace.c 	    za-&gt;nentry = za_nentry_prev;</span>
+<span class='curline'><a href='../S/1279.html#L91'>za</a>                 91 ext/zip/lib/zip_file_replace.c     _zip_unchange_data(za-&gt;entry+idx);</span>
+<span class='curline'><a href='../S/1279.html#L93'>za</a>                 93 ext/zip/lib/zip_file_replace.c     if (za-&gt;entry[idx].orig != NULL &amp;&amp; (za-&gt;entry[idx].changes == NULL || (za-&gt;entry[idx].changes-&gt;changed &amp; ZIP_DIRENT_COMP_METHOD) == 0)) {</span>
+<span class='curline'><a href='../S/1279.html#L94'>za</a>                 94 ext/zip/lib/zip_file_replace.c         if (za-&gt;entry[idx].changes == NULL) {</span>
+<span class='curline'><a href='../S/1279.html#L95'>za</a>                 95 ext/zip/lib/zip_file_replace.c             if ((za-&gt;entry[idx].changes=_zip_dirent_clone(za-&gt;entry[idx].orig)) == NULL) {</span>
+<span class='curline'><a href='../S/1279.html#L96'>za</a>                 96 ext/zip/lib/zip_file_replace.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1279.html#L101'>za</a>                101 ext/zip/lib/zip_file_replace.c         za-&gt;entry[idx].changes-&gt;comp_method = ZIP_CM_REPLACED_DEFAULT;</span>
+<span class='curline'><a href='../S/1279.html#L102'>za</a>                102 ext/zip/lib/zip_file_replace.c         za-&gt;entry[idx].changes-&gt;changed |= ZIP_DIRENT_COMP_METHOD;</span>
+<span class='curline'><a href='../S/1279.html#L105'>za</a>                105 ext/zip/lib/zip_file_replace.c     za-&gt;entry[idx].source = source;</span>
+<span class='curline'><a href='../S/1280.html#L41'>za</a>                 41 ext/zip/lib/zip_file_set_comment.c zip_file_set_comment(zip_t *za, zip_uint64_t idx,</span>
+<span class='curline'><a href='../S/1280.html#L48'>za</a>                 48 ext/zip/lib/zip_file_set_comment.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1280.html#L51'>za</a>                 51 ext/zip/lib/zip_file_set_comment.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1280.html#L52'>za</a>                 52 ext/zip/lib/zip_file_set_comment.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1280.html#L57'>za</a>                 57 ext/zip/lib/zip_file_set_comment.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1280.html#L62'>za</a>                 62 ext/zip/lib/zip_file_set_comment.c 	if ((cstr=_zip_string_new((const zip_uint8_t *)comment, len, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1280.html#L70'>za</a>                 70 ext/zip/lib/zip_file_set_comment.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1280.html#L86'>za</a>                 86 ext/zip/lib/zip_file_set_comment.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1281.html#L37'>za</a>                 37 ext/zip/lib/zip_file_set_external_attributes.c zip_file_set_external_attributes(zip_t *za, zip_uint64_t idx, zip_flags_t flags, zip_uint8_t opsys, zip_uint32_t attributes)</span>
+<span class='curline'><a href='../S/1281.html#L44'>za</a>                 44 ext/zip/lib/zip_file_set_external_attributes.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1281.html#L47'>za</a>                 47 ext/zip/lib/zip_file_set_external_attributes.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1281.html#L48'>za</a>                 48 ext/zip/lib/zip_file_set_external_attributes.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1281.html#L52'>za</a>                 52 ext/zip/lib/zip_file_set_external_attributes.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1281.html#L62'>za</a>                 62 ext/zip/lib/zip_file_set_external_attributes.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1282.html#L36'>za</a>                 36 ext/zip/lib/zip_file_set_mtime.c ZIP_EXTERN int zip_file_set_mtime(zip_t *za, zip_uint64_t idx, time_t mtime, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1282.html#L41'>za</a>                 41 ext/zip/lib/zip_file_set_mtime.c     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)</span>
+<span class='curline'><a href='../S/1282.html#L44'>za</a>                 44 ext/zip/lib/zip_file_set_mtime.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1282.html#L45'>za</a>                 45 ext/zip/lib/zip_file_set_mtime.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1282.html#L49'>za</a>                 49 ext/zip/lib/zip_file_set_mtime.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1282.html#L56'>za</a>                 56 ext/zip/lib/zip_file_set_mtime.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1285.html#L39'>za</a>                 39 ext/zip/lib/zip_fopen.c zip_fopen(zip_t *za, const char *fname, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1285.html#L43'>za</a>                 43 ext/zip/lib/zip_fopen.c     if ((idx=zip_name_locate(za, fname, flags)) &lt; 0)</span>
+<span class='curline'><a href='../S/1285.html#L46'>za</a>                 46 ext/zip/lib/zip_fopen.c     return zip_fopen_index_encrypted(za, (zip_uint64_t)idx, flags, za-&gt;default_password);</span>
+<span class='curline'><a href='../S/1286.html#L39'>za</a>                 39 ext/zip/lib/zip_fopen_encrypted.c zip_fopen_encrypted(zip_t *za, const char *fname, zip_flags_t flags, const char *password)</span>
+<span class='curline'><a href='../S/1286.html#L43'>za</a>                 43 ext/zip/lib/zip_fopen_encrypted.c     if ((idx=zip_name_locate(za, fname, flags)) &lt; 0)</span>
+<span class='curline'><a href='../S/1286.html#L46'>za</a>                 46 ext/zip/lib/zip_fopen_encrypted.c     return zip_fopen_index_encrypted(za, (zip_uint64_t)idx, flags, password);</span>
+<span class='curline'><a href='../S/1287.html#L42'>za</a>                 42 ext/zip/lib/zip_fopen_index.c zip_fopen_index(zip_t *za, zip_uint64_t index, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1287.html#L44'>za</a>                 44 ext/zip/lib/zip_fopen_index.c     return zip_fopen_index_encrypted(za, index, flags, za-&gt;default_password);</span>
+<span class='curline'><a href='../S/1288.html#L40'>za</a>                 40 ext/zip/lib/zip_fopen_index_encrypted.c static zip_file_t *_zip_file_new(zip_t *za);</span>
+<span class='curline'><a href='../S/1288.html#L44'>za</a>                 44 ext/zip/lib/zip_fopen_index_encrypted.c zip_fopen_index_encrypted(zip_t *za, zip_uint64_t index, zip_flags_t flags,</span>
+<span class='curline'><a href='../S/1288.html#L50'>za</a>                 50 ext/zip/lib/zip_fopen_index_encrypted.c     if ((src=_zip_source_zip_new(za, za, index, flags, 0, 0, password)) == NULL)</span>
+<span class='curline'><a href='../S/1288.html#L54'>za</a>                 54 ext/zip/lib/zip_fopen_index_encrypted.c 	_zip_error_set_from_source(&amp;za-&gt;error, src);</span>
+<span class='curline'><a href='../S/1288.html#L59'>za</a>                 59 ext/zip/lib/zip_fopen_index_encrypted.c     if ((zf=_zip_file_new(za)) == NULL) {</span>
+<span class='curline'><a href='../S/1288.html#L71'>za</a>                 71 ext/zip/lib/zip_fopen_index_encrypted.c _zip_file_new(zip_t *za)</span>
+<span class='curline'><a href='../S/1288.html#L76'>za</a>                 76 ext/zip/lib/zip_fopen_index_encrypted.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1288.html#L80'>za</a>                 80 ext/zip/lib/zip_fopen_index_encrypted.c     zf-&gt;za = za;</span>
+<span class='curline'><a href='../S/1290.html#L41'>za</a>                 41 ext/zip/lib/zip_get_archive_comment.c zip_get_archive_comment(zip_t *za, int *lenp, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1290.html#L47'>za</a>                 47 ext/zip/lib/zip_get_archive_comment.c     if ((flags &amp; ZIP_FL_UNCHANGED) || (za-&gt;comment_changes == NULL))</span>
+<span class='curline'><a href='../S/1290.html#L48'>za</a>                 48 ext/zip/lib/zip_get_archive_comment.c 	comment = za-&gt;comment_orig;</span>
+<span class='curline'><a href='../S/1290.html#L50'>za</a>                 50 ext/zip/lib/zip_get_archive_comment.c 	comment = za-&gt;comment_changes;</span>
+<span class='curline'><a href='../S/1290.html#L52'>za</a>                 52 ext/zip/lib/zip_get_archive_comment.c     if ((str=_zip_string_get(comment, &amp;len, flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1291.html#L39'>za</a>                 39 ext/zip/lib/zip_get_archive_flag.c zip_get_archive_flag(zip_t *za, zip_flags_t flag, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1291.html#L43'>za</a>                 43 ext/zip/lib/zip_get_archive_flag.c     fl = (flags &amp; ZIP_FL_UNCHANGED) ? za-&gt;flags : za-&gt;ch_flags;</span>
+<span class='curline'><a href='../S/1294.html#L40'>za</a>                 40 ext/zip/lib/zip_get_file_comment.c zip_get_file_comment(zip_t *za, zip_uint64_t idx, int *lenp, int flags)</span>
+<span class='curline'><a href='../S/1294.html#L45'>za</a>                 45 ext/zip/lib/zip_get_file_comment.c     if ((s=zip_file_get_comment(za, idx, &amp;len, (zip_flags_t)flags)) != NULL) {</span>
+<span class='curline'><a href='../S/1295.html#L41'>za</a>                 41 ext/zip/lib/zip_get_name.c zip_get_name(zip_t *za, zip_uint64_t idx, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1295.html#L43'>za</a>                 43 ext/zip/lib/zip_get_name.c     return _zip_get_name(za, idx, flags, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1295.html#L48'>za</a>                 48 ext/zip/lib/zip_get_name.c _zip_get_name(zip_t *za, zip_uint64_t idx, zip_flags_t flags, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1295.html#L53'>za</a>                 53 ext/zip/lib/zip_get_name.c     if ((de=_zip_get_dirent(za, idx, flags, error)) == NULL)</span>
+<span class='curline'><a href='../S/1296.html#L39'>za</a>                 39 ext/zip/lib/zip_get_num_entries.c zip_get_num_entries(zip_t *za, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1296.html#L43'>za</a>                 43 ext/zip/lib/zip_get_num_entries.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1296.html#L47'>za</a>                 47 ext/zip/lib/zip_get_num_entries.c 	n = za-&gt;nentry;</span>
+<span class='curline'><a href='../S/1296.html#L48'>za</a>                 48 ext/zip/lib/zip_get_num_entries.c 	while (n&gt;0 &amp;&amp; za-&gt;entry[n-1].orig == NULL)</span>
+<span class='curline'><a href='../S/1296.html#L52'>za</a>                 52 ext/zip/lib/zip_get_num_entries.c     return (zip_int64_t)za-&gt;nentry;</span>
+<span class='curline'><a href='../S/1297.html#L41'>za</a>                 41 ext/zip/lib/zip_get_num_files.c zip_get_num_files(zip_t *za)</span>
+<span class='curline'><a href='../S/1297.html#L43'>za</a>                 43 ext/zip/lib/zip_get_num_files.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1297.html#L46'>za</a>                 46 ext/zip/lib/zip_get_num_files.c     if (za-&gt;nentry &gt; INT_MAX) {</span>
+<span class='curline'><a href='../S/1297.html#L47'>za</a>                 47 ext/zip/lib/zip_get_num_files.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_OPNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1297.html#L51'>za</a>                 51 ext/zip/lib/zip_get_num_files.c     return (int)za-&gt;nentry;</span>
+<span class='curline'><a href='../S/1299.html#L124'>za</a>                124 ext/zip/lib/zip_io_util.c _zip_write(zip_t *za, const void *data, zip_uint64_t length)</span>
+<span class='curline'><a href='../S/1299.html#L128'>za</a>                128 ext/zip/lib/zip_io_util.c     if ((n = zip_source_write(za-&gt;src, data, length)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1299.html#L129'>za</a>                129 ext/zip/lib/zip_io_util.c         _zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1299.html#L133'>za</a>                133 ext/zip/lib/zip_io_util.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_WRITE, EINTR);</span>
+<span class='curline'><a href='../S/1301.html#L44'>za</a>                 44 ext/zip/lib/zip_name_locate.c zip_name_locate(zip_t *za, const char *fname, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1301.html#L46'>za</a>                 46 ext/zip/lib/zip_name_locate.c     return _zip_name_locate(za, fname, flags, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1301.html#L51'>za</a>                 51 ext/zip/lib/zip_name_locate.c _zip_name_locate(zip_t *za, const char *fname, zip_flags_t flags, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1301.html#L57'>za</a>                 57 ext/zip/lib/zip_name_locate.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1301.html#L69'>za</a>                 69 ext/zip/lib/zip_name_locate.c 	for (i=0; i&lt;za-&gt;nentry; i++) {</span>
+<span class='curline'><a href='../S/1301.html#L70'>za</a>                 70 ext/zip/lib/zip_name_locate.c 	    fn = _zip_get_name(za, i, flags, error);</span>
+<span class='curline'><a href='../S/1301.html#L92'>za</a>                 92 ext/zip/lib/zip_name_locate.c 	return _zip_hash_lookup(za-&gt;names, (const zip_uint8_t *)fname, flags, error);</span>
+<span class='curline'><a href='../S/1302.html#L47'>za</a>                 47 ext/zip/lib/zip_new.c     zip_t *za;</span>
+<span class='curline'><a href='../S/1302.html#L49'>za</a>                 49 ext/zip/lib/zip_new.c     za = (zip_t *)malloc(sizeof(struct zip));</span>
+<span class='curline'><a href='../S/1302.html#L50'>za</a>                 50 ext/zip/lib/zip_new.c     if (!za) {</span>
+<span class='curline'><a href='../S/1302.html#L55'>za</a>                 55 ext/zip/lib/zip_new.c     if ((za-&gt;names = _zip_hash_new(ZIP_HASH_TABLE_SIZE, error)) == NULL) {</span>
+<span class='curline'><a href='../S/1302.html#L56'>za</a>                 56 ext/zip/lib/zip_new.c 	free(za);</span>
+<span class='curline'><a href='../S/1302.html#L60'>za</a>                 60 ext/zip/lib/zip_new.c     za-&gt;src = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L61'>za</a>                 61 ext/zip/lib/zip_new.c     za-&gt;open_flags = 0;</span>
+<span class='curline'><a href='../S/1302.html#L62'>za</a>                 62 ext/zip/lib/zip_new.c     zip_error_init(&amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1302.html#L63'>za</a>                 63 ext/zip/lib/zip_new.c     za-&gt;flags = za-&gt;ch_flags = 0;</span>
+<span class='curline'><a href='../S/1302.html#L64'>za</a>                 64 ext/zip/lib/zip_new.c     za-&gt;default_password = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L65'>za</a>                 65 ext/zip/lib/zip_new.c     za-&gt;comment_orig = za-&gt;comment_changes = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L66'>za</a>                 66 ext/zip/lib/zip_new.c     za-&gt;comment_changed = 0;</span>
+<span class='curline'><a href='../S/1302.html#L67'>za</a>                 67 ext/zip/lib/zip_new.c     za-&gt;nentry = za-&gt;nentry_alloc = 0;</span>
+<span class='curline'><a href='../S/1302.html#L68'>za</a>                 68 ext/zip/lib/zip_new.c     za-&gt;entry = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L69'>za</a>                 69 ext/zip/lib/zip_new.c     za-&gt;nopen_source = za-&gt;nopen_source_alloc = 0;</span>
+<span class='curline'><a href='../S/1302.html#L70'>za</a>                 70 ext/zip/lib/zip_new.c     za-&gt;open_source = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L71'>za</a>                 71 ext/zip/lib/zip_new.c     za-&gt;tempdir = NULL;</span>
+<span class='curline'><a href='../S/1302.html#L73'>za</a>                 73 ext/zip/lib/zip_new.c     return za;</span>
+<span class='curline'><a href='../S/1303.html#L50'>za</a>                 50 ext/zip/lib/zip_open.c static zip_int64_t _zip_checkcons(zip_t *za, zip_cdir_t *cdir, zip_error_t *error);</span>
+<span class='curline'><a href='../S/1303.html#L51'>za</a>                 51 ext/zip/lib/zip_open.c static zip_cdir_t *_zip_find_central_dir(zip_t *za, zip_uint64_t len);</span>
+<span class='curline'><a href='../S/1303.html#L55'>za</a>                 55 ext/zip/lib/zip_open.c static zip_cdir_t *_zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_error_t *error);</span>
+<span class='curline'><a href='../S/1303.html#L63'>za</a>                 63 ext/zip/lib/zip_open.c     zip_t *za;</span>
+<span class='curline'><a href='../S/1303.html#L74'>za</a>                 74 ext/zip/lib/zip_open.c     if ((za = zip_open_from_source(src, _flags, &amp;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L82'>za</a>                 82 ext/zip/lib/zip_open.c     return za;</span>
+<span class='curline'><a href='../S/1303.html#L133'>za</a>                133 ext/zip/lib/zip_open.c 	zip_t *za;</span>
+<span class='curline'><a href='../S/1303.html#L144'>za</a>                144 ext/zip/lib/zip_open.c 	    za = _zip_allocate_new(src, flags, error);</span>
+<span class='curline'><a href='../S/1303.html#L148'>za</a>                148 ext/zip/lib/zip_open.c 	    za = _zip_open(src, flags, error);</span>
+<span class='curline'><a href='../S/1303.html#L151'>za</a>                151 ext/zip/lib/zip_open.c 	if (za == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L155'>za</a>                155 ext/zip/lib/zip_open.c 	return za;</span>
+<span class='curline'><a href='../S/1303.html#L161'>za</a>                161 ext/zip/lib/zip_open.c zip_archive_set_tempdir(zip_t *za, const char *tempdir)</span>
+<span class='curline'><a href='../S/1303.html#L167'>za</a>                167 ext/zip/lib/zip_open.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, errno);</span>
+<span class='curline'><a href='../S/1303.html#L174'>za</a>                174 ext/zip/lib/zip_open.c     free(za-&gt;tempdir);</span>
+<span class='curline'><a href='../S/1303.html#L175'>za</a>                175 ext/zip/lib/zip_open.c     za-&gt;tempdir = new_tempdir;</span>
+<span class='curline'><a href='../S/1303.html#L183'>za</a>                183 ext/zip/lib/zip_open.c     zip_t *za;</span>
+<span class='curline'><a href='../S/1303.html#L201'>za</a>                201 ext/zip/lib/zip_open.c 	if ((za=_zip_allocate_new(src, flags, error)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L206'>za</a>                206 ext/zip/lib/zip_open.c 	return za;</span>
+<span class='curline'><a href='../S/1303.html#L209'>za</a>                209 ext/zip/lib/zip_open.c     if ((za=_zip_allocate_new(src, flags, error)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L213'>za</a>                213 ext/zip/lib/zip_open.c     if ((cdir = _zip_find_central_dir(za, len)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L214'>za</a>                214 ext/zip/lib/zip_open.c         _zip_error_copy(error, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1303.html#L217'>za</a>                217 ext/zip/lib/zip_open.c 	zip_discard(za);</span>
+<span class='curline'><a href='../S/1303.html#L221'>za</a>                221 ext/zip/lib/zip_open.c     za-&gt;entry = cdir-&gt;entry;</span>
+<span class='curline'><a href='../S/1303.html#L222'>za</a>                222 ext/zip/lib/zip_open.c     za-&gt;nentry = cdir-&gt;nentry;</span>
+<span class='curline'><a href='../S/1303.html#L223'>za</a>                223 ext/zip/lib/zip_open.c     za-&gt;nentry_alloc = cdir-&gt;nentry_alloc;</span>
+<span class='curline'><a href='../S/1303.html#L224'>za</a>                224 ext/zip/lib/zip_open.c     za-&gt;comment_orig = cdir-&gt;comment;</span>
+<span class='curline'><a href='../S/1303.html#L228'>za</a>                228 ext/zip/lib/zip_open.c     for (idx = 0; idx &lt; za-&gt;nentry; idx++) {</span>
+<span class='curline'><a href='../S/1303.html#L229'>za</a>                229 ext/zip/lib/zip_open.c 	const zip_uint8_t *name = _zip_string_get(za-&gt;entry[idx].orig-&gt;filename, NULL, 0, error);</span>
+<span class='curline'><a href='../S/1303.html#L233'>za</a>                233 ext/zip/lib/zip_open.c 		zip_discard(za);</span>
+<span class='curline'><a href='../S/1303.html#L237'>za</a>                237 ext/zip/lib/zip_open.c 	if (_zip_hash_add(za-&gt;names, name, idx, ZIP_FL_UNCHANGED, &amp;za-&gt;error) == false) {</span>
+<span class='curline'><a href='../S/1303.html#L238'>za</a>                238 ext/zip/lib/zip_open.c 	    if (za-&gt;error.zip_err != ZIP_ER_EXISTS || (flags &amp; ZIP_CHECKCONS)) {</span>
+<span class='curline'><a href='../S/1303.html#L239'>za</a>                239 ext/zip/lib/zip_open.c 		_zip_error_copy(error, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1303.html#L242'>za</a>                242 ext/zip/lib/zip_open.c 		zip_discard(za);</span>
+<span class='curline'><a href='../S/1303.html#L248'>za</a>                248 ext/zip/lib/zip_open.c     za-&gt;ch_flags = za-&gt;flags;</span>
+<span class='curline'><a href='../S/1303.html#L250'>za</a>                250 ext/zip/lib/zip_open.c     return za;</span>
+<span class='curline'><a href='../S/1303.html#L276'>za</a>                276 ext/zip/lib/zip_open.c _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1303.html#L298'>za</a>                298 ext/zip/lib/zip_open.c         cd = _zip_read_eocd64(za-&gt;src, buffer, buf_offset, za-&gt;flags, error);</span>
+<span class='curline'><a href='../S/1303.html#L302'>za</a>                302 ext/zip/lib/zip_open.c         cd = _zip_read_eocd(buffer, buf_offset, za-&gt;flags, error);</span>
+<span class='curline'><a href='../S/1303.html#L318'>za</a>                318 ext/zip/lib/zip_open.c     if (comment_len || (za-&gt;open_flags &amp; ZIP_CHECKCONS)) {</span>
+<span class='curline'><a href='../S/1303.html#L324'>za</a>                324 ext/zip/lib/zip_open.c         if (tail_len &lt; comment_len || ((za-&gt;open_flags &amp; ZIP_CHECKCONS) &amp;&amp; tail_len != comment_len)) {</span>
+<span class='curline'><a href='../S/1303.html#L357'>za</a>                357 ext/zip/lib/zip_open.c         if (zip_source_seek(za-&gt;src, (zip_int64_t)cd-&gt;offset, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1303.html#L358'>za</a>                358 ext/zip/lib/zip_open.c             _zip_error_set_from_source(error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L364'>za</a>                364 ext/zip/lib/zip_open.c 	if (zip_source_tell(za-&gt;src) != (zip_int64_t)cd-&gt;offset) {</span>
+<span class='curline'><a href='../S/1303.html#L375'>za</a>                375 ext/zip/lib/zip_open.c 	if ((cd-&gt;entry[i].orig=_zip_dirent_new()) == NULL || (entry_size = _zip_dirent_read(cd-&gt;entry[i].orig, za-&gt;src, cd_buffer, false, error)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1303.html#L391'>za</a>                391 ext/zip/lib/zip_open.c     if (za-&gt;open_flags &amp; ZIP_CHECKCONS) {</span>
+<span class='curline'><a href='../S/1303.html#L398'>za</a>                398 ext/zip/lib/zip_open.c             zip_int64_t offset = zip_source_tell(za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L401'>za</a>                401 ext/zip/lib/zip_open.c                 _zip_error_set_from_source(error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L429'>za</a>                429 ext/zip/lib/zip_open.c _zip_checkcons(zip_t *za, zip_cdir_t *cd, zip_error_t *error)</span>
+<span class='curline'><a href='../S/1303.html#L460'>za</a>                460 ext/zip/lib/zip_open.c         if (zip_source_seek(za-&gt;src, (zip_int64_t)cd-&gt;entry[i].orig-&gt;offset, SEEK_SET) &lt; 0) {</span>
+<span class='curline'><a href='../S/1303.html#L461'>za</a>                461 ext/zip/lib/zip_open.c             _zip_error_set_from_source(error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L465'>za</a>                465 ext/zip/lib/zip_open.c 	if (_zip_dirent_read(&amp;temp, za-&gt;src, NULL, true, error) == -1) {</span>
+<span class='curline'><a href='../S/1303.html#L521'>za</a>                521 ext/zip/lib/zip_open.c     zip_t *za;</span>
+<span class='curline'><a href='../S/1303.html#L523'>za</a>                523 ext/zip/lib/zip_open.c     if ((za = _zip_new(error)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L527'>za</a>                527 ext/zip/lib/zip_open.c     za-&gt;src = src;</span>
+<span class='curline'><a href='../S/1303.html#L528'>za</a>                528 ext/zip/lib/zip_open.c     za-&gt;open_flags = flags;</span>
+<span class='curline'><a href='../S/1303.html#L530'>za</a>                530 ext/zip/lib/zip_open.c         za-&gt;flags |= ZIP_AFL_RDONLY;</span>
+<span class='curline'><a href='../S/1303.html#L531'>za</a>                531 ext/zip/lib/zip_open.c         za-&gt;ch_flags |= ZIP_AFL_RDONLY;</span>
+<span class='curline'><a href='../S/1303.html#L533'>za</a>                533 ext/zip/lib/zip_open.c     return za;</span>
+<span class='curline'><a href='../S/1303.html#L560'>za</a>                560 ext/zip/lib/zip_open.c _zip_find_central_dir(zip_t *za, zip_uint64_t len)</span>
+<span class='curline'><a href='../S/1303.html#L572'>za</a>                572 ext/zip/lib/zip_open.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_NOZIP, 0);</span>
+<span class='curline'><a href='../S/1303.html#L577'>za</a>                577 ext/zip/lib/zip_open.c     if (zip_source_seek(za-&gt;src, -(zip_int64_t)buflen, SEEK_END) &lt; 0) {</span>
+<span class='curline'><a href='../S/1303.html#L578'>za</a>                578 ext/zip/lib/zip_open.c 	zip_error_t *src_error = zip_source_error(za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L581'>za</a>                581 ext/zip/lib/zip_open.c 	    _zip_error_copy(&amp;za-&gt;error, src_error);</span>
+<span class='curline'><a href='../S/1303.html#L585'>za</a>                585 ext/zip/lib/zip_open.c     if ((buf_offset = zip_source_tell(za-&gt;src)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1303.html#L586'>za</a>                586 ext/zip/lib/zip_open.c         _zip_error_set_from_source(&amp;za-&gt;error, za-&gt;src);</span>
+<span class='curline'><a href='../S/1303.html#L590'>za</a>                590 ext/zip/lib/zip_open.c     if ((buffer = _zip_buffer_new_from_source(za-&gt;src, buflen, NULL, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L605'>za</a>                605 ext/zip/lib/zip_open.c         if ((cdirnew = _zip_read_cdir(za, buffer, (zip_uint64_t)buf_offset, &amp;error)) != NULL) {</span>
+<span class='curline'><a href='../S/1303.html#L608'>za</a>                608 ext/zip/lib/zip_open.c                     best = _zip_checkcons(za, cdir, &amp;error);</span>
+<span class='curline'><a href='../S/1303.html#L611'>za</a>                611 ext/zip/lib/zip_open.c                 a = _zip_checkcons(za, cdirnew, &amp;error);</span>
+<span class='curline'><a href='../S/1303.html#L623'>za</a>                623 ext/zip/lib/zip_open.c                 if (za-&gt;open_flags &amp; ZIP_CHECKCONS)</span>
+<span class='curline'><a href='../S/1303.html#L624'>za</a>                624 ext/zip/lib/zip_open.c                     best = _zip_checkcons(za, cdir, &amp;error);</span>
+<span class='curline'><a href='../S/1303.html#L639'>za</a>                639 ext/zip/lib/zip_open.c         _zip_error_copy(&amp;za-&gt;error, &amp;error);</span>
+<span class='curline'><a href='../S/1304.html#L42'>za</a>                 42 ext/zip/lib/zip_rename.c zip_rename(zip_t *za, zip_uint64_t idx, const char *name)</span>
+<span class='curline'><a href='../S/1304.html#L44'>za</a>                 44 ext/zip/lib/zip_rename.c     return zip_file_rename(za, idx, name, 0);</span>
+<span class='curline'><a href='../S/1305.html#L40'>za</a>                 40 ext/zip/lib/zip_replace.c zip_replace(zip_t *za, zip_uint64_t idx, zip_source_t *source)</span>
+<span class='curline'><a href='../S/1305.html#L42'>za</a>                 42 ext/zip/lib/zip_replace.c     return zip_file_replace(za, idx, source, 0);</span>
+<span class='curline'><a href='../S/1306.html#L41'>za</a>                 41 ext/zip/lib/zip_set_archive_comment.c zip_set_archive_comment(zip_t *za, const char *comment, zip_uint16_t len)</span>
+<span class='curline'><a href='../S/1306.html#L45'>za</a>                 45 ext/zip/lib/zip_set_archive_comment.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1306.html#L46'>za</a>                 46 ext/zip/lib/zip_set_archive_comment.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1306.html#L51'>za</a>                 51 ext/zip/lib/zip_set_archive_comment.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1306.html#L56'>za</a>                 56 ext/zip/lib/zip_set_archive_comment.c 	if ((cstr=_zip_string_new((const zip_uint8_t *)comment, len, ZIP_FL_ENC_GUESS, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1306.html#L61'>za</a>                 61 ext/zip/lib/zip_set_archive_comment.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1306.html#L68'>za</a>                 68 ext/zip/lib/zip_set_archive_comment.c     _zip_string_free(za-&gt;comment_changes);</span>
+<span class='curline'><a href='../S/1306.html#L69'>za</a>                 69 ext/zip/lib/zip_set_archive_comment.c     za-&gt;comment_changes = NULL;</span>
+<span class='curline'><a href='../S/1306.html#L71'>za</a>                 71 ext/zip/lib/zip_set_archive_comment.c     if (((za-&gt;comment_orig &amp;&amp; _zip_string_equal(za-&gt;comment_orig, cstr))</span>
+<span class='curline'><a href='../S/1306.html#L72'>za</a>                 72 ext/zip/lib/zip_set_archive_comment.c 	 || (za-&gt;comment_orig == NULL &amp;&amp; cstr == NULL))) {</span>
+<span class='curline'><a href='../S/1306.html#L74'>za</a>                 74 ext/zip/lib/zip_set_archive_comment.c 	za-&gt;comment_changed = 0;</span>
+<span class='curline'><a href='../S/1306.html#L77'>za</a>                 77 ext/zip/lib/zip_set_archive_comment.c 	za-&gt;comment_changes = cstr;</span>
+<span class='curline'><a href='../S/1306.html#L78'>za</a>                 78 ext/zip/lib/zip_set_archive_comment.c 	za-&gt;comment_changed = 1;</span>
+<span class='curline'><a href='../S/1307.html#L39'>za</a>                 39 ext/zip/lib/zip_set_archive_flag.c zip_set_archive_flag(zip_t *za, zip_flags_t flag, int value)</span>
+<span class='curline'><a href='../S/1307.html#L44'>za</a>                 44 ext/zip/lib/zip_set_archive_flag.c 	new_flags = za-&gt;ch_flags | flag;</span>
+<span class='curline'><a href='../S/1307.html#L46'>za</a>                 46 ext/zip/lib/zip_set_archive_flag.c 	new_flags = za-&gt;ch_flags &amp; ~flag;</span>
+<span class='curline'><a href='../S/1307.html#L48'>za</a>                 48 ext/zip/lib/zip_set_archive_flag.c     if (new_flags == za-&gt;ch_flags)</span>
+<span class='curline'><a href='../S/1307.html#L51'>za</a>                 51 ext/zip/lib/zip_set_archive_flag.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1307.html#L52'>za</a>                 52 ext/zip/lib/zip_set_archive_flag.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1307.html#L57'>za</a>                 57 ext/zip/lib/zip_set_archive_flag.c 	&amp;&amp; (za-&gt;ch_flags &amp; ZIP_AFL_RDONLY) == 0) {</span>
+<span class='curline'><a href='../S/1307.html#L58'>za</a>                 58 ext/zip/lib/zip_set_archive_flag.c 	if (_zip_changed(za, NULL)) {</span>
+<span class='curline'><a href='../S/1307.html#L59'>za</a>                 59 ext/zip/lib/zip_set_archive_flag.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_CHANGED, 0);</span>
+<span class='curline'><a href='../S/1307.html#L64'>za</a>                 64 ext/zip/lib/zip_set_archive_flag.c     za-&gt;ch_flags = new_flags;</span>
+<span class='curline'><a href='../S/1308.html#L42'>za</a>                 42 ext/zip/lib/zip_set_default_password.c zip_set_default_password(zip_t *za, const char *passwd)</span>
+<span class='curline'><a href='../S/1308.html#L44'>za</a>                 44 ext/zip/lib/zip_set_default_password.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1308.html#L47'>za</a>                 47 ext/zip/lib/zip_set_default_password.c     free(za-&gt;default_password);</span>
+<span class='curline'><a href='../S/1308.html#L50'>za</a>                 50 ext/zip/lib/zip_set_default_password.c 	if ((za-&gt;default_password=strdup(passwd)) == NULL) {</span>
+<span class='curline'><a href='../S/1308.html#L51'>za</a>                 51 ext/zip/lib/zip_set_default_password.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1308.html#L56'>za</a>                 56 ext/zip/lib/zip_set_default_password.c 	za-&gt;default_password = NULL;</span>
+<span class='curline'><a href='../S/1309.html#L42'>za</a>                 42 ext/zip/lib/zip_set_file_comment.c zip_set_file_comment(zip_t *za, zip_uint64_t idx, const char *comment, int len)</span>
+<span class='curline'><a href='../S/1309.html#L45'>za</a>                 45 ext/zip/lib/zip_set_file_comment.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1309.html#L48'>za</a>                 48 ext/zip/lib/zip_set_file_comment.c     return zip_file_set_comment(za, idx, comment, (zip_uint16_t)len, 0);</span>
+<span class='curline'><a href='../S/1310.html#L39'>za</a>                 39 ext/zip/lib/zip_set_file_compression.c zip_set_file_compression(zip_t *za, zip_uint64_t idx, zip_int32_t method, zip_uint32_t flags)</span>
+<span class='curline'><a href='../S/1310.html#L44'>za</a>                 44 ext/zip/lib/zip_set_file_compression.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1310.html#L45'>za</a>                 45 ext/zip/lib/zip_set_file_compression.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1310.html#L49'>za</a>                 49 ext/zip/lib/zip_set_file_compression.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1310.html#L50'>za</a>                 50 ext/zip/lib/zip_set_file_compression.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1310.html#L55'>za</a>                 55 ext/zip/lib/zip_set_file_compression.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_COMPNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1310.html#L59'>za</a>                 59 ext/zip/lib/zip_set_file_compression.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1310.html#L77'>za</a>                 77 ext/zip/lib/zip_set_file_compression.c                 zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1311.html#L42'>za</a>                 42 ext/zip/lib/zip_set_name.c _zip_set_name(zip_t *za, zip_uint64_t idx, const char *name, zip_flags_t flags)</span>
+<span class='curline'><a href='../S/1311.html#L51'>za</a>                 51 ext/zip/lib/zip_set_name.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1311.html#L52'>za</a>                 52 ext/zip/lib/zip_set_name.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1311.html#L56'>za</a>                 56 ext/zip/lib/zip_set_name.c     if (ZIP_IS_RDONLY(za)) {</span>
+<span class='curline'><a href='../S/1311.html#L57'>za</a>                 57 ext/zip/lib/zip_set_name.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_RDONLY, 0);</span>
+<span class='curline'><a href='../S/1311.html#L63'>za</a>                 63 ext/zip/lib/zip_set_name.c 	if ((str=_zip_string_new((const zip_uint8_t *)name, (zip_uint16_t)strlen(name), flags, &amp;za-&gt;error)) == NULL)</span>
+<span class='curline'><a href='../S/1311.html#L72'>za</a>                 72 ext/zip/lib/zip_set_name.c     if ((i=_zip_name_locate(za, name, 0, NULL)) &gt;= 0 &amp;&amp; (zip_uint64_t)i != idx) {</span>
+<span class='curline'><a href='../S/1311.html#L74'>za</a>                 74 ext/zip/lib/zip_set_name.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_EXISTS, 0);</span>
+<span class='curline'><a href='../S/1311.html#L84'>za</a>                 84 ext/zip/lib/zip_set_name.c     e = za-&gt;entry+idx;</span>
+<span class='curline'><a href='../S/1311.html#L93'>za</a>                 93 ext/zip/lib/zip_set_name.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1311.html#L99'>za</a>                 99 ext/zip/lib/zip_set_name.c     if ((new_name = _zip_string_get(same_as_orig ? e-&gt;orig-&gt;filename : str, NULL, 0, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1311.html#L115'>za</a>                115 ext/zip/lib/zip_set_name.c 	if ((old_name = _zip_string_get(old_str, NULL, 0, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1311.html#L124'>za</a>                124 ext/zip/lib/zip_set_name.c     if (_zip_hash_add(za-&gt;names, new_name, idx, 0, &amp;za-&gt;error) == false) {</span>
+<span class='curline'><a href='../S/1311.html#L129'>za</a>                129 ext/zip/lib/zip_set_name.c 	_zip_hash_delete(za-&gt;names, old_name, NULL);</span>
+<span class='curline'><a href='../S/1313.html#L75'>za</a>                 75 ext/zip/lib/zip_source_buffer.c zip_source_buffer(zip_t *za, const void *data, zip_uint64_t len, int freep)</span>
+<span class='curline'><a href='../S/1313.html#L77'>za</a>                 77 ext/zip/lib/zip_source_buffer.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1313.html#L80'>za</a>                 80 ext/zip/lib/zip_source_buffer.c     return zip_source_buffer_create(data, len, freep, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1317.html#L55'>za</a>                 55 ext/zip/lib/zip_source_crc.c zip_source_crc(zip_t *za, zip_source_t *src, int validate)</span>
+<span class='curline'><a href='../S/1317.html#L60'>za</a>                 60 ext/zip/lib/zip_source_crc.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1317.html#L65'>za</a>                 65 ext/zip/lib/zip_source_crc.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1317.html#L76'>za</a>                 76 ext/zip/lib/zip_source_crc.c     return zip_source_layered(za, src, crc_read, ctx);</span>
+<span class='curline'><a href='../S/1318.html#L60'>za</a>                 60 ext/zip/lib/zip_source_deflate.c zip_source_deflate(zip_t *za, zip_source_t *src, zip_int32_t cm, int flags)</span>
+<span class='curline'><a href='../S/1318.html#L66'>za</a>                 66 ext/zip/lib/zip_source_deflate.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1318.html#L71'>za</a>                 71 ext/zip/lib/zip_source_deflate.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1318.html#L83'>za</a>                 83 ext/zip/lib/zip_source_deflate.c     if ((s2=zip_source_layered(za, src,</span>
+<span class='curline'><a href='../S/1320.html#L41'>za</a>                 41 ext/zip/lib/zip_source_file.c zip_source_file(zip_t *za, const char *fname, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1320.html#L43'>za</a>                 43 ext/zip/lib/zip_source_file.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1320.html#L46'>za</a>                 46 ext/zip/lib/zip_source_file.c     return zip_source_file_create(fname, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1321.html#L91'>za</a>                 91 ext/zip/lib/zip_source_filep.c zip_source_filep(zip_t *za, FILE *file, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1321.html#L93'>za</a>                 93 ext/zip/lib/zip_source_filep.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1321.html#L96'>za</a>                 96 ext/zip/lib/zip_source_filep.c     return zip_source_filep_create(file, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1323.html#L41'>za</a>                 41 ext/zip/lib/zip_source_function.c zip_source_function(zip_t *za, zip_source_callback zcb, void *ud)</span>
+<span class='curline'><a href='../S/1323.html#L43'>za</a>                 43 ext/zip/lib/zip_source_function.c     if (za == NULL) {</span>
+<span class='curline'><a href='../S/1323.html#L47'>za</a>                 47 ext/zip/lib/zip_source_function.c     return zip_source_function_create(zcb, ud, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1325.html#L41'>za</a>                 41 ext/zip/lib/zip_source_layered.c zip_source_layered(zip_t *za, zip_source_t *src, zip_source_layered_callback cb, void *ud)</span>
+<span class='curline'><a href='../S/1325.html#L43'>za</a>                 43 ext/zip/lib/zip_source_layered.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1325.html#L46'>za</a>                 46 ext/zip/lib/zip_source_layered.c     return zip_source_layered_create(src, cb, ud, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1327.html#L60'>za</a>                 60 ext/zip/lib/zip_source_pkware.c zip_source_pkware(zip_t *za, zip_source_t *src,</span>
+<span class='curline'><a href='../S/1327.html#L67'>za</a>                 67 ext/zip/lib/zip_source_pkware.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1327.html#L71'>za</a>                 71 ext/zip/lib/zip_source_pkware.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_ENCRNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1327.html#L76'>za</a>                 76 ext/zip/lib/zip_source_pkware.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1327.html#L87'>za</a>                 87 ext/zip/lib/zip_source_pkware.c     if ((s2=zip_source_layered(za, src, pkware_decrypt, ctx)) == NULL) {</span>
+<span class='curline'><a href='../S/1337.html#L55'>za</a>                 55 ext/zip/lib/zip_source_win32a.c zip_source_win32a(zip_t *za, const char *fname, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1337.html#L57'>za</a>                 57 ext/zip/lib/zip_source_win32a.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1337.html#L60'>za</a>                 60 ext/zip/lib/zip_source_win32a.c     return zip_source_win32a_create(fname, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1338.html#L51'>za</a>                 51 ext/zip/lib/zip_source_win32handle.c zip_source_win32handle(zip_t *za, HANDLE h, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1338.html#L53'>za</a>                 53 ext/zip/lib/zip_source_win32handle.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1338.html#L56'>za</a>                 56 ext/zip/lib/zip_source_win32handle.c     return zip_source_win32handle_create(h, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1339.html#L42'>za</a>                 42 ext/zip/lib/zip_source_win32utf8.c zip_source_file(zip_t *za, const char *fname, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1339.html#L44'>za</a>                 44 ext/zip/lib/zip_source_win32utf8.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1339.html#L47'>za</a>                 47 ext/zip/lib/zip_source_win32utf8.c     return zip_source_file_create(fname, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1340.html#L55'>za</a>                 55 ext/zip/lib/zip_source_win32w.c zip_source_win32w(zip_t *za, const wchar_t *fname, zip_uint64_t start, zip_int64_t len)</span>
+<span class='curline'><a href='../S/1340.html#L57'>za</a>                 57 ext/zip/lib/zip_source_win32w.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1340.html#L60'>za</a>                 60 ext/zip/lib/zip_source_win32w.c     return zip_source_win32w_create(fname, start, len, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1341.html#L54'>za</a>                 54 ext/zip/lib/zip_source_window.c zip_source_window(zip_t *za, zip_source_t *src, zip_uint64_t start, zip_uint64_t len)</span>
+<span class='curline'><a href='../S/1341.html#L56'>za</a>                 56 ext/zip/lib/zip_source_window.c     return _zip_source_window_new(src, start, len, NULL, &amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1341.html#L94'>za</a>                 94 ext/zip/lib/zip_source_window.c _zip_source_set_source_archive(zip_source_t *src, zip_t *za)</span>
+<span class='curline'><a href='../S/1341.html#L96'>za</a>                 96 ext/zip/lib/zip_source_window.c     src-&gt;source_archive = za;</span>
+<span class='curline'><a href='../S/1341.html#L97'>za</a>                 97 ext/zip/lib/zip_source_window.c     return _zip_register_source(za, src);</span>
+<span class='curline'><a href='../S/1341.html#L219'>za</a>                219 ext/zip/lib/zip_source_window.c _zip_deregister_source(zip_t *za, zip_source_t *src)</span>
+<span class='curline'><a href='../S/1341.html#L223'>za</a>                223 ext/zip/lib/zip_source_window.c     for (i=0; i&lt;za-&gt;nopen_source; i++) {</span>
+<span class='curline'><a href='../S/1341.html#L224'>za</a>                224 ext/zip/lib/zip_source_window.c         if (za-&gt;open_source[i] == src) {</span>
+<span class='curline'><a href='../S/1341.html#L225'>za</a>                225 ext/zip/lib/zip_source_window.c             za-&gt;open_source[i] = za-&gt;open_source[za-&gt;nopen_source-1];</span>
+<span class='curline'><a href='../S/1341.html#L226'>za</a>                226 ext/zip/lib/zip_source_window.c             za-&gt;nopen_source--;</span>
+<span class='curline'><a href='../S/1341.html#L234'>za</a>                234 ext/zip/lib/zip_source_window.c _zip_register_source(zip_t *za, zip_source_t *src)</span>
+<span class='curline'><a href='../S/1341.html#L238'>za</a>                238 ext/zip/lib/zip_source_window.c     if (za-&gt;nopen_source+1 &gt;= za-&gt;nopen_source_alloc) {</span>
+<span class='curline'><a href='../S/1341.html#L240'>za</a>                240 ext/zip/lib/zip_source_window.c         n = za-&gt;nopen_source_alloc + 10;</span>
+<span class='curline'><a href='../S/1341.html#L241'>za</a>                241 ext/zip/lib/zip_source_window.c         open_source = (zip_source_t **)realloc(za-&gt;open_source, n*sizeof(zip_source_t *));</span>
+<span class='curline'><a href='../S/1341.html#L243'>za</a>                243 ext/zip/lib/zip_source_window.c             zip_error_set(&amp;za-&gt;error, ZIP_ER_MEMORY, 0);</span>
+<span class='curline'><a href='../S/1341.html#L246'>za</a>                246 ext/zip/lib/zip_source_window.c         za-&gt;nopen_source_alloc = n;</span>
+<span class='curline'><a href='../S/1341.html#L247'>za</a>                247 ext/zip/lib/zip_source_window.c         za-&gt;open_source = open_source;</span>
+<span class='curline'><a href='../S/1341.html#L250'>za</a>                250 ext/zip/lib/zip_source_window.c     za-&gt;open_source[za-&gt;nopen_source++] = src;</span>
+<span class='curline'><a href='../S/1343.html#L42'>za</a>                 42 ext/zip/lib/zip_source_zip.c zip_source_zip(zip_t *za, zip_t *srcza, zip_uint64_t srcidx,</span>
+<span class='curline'><a href='../S/1343.html#L46'>za</a>                 46 ext/zip/lib/zip_source_zip.c         zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1343.html#L58'>za</a>                 58 ext/zip/lib/zip_source_zip.c     return _zip_source_zip_new(za, srcza, srcidx, flags, start, (zip_uint64_t)len, NULL);</span>
+<span class='curline'><a href='../S/1344.html#L41'>za</a>                 41 ext/zip/lib/zip_source_zip_new.c _zip_source_zip_new(zip_t *za, zip_t *srcza, zip_uint64_t srcidx, zip_flags_t flags, zip_uint64_t start, zip_uint64_t len, const char *password)</span>
+<span class='curline'><a href='../S/1344.html#L49'>za</a>                 49 ext/zip/lib/zip_source_zip_new.c     if (za == NULL)</span>
+<span class='curline'><a href='../S/1344.html#L53'>za</a>                 53 ext/zip/lib/zip_source_zip_new.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1344.html#L59'>za</a>                 59 ext/zip/lib/zip_source_zip_new.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_CHANGED, 0);</span>
+<span class='curline'><a href='../S/1344.html#L64'>za</a>                 64 ext/zip/lib/zip_source_zip_new.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INTERNAL, 0);</span>
+<span class='curline'><a href='../S/1344.html#L72'>za</a>                 72 ext/zip/lib/zip_source_zip_new.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1344.html#L78'>za</a>                 78 ext/zip/lib/zip_source_zip_new.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1344.html#L85'>za</a>                 85 ext/zip/lib/zip_source_zip_new.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_NOPASSWD, 0);</span>
+<span class='curline'><a href='../S/1344.html#L89'>za</a>                 89 ext/zip/lib/zip_source_zip_new.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_ENCRNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1344.html#L98'>za</a>                 98 ext/zip/lib/zip_source_zip_new.c 		zip_error_set(&amp;za-&gt;error, ZIP_ER_COMPNOTSUPP, 0);</span>
+<span class='curline'><a href='../S/1344.html#L104'>za</a>                104 ext/zip/lib/zip_source_zip_new.c     if ((offset=_zip_file_get_offset(srcza, srcidx, &amp;za-&gt;error)) == 0)</span>
+<span class='curline'><a href='../S/1344.html#L108'>za</a>                108 ext/zip/lib/zip_source_zip_new.c 	return zip_source_buffer(za, NULL, 0, 0);</span>
+<span class='curline'><a href='../S/1344.html#L120'>za</a>                120 ext/zip/lib/zip_source_zip_new.c 	if ((src = _zip_source_window_new(srcza-&gt;src, offset+start, st2.size, &amp;st2, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1344.html#L125'>za</a>                125 ext/zip/lib/zip_source_zip_new.c 	if ((src = _zip_source_window_new(srcza-&gt;src, offset, st.comp_size, &amp;st, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1344.html#L138'>za</a>                138 ext/zip/lib/zip_source_zip_new.c 	s2 = enc_impl(za, src, st.encryption_method, 0, password);</span>
+<span class='curline'><a href='../S/1344.html#L146'>za</a>                146 ext/zip/lib/zip_source_zip_new.c 	s2 = comp_impl(za, src, st.comp_method, 0);</span>
+<span class='curline'><a href='../S/1344.html#L155'>za</a>                155 ext/zip/lib/zip_source_zip_new.c 	s2 = zip_source_crc(za, src, 1);</span>
+<span class='curline'><a href='../S/1344.html#L164'>za</a>                164 ext/zip/lib/zip_source_zip_new.c 	s2 = zip_source_window(za, src, start, len ? len : st.size-start);</span>
+<span class='curline'><a href='../S/1345.html#L39'>za</a>                 39 ext/zip/lib/zip_stat.c zip_stat(zip_t *za, const char *fname, zip_flags_t flags, zip_stat_t *st)</span>
+<span class='curline'><a href='../S/1345.html#L43'>za</a>                 43 ext/zip/lib/zip_stat.c     if ((idx=zip_name_locate(za, fname, flags)) &lt; 0)</span>
+<span class='curline'><a href='../S/1345.html#L46'>za</a>                 46 ext/zip/lib/zip_stat.c     return zip_stat_index(za, (zip_uint64_t)idx, flags, st);</span>
+<span class='curline'><a href='../S/1346.html#L39'>za</a>                 39 ext/zip/lib/zip_stat_index.c zip_stat_index(zip_t *za, zip_uint64_t index, zip_flags_t flags,</span>
+<span class='curline'><a href='../S/1346.html#L45'>za</a>                 45 ext/zip/lib/zip_stat_index.c     if ((de=_zip_get_dirent(za, index, flags, NULL)) == NULL)</span>
+<span class='curline'><a href='../S/1346.html#L48'>za</a>                 48 ext/zip/lib/zip_stat_index.c     if ((name=zip_get_name(za, index, flags)) == NULL)</span>
+<span class='curline'><a href='../S/1346.html#L53'>za</a>                 53 ext/zip/lib/zip_stat_index.c 	&amp;&amp; ZIP_ENTRY_DATA_CHANGED(za-&gt;entry+index)) {</span>
+<span class='curline'><a href='../S/1346.html#L54'>za</a>                 54 ext/zip/lib/zip_stat_index.c 	if (zip_source_stat(za-&gt;entry[index].source, st) &lt; 0) {</span>
+<span class='curline'><a href='../S/1346.html#L55'>za</a>                 55 ext/zip/lib/zip_stat_index.c 	    zip_error_set(&amp;za-&gt;error, ZIP_ER_CHANGED, 0);</span>
+<span class='curline'><a href='../S/1348.html#L39'>za</a>                 39 ext/zip/lib/zip_strerror.c zip_strerror(zip_t *za)</span>
+<span class='curline'><a href='../S/1348.html#L41'>za</a>                 41 ext/zip/lib/zip_strerror.c     return zip_error_strerror(&amp;za-&gt;error);</span>
+<span class='curline'><a href='../S/1349.html#L182'>za</a>                182 ext/zip/lib/zip_string.c _zip_string_write(zip_t *za, const zip_string_t *s)</span>
+<span class='curline'><a href='../S/1349.html#L187'>za</a>                187 ext/zip/lib/zip_string.c     return _zip_write(za, s-&gt;raw, s-&gt;length);</span>
+<span class='curline'><a href='../S/1350.html#L41'>za</a>                 41 ext/zip/lib/zip_unchange.c zip_unchange(zip_t *za, zip_uint64_t idx)</span>
+<span class='curline'><a href='../S/1350.html#L43'>za</a>                 43 ext/zip/lib/zip_unchange.c     return _zip_unchange(za, idx, 0);</span>
+<span class='curline'><a href='../S/1350.html#L48'>za</a>                 48 ext/zip/lib/zip_unchange.c _zip_unchange(zip_t *za, zip_uint64_t idx, int allow_duplicates)</span>
+<span class='curline'><a href='../S/1350.html#L53'>za</a>                 53 ext/zip/lib/zip_unchange.c     if (idx &gt;= za-&gt;nentry) {</span>
+<span class='curline'><a href='../S/1350.html#L54'>za</a>                 54 ext/zip/lib/zip_unchange.c 	zip_error_set(&amp;za-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1350.html#L58'>za</a>                 58 ext/zip/lib/zip_unchange.c     if (!allow_duplicates &amp;&amp; za-&gt;entry[idx].changes &amp;&amp; (za-&gt;entry[idx].changes-&gt;changed &amp; ZIP_DIRENT_FILENAME)) {</span>
+<span class='curline'><a href='../S/1350.html#L59'>za</a>                 59 ext/zip/lib/zip_unchange.c 	if (za-&gt;entry[idx].orig != NULL) {</span>
+<span class='curline'><a href='../S/1350.html#L60'>za</a>                 60 ext/zip/lib/zip_unchange.c 	    if ((orig_name=_zip_get_name(za, idx, ZIP_FL_UNCHANGED, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1350.html#L64'>za</a>                 64 ext/zip/lib/zip_unchange.c 	    i = _zip_name_locate(za, orig_name, 0, NULL);</span>
+<span class='curline'><a href='../S/1350.html#L66'>za</a>                 66 ext/zip/lib/zip_unchange.c 		zip_error_set(&amp;za-&gt;error, ZIP_ER_EXISTS, 0);</span>
+<span class='curline'><a href='../S/1350.html#L74'>za</a>                 74 ext/zip/lib/zip_unchange.c 	if ((changed_name=_zip_get_name(za, idx, 0, &amp;za-&gt;error)) == NULL) {</span>
+<span class='curline'><a href='../S/1350.html#L79'>za</a>                 79 ext/zip/lib/zip_unchange.c 	    if (_zip_hash_add(za-&gt;names, (const zip_uint8_t *)orig_name, idx, 0, &amp;za-&gt;error) == false) {</span>
+<span class='curline'><a href='../S/1350.html#L83'>za</a>                 83 ext/zip/lib/zip_unchange.c 	if (_zip_hash_delete(za-&gt;names, (const zip_uint8_t *)changed_name, &amp;za-&gt;error) == false) {</span>
+<span class='curline'><a href='../S/1350.html#L84'>za</a>                 84 ext/zip/lib/zip_unchange.c 	    _zip_hash_delete(za-&gt;names, (const zip_uint8_t *)orig_name, NULL);</span>
+<span class='curline'><a href='../S/1350.html#L89'>za</a>                 89 ext/zip/lib/zip_unchange.c     _zip_dirent_free(za-&gt;entry[idx].changes);</span>
+<span class='curline'><a href='../S/1350.html#L90'>za</a>                 90 ext/zip/lib/zip_unchange.c     za-&gt;entry[idx].changes = NULL;</span>
+<span class='curline'><a href='../S/1350.html#L92'>za</a>                 92 ext/zip/lib/zip_unchange.c     _zip_unchange_data(za-&gt;entry+idx);</span>
+<span class='curline'><a href='../S/1351.html#L41'>za</a>                 41 ext/zip/lib/zip_unchange_all.c zip_unchange_all(zip_t *za)</span>
+<span class='curline'><a href='../S/1351.html#L46'>za</a>                 46 ext/zip/lib/zip_unchange_all.c     _zip_hash_revert(za-&gt;names);</span>
+<span class='curline'><a href='../S/1351.html#L49'>za</a>                 49 ext/zip/lib/zip_unchange_all.c     for (i=0; i&lt;za-&gt;nentry; i++)</span>
+<span class='curline'><a href='../S/1351.html#L50'>za</a>                 50 ext/zip/lib/zip_unchange_all.c 	ret |= _zip_unchange(za, i, 1);</span>
+<span class='curline'><a href='../S/1351.html#L52'>za</a>                 52 ext/zip/lib/zip_unchange_all.c     ret |= zip_unchange_archive(za);</span>
+<span class='curline'><a href='../S/1352.html#L41'>za</a>                 41 ext/zip/lib/zip_unchange_archive.c zip_unchange_archive(zip_t *za)</span>
+<span class='curline'><a href='../S/1352.html#L43'>za</a>                 43 ext/zip/lib/zip_unchange_archive.c     if (za-&gt;comment_changed) {</span>
+<span class='curline'><a href='../S/1352.html#L44'>za</a>                 44 ext/zip/lib/zip_unchange_archive.c 	_zip_string_free(za-&gt;comment_changes);</span>
+<span class='curline'><a href='../S/1352.html#L45'>za</a>                 45 ext/zip/lib/zip_unchange_archive.c 	za-&gt;comment_changes = NULL;</span>
+<span class='curline'><a href='../S/1352.html#L46'>za</a>                 46 ext/zip/lib/zip_unchange_archive.c 	za-&gt;comment_changed = 0;</span>
+<span class='curline'><a href='../S/1352.html#L49'>za</a>                 49 ext/zip/lib/zip_unchange_archive.c     za-&gt;ch_flags = za-&gt;flags;</span>
+<span class='curline'><a href='../S/1356.html#L323'>za</a>                323 ext/zip/lib/zipint.h     zip_t *za;		/* zip archive containing this file */</span>
+<span class='curline'><a href='../S/1356.html#L460'>za</a>                460 ext/zip/lib/zipint.h #define ZIP_IS_RDONLY(za)	((za)-&gt;ch_flags &amp; ZIP_AFL_RDONLY)</span>
+<span class='curline'><a href='../S/1356.html#L490'>za</a>                490 ext/zip/lib/zipint.h zip_int64_t _zip_cdir_write(zip_t *za, const zip_filelist_t *filelist, zip_uint64_t survivors);</span>
+<span class='curline'><a href='../S/1356.html#L491'>za</a>                491 ext/zip/lib/zipint.h void _zip_deregister_source(zip_t *za, zip_source_t *src);</span>
+<span class='curline'><a href='../S/1356.html#L501'>za</a>                501 ext/zip/lib/zipint.h int _zip_dirent_write(zip_t *za, zip_dirent_t *dirent, zip_flags_t flags);</span>
+<span class='curline'><a href='../S/1356.html#L512'>za</a>                512 ext/zip/lib/zipint.h int _zip_ef_write(zip_t *za, const zip_extra_field_t *ef, zip_flags_t flags);</span>
+<span class='curline'><a href='../S/1356.html#L550'>za</a>                550 ext/zip/lib/zipint.h int _zip_register_source(zip_t *za, zip_source_t *src);</span>
+<span class='curline'><a href='../S/1356.html#L569'>za</a>                569 ext/zip/lib/zipint.h int _zip_string_write(zip_t *za, const zip_string_t *string);</span>
+<span class='curline'><a href='../S/1356.html#L583'>za</a>                583 ext/zip/lib/zipint.h int _zip_write(zip_t *za, const void *data, zip_uint64_t length);</span>
+<span class='curline'><a href='../S/1358.html#L61'>za</a>                 61 ext/zip/php_zip.c #define PHP_ZIP_STAT_INDEX(za, index, flags, sb) \</span>
+<span class='curline'><a href='../S/1358.html#L62'>za</a>                 62 ext/zip/php_zip.c 	if (zip_stat_index(za, index, flags, &amp;sb) != 0) { \</span>
+<span class='curline'><a href='../S/1358.html#L68'>za</a>                 68 ext/zip/php_zip.c #define PHP_ZIP_STAT_PATH(za, path, path_len, flags, sb) \</span>
+<span class='curline'><a href='../S/1358.html#L73'>za</a>                 73 ext/zip/php_zip.c 	if (zip_stat(za, path, flags, &amp;sb) != 0) { \</span>
+<span class='curline'><a href='../S/1358.html#L79'>za</a>                 79 ext/zip/php_zip.c #define PHP_ZIP_SET_FILE_COMMENT(za, index, comment, comment_len) \</span>
+<span class='curline'><a href='../S/1358.html#L82'>za</a>                 82 ext/zip/php_zip.c 		if (zip_set_file_comment(za, index, NULL, 0) &lt; 0) { \</span>
+<span class='curline'><a href='../S/1358.html#L85'>za</a>                 85 ext/zip/php_zip.c 	} else if (zip_set_file_comment(za, index, comment, comment_len) &lt; 0) { \</span>
+<span class='curline'><a href='../S/1358.html#L135'>za</a>                135 ext/zip/php_zip.c static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len)</span>
+<span class='curline'><a href='../S/1358.html#L167'>za</a>                167 ext/zip/php_zip.c 	if (path_cleaned_len &gt;= MAXPATHLEN || zip_stat(za, file, 0, &amp;sb) != 0) {</span>
+<span class='curline'><a href='../S/1358.html#L248'>za</a>                248 ext/zip/php_zip.c 	zf = zip_fopen(za, file, 0);</span>
+<span class='curline'><a href='../S/1358.html#L278'>za</a>                278 ext/zip/php_zip.c static int php_zip_add_file(struct zip *za, const char *filename, size_t filename_len,</span>
+<span class='curline'><a href='../S/1358.html#L299'>za</a>                299 ext/zip/php_zip.c 	zs = zip_source_file(za, resolved_path, offset_start, offset_len);</span>
+<span class='curline'><a href='../S/1358.html#L303'>za</a>                303 ext/zip/php_zip.c 	if (zip_file_add(za, entry_name, zs, ZIP_FL_OVERWRITE) &lt; 0) {</span>
+<span class='curline'><a href='../S/1358.html#L307'>za</a>                307 ext/zip/php_zip.c 		zip_error_clear(za);</span>
+<span class='curline'><a href='../S/1358.html#L373'>za</a>                373 ext/zip/php_zip.c 		intern = obj-&gt;za; \</span>
+<span class='curline'><a href='../S/1358.html#L395'>za</a>                395 ext/zip/php_zip.c static int php_zip_status(struct zip *za) /* {{{ */</span>
+<span class='curline'><a href='../S/1358.html#L400'>za</a>                400 ext/zip/php_zip.c 	zip_error_get(za, &amp;zep, &amp;syp);</span>
+<span class='curline'><a href='../S/1358.html#L405'>za</a>                405 ext/zip/php_zip.c 	err = zip_get_error(za);</span>
+<span class='curline'><a href='../S/1358.html#L413'>za</a>                413 ext/zip/php_zip.c static int php_zip_status_sys(struct zip *za) /* {{{ */</span>
+<span class='curline'><a href='../S/1358.html#L418'>za</a>                418 ext/zip/php_zip.c 	zip_error_get(za, &amp;zep, &amp;syp);</span>
+<span class='curline'><a href='../S/1358.html#L423'>za</a>                423 ext/zip/php_zip.c 	err = zip_get_error(za);</span>
+<span class='curline'><a href='../S/1358.html#L431'>za</a>                431 ext/zip/php_zip.c static int php_zip_get_num_files(struct zip *za) /* {{{ */</span>
+<span class='curline'><a href='../S/1358.html#L433'>za</a>                433 ext/zip/php_zip.c 	return zip_get_num_files(za);</span>
+<span class='curline'><a href='../S/1358.html#L451'>za</a>                451 ext/zip/php_zip.c static char * php_zipobj_get_zip_comment(struct zip *za, int *len) /* {{{ */</span>
+<span class='curline'><a href='../S/1358.html#L453'>za</a>                453 ext/zip/php_zip.c 	if (za) {</span>
+<span class='curline'><a href='../S/1358.html#L454'>za</a>                454 ext/zip/php_zip.c 		return (char *)zip_get_archive_comment(za, len, 0);</span>
+<span class='curline'><a href='../S/1358.html#L767'>za</a>                767 ext/zip/php_zip.c typedef int (*zip_read_int_t)(struct zip *za);</span>
+<span class='curline'><a href='../S/1358.html#L768'>za</a>                768 ext/zip/php_zip.c typedef char *(*zip_read_const_char_t)(struct zip *za, int *len);</span>
+<span class='curline'><a href='../S/1358.html#L798'>za</a>                798 ext/zip/php_zip.c 	if (obj &amp;&amp; obj-&gt;za != NULL) {</span>
+<span class='curline'><a href='../S/1358.html#L800'>za</a>                800 ext/zip/php_zip.c 			retchar = hnd-&gt;read_const_char_func(obj-&gt;za, &amp;len);</span>
+<span class='curline'><a href='../S/1358.html#L803'>za</a>                803 ext/zip/php_zip.c 				retint = hnd-&gt;read_int_func(obj-&gt;za);</span>
+<span class='curline'><a href='../S/1358.html#L996'>za</a>                996 ext/zip/php_zip.c 	if (intern-&gt;za) {</span>
+<span class='curline'><a href='../S/1358.html#L997'>za</a>                997 ext/zip/php_zip.c 		if (zip_close(intern-&gt;za) != 0) {</span>
+<span class='curline'><a href='../S/1358.html#L998'>za</a>                998 ext/zip/php_zip.c 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern-&gt;za));</span>
+<span class='curline'><a href='../S/1358.html#L1001'>za</a>               1001 ext/zip/php_zip.c 		intern-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1358.html#L1011'>za</a>               1011 ext/zip/php_zip.c 	intern-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1358.html#L1042'>za</a>               1042 ext/zip/php_zip.c 		if (zip_int-&gt;za) {</span>
+<span class='curline'><a href='../S/1358.html#L1043'>za</a>               1043 ext/zip/php_zip.c 			if (zip_close(zip_int-&gt;za) != 0) {</span>
+<span class='curline'><a href='../S/1358.html#L1046'>za</a>               1046 ext/zip/php_zip.c 			zip_int-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1358.html#L1131'>za</a>               1131 ext/zip/php_zip.c 	rsrc_int-&gt;za = zip_open(resolved_path, 0, &amp;err);</span>
+<span class='curline'><a href='../S/1358.html#L1132'>za</a>               1132 ext/zip/php_zip.c 	if (rsrc_int-&gt;za == NULL) {</span>
+<span class='curline'><a href='../S/1358.html#L1138'>za</a>               1138 ext/zip/php_zip.c 	rsrc_int-&gt;num_files = zip_get_num_files(rsrc_int-&gt;za);</span>
+<span class='curline'><a href='../S/1358.html#L1181'>za</a>               1181 ext/zip/php_zip.c 	if (rsrc_int &amp;&amp; rsrc_int-&gt;za) {</span>
+<span class='curline'><a href='../S/1358.html#L1188'>za</a>               1188 ext/zip/php_zip.c 		ret = zip_stat_index(rsrc_int-&gt;za, rsrc_int-&gt;index_current, 0, &amp;zr_rsrc-&gt;sb);</span>
+<span class='curline'><a href='../S/1358.html#L1195'>za</a>               1195 ext/zip/php_zip.c 		zr_rsrc-&gt;zf = zip_fopen_index(rsrc_int-&gt;za, rsrc_int-&gt;index_current, 0);</span>
+<span class='curline'><a href='../S/1358.html#L1432'>za</a>               1432 ext/zip/php_zip.c 	if (ze_obj-&gt;za) {</span>
+<span class='curline'><a href='../S/1358.html#L1434'>za</a>               1434 ext/zip/php_zip.c 		if (zip_close(ze_obj-&gt;za) != 0) {</span>
+<span class='curline'><a href='../S/1358.html#L1439'>za</a>               1439 ext/zip/php_zip.c 		ze_obj-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1358.html#L1453'>za</a>               1453 ext/zip/php_zip.c 	ze_obj-&gt;za = intern;</span>
+<span class='curline'><a href='../S/1358.html#L1515'>za</a>               1515 ext/zip/php_zip.c 	ze_obj-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1359.html#L60'>za</a>                 60 ext/zip/php_zip.h 	struct zip *za;</span>
+<span class='curline'><a href='../S/1359.html#L77'>za</a>                 77 ext/zip/php_zip.h 	struct zip *za;</span>
+<span class='curline'><a href='../S/1360.html#L35'>za</a>                 35 ext/zip/zip_stream.c 	struct zip *za;</span>
+<span class='curline'><a href='../S/1360.html#L51'>za</a>                 51 ext/zip/zip_stream.c 	if (self-&gt;za &amp;&amp; self-&gt;zf) {</span>
+<span class='curline'><a href='../S/1360.html#L101'>za</a>                101 ext/zip/zip_stream.c 		if (self-&gt;za) {</span>
+<span class='curline'><a href='../S/1360.html#L102'>za</a>                102 ext/zip/zip_stream.c 			zip_close(self-&gt;za);</span>
+<span class='curline'><a href='../S/1360.html#L103'>za</a>                103 ext/zip/zip_stream.c 			self-&gt;za = NULL;</span>
+<span class='curline'><a href='../S/1360.html#L129'>za</a>                129 ext/zip/zip_stream.c 	struct zip *za;</span>
+<span class='curline'><a href='../S/1360.html#L166'>za</a>                166 ext/zip/zip_stream.c 	za = zip_open(file_dirname, ZIP_CREATE, &amp;err);</span>
+<span class='curline'><a href='../S/1360.html#L167'>za</a>                167 ext/zip/zip_stream.c 	if (za) {</span>
+<span class='curline'><a href='../S/1360.html#L169'>za</a>                169 ext/zip/zip_stream.c 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &amp;sb) != 0) {</span>
+<span class='curline'><a href='../S/1360.html#L170'>za</a>                170 ext/zip/zip_stream.c 			zip_close(za);</span>
+<span class='curline'><a href='../S/1360.html#L174'>za</a>                174 ext/zip/zip_stream.c 		zip_close(za);</span>
+<span class='curline'><a href='../S/1360.html#L239'>za</a>                239 ext/zip/zip_stream.c 			self-&gt;za = stream_za;</span>
+<span class='curline'><a href='../S/1360.html#L272'>za</a>                272 ext/zip/zip_stream.c 	struct zip *za;</span>
+<span class='curline'><a href='../S/1360.html#L311'>za</a>                311 ext/zip/zip_stream.c 	za = zip_open(file_dirname, ZIP_CREATE, &amp;err);</span>
+<span class='curline'><a href='../S/1360.html#L312'>za</a>                312 ext/zip/zip_stream.c 	if (za) {</span>
+<span class='curline'><a href='../S/1360.html#L313'>za</a>                313 ext/zip/zip_stream.c 		zf = zip_fopen(za, fragment, 0);</span>
+<span class='curline'><a href='../S/1360.html#L317'>za</a>                317 ext/zip/zip_stream.c 			self-&gt;za = za;</span>
+<span class='curline'><a href='../S/1360.html#L327'>za</a>                327 ext/zip/zip_stream.c 			zip_close(za);</span>
+</pre>
+</body>
+</html>

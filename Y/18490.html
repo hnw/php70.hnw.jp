@@ -1,0 +1,630 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ftp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/189.html#L84'>ftp</a>                84 ext/ftp/ftp.c  static int		ftp_putcmd(	ftpbuf_t *ftp,</span>
+<span class='curline'><a href='../S/189.html#L89'>ftp</a>                89 ext/ftp/ftp.c  static int		my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);</span>
+<span class='curline'><a href='../S/189.html#L90'>ftp</a>                90 ext/ftp/ftp.c  static int		my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);</span>
+<span class='curline'><a href='../S/189.html#L91'>ftp</a>                91 ext/ftp/ftp.c  static int		my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen);</span>
+<span class='curline'><a href='../S/189.html#L94'>ftp</a>                94 ext/ftp/ftp.c  static int		ftp_readline(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/189.html#L97'>ftp</a>                97 ext/ftp/ftp.c  static int		ftp_getresp(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/189.html#L100'>ftp</a>               100 ext/ftp/ftp.c  static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);</span>
+<span class='curline'><a href='../S/189.html#L103'>ftp</a>               103 ext/ftp/ftp.c  static databuf_t*	ftp_getdata(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/189.html#L106'>ftp</a>               106 ext/ftp/ftp.c  static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/189.html#L109'>ftp</a>               109 ext/ftp/ftp.c  static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);</span>
+<span class='curline'><a href='../S/189.html#L112'>ftp</a>               112 ext/ftp/ftp.c  static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path);</span>
+<span class='curline'><a href='../S/189.html#L126'>ftp</a>               126 ext/ftp/ftp.c  	ftpbuf_t		*ftp;</span>
+<span class='curline'><a href='../S/189.html#L132'>ftp</a>               132 ext/ftp/ftp.c  	ftp = ecalloc(1, sizeof(*ftp));</span>
+<span class='curline'><a href='../S/189.html#L137'>ftp</a>               137 ext/ftp/ftp.c  	ftp-&gt;fd = php_network_connect_socket_to_host(host,</span>
+<span class='curline'><a href='../S/189.html#L140'>ftp</a>               140 ext/ftp/ftp.c  	if (ftp-&gt;fd == -1) {</span>
+<span class='curline'><a href='../S/189.html#L145'>ftp</a>               145 ext/ftp/ftp.c  	ftp-&gt;timeout_sec = timeout_sec;</span>
+<span class='curline'><a href='../S/189.html#L146'>ftp</a>               146 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/189.html#L148'>ftp</a>               148 ext/ftp/ftp.c  	size = sizeof(ftp-&gt;localaddr);</span>
+<span class='curline'><a href='../S/189.html#L149'>ftp</a>               149 ext/ftp/ftp.c  	memset(&amp;ftp-&gt;localaddr, 0, size);</span>
+<span class='curline'><a href='../S/189.html#L150'>ftp</a>               150 ext/ftp/ftp.c  	if (getsockname(ftp-&gt;fd, (struct sockaddr*) &amp;ftp-&gt;localaddr, &amp;size) != 0) {</span>
+<span class='curline'><a href='../S/189.html#L155'>ftp</a>               155 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 220) {</span>
+<span class='curline'><a href='../S/189.html#L159'>ftp</a>               159 ext/ftp/ftp.c  	return ftp;</span>
+<span class='curline'><a href='../S/189.html#L162'>ftp</a>               162 ext/ftp/ftp.c  	if (ftp-&gt;fd != -1) {</span>
+<span class='curline'><a href='../S/189.html#L163'>ftp</a>               163 ext/ftp/ftp.c  		closesocket(ftp-&gt;fd);</span>
+<span class='curline'><a href='../S/189.html#L165'>ftp</a>               165 ext/ftp/ftp.c  	efree(ftp);</span>
+<span class='curline'><a href='../S/189.html#L173'>ftp</a>               173 ext/ftp/ftp.c  ftp_close(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L175'>ftp</a>               175 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L178'>ftp</a>               178 ext/ftp/ftp.c  	if (ftp-&gt;data) {</span>
+<span class='curline'><a href='../S/189.html#L179'>ftp</a>               179 ext/ftp/ftp.c  		data_close(ftp, ftp-&gt;data);</span>
+<span class='curline'><a href='../S/189.html#L181'>ftp</a>               181 ext/ftp/ftp.c  	if (ftp-&gt;stream &amp;&amp; ftp-&gt;closestream) {</span>
+<span class='curline'><a href='../S/189.html#L182'>ftp</a>               182 ext/ftp/ftp.c  			php_stream_close(ftp-&gt;stream);</span>
+<span class='curline'><a href='../S/189.html#L184'>ftp</a>               184 ext/ftp/ftp.c  	if (ftp-&gt;fd != -1) {</span>
+<span class='curline'><a href='../S/189.html#L186'>ftp</a>               186 ext/ftp/ftp.c  		if (ftp-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L187'>ftp</a>               187 ext/ftp/ftp.c  			SSL_shutdown(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L188'>ftp</a>               188 ext/ftp/ftp.c  			SSL_free(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L191'>ftp</a>               191 ext/ftp/ftp.c  		closesocket(ftp-&gt;fd);</span>
+<span class='curline'><a href='../S/189.html#L193'>ftp</a>               193 ext/ftp/ftp.c  	ftp_gc(ftp);</span>
+<span class='curline'><a href='../S/189.html#L194'>ftp</a>               194 ext/ftp/ftp.c  	efree(ftp);</span>
+<span class='curline'><a href='../S/189.html#L202'>ftp</a>               202 ext/ftp/ftp.c  ftp_gc(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L204'>ftp</a>               204 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L207'>ftp</a>               207 ext/ftp/ftp.c  	if (ftp-&gt;pwd) {</span>
+<span class='curline'><a href='../S/189.html#L208'>ftp</a>               208 ext/ftp/ftp.c  		efree(ftp-&gt;pwd);</span>
+<span class='curline'><a href='../S/189.html#L209'>ftp</a>               209 ext/ftp/ftp.c  		ftp-&gt;pwd = NULL;</span>
+<span class='curline'><a href='../S/189.html#L211'>ftp</a>               211 ext/ftp/ftp.c  	if (ftp-&gt;syst) {</span>
+<span class='curline'><a href='../S/189.html#L212'>ftp</a>               212 ext/ftp/ftp.c  		efree(ftp-&gt;syst);</span>
+<span class='curline'><a href='../S/189.html#L213'>ftp</a>               213 ext/ftp/ftp.c  		ftp-&gt;syst = NULL;</span>
+<span class='curline'><a href='../S/189.html#L221'>ftp</a>               221 ext/ftp/ftp.c  ftp_quit(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L223'>ftp</a>               223 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L227'>ftp</a>               227 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "QUIT", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L230'>ftp</a>               230 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 221) {</span>
+<span class='curline'><a href='../S/189.html#L234'>ftp</a>               234 ext/ftp/ftp.c  	if (ftp-&gt;pwd) {</span>
+<span class='curline'><a href='../S/189.html#L235'>ftp</a>               235 ext/ftp/ftp.c  		efree(ftp-&gt;pwd);</span>
+<span class='curline'><a href='../S/189.html#L236'>ftp</a>               236 ext/ftp/ftp.c  		ftp-&gt;pwd = NULL;</span>
+<span class='curline'><a href='../S/189.html#L246'>ftp</a>               246 ext/ftp/ftp.c  ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)</span>
+<span class='curline'><a href='../S/189.html#L254'>ftp</a>               254 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L259'>ftp</a>               259 ext/ftp/ftp.c  	if (ftp-&gt;use_ssl &amp;&amp; !ftp-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L260'>ftp</a>               260 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "AUTH", "TLS")) {</span>
+<span class='curline'><a href='../S/189.html#L263'>ftp</a>               263 ext/ftp/ftp.c  		if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L267'>ftp</a>               267 ext/ftp/ftp.c  		if (ftp-&gt;resp != 234) {</span>
+<span class='curline'><a href='../S/189.html#L268'>ftp</a>               268 ext/ftp/ftp.c  			if (!ftp_putcmd(ftp, "AUTH", "SSL")) {</span>
+<span class='curline'><a href='../S/189.html#L271'>ftp</a>               271 ext/ftp/ftp.c  			if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L275'>ftp</a>               275 ext/ftp/ftp.c  			if (ftp-&gt;resp != 334) {</span>
+<span class='curline'><a href='../S/189.html#L278'>ftp</a>               278 ext/ftp/ftp.c  				ftp-&gt;old_ssl = 1;</span>
+<span class='curline'><a href='../S/189.html#L279'>ftp</a>               279 ext/ftp/ftp.c  				ftp-&gt;use_ssl_for_data = 1;</span>
+<span class='curline'><a href='../S/189.html#L294'>ftp</a>               294 ext/ftp/ftp.c  		ftp-&gt;ssl_handle = SSL_new(ctx);</span>
+<span class='curline'><a href='../S/189.html#L295'>ftp</a>               295 ext/ftp/ftp.c  		if (ftp-&gt;ssl_handle == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L301'>ftp</a>               301 ext/ftp/ftp.c  		SSL_set_fd(ftp-&gt;ssl_handle, ftp-&gt;fd);</span>
+<span class='curline'><a href='../S/189.html#L304'>ftp</a>               304 ext/ftp/ftp.c  			res = SSL_connect(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L305'>ftp</a>               305 ext/ftp/ftp.c  			err = SSL_get_error(ftp-&gt;ssl_handle, res);</span>
+<span class='curline'><a href='../S/189.html#L315'>ftp</a>               315 ext/ftp/ftp.c  					SSL_shutdown(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L323'>ftp</a>               323 ext/ftp/ftp.c  						p.fd = ftp-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L335'>ftp</a>               335 ext/ftp/ftp.c  					SSL_shutdown(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L336'>ftp</a>               336 ext/ftp/ftp.c  					SSL_free(ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L341'>ftp</a>               341 ext/ftp/ftp.c  		ftp-&gt;ssl_active = 1;</span>
+<span class='curline'><a href='../S/189.html#L343'>ftp</a>               343 ext/ftp/ftp.c  		if (!ftp-&gt;old_ssl) {</span>
+<span class='curline'><a href='../S/189.html#L346'>ftp</a>               346 ext/ftp/ftp.c  			if (!ftp_putcmd(ftp, "PBSZ", "0")) {</span>
+<span class='curline'><a href='../S/189.html#L349'>ftp</a>               349 ext/ftp/ftp.c  			if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L354'>ftp</a>               354 ext/ftp/ftp.c  			if (!ftp_putcmd(ftp, "PROT", "P")) {</span>
+<span class='curline'><a href='../S/189.html#L357'>ftp</a>               357 ext/ftp/ftp.c  			if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L361'>ftp</a>               361 ext/ftp/ftp.c  			ftp-&gt;use_ssl_for_data = (ftp-&gt;resp &gt;= 200 &amp;&amp; ftp-&gt;resp &lt;=299);</span>
+<span class='curline'><a href='../S/189.html#L366'>ftp</a>               366 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "USER", user)) {</span>
+<span class='curline'><a href='../S/189.html#L369'>ftp</a>               369 ext/ftp/ftp.c  	if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L372'>ftp</a>               372 ext/ftp/ftp.c  	if (ftp-&gt;resp == 230) {</span>
+<span class='curline'><a href='../S/189.html#L375'>ftp</a>               375 ext/ftp/ftp.c  	if (ftp-&gt;resp != 331) {</span>
+<span class='curline'><a href='../S/189.html#L378'>ftp</a>               378 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "PASS", pass)) {</span>
+<span class='curline'><a href='../S/189.html#L381'>ftp</a>               381 ext/ftp/ftp.c  	if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L384'>ftp</a>               384 ext/ftp/ftp.c  	return (ftp-&gt;resp == 230);</span>
+<span class='curline'><a href='../S/189.html#L391'>ftp</a>               391 ext/ftp/ftp.c  ftp_reinit(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L393'>ftp</a>               393 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L397'>ftp</a>               397 ext/ftp/ftp.c  	ftp_gc(ftp);</span>
+<span class='curline'><a href='../S/189.html#L399'>ftp</a>               399 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/189.html#L401'>ftp</a>               401 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "REIN", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L404'>ftp</a>               404 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 220) {</span>
+<span class='curline'><a href='../S/189.html#L415'>ftp</a>               415 ext/ftp/ftp.c  ftp_syst(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L419'>ftp</a>               419 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L424'>ftp</a>               424 ext/ftp/ftp.c  	if (ftp-&gt;syst) {</span>
+<span class='curline'><a href='../S/189.html#L425'>ftp</a>               425 ext/ftp/ftp.c  		return ftp-&gt;syst;</span>
+<span class='curline'><a href='../S/189.html#L427'>ftp</a>               427 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "SYST", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L430'>ftp</a>               430 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 215) {</span>
+<span class='curline'><a href='../S/189.html#L433'>ftp</a>               433 ext/ftp/ftp.c  	syst = ftp-&gt;inbuf;</span>
+<span class='curline'><a href='../S/189.html#L440'>ftp</a>               440 ext/ftp/ftp.c  	ftp-&gt;syst = estrdup(syst);</span>
+<span class='curline'><a href='../S/189.html#L444'>ftp</a>               444 ext/ftp/ftp.c  	return ftp-&gt;syst;</span>
+<span class='curline'><a href='../S/189.html#L451'>ftp</a>               451 ext/ftp/ftp.c  ftp_pwd(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L455'>ftp</a>               455 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L460'>ftp</a>               460 ext/ftp/ftp.c  	if (ftp-&gt;pwd) {</span>
+<span class='curline'><a href='../S/189.html#L461'>ftp</a>               461 ext/ftp/ftp.c  		return ftp-&gt;pwd;</span>
+<span class='curline'><a href='../S/189.html#L463'>ftp</a>               463 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "PWD", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L466'>ftp</a>               466 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 257) {</span>
+<span class='curline'><a href='../S/189.html#L470'>ftp</a>               470 ext/ftp/ftp.c  	if ((pwd = strchr(ftp-&gt;inbuf, '"')) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L476'>ftp</a>               476 ext/ftp/ftp.c  	ftp-&gt;pwd = estrndup(pwd, end - pwd);</span>
+<span class='curline'><a href='../S/189.html#L478'>ftp</a>               478 ext/ftp/ftp.c  	return ftp-&gt;pwd;</span>
+<span class='curline'><a href='../S/189.html#L485'>ftp</a>               485 ext/ftp/ftp.c  ftp_exec(ftpbuf_t *ftp, const char *cmd)</span>
+<span class='curline'><a href='../S/189.html#L487'>ftp</a>               487 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L490'>ftp</a>               490 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "SITE EXEC", cmd)) {</span>
+<span class='curline'><a href='../S/189.html#L493'>ftp</a>               493 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 200) {</span>
+<span class='curline'><a href='../S/189.html#L504'>ftp</a>               504 ext/ftp/ftp.c  ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value)</span>
+<span class='curline'><a href='../S/189.html#L506'>ftp</a>               506 ext/ftp/ftp.c  	if (ftp == NULL || cmd == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L509'>ftp</a>               509 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, cmd, NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L513'>ftp</a>               513 ext/ftp/ftp.c  	while (ftp_readline(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L514'>ftp</a>               514 ext/ftp/ftp.c  		add_next_index_string(return_value, ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/189.html#L515'>ftp</a>               515 ext/ftp/ftp.c  		if (isdigit(ftp-&gt;inbuf[0]) &amp;&amp; isdigit(ftp-&gt;inbuf[1]) &amp;&amp; isdigit(ftp-&gt;inbuf[2]) &amp;&amp; ftp-&gt;inbuf[3] == ' ') {</span>
+<span class='curline'><a href='../S/189.html#L525'>ftp</a>               525 ext/ftp/ftp.c  ftp_chdir(ftpbuf_t *ftp, const char *dir)</span>
+<span class='curline'><a href='../S/189.html#L527'>ftp</a>               527 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L531'>ftp</a>               531 ext/ftp/ftp.c  	if (ftp-&gt;pwd) {</span>
+<span class='curline'><a href='../S/189.html#L532'>ftp</a>               532 ext/ftp/ftp.c  		efree(ftp-&gt;pwd);</span>
+<span class='curline'><a href='../S/189.html#L533'>ftp</a>               533 ext/ftp/ftp.c  		ftp-&gt;pwd = NULL;</span>
+<span class='curline'><a href='../S/189.html#L536'>ftp</a>               536 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "CWD", dir)) {</span>
+<span class='curline'><a href='../S/189.html#L539'>ftp</a>               539 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 250) {</span>
+<span class='curline'><a href='../S/189.html#L549'>ftp</a>               549 ext/ftp/ftp.c  ftp_cdup(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L551'>ftp</a>               551 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L555'>ftp</a>               555 ext/ftp/ftp.c  	if (ftp-&gt;pwd) {</span>
+<span class='curline'><a href='../S/189.html#L556'>ftp</a>               556 ext/ftp/ftp.c  		efree(ftp-&gt;pwd);</span>
+<span class='curline'><a href='../S/189.html#L557'>ftp</a>               557 ext/ftp/ftp.c  		ftp-&gt;pwd = NULL;</span>
+<span class='curline'><a href='../S/189.html#L560'>ftp</a>               560 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "CDUP", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L563'>ftp</a>               563 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 250) {</span>
+<span class='curline'><a href='../S/189.html#L573'>ftp</a>               573 ext/ftp/ftp.c  ftp_mkdir(ftpbuf_t *ftp, const char *dir)</span>
+<span class='curline'><a href='../S/189.html#L578'>ftp</a>               578 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L581'>ftp</a>               581 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "MKD", dir)) {</span>
+<span class='curline'><a href='../S/189.html#L584'>ftp</a>               584 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 257) {</span>
+<span class='curline'><a href='../S/189.html#L588'>ftp</a>               588 ext/ftp/ftp.c  	if ((mkd = strchr(ftp-&gt;inbuf, '"')) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L605'>ftp</a>               605 ext/ftp/ftp.c  ftp_rmdir(ftpbuf_t *ftp, const char *dir)</span>
+<span class='curline'><a href='../S/189.html#L607'>ftp</a>               607 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L610'>ftp</a>               610 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "RMD", dir)) {</span>
+<span class='curline'><a href='../S/189.html#L613'>ftp</a>               613 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 250) {</span>
+<span class='curline'><a href='../S/189.html#L623'>ftp</a>               623 ext/ftp/ftp.c  ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len)</span>
+<span class='curline'><a href='../S/189.html#L627'>ftp</a>               627 ext/ftp/ftp.c  	if (ftp == NULL || filename_len &lt;= 0) {</span>
+<span class='curline'><a href='../S/189.html#L633'>ftp</a>               633 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "SITE", buffer)) {</span>
+<span class='curline'><a href='../S/189.html#L640'>ftp</a>               640 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 200) {</span>
+<span class='curline'><a href='../S/189.html#L651'>ftp</a>               651 ext/ftp/ftp.c  ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)</span>
+<span class='curline'><a href='../S/189.html#L655'>ftp</a>               655 ext/ftp/ftp.c  	if (ftp == NULL || size &lt;= 0) {</span>
+<span class='curline'><a href='../S/189.html#L661'>ftp</a>               661 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "ALLO", buffer)) {</span>
+<span class='curline'><a href='../S/189.html#L665'>ftp</a>               665 ext/ftp/ftp.c  	if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L670'>ftp</a>               670 ext/ftp/ftp.c  		*response = zend_string_init(ftp-&gt;inbuf, strlen(ftp-&gt;inbuf), 0);</span>
+<span class='curline'><a href='../S/189.html#L673'>ftp</a>               673 ext/ftp/ftp.c  	if (ftp-&gt;resp &lt; 200 || ftp-&gt;resp &gt;= 300) {</span>
+<span class='curline'><a href='../S/189.html#L684'>ftp</a>               684 ext/ftp/ftp.c  ftp_nlist(ftpbuf_t *ftp, const char *path)</span>
+<span class='curline'><a href='../S/189.html#L686'>ftp</a>               686 ext/ftp/ftp.c  	return ftp_genlist(ftp, "NLST", path);</span>
+<span class='curline'><a href='../S/189.html#L693'>ftp</a>               693 ext/ftp/ftp.c  ftp_list(ftpbuf_t *ftp, const char *path, int recursive)</span>
+<span class='curline'><a href='../S/189.html#L695'>ftp</a>               695 ext/ftp/ftp.c  	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path);</span>
+<span class='curline'><a href='../S/189.html#L702'>ftp</a>               702 ext/ftp/ftp.c  ftp_type(ftpbuf_t *ftp, ftptype_t type)</span>
+<span class='curline'><a href='../S/189.html#L706'>ftp</a>               706 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L709'>ftp</a>               709 ext/ftp/ftp.c  	if (type == ftp-&gt;type) {</span>
+<span class='curline'><a href='../S/189.html#L719'>ftp</a>               719 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "TYPE", typechar)) {</span>
+<span class='curline'><a href='../S/189.html#L722'>ftp</a>               722 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 200) {</span>
+<span class='curline'><a href='../S/189.html#L725'>ftp</a>               725 ext/ftp/ftp.c  	ftp-&gt;type = type;</span>
+<span class='curline'><a href='../S/189.html#L734'>ftp</a>               734 ext/ftp/ftp.c  ftp_pasv(ftpbuf_t *ftp, int pasv)</span>
+<span class='curline'><a href='../S/189.html#L743'>ftp</a>               743 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L746'>ftp</a>               746 ext/ftp/ftp.c  	if (pasv &amp;&amp; ftp-&gt;pasv == 2) {</span>
+<span class='curline'><a href='../S/189.html#L749'>ftp</a>               749 ext/ftp/ftp.c  	ftp-&gt;pasv = 0;</span>
+<span class='curline'><a href='../S/189.html#L753'>ftp</a>               753 ext/ftp/ftp.c  	n = sizeof(ftp-&gt;pasvaddr);</span>
+<span class='curline'><a href='../S/189.html#L754'>ftp</a>               754 ext/ftp/ftp.c  	memset(&amp;ftp-&gt;pasvaddr, 0, n);</span>
+<span class='curline'><a href='../S/189.html#L755'>ftp</a>               755 ext/ftp/ftp.c  	sa = (struct sockaddr *) &amp;ftp-&gt;pasvaddr;</span>
+<span class='curline'><a href='../S/189.html#L757'>ftp</a>               757 ext/ftp/ftp.c  	if (getpeername(ftp-&gt;fd, sa, &amp;n) &lt; 0) {</span>
+<span class='curline'><a href='../S/189.html#L767'>ftp</a>               767 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "EPSV", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L770'>ftp</a>               770 ext/ftp/ftp.c  		if (!ftp_getresp(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L773'>ftp</a>               773 ext/ftp/ftp.c  		if (ftp-&gt;resp == 229) {</span>
+<span class='curline'><a href='../S/189.html#L775'>ftp</a>               775 ext/ftp/ftp.c  			for (ptr = ftp-&gt;inbuf; *ptr &amp;&amp; *ptr != '('; ptr++);</span>
+<span class='curline'><a href='../S/189.html#L790'>ftp</a>               790 ext/ftp/ftp.c  			ftp-&gt;pasv = 2;</span>
+<span class='curline'><a href='../S/189.html#L798'>ftp</a>               798 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "PASV", NULL)) {</span>
+<span class='curline'><a href='../S/189.html#L801'>ftp</a>               801 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 227) {</span>
+<span class='curline'><a href='../S/189.html#L805'>ftp</a>               805 ext/ftp/ftp.c  	for (ptr = ftp-&gt;inbuf; *ptr &amp;&amp; !isdigit(*ptr); ptr++);</span>
+<span class='curline'><a href='../S/189.html#L814'>ftp</a>               814 ext/ftp/ftp.c  	if (ftp-&gt;usepasvaddress) {</span>
+<span class='curline'><a href='../S/189.html#L819'>ftp</a>               819 ext/ftp/ftp.c  	ftp-&gt;pasv = 2;</span>
+<span class='curline'><a href='../S/189.html#L828'>ftp</a>               828 ext/ftp/ftp.c  ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos)</span>
+<span class='curline'><a href='../S/189.html#L834'>ftp</a>               834 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L837'>ftp</a>               837 ext/ftp/ftp.c  	if (!ftp_type(ftp, type)) {</span>
+<span class='curline'><a href='../S/189.html#L841'>ftp</a>               841 ext/ftp/ftp.c  	if ((data = ftp_getdata(ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L845'>ftp</a>               845 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L849'>ftp</a>               849 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "REST", arg)) {</span>
+<span class='curline'><a href='../S/189.html#L852'>ftp</a>               852 ext/ftp/ftp.c  		if (!ftp_getresp(ftp) || (ftp-&gt;resp != 350)) {</span>
+<span class='curline'><a href='../S/189.html#L857'>ftp</a>               857 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "RETR", path)) {</span>
+<span class='curline'><a href='../S/189.html#L860'>ftp</a>               860 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 150 &amp;&amp; ftp-&gt;resp != 125)) {</span>
+<span class='curline'><a href='../S/189.html#L864'>ftp</a>               864 ext/ftp/ftp.c  	if ((data = data_accept(data, ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L868'>ftp</a>               868 ext/ftp/ftp.c  	while ((rcvd = my_recv(ftp, data-&gt;fd, data-&gt;buf, FTP_BUFSIZE))) {</span>
+<span class='curline'><a href='../S/189.html#L904'>ftp</a>               904 ext/ftp/ftp.c  	ftp-&gt;data = data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L906'>ftp</a>               906 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 226 &amp;&amp; ftp-&gt;resp != 250)) {</span>
+<span class='curline'><a href='../S/189.html#L912'>ftp</a>               912 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L920'>ftp</a>               920 ext/ftp/ftp.c  ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos)</span>
+<span class='curline'><a href='../S/189.html#L928'>ftp</a>               928 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L931'>ftp</a>               931 ext/ftp/ftp.c  	if (!ftp_type(ftp, type)) {</span>
+<span class='curline'><a href='../S/189.html#L934'>ftp</a>               934 ext/ftp/ftp.c  	if ((data = ftp_getdata(ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L937'>ftp</a>               937 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L941'>ftp</a>               941 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "REST", arg)) {</span>
+<span class='curline'><a href='../S/189.html#L944'>ftp</a>               944 ext/ftp/ftp.c  		if (!ftp_getresp(ftp) || (ftp-&gt;resp != 350)) {</span>
+<span class='curline'><a href='../S/189.html#L949'>ftp</a>               949 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "STOR", path)) {</span>
+<span class='curline'><a href='../S/189.html#L952'>ftp</a>               952 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 150 &amp;&amp; ftp-&gt;resp != 125)) {</span>
+<span class='curline'><a href='../S/189.html#L955'>ftp</a>               955 ext/ftp/ftp.c  	if ((data = data_accept(data, ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L964'>ftp</a>               964 ext/ftp/ftp.c  			if (my_send(ftp, data-&gt;fd, data-&gt;buf, size) != size) {</span>
+<span class='curline'><a href='../S/189.html#L980'>ftp</a>               980 ext/ftp/ftp.c  	if (size &amp;&amp; my_send(ftp, data-&gt;fd, data-&gt;buf, size) != size) {</span>
+<span class='curline'><a href='../S/189.html#L983'>ftp</a>               983 ext/ftp/ftp.c  	ftp-&gt;data = data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L985'>ftp</a>               985 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 226 &amp;&amp; ftp-&gt;resp != 250 &amp;&amp; ftp-&gt;resp != 200)) {</span>
+<span class='curline'><a href='../S/189.html#L990'>ftp</a>               990 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L998'>ftp</a>               998 ext/ftp/ftp.c  ftp_size(ftpbuf_t *ftp, const char *path)</span>
+<span class='curline'><a href='../S/189.html#L1000'>ftp</a>              1000 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1003'>ftp</a>              1003 ext/ftp/ftp.c  	if (!ftp_type(ftp, FTPTYPE_IMAGE)) {</span>
+<span class='curline'><a href='../S/189.html#L1006'>ftp</a>              1006 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "SIZE", path)) {</span>
+<span class='curline'><a href='../S/189.html#L1009'>ftp</a>              1009 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 213) {</span>
+<span class='curline'><a href='../S/189.html#L1012'>ftp</a>              1012 ext/ftp/ftp.c  	return atol(ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/189.html#L1019'>ftp</a>              1019 ext/ftp/ftp.c  ftp_mdtm(ftpbuf_t *ftp, const char *path)</span>
+<span class='curline'><a href='../S/189.html#L1027'>ftp</a>              1027 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1030'>ftp</a>              1030 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "MDTM", path)) {</span>
+<span class='curline'><a href='../S/189.html#L1033'>ftp</a>              1033 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 213) {</span>
+<span class='curline'><a href='../S/189.html#L1037'>ftp</a>              1037 ext/ftp/ftp.c  	for (ptr = ftp-&gt;inbuf; *ptr &amp;&amp; !isdigit(*ptr); ptr++);</span>
+<span class='curline'><a href='../S/189.html#L1067'>ftp</a>              1067 ext/ftp/ftp.c  ftp_delete(ftpbuf_t *ftp, const char *path)</span>
+<span class='curline'><a href='../S/189.html#L1069'>ftp</a>              1069 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1072'>ftp</a>              1072 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "DELE", path)) {</span>
+<span class='curline'><a href='../S/189.html#L1075'>ftp</a>              1075 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 250) {</span>
+<span class='curline'><a href='../S/189.html#L1086'>ftp</a>              1086 ext/ftp/ftp.c  ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest)</span>
+<span class='curline'><a href='../S/189.html#L1088'>ftp</a>              1088 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1091'>ftp</a>              1091 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "RNFR", src)) {</span>
+<span class='curline'><a href='../S/189.html#L1094'>ftp</a>              1094 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 350) {</span>
+<span class='curline'><a href='../S/189.html#L1097'>ftp</a>              1097 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "RNTO", dest)) {</span>
+<span class='curline'><a href='../S/189.html#L1100'>ftp</a>              1100 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 250) {</span>
+<span class='curline'><a href='../S/189.html#L1110'>ftp</a>              1110 ext/ftp/ftp.c  ftp_site(ftpbuf_t *ftp, const char *cmd)</span>
+<span class='curline'><a href='../S/189.html#L1112'>ftp</a>              1112 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1115'>ftp</a>              1115 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "SITE", cmd)) {</span>
+<span class='curline'><a href='../S/189.html#L1118'>ftp</a>              1118 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp &lt; 200 || ftp-&gt;resp &gt;= 300) {</span>
+<span class='curline'><a href='../S/189.html#L1131'>ftp</a>              1131 ext/ftp/ftp.c  ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)</span>
+<span class='curline'><a href='../S/189.html#L1148'>ftp</a>              1148 ext/ftp/ftp.c  		size = slprintf(ftp-&gt;outbuf, sizeof(ftp-&gt;outbuf), "%s %s\r\n", cmd, args);</span>
+<span class='curline'><a href='../S/189.html#L1154'>ftp</a>              1154 ext/ftp/ftp.c  		size = slprintf(ftp-&gt;outbuf, sizeof(ftp-&gt;outbuf), "%s\r\n", cmd);</span>
+<span class='curline'><a href='../S/189.html#L1157'>ftp</a>              1157 ext/ftp/ftp.c  	data = ftp-&gt;outbuf;</span>
+<span class='curline'><a href='../S/189.html#L1160'>ftp</a>              1160 ext/ftp/ftp.c  	ftp-&gt;extra = NULL;</span>
+<span class='curline'><a href='../S/189.html#L1162'>ftp</a>              1162 ext/ftp/ftp.c  	if (my_send(ftp, ftp-&gt;fd, data, size) != size) {</span>
+<span class='curline'><a href='../S/189.html#L1172'>ftp</a>              1172 ext/ftp/ftp.c  ftp_readline(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L1180'>ftp</a>              1180 ext/ftp/ftp.c  	if (ftp-&gt;extra) {</span>
+<span class='curline'><a href='../S/189.html#L1181'>ftp</a>              1181 ext/ftp/ftp.c  		memmove(ftp-&gt;inbuf, ftp-&gt;extra, ftp-&gt;extralen);</span>
+<span class='curline'><a href='../S/189.html#L1182'>ftp</a>              1182 ext/ftp/ftp.c  		rcvd = ftp-&gt;extralen;</span>
+<span class='curline'><a href='../S/189.html#L1185'>ftp</a>              1185 ext/ftp/ftp.c  	data = ftp-&gt;inbuf;</span>
+<span class='curline'><a href='../S/189.html#L1192'>ftp</a>              1192 ext/ftp/ftp.c  				ftp-&gt;extra = eol + 1;</span>
+<span class='curline'><a href='../S/189.html#L1194'>ftp</a>              1194 ext/ftp/ftp.c  					ftp-&gt;extra++;</span>
+<span class='curline'><a href='../S/189.html#L1197'>ftp</a>              1197 ext/ftp/ftp.c  				if ((ftp-&gt;extralen = --rcvd) == 0) {</span>
+<span class='curline'><a href='../S/189.html#L1198'>ftp</a>              1198 ext/ftp/ftp.c  					ftp-&gt;extra = NULL;</span>
+<span class='curline'><a href='../S/189.html#L1203'>ftp</a>              1203 ext/ftp/ftp.c  				ftp-&gt;extra = eol + 1;</span>
+<span class='curline'><a href='../S/189.html#L1204'>ftp</a>              1204 ext/ftp/ftp.c  				if ((ftp-&gt;extralen = --rcvd) == 0) {</span>
+<span class='curline'><a href='../S/189.html#L1205'>ftp</a>              1205 ext/ftp/ftp.c  					ftp-&gt;extra = NULL;</span>
+<span class='curline'><a href='../S/189.html#L1212'>ftp</a>              1212 ext/ftp/ftp.c  		if ((rcvd = my_recv(ftp, ftp-&gt;fd, data, size)) &lt; 1) {</span>
+<span class='curline'><a href='../S/189.html#L1224'>ftp</a>              1224 ext/ftp/ftp.c  ftp_getresp(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L1226'>ftp</a>              1226 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1229'>ftp</a>              1229 ext/ftp/ftp.c  	ftp-&gt;resp = 0;</span>
+<span class='curline'><a href='../S/189.html#L1233'>ftp</a>              1233 ext/ftp/ftp.c  		if (!ftp_readline(ftp)) {</span>
+<span class='curline'><a href='../S/189.html#L1238'>ftp</a>              1238 ext/ftp/ftp.c  		if (isdigit(ftp-&gt;inbuf[0]) &amp;&amp; isdigit(ftp-&gt;inbuf[1]) &amp;&amp; isdigit(ftp-&gt;inbuf[2]) &amp;&amp; ftp-&gt;inbuf[3] == ' ') {</span>
+<span class='curline'><a href='../S/189.html#L1244'>ftp</a>              1244 ext/ftp/ftp.c  	if (!isdigit(ftp-&gt;inbuf[0]) || !isdigit(ftp-&gt;inbuf[1]) || !isdigit(ftp-&gt;inbuf[2])) {</span>
+<span class='curline'><a href='../S/189.html#L1248'>ftp</a>              1248 ext/ftp/ftp.c  	ftp-&gt;resp = 100 * (ftp-&gt;inbuf[0] - '0') + 10 * (ftp-&gt;inbuf[1] - '0') + (ftp-&gt;inbuf[2] - '0');</span>
+<span class='curline'><a href='../S/189.html#L1250'>ftp</a>              1250 ext/ftp/ftp.c  	memmove(ftp-&gt;inbuf, ftp-&gt;inbuf + 4, FTP_BUFSIZE - 4);</span>
+<span class='curline'><a href='../S/189.html#L1252'>ftp</a>              1252 ext/ftp/ftp.c  	if (ftp-&gt;extra) {</span>
+<span class='curline'><a href='../S/189.html#L1253'>ftp</a>              1253 ext/ftp/ftp.c  		ftp-&gt;extra -= 4;</span>
+<span class='curline'><a href='../S/189.html#L1262'>ftp</a>              1262 ext/ftp/ftp.c  my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)</span>
+<span class='curline'><a href='../S/189.html#L1276'>ftp</a>              1276 ext/ftp/ftp.c  		n = php_pollfd_for_ms(s, POLLOUT, ftp-&gt;timeout_sec * 1000);</span>
+<span class='curline'><a href='../S/189.html#L1292'>ftp</a>              1292 ext/ftp/ftp.c  		if (ftp-&gt;use_ssl &amp;&amp; ftp-&gt;fd == s &amp;&amp; ftp-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L1293'>ftp</a>              1293 ext/ftp/ftp.c  			handle = ftp-&gt;ssl_handle;</span>
+<span class='curline'><a href='../S/189.html#L1294'>ftp</a>              1294 ext/ftp/ftp.c  			fd = ftp-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L1295'>ftp</a>              1295 ext/ftp/ftp.c  		} else if (ftp-&gt;use_ssl &amp;&amp; ftp-&gt;fd != s &amp;&amp; ftp-&gt;use_ssl_for_data &amp;&amp; ftp-&gt;data-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L1296'>ftp</a>              1296 ext/ftp/ftp.c  			handle = ftp-&gt;data-&gt;ssl_handle;</span>
+<span class='curline'><a href='../S/189.html#L1297'>ftp</a>              1297 ext/ftp/ftp.c  			fd = ftp-&gt;data-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L1356'>ftp</a>              1356 ext/ftp/ftp.c  my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)</span>
+<span class='curline'><a href='../S/189.html#L1366'>ftp</a>              1366 ext/ftp/ftp.c  	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp-&gt;timeout_sec * 1000);</span>
+<span class='curline'><a href='../S/189.html#L1381'>ftp</a>              1381 ext/ftp/ftp.c  	if (ftp-&gt;use_ssl &amp;&amp; ftp-&gt;fd == s &amp;&amp; ftp-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L1382'>ftp</a>              1382 ext/ftp/ftp.c  		handle = ftp-&gt;ssl_handle;</span>
+<span class='curline'><a href='../S/189.html#L1383'>ftp</a>              1383 ext/ftp/ftp.c  		fd = ftp-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L1384'>ftp</a>              1384 ext/ftp/ftp.c  	} else if (ftp-&gt;use_ssl &amp;&amp; ftp-&gt;fd != s &amp;&amp; ftp-&gt;use_ssl_for_data &amp;&amp; ftp-&gt;data-&gt;ssl_active) {</span>
+<span class='curline'><a href='../S/189.html#L1385'>ftp</a>              1385 ext/ftp/ftp.c  		handle = ftp-&gt;data-&gt;ssl_handle;</span>
+<span class='curline'><a href='../S/189.html#L1386'>ftp</a>              1386 ext/ftp/ftp.c  		fd = ftp-&gt;data-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L1437'>ftp</a>              1437 ext/ftp/ftp.c  data_available(ftpbuf_t *ftp, php_socket_t s)</span>
+<span class='curline'><a href='../S/189.html#L1461'>ftp</a>              1461 ext/ftp/ftp.c  data_writeable(ftpbuf_t *ftp, php_socket_t s)</span>
+<span class='curline'><a href='../S/189.html#L1486'>ftp</a>              1486 ext/ftp/ftp.c  my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen)</span>
+<span class='curline'><a href='../S/189.html#L1490'>ftp</a>              1490 ext/ftp/ftp.c  	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp-&gt;timeout_sec * 1000);</span>
+<span class='curline'><a href='../S/189.html#L1511'>ftp</a>              1511 ext/ftp/ftp.c  ftp_getdata(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L1524'>ftp</a>              1524 ext/ftp/ftp.c  	if (ftp-&gt;pasv &amp;&amp; !ftp_pasv(ftp, 1)) {</span>
+<span class='curline'><a href='../S/189.html#L1531'>ftp</a>              1531 ext/ftp/ftp.c  	data-&gt;type = ftp-&gt;type;</span>
+<span class='curline'><a href='../S/189.html#L1533'>ftp</a>              1533 ext/ftp/ftp.c  	sa = (struct sockaddr *) &amp;ftp-&gt;localaddr;</span>
+<span class='curline'><a href='../S/189.html#L1541'>ftp</a>              1541 ext/ftp/ftp.c  	if (ftp-&gt;pasv) {</span>
+<span class='curline'><a href='../S/189.html#L1543'>ftp</a>              1543 ext/ftp/ftp.c  		ftp-&gt;pasv = 1;</span>
+<span class='curline'><a href='../S/189.html#L1547'>ftp</a>              1547 ext/ftp/ftp.c  		size = php_sockaddr_size(&amp;ftp-&gt;pasvaddr);</span>
+<span class='curline'><a href='../S/189.html#L1548'>ftp</a>              1548 ext/ftp/ftp.c  		tv.tv_sec = ftp-&gt;timeout_sec;</span>
+<span class='curline'><a href='../S/189.html#L1550'>ftp</a>              1550 ext/ftp/ftp.c  		if (php_connect_nonb(fd, (struct sockaddr*) &amp;ftp-&gt;pasvaddr, size, &amp;tv) == -1) {</span>
+<span class='curline'><a href='../S/189.html#L1557'>ftp</a>              1557 ext/ftp/ftp.c  		ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L1593'>ftp</a>              1593 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "EPRT", eprtarg)) {</span>
+<span class='curline'><a href='../S/189.html#L1597'>ftp</a>              1597 ext/ftp/ftp.c  		if (!ftp_getresp(ftp) || ftp-&gt;resp != 200) {</span>
+<span class='curline'><a href='../S/189.html#L1601'>ftp</a>              1601 ext/ftp/ftp.c  		ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L1611'>ftp</a>              1611 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "PORT", arg)) {</span>
+<span class='curline'><a href='../S/189.html#L1614'>ftp</a>              1614 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || ftp-&gt;resp != 200) {</span>
+<span class='curline'><a href='../S/189.html#L1618'>ftp</a>              1618 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L1633'>ftp</a>              1633 ext/ftp/ftp.c  data_accept(databuf_t *data, ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L1649'>ftp</a>              1649 ext/ftp/ftp.c  	data-&gt;fd = my_accept(ftp, data-&gt;listener, (struct sockaddr*) &amp;addr, &amp;size);</span>
+<span class='curline'><a href='../S/189.html#L1662'>ftp</a>              1662 ext/ftp/ftp.c  	if (ftp-&gt;use_ssl &amp;&amp; ftp-&gt;use_ssl_for_data) {</span>
+<span class='curline'><a href='../S/189.html#L1684'>ftp</a>              1684 ext/ftp/ftp.c  		if (ftp-&gt;old_ssl) {</span>
+<span class='curline'><a href='../S/189.html#L1685'>ftp</a>              1685 ext/ftp/ftp.c  			SSL_copy_session_id(data-&gt;ssl_handle, ftp-&gt;ssl_handle);</span>
+<span class='curline'><a href='../S/189.html#L1707'>ftp</a>              1707 ext/ftp/ftp.c  						p.fd = ftp-&gt;fd;</span>
+<span class='curline'><a href='../S/189.html#L1737'>ftp</a>              1737 ext/ftp/ftp.c  data_close(ftpbuf_t *ftp, databuf_t *data)</span>
+<span class='curline'><a href='../S/189.html#L1772'>ftp</a>              1772 ext/ftp/ftp.c  	if (ftp) {</span>
+<span class='curline'><a href='../S/189.html#L1773'>ftp</a>              1773 ext/ftp/ftp.c  		ftp-&gt;data = NULL;</span>
+<span class='curline'><a href='../S/189.html#L1783'>ftp</a>              1783 ext/ftp/ftp.c  ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)</span>
+<span class='curline'><a href='../S/189.html#L1801'>ftp</a>              1801 ext/ftp/ftp.c  	if (!ftp_type(ftp, FTPTYPE_ASCII)) {</span>
+<span class='curline'><a href='../S/189.html#L1805'>ftp</a>              1805 ext/ftp/ftp.c  	if ((data = ftp_getdata(ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1808'>ftp</a>              1808 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L1810'>ftp</a>              1810 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, cmd, path)) {</span>
+<span class='curline'><a href='../S/189.html#L1813'>ftp</a>              1813 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 150 &amp;&amp; ftp-&gt;resp != 125 &amp;&amp; ftp-&gt;resp != 226)) {</span>
+<span class='curline'><a href='../S/189.html#L1818'>ftp</a>              1818 ext/ftp/ftp.c  	if (ftp-&gt;resp == 226) {</span>
+<span class='curline'><a href='../S/189.html#L1819'>ftp</a>              1819 ext/ftp/ftp.c  		ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L1825'>ftp</a>              1825 ext/ftp/ftp.c  	if ((data = data_accept(data, ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1831'>ftp</a>              1831 ext/ftp/ftp.c  	while ((rcvd = my_recv(ftp, data-&gt;fd, data-&gt;buf, FTP_BUFSIZE))) {</span>
+<span class='curline'><a href='../S/189.html#L1847'>ftp</a>              1847 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L1870'>ftp</a>              1870 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 226 &amp;&amp; ftp-&gt;resp != 250)) {</span>
+<span class='curline'><a href='../S/189.html#L1877'>ftp</a>              1877 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L1888'>ftp</a>              1888 ext/ftp/ftp.c  ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos)</span>
+<span class='curline'><a href='../S/189.html#L1893'>ftp</a>              1893 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1897'>ftp</a>              1897 ext/ftp/ftp.c  	if (!ftp_type(ftp, type)) {</span>
+<span class='curline'><a href='../S/189.html#L1901'>ftp</a>              1901 ext/ftp/ftp.c  	if ((data = ftp_getdata(ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1907'>ftp</a>              1907 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "REST", arg)) {</span>
+<span class='curline'><a href='../S/189.html#L1910'>ftp</a>              1910 ext/ftp/ftp.c  		if (!ftp_getresp(ftp) || (ftp-&gt;resp != 350)) {</span>
+<span class='curline'><a href='../S/189.html#L1915'>ftp</a>              1915 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "RETR", path)) {</span>
+<span class='curline'><a href='../S/189.html#L1918'>ftp</a>              1918 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 150 &amp;&amp; ftp-&gt;resp != 125)) {</span>
+<span class='curline'><a href='../S/189.html#L1922'>ftp</a>              1922 ext/ftp/ftp.c  	if ((data = data_accept(data, ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L1926'>ftp</a>              1926 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L1927'>ftp</a>              1927 ext/ftp/ftp.c  	ftp-&gt;stream = outstream;</span>
+<span class='curline'><a href='../S/189.html#L1928'>ftp</a>              1928 ext/ftp/ftp.c  	ftp-&gt;lastch = 0;</span>
+<span class='curline'><a href='../S/189.html#L1929'>ftp</a>              1929 ext/ftp/ftp.c  	ftp-&gt;nb = 1;</span>
+<span class='curline'><a href='../S/189.html#L1931'>ftp</a>              1931 ext/ftp/ftp.c  	return (ftp_nb_continue_read(ftp));</span>
+<span class='curline'><a href='../S/189.html#L1934'>ftp</a>              1934 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L1942'>ftp</a>              1942 ext/ftp/ftp.c  ftp_nb_continue_read(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L1950'>ftp</a>              1950 ext/ftp/ftp.c  	data = ftp-&gt;data;</span>
+<span class='curline'><a href='../S/189.html#L1953'>ftp</a>              1953 ext/ftp/ftp.c  	if (!data_available(ftp, data-&gt;fd)) {</span>
+<span class='curline'><a href='../S/189.html#L1957'>ftp</a>              1957 ext/ftp/ftp.c  	type = ftp-&gt;type;</span>
+<span class='curline'><a href='../S/189.html#L1959'>ftp</a>              1959 ext/ftp/ftp.c  	lastch = ftp-&gt;lastch;</span>
+<span class='curline'><a href='../S/189.html#L1960'>ftp</a>              1960 ext/ftp/ftp.c  	if ((rcvd = my_recv(ftp, data-&gt;fd, data-&gt;buf, FTP_BUFSIZE))) {</span>
+<span class='curline'><a href='../S/189.html#L1968'>ftp</a>              1968 ext/ftp/ftp.c  					php_stream_putc(ftp-&gt;stream, '\r');</span>
+<span class='curline'><a href='../S/189.html#L1971'>ftp</a>              1971 ext/ftp/ftp.c  					php_stream_putc(ftp-&gt;stream, *ptr);</span>
+<span class='curline'><a href='../S/189.html#L1975'>ftp</a>              1975 ext/ftp/ftp.c  		} else if (rcvd != php_stream_write(ftp-&gt;stream, data-&gt;buf, rcvd)) {</span>
+<span class='curline'><a href='../S/189.html#L1979'>ftp</a>              1979 ext/ftp/ftp.c  		ftp-&gt;lastch = lastch;</span>
+<span class='curline'><a href='../S/189.html#L1984'>ftp</a>              1984 ext/ftp/ftp.c  		php_stream_putc(ftp-&gt;stream, '\r');</span>
+<span class='curline'><a href='../S/189.html#L1987'>ftp</a>              1987 ext/ftp/ftp.c  	ftp-&gt;data = data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L1989'>ftp</a>              1989 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 226 &amp;&amp; ftp-&gt;resp != 250)) {</span>
+<span class='curline'><a href='../S/189.html#L1993'>ftp</a>              1993 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/189.html#L1996'>ftp</a>              1996 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/189.html#L1997'>ftp</a>              1997 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L2005'>ftp</a>              2005 ext/ftp/ftp.c  ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos)</span>
+<span class='curline'><a href='../S/189.html#L2010'>ftp</a>              2010 ext/ftp/ftp.c  	if (ftp == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L2013'>ftp</a>              2013 ext/ftp/ftp.c  	if (!ftp_type(ftp, type)) {</span>
+<span class='curline'><a href='../S/189.html#L2016'>ftp</a>              2016 ext/ftp/ftp.c  	if ((data = ftp_getdata(ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L2021'>ftp</a>              2021 ext/ftp/ftp.c  		if (!ftp_putcmd(ftp, "REST", arg)) {</span>
+<span class='curline'><a href='../S/189.html#L2024'>ftp</a>              2024 ext/ftp/ftp.c  		if (!ftp_getresp(ftp) || (ftp-&gt;resp != 350)) {</span>
+<span class='curline'><a href='../S/189.html#L2029'>ftp</a>              2029 ext/ftp/ftp.c  	if (!ftp_putcmd(ftp, "STOR", path)) {</span>
+<span class='curline'><a href='../S/189.html#L2032'>ftp</a>              2032 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 150 &amp;&amp; ftp-&gt;resp != 125)) {</span>
+<span class='curline'><a href='../S/189.html#L2035'>ftp</a>              2035 ext/ftp/ftp.c  	if ((data = data_accept(data, ftp)) == NULL) {</span>
+<span class='curline'><a href='../S/189.html#L2038'>ftp</a>              2038 ext/ftp/ftp.c  	ftp-&gt;data = data;</span>
+<span class='curline'><a href='../S/189.html#L2039'>ftp</a>              2039 ext/ftp/ftp.c  	ftp-&gt;stream = instream;</span>
+<span class='curline'><a href='../S/189.html#L2040'>ftp</a>              2040 ext/ftp/ftp.c  	ftp-&gt;lastch = 0;</span>
+<span class='curline'><a href='../S/189.html#L2041'>ftp</a>              2041 ext/ftp/ftp.c  	ftp-&gt;nb = 1;</span>
+<span class='curline'><a href='../S/189.html#L2043'>ftp</a>              2043 ext/ftp/ftp.c  	return (ftp_nb_continue_write(ftp));</span>
+<span class='curline'><a href='../S/189.html#L2046'>ftp</a>              2046 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, data);</span>
+<span class='curline'><a href='../S/189.html#L2055'>ftp</a>              2055 ext/ftp/ftp.c  ftp_nb_continue_write(ftpbuf_t *ftp)</span>
+<span class='curline'><a href='../S/189.html#L2062'>ftp</a>              2062 ext/ftp/ftp.c  	if (!data_writeable(ftp, ftp-&gt;data-&gt;fd)) {</span>
+<span class='curline'><a href='../S/189.html#L2067'>ftp</a>              2067 ext/ftp/ftp.c  	ptr = ftp-&gt;data-&gt;buf;</span>
+<span class='curline'><a href='../S/189.html#L2068'>ftp</a>              2068 ext/ftp/ftp.c  	while (!php_stream_eof(ftp-&gt;stream) &amp;&amp; (ch = php_stream_getc(ftp-&gt;stream)) != EOF) {</span>
+<span class='curline'><a href='../S/189.html#L2070'>ftp</a>              2070 ext/ftp/ftp.c  		if (ch == '\n' &amp;&amp; ftp-&gt;type == FTPTYPE_ASCII) {</span>
+<span class='curline'><a href='../S/189.html#L2080'>ftp</a>              2080 ext/ftp/ftp.c  			if (my_send(ftp, ftp-&gt;data-&gt;fd, ftp-&gt;data-&gt;buf, size) != size) {</span>
+<span class='curline'><a href='../S/189.html#L2087'>ftp</a>              2087 ext/ftp/ftp.c  	if (size &amp;&amp; my_send(ftp, ftp-&gt;data-&gt;fd, ftp-&gt;data-&gt;buf, size) != size) {</span>
+<span class='curline'><a href='../S/189.html#L2090'>ftp</a>              2090 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, ftp-&gt;data);</span>
+<span class='curline'><a href='../S/189.html#L2092'>ftp</a>              2092 ext/ftp/ftp.c  	if (!ftp_getresp(ftp) || (ftp-&gt;resp != 226 &amp;&amp; ftp-&gt;resp != 250)) {</span>
+<span class='curline'><a href='../S/189.html#L2095'>ftp</a>              2095 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/189.html#L2098'>ftp</a>              2098 ext/ftp/ftp.c  	ftp-&gt;data = data_close(ftp, ftp-&gt;data);</span>
+<span class='curline'><a href='../S/189.html#L2099'>ftp</a>              2099 ext/ftp/ftp.c  	ftp-&gt;nb = 0;</span>
+<span class='curline'><a href='../S/190.html#L103'>ftp</a>               103 ext/ftp/ftp.h  int		ftp_quit(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L106'>ftp</a>               106 ext/ftp/ftp.h  void		ftp_gc(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L109'>ftp</a>               109 ext/ftp/ftp.h  ftpbuf_t*	ftp_close(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L112'>ftp</a>               112 ext/ftp/ftp.h  int		ftp_login(ftpbuf_t *ftp, const char *user, const char *pass);</span>
+<span class='curline'><a href='../S/190.html#L115'>ftp</a>               115 ext/ftp/ftp.h  int		ftp_reinit(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L118'>ftp</a>               118 ext/ftp/ftp.h  const char*	ftp_syst(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L121'>ftp</a>               121 ext/ftp/ftp.h  const char*	ftp_pwd(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L124'>ftp</a>               124 ext/ftp/ftp.h  int 	ftp_exec(ftpbuf_t *ftp, const char *cmd);</span>
+<span class='curline'><a href='../S/190.html#L127'>ftp</a>               127 ext/ftp/ftp.h  void	ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value);</span>
+<span class='curline'><a href='../S/190.html#L130'>ftp</a>               130 ext/ftp/ftp.h  int		ftp_chdir(ftpbuf_t *ftp, const char *dir);</span>
+<span class='curline'><a href='../S/190.html#L133'>ftp</a>               133 ext/ftp/ftp.h  int		ftp_cdup(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L138'>ftp</a>               138 ext/ftp/ftp.h  zend_string* ftp_mkdir(ftpbuf_t *ftp, const char *dir);</span>
+<span class='curline'><a href='../S/190.html#L141'>ftp</a>               141 ext/ftp/ftp.h  int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);</span>
+<span class='curline'><a href='../S/190.html#L144'>ftp</a>               144 ext/ftp/ftp.h  int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len);</span>
+<span class='curline'><a href='../S/190.html#L151'>ftp</a>               151 ext/ftp/ftp.h  int		ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response);</span>
+<span class='curline'><a href='../S/190.html#L157'>ftp</a>               157 ext/ftp/ftp.h  char**		ftp_nlist(ftpbuf_t *ftp, const char *path);</span>
+<span class='curline'><a href='../S/190.html#L164'>ftp</a>               164 ext/ftp/ftp.h  char**		ftp_list(ftpbuf_t *ftp, const char *path, int recursive);</span>
+<span class='curline'><a href='../S/190.html#L169'>ftp</a>               169 ext/ftp/ftp.h  int		ftp_pasv(ftpbuf_t *ftp, int pasv);</span>
+<span class='curline'><a href='../S/190.html#L174'>ftp</a>               174 ext/ftp/ftp.h  int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos);</span>
+<span class='curline'><a href='../S/190.html#L179'>ftp</a>               179 ext/ftp/ftp.h  int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos);</span>
+<span class='curline'><a href='../S/190.html#L182'>ftp</a>               182 ext/ftp/ftp.h  zend_long		ftp_size(ftpbuf_t *ftp, const char *path);</span>
+<span class='curline'><a href='../S/190.html#L185'>ftp</a>               185 ext/ftp/ftp.h  time_t		ftp_mdtm(ftpbuf_t *ftp, const char *path);</span>
+<span class='curline'><a href='../S/190.html#L188'>ftp</a>               188 ext/ftp/ftp.h  int		ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest);</span>
+<span class='curline'><a href='../S/190.html#L191'>ftp</a>               191 ext/ftp/ftp.h  int		ftp_delete(ftpbuf_t *ftp, const char *path);</span>
+<span class='curline'><a href='../S/190.html#L194'>ftp</a>               194 ext/ftp/ftp.h  int		ftp_site(ftpbuf_t *ftp, const char *cmd);</span>
+<span class='curline'><a href='../S/190.html#L199'>ftp</a>               199 ext/ftp/ftp.h  int		ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos);</span>
+<span class='curline'><a href='../S/190.html#L204'>ftp</a>               204 ext/ftp/ftp.h  int		ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos);</span>
+<span class='curline'><a href='../S/190.html#L208'>ftp</a>               208 ext/ftp/ftp.h  int		ftp_nb_continue_read(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/190.html#L212'>ftp</a>               212 ext/ftp/ftp.h  int		ftp_nb_continue_write(ftpbuf_t *ftp);</span>
+<span class='curline'><a href='../S/191.html#L63'>ftp</a>                63 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L69'>ftp</a>                69 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L73'>ftp</a>                73 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L77'>ftp</a>                77 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L82'>ftp</a>                82 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L87'>ftp</a>                87 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L92'>ftp</a>                92 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L97'>ftp</a>                97 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L102'>ftp</a>               102 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L108'>ftp</a>               108 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L114'>ftp</a>               114 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L119'>ftp</a>               119 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L125'>ftp</a>               125 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L129'>ftp</a>               129 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L137'>ftp</a>               137 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L145'>ftp</a>               145 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L150'>ftp</a>               150 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L158'>ftp</a>               158 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L166'>ftp</a>               166 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L170'>ftp</a>               170 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L178'>ftp</a>               178 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L186'>ftp</a>               186 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L194'>ftp</a>               194 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L202'>ftp</a>               202 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L207'>ftp</a>               207 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L212'>ftp</a>               212 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L218'>ftp</a>               218 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L223'>ftp</a>               223 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L228'>ftp</a>               228 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L232'>ftp</a>               232 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L238'>ftp</a>               238 ext/ftp/php_ftp.c 	ZEND_ARG_INFO(0, ftp)</span>
+<span class='curline'><a href='../S/191.html#L290'>ftp</a>               290 ext/ftp/php_ftp.c 	PHP_MINIT(ftp),</span>
+<span class='curline'><a href='../S/191.html#L294'>ftp</a>               294 ext/ftp/php_ftp.c 	PHP_MINFO(ftp),</span>
+<span class='curline'><a href='../S/191.html#L305'>ftp</a>               305 ext/ftp/php_ftp.c 	ftpbuf_t *ftp = (ftpbuf_t *)rsrc-&gt;ptr;</span>
+<span class='curline'><a href='../S/191.html#L307'>ftp</a>               307 ext/ftp/php_ftp.c 	ftp_close(ftp);</span>
+<span class='curline'><a href='../S/191.html#L310'>ftp</a>               310 ext/ftp/php_ftp.c PHP_MINIT_FUNCTION(ftp)</span>
+<span class='curline'><a href='../S/191.html#L336'>ftp</a>               336 ext/ftp/php_ftp.c PHP_MINFO_FUNCTION(ftp)</span>
+<span class='curline'><a href='../S/191.html#L361'>ftp</a>               361 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L377'>ftp</a>               377 ext/ftp/php_ftp.c 	if (!(ftp = ftp_open(host, (short)port, timeout_sec))) {</span>
+<span class='curline'><a href='../S/191.html#L382'>ftp</a>               382 ext/ftp/php_ftp.c 	ftp-&gt;autoseek = FTP_DEFAULT_AUTOSEEK;</span>
+<span class='curline'><a href='../S/191.html#L383'>ftp</a>               383 ext/ftp/php_ftp.c 	ftp-&gt;usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;</span>
+<span class='curline'><a href='../S/191.html#L386'>ftp</a>               386 ext/ftp/php_ftp.c 	ftp-&gt;use_ssl = 0;</span>
+<span class='curline'><a href='../S/191.html#L389'>ftp</a>               389 ext/ftp/php_ftp.c 	RETURN_RES(zend_register_resource(ftp, le_ftpbuf));</span>
+<span class='curline'><a href='../S/191.html#L398'>ftp</a>               398 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L414'>ftp</a>               414 ext/ftp/php_ftp.c 	if (!(ftp = ftp_open(host, (short)port, timeout_sec))) {</span>
+<span class='curline'><a href='../S/191.html#L419'>ftp</a>               419 ext/ftp/php_ftp.c 	ftp-&gt;autoseek = FTP_DEFAULT_AUTOSEEK;</span>
+<span class='curline'><a href='../S/191.html#L420'>ftp</a>               420 ext/ftp/php_ftp.c 	ftp-&gt;usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;</span>
+<span class='curline'><a href='../S/191.html#L422'>ftp</a>               422 ext/ftp/php_ftp.c 	ftp-&gt;use_ssl = 1;</span>
+<span class='curline'><a href='../S/191.html#L424'>ftp</a>               424 ext/ftp/php_ftp.c 	RETURN_RES(zend_register_resource(ftp, le_ftpbuf));</span>
+<span class='curline'><a href='../S/191.html#L434'>ftp</a>               434 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L442'>ftp</a>               442 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L447'>ftp</a>               447 ext/ftp/php_ftp.c 	if (!ftp_login(ftp, user, pass)) {</span>
+<span class='curline'><a href='../S/191.html#L448'>ftp</a>               448 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L461'>ftp</a>               461 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L468'>ftp</a>               468 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L472'>ftp</a>               472 ext/ftp/php_ftp.c 	if (!(pwd = ftp_pwd(ftp))) {</span>
+<span class='curline'><a href='../S/191.html#L473'>ftp</a>               473 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L486'>ftp</a>               486 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L492'>ftp</a>               492 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L496'>ftp</a>               496 ext/ftp/php_ftp.c 	if (!ftp_cdup(ftp)) {</span>
+<span class='curline'><a href='../S/191.html#L497'>ftp</a>               497 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L510'>ftp</a>               510 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L518'>ftp</a>               518 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L523'>ftp</a>               523 ext/ftp/php_ftp.c 	if (!ftp_chdir(ftp, dir)) {</span>
+<span class='curline'><a href='../S/191.html#L524'>ftp</a>               524 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L537'>ftp</a>               537 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L545'>ftp</a>               545 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L550'>ftp</a>               550 ext/ftp/php_ftp.c 	if (!ftp_exec(ftp, cmd)) {</span>
+<span class='curline'><a href='../S/191.html#L551'>ftp</a>               551 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L564'>ftp</a>               564 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L572'>ftp</a>               572 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L577'>ftp</a>               577 ext/ftp/php_ftp.c 	ftp_raw(ftp, cmd, return_value);</span>
+<span class='curline'><a href='../S/191.html#L586'>ftp</a>               586 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L595'>ftp</a>               595 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L600'>ftp</a>               600 ext/ftp/php_ftp.c 	if (NULL == (tmp = ftp_mkdir(ftp, dir))) {</span>
+<span class='curline'><a href='../S/191.html#L601'>ftp</a>               601 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L614'>ftp</a>               614 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L622'>ftp</a>               622 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L627'>ftp</a>               627 ext/ftp/php_ftp.c 	if (!ftp_rmdir(ftp, dir)) {</span>
+<span class='curline'><a href='../S/191.html#L628'>ftp</a>               628 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L641'>ftp</a>               641 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L650'>ftp</a>               650 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L654'>ftp</a>               654 ext/ftp/php_ftp.c 	if (!ftp_chmod(ftp, mode, filename, filename_len)) {</span>
+<span class='curline'><a href='../S/191.html#L655'>ftp</a>               655 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L668'>ftp</a>               668 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L676'>ftp</a>               676 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L680'>ftp</a>               680 ext/ftp/php_ftp.c 	ret = ftp_alloc(ftp, size, zresponse ? &amp;response : NULL);</span>
+<span class='curline'><a href='../S/191.html#L699'>ftp</a>               699 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L707'>ftp</a>               707 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L712'>ftp</a>               712 ext/ftp/php_ftp.c 	if (NULL == (nlist = ftp_nlist(ftp, dir))) {</span>
+<span class='curline'><a href='../S/191.html#L729'>ftp</a>               729 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L738'>ftp</a>               738 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L743'>ftp</a>               743 ext/ftp/php_ftp.c 	if (NULL == (llist = ftp_list(ftp, dir, recursive))) {</span>
+<span class='curline'><a href='../S/191.html#L760'>ftp</a>               760 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L767'>ftp</a>               767 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L771'>ftp</a>               771 ext/ftp/php_ftp.c 	if (NULL == (syst = ftp_syst(ftp))) {</span>
+<span class='curline'><a href='../S/191.html#L772'>ftp</a>               772 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L785'>ftp</a>               785 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L796'>ftp</a>               796 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L803'>ftp</a>               803 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; resumepos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L807'>ftp</a>               807 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; resumepos) {</span>
+<span class='curline'><a href='../S/191.html#L817'>ftp</a>               817 ext/ftp/php_ftp.c 	if (!ftp_get(ftp, stream, file, xtype, resumepos)) {</span>
+<span class='curline'><a href='../S/191.html#L818'>ftp</a>               818 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L831'>ftp</a>               831 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L842'>ftp</a>               842 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L849'>ftp</a>               849 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; resumepos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L853'>ftp</a>               853 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; resumepos) {</span>
+<span class='curline'><a href='../S/191.html#L864'>ftp</a>               864 ext/ftp/php_ftp.c 	ftp-&gt;direction = 0;   /* recv */</span>
+<span class='curline'><a href='../S/191.html#L865'>ftp</a>               865 ext/ftp/php_ftp.c 	ftp-&gt;closestream = 0; /* do not close */</span>
+<span class='curline'><a href='../S/191.html#L867'>ftp</a>               867 ext/ftp/php_ftp.c 	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos)) == PHP_FTP_FAILED) {</span>
+<span class='curline'><a href='../S/191.html#L868'>ftp</a>               868 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L881'>ftp</a>               881 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L888'>ftp</a>               888 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L892'>ftp</a>               892 ext/ftp/php_ftp.c 	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {</span>
+<span class='curline'><a href='../S/191.html#L905'>ftp</a>               905 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L916'>ftp</a>               916 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L922'>ftp</a>               922 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; resumepos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L930'>ftp</a>               930 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; resumepos) {</span>
+<span class='curline'><a href='../S/191.html#L953'>ftp</a>               953 ext/ftp/php_ftp.c 	if (!ftp_get(ftp, outstream, remote, xtype, resumepos)) {</span>
+<span class='curline'><a href='../S/191.html#L956'>ftp</a>               956 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L970'>ftp</a>               970 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L982'>ftp</a>               982 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L988'>ftp</a>               988 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; resumepos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L994'>ftp</a>               994 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; resumepos) {</span>
+<span class='curline'><a href='../S/191.html#L1018'>ftp</a>              1018 ext/ftp/php_ftp.c 	ftp-&gt;direction = 0;   /* recv */</span>
+<span class='curline'><a href='../S/191.html#L1019'>ftp</a>              1019 ext/ftp/php_ftp.c 	ftp-&gt;closestream = 1; /* do close */</span>
+<span class='curline'><a href='../S/191.html#L1021'>ftp</a>              1021 ext/ftp/php_ftp.c 	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos)) == PHP_FTP_FAILED) {</span>
+<span class='curline'><a href='../S/191.html#L1023'>ftp</a>              1023 ext/ftp/php_ftp.c 		ftp-&gt;stream = NULL;</span>
+<span class='curline'><a href='../S/191.html#L1025'>ftp</a>              1025 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1031'>ftp</a>              1031 ext/ftp/php_ftp.c 		ftp-&gt;stream = NULL;</span>
+<span class='curline'><a href='../S/191.html#L1043'>ftp</a>              1043 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1050'>ftp</a>              1050 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1054'>ftp</a>              1054 ext/ftp/php_ftp.c 	if (!ftp-&gt;nb) {</span>
+<span class='curline'><a href='../S/191.html#L1059'>ftp</a>              1059 ext/ftp/php_ftp.c 	if (ftp-&gt;direction) {</span>
+<span class='curline'><a href='../S/191.html#L1060'>ftp</a>              1060 ext/ftp/php_ftp.c 		ret=ftp_nb_continue_write(ftp);</span>
+<span class='curline'><a href='../S/191.html#L1062'>ftp</a>              1062 ext/ftp/php_ftp.c 		ret=ftp_nb_continue_read(ftp);</span>
+<span class='curline'><a href='../S/191.html#L1065'>ftp</a>              1065 ext/ftp/php_ftp.c 	if (ret != PHP_FTP_MOREDATA &amp;&amp; ftp-&gt;closestream) {</span>
+<span class='curline'><a href='../S/191.html#L1066'>ftp</a>              1066 ext/ftp/php_ftp.c 		php_stream_close(ftp-&gt;stream);</span>
+<span class='curline'><a href='../S/191.html#L1067'>ftp</a>              1067 ext/ftp/php_ftp.c 		ftp-&gt;stream = NULL;</span>
+<span class='curline'><a href='../S/191.html#L1071'>ftp</a>              1071 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1083'>ftp</a>              1083 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1094'>ftp</a>              1094 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1101'>ftp</a>              1101 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; startpos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L1105'>ftp</a>              1105 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; startpos) {</span>
+<span class='curline'><a href='../S/191.html#L1108'>ftp</a>              1108 ext/ftp/php_ftp.c 			startpos = ftp_size(ftp, remote);</span>
+<span class='curline'><a href='../S/191.html#L1118'>ftp</a>              1118 ext/ftp/php_ftp.c 	if (!ftp_put(ftp, remote, stream, xtype, startpos)) {</span>
+<span class='curline'><a href='../S/191.html#L1119'>ftp</a>              1119 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1132'>ftp</a>              1132 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1144'>ftp</a>              1144 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1151'>ftp</a>              1151 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; startpos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L1155'>ftp</a>              1155 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; startpos) {</span>
+<span class='curline'><a href='../S/191.html#L1158'>ftp</a>              1158 ext/ftp/php_ftp.c 			startpos = ftp_size(ftp, remote);</span>
+<span class='curline'><a href='../S/191.html#L1169'>ftp</a>              1169 ext/ftp/php_ftp.c 	ftp-&gt;direction = 1;   /* send */</span>
+<span class='curline'><a href='../S/191.html#L1170'>ftp</a>              1170 ext/ftp/php_ftp.c 	ftp-&gt;closestream = 0; /* do not close */</span>
+<span class='curline'><a href='../S/191.html#L1172'>ftp</a>              1172 ext/ftp/php_ftp.c 	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos)) == PHP_FTP_FAILED)) {</span>
+<span class='curline'><a href='../S/191.html#L1173'>ftp</a>              1173 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1187'>ftp</a>              1187 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1198'>ftp</a>              1198 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1208'>ftp</a>              1208 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; startpos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L1212'>ftp</a>              1212 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; startpos) {</span>
+<span class='curline'><a href='../S/191.html#L1215'>ftp</a>              1215 ext/ftp/php_ftp.c 			startpos = ftp_size(ftp, remote);</span>
+<span class='curline'><a href='../S/191.html#L1225'>ftp</a>              1225 ext/ftp/php_ftp.c 	if (!ftp_put(ftp, remote, instream, xtype, startpos)) {</span>
+<span class='curline'><a href='../S/191.html#L1227'>ftp</a>              1227 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1242'>ftp</a>              1242 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1253'>ftp</a>              1253 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1263'>ftp</a>              1263 ext/ftp/php_ftp.c 	if (!ftp-&gt;autoseek &amp;&amp; startpos == PHP_FTP_AUTORESUME) {</span>
+<span class='curline'><a href='../S/191.html#L1267'>ftp</a>              1267 ext/ftp/php_ftp.c 	if (ftp-&gt;autoseek &amp;&amp; startpos) {</span>
+<span class='curline'><a href='../S/191.html#L1270'>ftp</a>              1270 ext/ftp/php_ftp.c 			startpos = ftp_size(ftp, remote);</span>
+<span class='curline'><a href='../S/191.html#L1281'>ftp</a>              1281 ext/ftp/php_ftp.c 	ftp-&gt;direction = 1;   /* send */</span>
+<span class='curline'><a href='../S/191.html#L1282'>ftp</a>              1282 ext/ftp/php_ftp.c 	ftp-&gt;closestream = 1; /* do close */</span>
+<span class='curline'><a href='../S/191.html#L1284'>ftp</a>              1284 ext/ftp/php_ftp.c 	ret = ftp_nb_put(ftp, remote, instream, xtype, startpos);</span>
+<span class='curline'><a href='../S/191.html#L1288'>ftp</a>              1288 ext/ftp/php_ftp.c 		ftp-&gt;stream = NULL;</span>
+<span class='curline'><a href='../S/191.html#L1292'>ftp</a>              1292 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1304'>ftp</a>              1304 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1312'>ftp</a>              1312 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1317'>ftp</a>              1317 ext/ftp/php_ftp.c 	RETURN_LONG(ftp_size(ftp, file));</span>
+<span class='curline'><a href='../S/191.html#L1326'>ftp</a>              1326 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1334'>ftp</a>              1334 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1339'>ftp</a>              1339 ext/ftp/php_ftp.c 	RETURN_LONG(ftp_mdtm(ftp, file));</span>
+<span class='curline'><a href='../S/191.html#L1348'>ftp</a>              1348 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1356'>ftp</a>              1356 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1361'>ftp</a>              1361 ext/ftp/php_ftp.c 	if (!ftp_rename(ftp, src, dest)) {</span>
+<span class='curline'><a href='../S/191.html#L1362'>ftp</a>              1362 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1375'>ftp</a>              1375 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1383'>ftp</a>              1383 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1388'>ftp</a>              1388 ext/ftp/php_ftp.c 	if (!ftp_delete(ftp, file)) {</span>
+<span class='curline'><a href='../S/191.html#L1389'>ftp</a>              1389 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1402'>ftp</a>              1402 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1410'>ftp</a>              1410 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1415'>ftp</a>              1415 ext/ftp/php_ftp.c 	if (!ftp_site(ftp, cmd)) {</span>
+<span class='curline'><a href='../S/191.html#L1416'>ftp</a>              1416 ext/ftp/php_ftp.c 		php_error_docref(NULL, E_WARNING, "%s", ftp-&gt;inbuf);</span>
+<span class='curline'><a href='../S/191.html#L1429'>ftp</a>              1429 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1435'>ftp</a>              1435 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1439'>ftp</a>              1439 ext/ftp/php_ftp.c 	ftp_quit(ftp);</span>
+<span class='curline'><a href='../S/191.html#L1451'>ftp</a>              1451 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1457'>ftp</a>              1457 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1472'>ftp</a>              1472 ext/ftp/php_ftp.c 			ftp-&gt;timeout_sec = Z_LVAL_P(z_value);</span>
+<span class='curline'><a href='../S/191.html#L1481'>ftp</a>              1481 ext/ftp/php_ftp.c 			ftp-&gt;autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;</span>
+<span class='curline'><a href='../S/191.html#L1490'>ftp</a>              1490 ext/ftp/php_ftp.c 			ftp-&gt;usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;</span>
+<span class='curline'><a href='../S/191.html#L1507'>ftp</a>              1507 ext/ftp/php_ftp.c 	ftpbuf_t	*ftp;</span>
+<span class='curline'><a href='../S/191.html#L1513'>ftp</a>              1513 ext/ftp/php_ftp.c 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {</span>
+<span class='curline'><a href='../S/191.html#L1519'>ftp</a>              1519 ext/ftp/php_ftp.c 			RETURN_LONG(ftp-&gt;timeout_sec);</span>
+<span class='curline'><a href='../S/191.html#L1522'>ftp</a>              1522 ext/ftp/php_ftp.c 			RETURN_BOOL(ftp-&gt;autoseek);</span>
+<span class='curline'><a href='../S/191.html#L1525'>ftp</a>              1525 ext/ftp/php_ftp.c 			RETURN_BOOL(ftp-&gt;usepasvaddress);</span>
+<span class='curline'><a href='../S/192.html#L38'>ftp</a>                38 ext/ftp/php_ftp.h PHP_MINIT_FUNCTION(ftp);</span>
+<span class='curline'><a href='../S/192.html#L39'>ftp</a>                39 ext/ftp/php_ftp.h PHP_MINFO_FUNCTION(ftp);</span>
+</pre>
+</body>
+</html>

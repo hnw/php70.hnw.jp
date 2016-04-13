@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/pcre/pcrelib/pcre_fullinfo.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1814.html'>pcre</a>/<a href='../files/1815.html'>pcrelib</a>/pcre_fullinfo.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L68'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L68' title='Defined at 68.'>pcre_fullinfo</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*************************************************</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>*      Perl-Compatible Regular Expressions       *</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>*************************************************/</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='comment'>/* PCRE is a library of functions to support regular expressions whose syntax</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>and semantics are as close as possible to those of the Perl 5 language.</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'></em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>                       Written by Philip Hazel</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>           Copyright (c) 1997-2013 University of Cambridge</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>-----------------------------------------------------------------------------</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>Redistribution and use in source and binary forms, with or without</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>modification, are permitted provided that the following conditions are met:</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'></em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>    * Redistributions of source code must retain the above copyright notice,</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>      this list of conditions and the following disclaimer.</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'></em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>    * Redistributions in binary form must reproduce the above copyright</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>      notice, this list of conditions and the following disclaimer in the</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>      documentation and/or other materials provided with the distribution.</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'></em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>    * Neither the name of the University of Cambridge nor the names of its</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>      contributors may be used to endorse or promote products derived from</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>      this software without specific prior written permission.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'></em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'>INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'>ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'>POSSIBILITY OF SUCH DAMAGE.</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>-----------------------------------------------------------------------------</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>*/</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='comment'>/* This module contains the external function pcre_fullinfo(), which returns</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'>information about a compiled pattern. */</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#include</em> "<a href='868.html'>pcre_internal.h</a>"
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <em class='comment'>/*************************************************</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>*        Return info about compiled pattern      *</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>*************************************************/</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='comment'>/* This is a newer "info" function which has an extensible interface so</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>that additional items can be added compatibly.</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'></em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>Arguments:</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>  argument_re      points to compiled code</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>  extra_data       points extra data, or NULL</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>  what             what information is required</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>  where            where to put the information</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'></em>
+<a id='L63' name='L63'></a>  63 <em class='comment'>Returns:           0 if data returned, negative on error</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>*/</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong> <a href='../D/1215.html' title='Multiple defined in 2 places.'>COMPILE_PCRE8</a>
+<a id='L67' name='L67'></a>  67 <a href='../D/7120.html' title='Multiple defined in 4 places.'>PCRE_EXP_DEFN</a> <strong class='reserved'>int</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L68' name='L68'></a>  68 <a href='../R/22775.html' title='Multiple referred from 17 places.'>pcre_fullinfo</a>(<strong class='reserved'>const</strong> <a href='../S/860.html#L325' title='Defined at 325 in ext/pcre/pcrelib/pcre.h.'>pcre</a> *<a href='../Y/11909.html' title='Multiple used in 16 places.'>argument_re</a>, <strong class='reserved'>const</strong> <a href='../D/25808.html' title='Multiple defined in 2 places.'>pcre_extra</a> *<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>,
+<a id='L69' name='L69'></a>  69   <strong class='reserved'>int</strong> <a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>, <strong class='reserved'>void</strong> *<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)
+<a id='L70' name='L70'></a>  70 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong> <a href='../Y/550.html' title='Multiple used in 128 places.'>COMPILE_PCRE16</a>
+<a id='L71' name='L71'></a>  71 <a href='../D/7120.html' title='Multiple defined in 4 places.'>PCRE_EXP_DEFN</a> <strong class='reserved'>int</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L72' name='L72'></a>  72 <a href='../Y/31420.html' title='Multiple used in 9 places.'>pcre16_fullinfo</a>(<strong class='reserved'>const</strong> <a href='../S/860.html#L328' title='Defined at 328 in ext/pcre/pcrelib/pcre.h.'>pcre16</a> *<a href='../Y/11909.html' title='Multiple used in 16 places.'>argument_re</a>, <strong class='reserved'>const</strong> <a href='../D/25791.html' title='Multiple defined in 2 places.'>pcre16_extra</a> *<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>,
+<a id='L73' name='L73'></a>  73   <strong class='reserved'>int</strong> <a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>, <strong class='reserved'>void</strong> *<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)
+<a id='L74' name='L74'></a>  74 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong> <a href='../Y/551.html' title='Multiple used in 143 places.'>COMPILE_PCRE32</a>
+<a id='L75' name='L75'></a>  75 <a href='../D/7120.html' title='Multiple defined in 4 places.'>PCRE_EXP_DEFN</a> <strong class='reserved'>int</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L76' name='L76'></a>  76 <a href='../Y/31456.html' title='Multiple used in 9 places.'>pcre32_fullinfo</a>(<strong class='reserved'>const</strong> <a href='../S/860.html#L331' title='Defined at 331 in ext/pcre/pcrelib/pcre.h.'>pcre32</a> *<a href='../Y/11909.html' title='Multiple used in 16 places.'>argument_re</a>, <strong class='reserved'>const</strong> <a href='../D/25795.html' title='Multiple defined in 2 places.'>pcre32_extra</a> *<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>,
+<a id='L77' name='L77'></a>  77   <strong class='reserved'>int</strong> <a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>, <strong class='reserved'>void</strong> *<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)
+<a id='L78' name='L78'></a>  78 <em class='sharp'>#endif</em>
+<a id='L79' name='L79'></a>  79 <em class='brace'>{</em>
+<a id='L80' name='L80'></a>  80 <strong class='reserved'>const</strong> <a href='../D/9559.html' title='Multiple defined in 3 places.'>REAL_PCRE</a> *<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a> = (<strong class='reserved'>const</strong> <a href='../D/9559.html' title='Multiple defined in 3 places.'>REAL_PCRE</a> *)<a href='../Y/11909.html' title='Multiple used in 16 places.'>argument_re</a>;
+<a id='L81' name='L81'></a>  81 <strong class='reserved'>const</strong> <a href='../D/25838.html' title='Multiple defined in 2 places.'>pcre_study_data</a> *<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>if</strong> (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> || <a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <strong class='reserved'>return</strong> <a href='../S/860.html#L176' title='Defined at 176 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_NULL</a>;
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>if</strong> (<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp; (<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/860.html#L314' title='Defined at 314 in ext/pcre/pcrelib/pcre.h.'>PCRE_EXTRA_STUDY_DATA</a>) != 0)
+<a id='L86' name='L86'></a>  86   <a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a> = (<strong class='reserved'>const</strong> <a href='../D/25838.html' title='Multiple defined in 2 places.'>pcre_study_data</a> *)<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../Y/37776.html' title='Multiple used in 8 places.'>study_data</a>;
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88 <em class='comment'>/* Check that the first field in the block is the magic number. If it is not,</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>means that the pattern is likely compiled with different endianness. */</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93 <strong class='reserved'>if</strong> (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/25658.html' title='Multiple used in 11 places.'>magic_number</a> != <a href='../S/868.html#L1143' title='Defined at 1143 in ext/pcre/pcrelib/pcre_internal.h.'>MAGIC_NUMBER</a>)
+<a id='L94' name='L94'></a>  94   <strong class='reserved'>return</strong> <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/25658.html' title='Multiple used in 11 places.'>magic_number</a> == <a href='../S/868.html#L1148' title='Defined at 1148 in ext/pcre/pcrelib/pcre_internal.h.'>REVERSED_MAGIC_NUMBER</a>?
+<a id='L95' name='L95'></a>  95     <a href='../S/860.html#L208' title='Defined at 208 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADENDIANNESS</a>:<a href='../S/860.html#L178' title='Defined at 178 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADMAGIC</a>;
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97 <em class='comment'>/* Check that this pattern was compiled in the correct bit mode */</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <strong class='reserved'>if</strong> ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../D/7173.html' title='Multiple defined in 3 places.'>PCRE_MODE</a>) == 0) <strong class='reserved'>return</strong> <a href='../S/860.html#L207' title='Defined at 207 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADMODE</a>;
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <strong class='reserved'>switch</strong> (<a href='../Y/40693.html' title='Multiple used in 151 places.'>what</a>)
+<a id='L102' name='L102'></a> 102   <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103   <strong class='reserved'>case</strong> <a href='../S/860.html#L257' title='Defined at 257 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_OPTIONS</a>:
+<a id='L104' name='L104'></a> 104   *((<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> &amp; <a href='../S/868.html#L1114' title='Defined at 1114 in ext/pcre/pcrelib/pcre_internal.h.'>PUBLIC_COMPILE_OPTIONS</a>;
+<a id='L105' name='L105'></a> 105   <strong class='reserved'>break</strong>;
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107   <strong class='reserved'>case</strong> <a href='../S/860.html#L258' title='Defined at 258 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_SIZE</a>:
+<a id='L108' name='L108'></a> 108   *((<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L109' name='L109'></a> 109   <strong class='reserved'>break</strong>;
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111   <strong class='reserved'>case</strong> <a href='../S/860.html#L268' title='Defined at 268 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_STUDYSIZE</a>:
+<a id='L112' name='L112'></a> 112   *((<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)? 0 : <a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L113' name='L113'></a> 113   <strong class='reserved'>break</strong>;
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115   <strong class='reserved'>case</strong> <a href='../S/860.html#L275' title='Defined at 275 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_JITSIZE</a>:
+<a id='L116' name='L116'></a> 116 <em class='sharp'>#ifdef</em> <a href='../S/858.html#L400' title='Defined at 400 in ext/pcre/pcrelib/config.h.'>SUPPORT_JIT</a>
+<a id='L117' name='L117'></a> 117   *((<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L118' name='L118'></a> 118       (<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp;
+<a id='L119' name='L119'></a> 119       (<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/860.html#L320' title='Defined at 320 in ext/pcre/pcrelib/pcre.h.'>PCRE_EXTRA_EXECUTABLE_JIT</a>) != 0 &amp;&amp;
+<a id='L120' name='L120'></a> 120       <a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../Y/17249.html' title='Multiple used in 17 places.'>executable_jit</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)?
+<a id='L121' name='L121'></a> 121     <a href='../D/9021.html' title='Multiple defined in 7 places.'>PRIV</a>(<a href='../Y/24308.html' title='Multiple used in 3 places.'>jit_get_size</a>)(<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../Y/17249.html' title='Multiple used in 17 places.'>executable_jit</a>) : 0;
+<a id='L122' name='L122'></a> 122 <em class='sharp'>#else</em>
+<a id='L123' name='L123'></a> 123   *((<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = 0;
+<a id='L124' name='L124'></a> 124 <em class='sharp'>#endif</em>
+<a id='L125' name='L125'></a> 125   <strong class='reserved'>break</strong>;
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127   <strong class='reserved'>case</strong> <a href='../S/860.html#L259' title='Defined at 259 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_CAPTURECOUNT</a>:
+<a id='L128' name='L128'></a> 128   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/38815.html' title='Multiple used in 22 places.'>top_bracket</a>;
+<a id='L129' name='L129'></a> 129   <strong class='reserved'>break</strong>;
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131   <strong class='reserved'>case</strong> <a href='../S/860.html#L260' title='Defined at 260 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_BACKREFMAX</a>:
+<a id='L132' name='L132'></a> 132   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/38814.html' title='Multiple used in 14 places.'>top_backref</a>;
+<a id='L133' name='L133'></a> 133   <strong class='reserved'>break</strong>;
+<a id='L134' name='L134'></a> 134 
+<a id='L135' name='L135'></a> 135   <strong class='reserved'>case</strong> <a href='../S/860.html#L261' title='Defined at 261 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_FIRSTBYTE</a>:
+<a id='L136' name='L136'></a> 136   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L137' name='L137'></a> 137     ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1081' title='Defined at 1081 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_FIRSTSET</a>) != 0)? (<strong class='reserved'>int</strong>)<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/18022.html' title='Multiple used in 33 places.'>first_char</a> :
+<a id='L138' name='L138'></a> 138     ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1085' title='Defined at 1085 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_STARTLINE</a>) != 0)? -1 : -2;
+<a id='L139' name='L139'></a> 139   <strong class='reserved'>break</strong>;
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141   <strong class='reserved'>case</strong> <a href='../S/860.html#L277' title='Defined at 277 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_FIRSTCHARACTER</a>:
+<a id='L142' name='L142'></a> 142     *((<a href='../D/25841.html' title='Multiple defined in 2 places.'>pcre_uint32</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L143' name='L143'></a> 143       (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1081' title='Defined at 1081 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_FIRSTSET</a>) != 0 ? <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/18022.html' title='Multiple used in 33 places.'>first_char</a> : 0;
+<a id='L144' name='L144'></a> 144     <strong class='reserved'>break</strong>;
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146   <strong class='reserved'>case</strong> <a href='../S/860.html#L278' title='Defined at 278 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_FIRSTCHARACTERFLAGS</a>:
+<a id='L147' name='L147'></a> 147     *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L148' name='L148'></a> 148       ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1081' title='Defined at 1081 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_FIRSTSET</a>) != 0) ? 1 :
+<a id='L149' name='L149'></a> 149       ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1085' title='Defined at 1085 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_STARTLINE</a>) != 0) ? 2 : 0;
+<a id='L150' name='L150'></a> 150     <strong class='reserved'>break</strong>;
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152   <em class='comment'>/* Make sure we pass back the pointer to the bit vector in the external</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'>  block, not the internal copy (with flipped integer fields). */</em>
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155   <strong class='reserved'>case</strong> <a href='../S/860.html#L263' title='Defined at 263 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_FIRSTTABLE</a>:
+<a id='L156' name='L156'></a> 156   *((<strong class='reserved'>const</strong> <a href='../S/868.html#L194' title='Defined at 194 in ext/pcre/pcrelib/pcre_internal.h.'>pcre_uint8</a> **)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L157' name='L157'></a> 157     (<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp; (<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1105' title='Defined at 1105 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_STUDY_MAPPED</a>) != 0)?
+<a id='L158' name='L158'></a> 158       ((<strong class='reserved'>const</strong> <a href='../D/25838.html' title='Multiple defined in 2 places.'>pcre_study_data</a> *)<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../Y/37776.html' title='Multiple used in 8 places.'>study_data</a>)-&gt;<a href='../Y/37283.html' title='Multiple used in 49 places.'>start_bits</a> : <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L159' name='L159'></a> 159   <strong class='reserved'>break</strong>;
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161   <strong class='reserved'>case</strong> <a href='../S/860.html#L273' title='Defined at 273 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_MINLENGTH</a>:
+<a id='L162' name='L162'></a> 162   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L163' name='L163'></a> 163     (<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp; (<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1106' title='Defined at 1106 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_STUDY_MINLEN</a>) != 0)?
+<a id='L164' name='L164'></a> 164       (<strong class='reserved'>int</strong>)(<a href='../Y/37775.html' title='Multiple used in 33 places.'>study</a>-&gt;<a href='../Y/26631.html' title='Multiple used in 12 places.'>minlength</a>) : -1;
+<a id='L165' name='L165'></a> 165   <strong class='reserved'>break</strong>;
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167   <strong class='reserved'>case</strong> <a href='../S/860.html#L274' title='Defined at 274 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_JIT</a>:
+<a id='L168' name='L168'></a> 168   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp;
+<a id='L169' name='L169'></a> 169                     (<a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/860.html#L320' title='Defined at 320 in ext/pcre/pcrelib/pcre.h.'>PCRE_EXTRA_EXECUTABLE_JIT</a>) != 0 &amp;&amp;
+<a id='L170' name='L170'></a> 170                     <a href='../Y/17418.html' title='Multiple used in 58 places.'>extra_data</a>-&gt;<a href='../Y/17249.html' title='Multiple used in 17 places.'>executable_jit</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L171' name='L171'></a> 171   <strong class='reserved'>break</strong>;
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173   <strong class='reserved'>case</strong> <a href='../S/860.html#L264' title='Defined at 264 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_LASTLITERAL</a>:
+<a id='L174' name='L174'></a> 174   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L175' name='L175'></a> 175     ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1083' title='Defined at 1083 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_REQCHSET</a>) != 0)? (<strong class='reserved'>int</strong>)<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/34546.html' title='Multiple used in 32 places.'>req_char</a> : -1;
+<a id='L176' name='L176'></a> 176   <strong class='reserved'>break</strong>;
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178   <strong class='reserved'>case</strong> <a href='../S/860.html#L279' title='Defined at 279 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_REQUIREDCHAR</a>:
+<a id='L179' name='L179'></a> 179     *((<a href='../D/25841.html' title='Multiple defined in 2 places.'>pcre_uint32</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L180' name='L180'></a> 180       ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1083' title='Defined at 1083 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_REQCHSET</a>) != 0) ? <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/34546.html' title='Multiple used in 32 places.'>req_char</a> : 0;
+<a id='L181' name='L181'></a> 181     <strong class='reserved'>break</strong>;
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183   <strong class='reserved'>case</strong> <a href='../S/860.html#L280' title='Defined at 280 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_REQUIREDCHARFLAGS</a>:
+<a id='L184' name='L184'></a> 184     *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) =
+<a id='L185' name='L185'></a> 185       ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1083' title='Defined at 1083 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_REQCHSET</a>) != 0);
+<a id='L186' name='L186'></a> 186     <strong class='reserved'>break</strong>;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188   <strong class='reserved'>case</strong> <a href='../S/860.html#L265' title='Defined at 265 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_NAMEENTRYSIZE</a>:
+<a id='L189' name='L189'></a> 189   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/27942.html' title='Multiple used in 50 places.'>name_entry_size</a>;
+<a id='L190' name='L190'></a> 190   <strong class='reserved'>break</strong>;
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192   <strong class='reserved'>case</strong> <a href='../S/860.html#L266' title='Defined at 266 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_NAMECOUNT</a>:
+<a id='L193' name='L193'></a> 193   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/27938.html' title='Multiple used in 32 places.'>name_count</a>;
+<a id='L194' name='L194'></a> 194   <strong class='reserved'>break</strong>;
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196   <strong class='reserved'>case</strong> <a href='../S/860.html#L267' title='Defined at 267 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_NAMETABLE</a>:
+<a id='L197' name='L197'></a> 197   *((<strong class='reserved'>const</strong> <a href='../D/25839.html' title='Multiple defined in 3 places.'>pcre_uchar</a> **)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<strong class='reserved'>const</strong> <a href='../D/25839.html' title='Multiple defined in 3 places.'>pcre_uchar</a> *)<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a> + <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/27956.html' title='Multiple used in 12 places.'>name_table_offset</a>;
+<a id='L198' name='L198'></a> 198   <strong class='reserved'>break</strong>;
+<a id='L199' name='L199'></a> 199 
+<a id='L200' name='L200'></a> 200   <strong class='reserved'>case</strong> <a href='../S/860.html#L269' title='Defined at 269 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_DEFAULT_TABLES</a>:
+<a id='L201' name='L201'></a> 201   *((<strong class='reserved'>const</strong> <a href='../S/868.html#L194' title='Defined at 194 in ext/pcre/pcrelib/pcre_internal.h.'>pcre_uint8</a> **)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<strong class='reserved'>const</strong> <a href='../S/868.html#L194' title='Defined at 194 in ext/pcre/pcrelib/pcre_internal.h.'>pcre_uint8</a> *)(<a href='../D/9021.html' title='Multiple defined in 7 places.'>PRIV</a>(<a href='../Y/15468.html' title='Multiple used in 7 places.'>default_tables</a>));
+<a id='L202' name='L202'></a> 202   <strong class='reserved'>break</strong>;
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204   <em class='comment'>/* From release 8.00 this will always return TRUE because NOPARTIAL is</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>  no longer ever set (the restrictions have been removed). */</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207   <strong class='reserved'>case</strong> <a href='../S/860.html#L270' title='Defined at 270 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_OKPARTIAL</a>:
+<a id='L208' name='L208'></a> 208   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1086' title='Defined at 1086 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_NOPARTIAL</a>) == 0;
+<a id='L209' name='L209'></a> 209   <strong class='reserved'>break</strong>;
+<a id='L210' name='L210'></a> 210 
+<a id='L211' name='L211'></a> 211   <strong class='reserved'>case</strong> <a href='../S/860.html#L271' title='Defined at 271 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_JCHANGED</a>:
+<a id='L212' name='L212'></a> 212   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1087' title='Defined at 1087 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_JCHANGED</a>) != 0;
+<a id='L213' name='L213'></a> 213   <strong class='reserved'>break</strong>;
+<a id='L214' name='L214'></a> 214 
+<a id='L215' name='L215'></a> 215   <strong class='reserved'>case</strong> <a href='../S/860.html#L272' title='Defined at 272 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_HASCRORLF</a>:
+<a id='L216' name='L216'></a> 216   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1088' title='Defined at 1088 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_HASCRORLF</a>) != 0;
+<a id='L217' name='L217'></a> 217   <strong class='reserved'>break</strong>;
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219   <strong class='reserved'>case</strong> <a href='../S/860.html#L276' title='Defined at 276 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_MAXLOOKBEHIND</a>:
+<a id='L220' name='L220'></a> 220   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/25909.html' title='Multiple used in 12 places.'>max_lookbehind</a>;
+<a id='L221' name='L221'></a> 221   <strong class='reserved'>break</strong>;
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223   <strong class='reserved'>case</strong> <a href='../S/860.html#L281' title='Defined at 281 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_MATCHLIMIT</a>:
+<a id='L224' name='L224'></a> 224   <strong class='reserved'>if</strong> ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1090' title='Defined at 1090 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_MLSET</a>) == 0) <strong class='reserved'>return</strong> <a href='../S/860.html#L212' title='Defined at 212 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_UNSET</a>;
+<a id='L225' name='L225'></a> 225   *((<a href='../D/25841.html' title='Multiple defined in 2 places.'>pcre_uint32</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/25088.html' title='Multiple used in 19 places.'>limit_match</a>;
+<a id='L226' name='L226'></a> 226   <strong class='reserved'>break</strong>;
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228   <strong class='reserved'>case</strong> <a href='../S/860.html#L282' title='Defined at 282 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_RECURSIONLIMIT</a>:
+<a id='L229' name='L229'></a> 229   <strong class='reserved'>if</strong> ((<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1091' title='Defined at 1091 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_RLSET</a>) == 0) <strong class='reserved'>return</strong> <a href='../S/860.html#L212' title='Defined at 212 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_UNSET</a>;
+<a id='L230' name='L230'></a> 230   *((<a href='../D/25841.html' title='Multiple defined in 2 places.'>pcre_uint32</a> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = <a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../Y/25089.html' title='Multiple used in 9 places.'>limit_recursion</a>;
+<a id='L231' name='L231'></a> 231   <strong class='reserved'>break</strong>;
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233   <strong class='reserved'>case</strong> <a href='../S/860.html#L283' title='Defined at 283 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_MATCH_EMPTY</a>:
+<a id='L234' name='L234'></a> 234   *((<strong class='reserved'>int</strong> *)<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>) = (<a href='../Y/34032.html' title='Multiple used in 310 places.'>re</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/868.html#L1092' title='Defined at 1092 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_MATCH_EMPTY</a>) != 0;
+<a id='L235' name='L235'></a> 235   <strong class='reserved'>break</strong>;
+<a id='L236' name='L236'></a> 236 
+<a id='L237' name='L237'></a> 237   <strong class='reserved'>default</strong>: <strong class='reserved'>return</strong> <a href='../S/860.html#L177' title='Defined at 177 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADOPTION</a>;
+<a id='L238' name='L238'></a> 238   <em class='brace'>}</em>
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240 <strong class='reserved'>return</strong> 0;
+<a id='L241' name='L241'></a> 241 <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 <em class='comment'>/* End of pcre_fullinfo.c */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L68'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

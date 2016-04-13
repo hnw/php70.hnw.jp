@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>Zend/zend_ast.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1742.html'>Zend</a>/zend_ast.h</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L216'>[^]</a><a href='#L267'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/21.html' title='Multiple included from 4 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L216' title='Defined at 216.'>zend_ast_is_list</a></li>
+<li><a href='#L219' title='Defined at 219.'>zend_ast_get_list</a></li>
+<li><a href='#L224' title='Defined at 224.'>zend_ast_get_zval</a></li>
+<li><a href='#L228' title='Defined at 228.'>zend_ast_get_str</a></li>
+<li><a href='#L234' title='Defined at 234.'>zend_ast_get_num_children</a></li>
+<li><a href='#L238' title='Defined at 238.'>zend_ast_get_lineno</a></li>
+<li><a href='#L247' title='Defined at 247.'>zend_ast_create_zval</a></li>
+<li><a href='#L250' title='Defined at 250.'>zend_ast_create_zval_from_str</a></li>
+<li><a href='#L255' title='Defined at 255.'>zend_ast_create_zval_from_long</a></li>
+<li><a href='#L261' title='Defined at 261.'>zend_ast_create_binary_op</a></li>
+<li><a href='#L264' title='Defined at 264.'>zend_ast_create_assign_op</a></li>
+<li><a href='#L267' title='Defined at 267.'>zend_ast_create_cast</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | Zend Engine                                                          |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 2.00 of the Zend license,     |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.zend.com/license/2_00.txt.                                |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the Zend license and are unable to  |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@zend.com so we can mail you a copy immediately.              |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Bob Weinand &lt;bwoebi@php.net&gt;                                |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Dmitry Stogov &lt;dmitry@zend.com&gt;                             |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |          Nikita Popov &lt;nikic@php.net&gt;                                |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>*/</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='comment'>/* $Id$ */</em>
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#ifndef</em> <a href='../S/1635.html#L24' title='Defined at 24 in Zend/zend_ast.h.'>ZEND_AST_H</a>
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#define</em> <a href='../S/1635.html#L23' title='Referred from 23 in Zend/zend_ast.h.'>ZEND_AST_H</a>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1627.html'>zend.h</a>"
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> <a href='../S/1635.html#L34' title='Referred from 34 in Zend/zend_ast.h.'>ZEND_AST_SPECIAL_SHIFT</a>      6
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> <a href='../R/13614.html' title='Multiple referred from 3 places.'>ZEND_AST_IS_LIST_SHIFT</a>      7
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> <a href='../R/13624.html' title='Multiple referred from 7 places.'>ZEND_AST_NUM_CHILDREN_SHIFT</a> 8
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>enum</strong> _zend_ast_kind <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33         <em class='comment'>/* special nodes */</em>
+<a id='L34' name='L34'></a>  34         <a href='../R/13667.html' title='Multiple referred from 58 places.'>ZEND_AST_ZVAL</a> = 1 &lt;&lt; <a href='../S/1635.html#L28' title='Defined at 28 in Zend/zend_ast.h.'>ZEND_AST_SPECIAL_SHIFT</a>,
+<a id='L35' name='L35'></a>  35         <a href='../R/13666.html' title='Multiple referred from 4 places.'>ZEND_AST_ZNODE</a>,
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37         <em class='comment'>/* declaration nodes */</em>
+<a id='L38' name='L38'></a>  38         <a href='../R/13601.html' title='Multiple referred from 6 places.'>ZEND_AST_FUNC_DECL</a>,
+<a id='L39' name='L39'></a>  39         <a href='../R/13583.html' title='Multiple referred from 8 places.'>ZEND_AST_CLOSURE</a>,
+<a id='L40' name='L40'></a>  40         <a href='../R/13618.html' title='Multiple referred from 7 places.'>ZEND_AST_METHOD</a>,
+<a id='L41' name='L41'></a>  41         <a href='../R/13579.html' title='Multiple referred from 11 places.'>ZEND_AST_CLASS</a>,
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <em class='comment'>/* list nodes */</em>
+<a id='L44' name='L44'></a>  44         <a href='../R/13567.html' title='Multiple referred from 5 places.'>ZEND_AST_ARG_LIST</a> = 1 &lt;&lt; <a href='../S/1635.html#L29' title='Defined at 29 in Zend/zend_ast.h.'>ZEND_AST_IS_LIST_SHIFT</a>,
+<a id='L45' name='L45'></a>  45         <a href='../R/13616.html' title='Multiple referred from 6 places.'>ZEND_AST_LIST</a>,
+<a id='L46' name='L46'></a>  46         <a href='../R/13568.html' title='Multiple referred from 7 places.'>ZEND_AST_ARRAY</a>,
+<a id='L47' name='L47'></a>  47         <a href='../R/13596.html' title='Multiple referred from 5 places.'>ZEND_AST_ENCAPS_LIST</a>,
+<a id='L48' name='L48'></a>  48         <a href='../R/13598.html' title='Multiple referred from 2 places.'>ZEND_AST_EXPR_LIST</a>,
+<a id='L49' name='L49'></a>  49         <a href='../R/13644.html' title='Multiple referred from 13 places.'>ZEND_AST_STMT_LIST</a>,
+<a id='L50' name='L50'></a>  50         <a href='../R/13609.html' title='Multiple referred from 6 places.'>ZEND_AST_IF</a>,
+<a id='L51' name='L51'></a>  51         <a href='../R/13647.html' title='Multiple referred from 2 places.'>ZEND_AST_SWITCH_LIST</a>,
+<a id='L52' name='L52'></a>  52         <a href='../R/13578.html' title='Multiple referred from 2 places.'>ZEND_AST_CATCH_LIST</a>,
+<a id='L53' name='L53'></a>  53         <a href='../R/13627.html' title='Multiple referred from 3 places.'>ZEND_AST_PARAM_LIST</a>,
+<a id='L54' name='L54'></a>  54         <a href='../R/13584.html' title='Multiple referred from 2 places.'>ZEND_AST_CLOSURE_USES</a>,
+<a id='L55' name='L55'></a>  55         <a href='../R/13634.html' title='Multiple referred from 4 places.'>ZEND_AST_PROP_DECL</a>,
+<a id='L56' name='L56'></a>  56         <a href='../R/13588.html' title='Multiple referred from 4 places.'>ZEND_AST_CONST_DECL</a>,
+<a id='L57' name='L57'></a>  57         <a href='../R/13581.html' title='Multiple referred from 4 places.'>ZEND_AST_CLASS_CONST_DECL</a>,
+<a id='L58' name='L58'></a>  58         <a href='../R/13622.html' title='Multiple referred from 2 places.'>ZEND_AST_NAME_LIST</a>,
+<a id='L59' name='L59'></a>  59         <a href='../R/13649.html' title='Multiple referred from 3 places.'>ZEND_AST_TRAIT_ADAPTATIONS</a>,
+<a id='L60' name='L60'></a>  60         <a href='../R/13659.html' title='Multiple referred from 6 places.'>ZEND_AST_USE</a>,
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <em class='comment'>/* 0 child nodes */</em>
+<a id='L63' name='L63'></a>  63         <a href='../R/13617.html' title='Multiple referred from 14 places.'>ZEND_AST_MAGIC_CONST</a> = 0 &lt;&lt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>,
+<a id='L64' name='L64'></a>  64         <a href='../R/13653.html' title='Multiple referred from 5 places.'>ZEND_AST_TYPE</a>,
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <em class='comment'>/* 1 child node */</em>
+<a id='L67' name='L67'></a>  67         <a href='../R/13662.html' title='Multiple referred from 34 places.'>ZEND_AST_VAR</a> = 1 &lt;&lt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>,
+<a id='L68' name='L68'></a>  68         <a href='../R/13587.html' title='Multiple referred from 6 places.'>ZEND_AST_CONST</a>,
+<a id='L69' name='L69'></a>  69         <a href='../R/13657.html' title='Multiple referred from 6 places.'>ZEND_AST_UNPACK</a>,
+<a id='L70' name='L70'></a>  70         <a href='../R/13656.html' title='Multiple referred from 9 places.'>ZEND_AST_UNARY_PLUS</a>,
+<a id='L71' name='L71'></a>  71         <a href='../R/13654.html' title='Multiple referred from 7 places.'>ZEND_AST_UNARY_MINUS</a>,
+<a id='L72' name='L72'></a>  72         <a href='../R/13576.html' title='Multiple referred from 3 places.'>ZEND_AST_CAST</a>,
+<a id='L73' name='L73'></a>  73         <a href='../R/13595.html' title='Multiple referred from 5 places.'>ZEND_AST_EMPTY</a>,
+<a id='L74' name='L74'></a>  74         <a href='../R/13613.html' title='Multiple referred from 5 places.'>ZEND_AST_ISSET</a>,
+<a id='L75' name='L75'></a>  75         <a href='../R/13639.html' title='Multiple referred from 3 places.'>ZEND_AST_SILENCE</a>,
+<a id='L76' name='L76'></a>  76         <a href='../R/13638.html' title='Multiple referred from 3 places.'>ZEND_AST_SHELL_EXEC</a>,
+<a id='L77' name='L77'></a>  77         <a href='../R/13582.html' title='Multiple referred from 3 places.'>ZEND_AST_CLONE</a>,
+<a id='L78' name='L78'></a>  78         <a href='../R/13597.html' title='Multiple referred from 3 places.'>ZEND_AST_EXIT</a>,
+<a id='L79' name='L79'></a>  79         <a href='../R/13632.html' title='Multiple referred from 3 places.'>ZEND_AST_PRINT</a>,
+<a id='L80' name='L80'></a>  80         <a href='../R/13611.html' title='Multiple referred from 7 places.'>ZEND_AST_INCLUDE_OR_EVAL</a>,
+<a id='L81' name='L81'></a>  81         <a href='../R/13655.html' title='Multiple referred from 8 places.'>ZEND_AST_UNARY_OP</a>,
+<a id='L82' name='L82'></a>  82         <a href='../R/13631.html' title='Multiple referred from 6 places.'>ZEND_AST_PRE_INC</a>,
+<a id='L83' name='L83'></a>  83         <a href='../R/13630.html' title='Multiple referred from 4 places.'>ZEND_AST_PRE_DEC</a>,
+<a id='L84' name='L84'></a>  84         <a href='../R/13629.html' title='Multiple referred from 6 places.'>ZEND_AST_POST_INC</a>,
+<a id='L85' name='L85'></a>  85         <a href='../R/13628.html' title='Multiple referred from 4 places.'>ZEND_AST_POST_DEC</a>,
+<a id='L86' name='L86'></a>  86         <a href='../R/13665.html' title='Multiple referred from 3 places.'>ZEND_AST_YIELD_FROM</a>,
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         <a href='../R/13602.html' title='Multiple referred from 3 places.'>ZEND_AST_GLOBAL</a>,
+<a id='L89' name='L89'></a>  89         <a href='../R/13658.html' title='Multiple referred from 3 places.'>ZEND_AST_UNSET</a>,
+<a id='L90' name='L90'></a>  90         <a href='../R/13637.html' title='Multiple referred from 3 places.'>ZEND_AST_RETURN</a>,
+<a id='L91' name='L91'></a>  91         <a href='../R/13615.html' title='Multiple referred from 5 places.'>ZEND_AST_LABEL</a>,
+<a id='L92' name='L92'></a>  92         <a href='../R/13636.html' title='Multiple referred from 4 places.'>ZEND_AST_REF</a>,
+<a id='L93' name='L93'></a>  93         <a href='../R/13608.html' title='Multiple referred from 5 places.'>ZEND_AST_HALT_COMPILER</a>,
+<a id='L94' name='L94'></a>  94         <a href='../R/13594.html' title='Multiple referred from 4 places.'>ZEND_AST_ECHO</a>,
+<a id='L95' name='L95'></a>  95         <a href='../R/13648.html' title='Multiple referred from 3 places.'>ZEND_AST_THROW</a>,
+<a id='L96' name='L96'></a>  96         <a href='../R/13603.html' title='Multiple referred from 3 places.'>ZEND_AST_GOTO</a>,
+<a id='L97' name='L97'></a>  97         <a href='../R/13574.html' title='Multiple referred from 9 places.'>ZEND_AST_BREAK</a>,
+<a id='L98' name='L98'></a>  98         <a href='../R/13590.html' title='Multiple referred from 4 places.'>ZEND_AST_CONTINUE</a>,
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <em class='comment'>/* 2 child nodes */</em>
+<a id='L101' name='L101'></a> 101         <a href='../R/13592.html' title='Multiple referred from 20 places.'>ZEND_AST_DIM</a> = 2 &lt;&lt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>,
+<a id='L102' name='L102'></a> 102         <a href='../R/13633.html' title='Multiple referred from 15 places.'>ZEND_AST_PROP</a>,
+<a id='L103' name='L103'></a> 103         <a href='../R/13643.html' title='Multiple referred from 13 places.'>ZEND_AST_STATIC_PROP</a>,
+<a id='L104' name='L104'></a> 104         <a href='../R/13575.html' title='Multiple referred from 9 places.'>ZEND_AST_CALL</a>,
+<a id='L105' name='L105'></a> 105         <a href='../R/13580.html' title='Multiple referred from 7 places.'>ZEND_AST_CLASS_CONST</a>,
+<a id='L106' name='L106'></a> 106         <a href='../R/13570.html' title='Multiple referred from 5 places.'>ZEND_AST_ASSIGN</a>,
+<a id='L107' name='L107'></a> 107         <a href='../R/13572.html' title='Multiple referred from 4 places.'>ZEND_AST_ASSIGN_REF</a>,
+<a id='L108' name='L108'></a> 108         <a href='../R/13571.html' title='Multiple referred from 3 places.'>ZEND_AST_ASSIGN_OP</a>,
+<a id='L109' name='L109'></a> 109         <a href='../R/13573.html' title='Multiple referred from 6 places.'>ZEND_AST_BINARY_OP</a>,
+<a id='L110' name='L110'></a> 110         <a href='../R/13604.html' title='Multiple referred from 10 places.'>ZEND_AST_GREATER</a>,
+<a id='L111' name='L111'></a> 111         <a href='../R/13605.html' title='Multiple referred from 7 places.'>ZEND_AST_GREATER_EQUAL</a>,
+<a id='L112' name='L112'></a> 112         <a href='../R/13566.html' title='Multiple referred from 11 places.'>ZEND_AST_AND</a>,
+<a id='L113' name='L113'></a> 113         <a href='../R/13625.html' title='Multiple referred from 12 places.'>ZEND_AST_OR</a>,
+<a id='L114' name='L114'></a> 114         <a href='../R/13569.html' title='Multiple referred from 6 places.'>ZEND_AST_ARRAY_ELEM</a>,
+<a id='L115' name='L115'></a> 115         <a href='../R/13623.html' title='Multiple referred from 4 places.'>ZEND_AST_NEW</a>,
+<a id='L116' name='L116'></a> 116         <a href='../R/13612.html' title='Multiple referred from 3 places.'>ZEND_AST_INSTANCEOF</a>,
+<a id='L117' name='L117'></a> 117         <a href='../R/13664.html' title='Multiple referred from 6 places.'>ZEND_AST_YIELD</a>,
+<a id='L118' name='L118'></a> 118         <a href='../R/13585.html' title='Multiple referred from 3 places.'>ZEND_AST_COALESCE</a>,
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120         <a href='../R/13641.html' title='Multiple referred from 4 places.'>ZEND_AST_STATIC</a>,
+<a id='L121' name='L121'></a> 121         <a href='../R/13663.html' title='Multiple referred from 4 places.'>ZEND_AST_WHILE</a>,
+<a id='L122' name='L122'></a> 122         <a href='../R/13593.html' title='Multiple referred from 3 places.'>ZEND_AST_DO_WHILE</a>,
+<a id='L123' name='L123'></a> 123         <a href='../R/13610.html' title='Multiple referred from 8 places.'>ZEND_AST_IF_ELEM</a>,
+<a id='L124' name='L124'></a> 124         <a href='../R/13645.html' title='Multiple referred from 4 places.'>ZEND_AST_SWITCH</a>,
+<a id='L125' name='L125'></a> 125         <a href='../R/13646.html' title='Multiple referred from 3 places.'>ZEND_AST_SWITCH_CASE</a>,
+<a id='L126' name='L126'></a> 126         <a href='../R/13591.html' title='Multiple referred from 5 places.'>ZEND_AST_DECLARE</a>,
+<a id='L127' name='L127'></a> 127         <a href='../R/13589.html' title='Multiple referred from 3 places.'>ZEND_AST_CONST_ELEM</a>,
+<a id='L128' name='L128'></a> 128         <a href='../R/13661.html' title='Multiple referred from 5 places.'>ZEND_AST_USE_TRAIT</a>,
+<a id='L129' name='L129'></a> 129         <a href='../R/13651.html' title='Multiple referred from 3 places.'>ZEND_AST_TRAIT_PRECEDENCE</a>,
+<a id='L130' name='L130'></a> 130         <a href='../R/13620.html' title='Multiple referred from 3 places.'>ZEND_AST_METHOD_REFERENCE</a>,
+<a id='L131' name='L131'></a> 131         <a href='../R/13621.html' title='Multiple referred from 7 places.'>ZEND_AST_NAMESPACE</a>,
+<a id='L132' name='L132'></a> 132         <a href='../R/13660.html' title='Multiple referred from 3 places.'>ZEND_AST_USE_ELEM</a>,
+<a id='L133' name='L133'></a> 133         <a href='../R/13650.html' title='Multiple referred from 6 places.'>ZEND_AST_TRAIT_ALIAS</a>,
+<a id='L134' name='L134'></a> 134         <a href='../R/13606.html' title='Multiple referred from 5 places.'>ZEND_AST_GROUP_USE</a>,
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136         <em class='comment'>/* 3 child nodes */</em>
+<a id='L137' name='L137'></a> 137         <a href='../R/13619.html' title='Multiple referred from 7 places.'>ZEND_AST_METHOD_CALL</a> = 3 &lt;&lt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>,
+<a id='L138' name='L138'></a> 138         <a href='../R/13642.html' title='Multiple referred from 8 places.'>ZEND_AST_STATIC_CALL</a>,
+<a id='L139' name='L139'></a> 139         <a href='../R/13586.html' title='Multiple referred from 7 places.'>ZEND_AST_CONDITIONAL</a>,
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141         <a href='../R/13652.html' title='Multiple referred from 4 places.'>ZEND_AST_TRY</a>,
+<a id='L142' name='L142'></a> 142         <a href='../R/13577.html' title='Multiple referred from 2 places.'>ZEND_AST_CATCH</a>,
+<a id='L143' name='L143'></a> 143         <a href='../R/13626.html' title='Multiple referred from 3 places.'>ZEND_AST_PARAM</a>,
+<a id='L144' name='L144'></a> 144         <a href='../R/13635.html' title='Multiple referred from 3 places.'>ZEND_AST_PROP_ELEM</a>,
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146         <em class='comment'>/* 4 child nodes */</em>
+<a id='L147' name='L147'></a> 147         <a href='../R/13599.html' title='Multiple referred from 4 places.'>ZEND_AST_FOR</a> = 4 &lt;&lt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>,
+<a id='L148' name='L148'></a> 148         <a href='../R/13600.html' title='Multiple referred from 5 places.'>ZEND_AST_FOREACH</a>,
+<a id='L149' name='L149'></a> 149 <em class='brace'>}</em>;
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151 <strong class='reserved'>typedef</strong> <a href='../D/32381.html' title='Multiple defined in 3 places.'>uint16_t</a> <a href='../R/30016.html' title='Multiple referred from 17 places.'>zend_ast_kind</a>;
+<a id='L152' name='L152'></a> 152 <strong class='reserved'>typedef</strong> <a href='../D/32381.html' title='Multiple defined in 3 places.'>uint16_t</a> <a href='../R/29973.html' title='Multiple referred from 10 places.'>zend_ast_attr</a>;
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154 <strong class='reserved'>struct</strong> <a href='../S/1731.html#L93' title='Referred from 93 in Zend/zend_types.h.'>_zend_ast</a> <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155         <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>; <em class='comment'>/* Type of the node (ZEND_AST_* enum constant) */</em>
+<a id='L156' name='L156'></a> 156         <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>; <em class='comment'>/* Additional attribute, use depending on node type */</em>
+<a id='L157' name='L157'></a> 157         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a>;    <em class='comment'>/* Line number */</em>
+<a id='L158' name='L158'></a> 158         <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>[1]; <em class='comment'>/* Array of children (using struct hack) */</em>
+<a id='L159' name='L159'></a> 159 <em class='brace'>}</em>;
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161 <em class='comment'>/* Same as zend_ast, but with children count, which is updated dynamically */</em>
+<a id='L162' name='L162'></a> 162 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _zend_ast_list <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163         <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>;
+<a id='L164' name='L164'></a> 164         <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>;
+<a id='L165' name='L165'></a> 165         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a>;
+<a id='L166' name='L166'></a> 166         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/13654.html' title='Multiple used in 722 places.'>children</a>;
+<a id='L167' name='L167'></a> 167         <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>[1];
+<a id='L168' name='L168'></a> 168 <em class='brace'>}</em> <a href='../R/30017.html' title='Multiple referred from 73 places.'>zend_ast_list</a>;
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170 <em class='comment'>/* Lineno is stored in val.u2.lineno */</em>
+<a id='L171' name='L171'></a> 171 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _zend_ast_zval <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172         <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>;
+<a id='L173' name='L173'></a> 173         <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>;
+<a id='L174' name='L174'></a> 174         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>;
+<a id='L175' name='L175'></a> 175 <em class='brace'>}</em> <a href='../R/30026.html' title='Multiple referred from 9 places.'>zend_ast_zval</a>;
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177 <em class='comment'>/* Separate structure for function and class declaration, as they need extra information. */</em>
+<a id='L178' name='L178'></a> 178 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _zend_ast_decl <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179         <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>;
+<a id='L180' name='L180'></a> 180         <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>; <em class='comment'>/* Unused - for structure compatibility */</em>
+<a id='L181' name='L181'></a> 181         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/37294.html' title='Multiple used in 22 places.'>start_lineno</a>;
+<a id='L182' name='L182'></a> 182         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/16796.html' title='Multiple used in 6 places.'>end_lineno</a>;
+<a id='L183' name='L183'></a> 183         <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>;
+<a id='L184' name='L184'></a> 184         <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/25023.html' title='Multiple used in 9 places.'>lex_pos</a>;
+<a id='L185' name='L185'></a> 185         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/15893.html' title='Multiple used in 77 places.'>doc_comment</a>;
+<a id='L186' name='L186'></a> 186         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>;
+<a id='L187' name='L187'></a> 187         <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13632.html' title='Multiple used in 824 places.'>child</a>[4];
+<a id='L188' name='L188'></a> 188 <em class='brace'>}</em> <a href='../R/29989.html' title='Multiple referred from 10 places.'>zend_ast_decl</a>;
+<a id='L189' name='L189'></a> 189 
+<a id='L190' name='L190'></a> 190 <strong class='reserved'>typedef</strong> <strong class='reserved'>void</strong> (*<a href='../Y/43676.html' title='Multiple used in 3 places.'>zend_ast_process_t</a>)(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L191' name='L191'></a> 191 <strong class='reserved'>extern</strong> <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../Y/43676.html' title='Multiple used in 3 places.'>zend_ast_process_t</a> <a href='../Y/43675.html' title='Multiple used in 6 places.'>zend_ast_process</a>;
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L60' title='Defined at 60 in Zend/zend_ast.c.'>zend_ast_create_zval_ex</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>, <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>);
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L120' title='Defined at 120 in Zend/zend_ast.c.'>zend_ast_create_ex</a>(<a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>, <a href='../S/1635.html#L152' title='Defined at 152 in Zend/zend_ast.h.'>zend_ast_attr</a> <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>, ...);
+<a id='L196' name='L196'></a> 196 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L131' title='Defined at 131 in Zend/zend_ast.c.'>zend_ast_create</a>(<a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>, ...);
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L71' title='Defined at 71 in Zend/zend_ast.c.'>zend_ast_create_decl</a>(
+<a id='L199' name='L199'></a> 199         <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>, <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/37294.html' title='Multiple used in 22 places.'>start_lineno</a>, <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/15893.html' title='Multiple used in 77 places.'>doc_comment</a>,
+<a id='L200' name='L200'></a> 200         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13633.html' title='Multiple used in 3 places.'>child0</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13634.html' title='Multiple used in 3 places.'>child1</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13635.html' title='Multiple used in 3 places.'>child2</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/13636.html' title='Multiple used in 3 places.'>child3</a>
+<a id='L201' name='L201'></a> 201 );
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L142' title='Defined at 142 in Zend/zend_ast.c.'>zend_ast_create_list</a>(<a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/23227.html' title='Multiple used in 3 places.'>init_children</a>, <a href='../S/1635.html#L151' title='Defined at 151 in Zend/zend_ast.h.'>zend_ast_kind</a> <a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a>, ...);
+<a id='L204' name='L204'></a> 204 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L170' title='Defined at 170 in Zend/zend_ast.c.'>zend_ast_list_add</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/25153.html' title='Multiple used in 678 places.'>list</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../D/25474.html' title='Multiple defined in 2 places.'>op</a>);
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>int</strong> <a href='../S/1634.html#L212' title='Defined at 212 in Zend/zend_ast.c.'>zend_ast_evaluate</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>, <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/35476.html' title='Multiple used in 725 places.'>scope</a>);
+<a id='L207' name='L207'></a> 207 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../S/1634.html#L1657' title='Defined at 1657 in Zend/zend_ast.c.'>zend_ast_export</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/33250.html' title='Multiple used in 351 places.'>prefix</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/37864.html' title='Multiple used in 23 places.'>suffix</a>);
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1634.html#L414' title='Defined at 414 in Zend/zend_ast.c.'>zend_ast_copy</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L210' name='L210'></a> 210 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1634.html#L497' title='Defined at 497 in Zend/zend_ast.c.'>zend_ast_destroy</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L211' name='L211'></a> 211 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1634.html#L500' title='Defined at 500 in Zend/zend_ast.c.'>zend_ast_destroy_and_free</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213 <strong class='reserved'>typedef</strong> <strong class='reserved'>void</strong> (*<a href='../Y/43674.html' title='Multiple used in 3 places.'>zend_ast_apply_func</a>)(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> **<a href='../Y/12053.html' title='Multiple used in 24 places.'>ast_ptr</a>);
+<a id='L214' name='L214'></a> 214 <a href='../D/15641.html' title='Multiple defined in 2 places.'>ZEND_API</a> <strong class='reserved'>void</strong> <a href='../S/1634.html#L504' title='Defined at 504 in Zend/zend_ast.c.'>zend_ast_apply</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>, <a href='../Y/43674.html' title='Multiple used in 3 places.'>zend_ast_apply_func</a> <a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a>);
+<a id='L215' name='L215'></a> 215 
+<a id='L216' name='L216'></a> 216 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../R/30015.html' title='Multiple referred from 12 places.'>zend_ast_is_list</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>return</strong> (<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>-&gt;<a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a> &gt;&gt; <a href='../S/1635.html#L29' title='Defined at 29 in Zend/zend_ast.h.'>ZEND_AST_IS_LIST_SHIFT</a>) &amp; 1;
+<a id='L218' name='L218'></a> 218 <em class='brace'>}</em>
+<a id='L219' name='L219'></a> 219 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1635.html#L168' title='Defined at 168 in Zend/zend_ast.h.'>zend_ast_list</a> *<a href='../R/30010.html' title='Multiple referred from 42 places.'>zend_ast_get_list</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L220' name='L220'></a> 220         <a href='../D/15659.html' title='Multiple defined in 2 places.'>ZEND_ASSERT</a>(<a href='../S/1635.html#L216' title='Defined at 216 in Zend/zend_ast.h.'>zend_ast_is_list</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>));
+<a id='L221' name='L221'></a> 221         <strong class='reserved'>return</strong> (<a href='../S/1635.html#L168' title='Defined at 168 in Zend/zend_ast.h.'>zend_ast_list</a> *) <a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>;
+<a id='L222' name='L222'></a> 222 <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../R/30014.html' title='Multiple referred from 45 places.'>zend_ast_get_zval</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L225' name='L225'></a> 225         <a href='../D/15659.html' title='Multiple defined in 2 places.'>ZEND_ASSERT</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>-&gt;<a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a> == <a href='../S/1635.html#L34' title='Defined at 34 in Zend/zend_ast.h.'>ZEND_AST_ZVAL</a>);
+<a id='L226' name='L226'></a> 226         <strong class='reserved'>return</strong> &amp;((<a href='../S/1635.html#L175' title='Defined at 175 in Zend/zend_ast.h.'>zend_ast_zval</a> *) <a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>)-&gt;<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>;
+<a id='L227' name='L227'></a> 227 <em class='brace'>}</em>
+<a id='L228' name='L228'></a> 228 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../R/30012.html' title='Multiple referred from 44 places.'>zend_ast_get_str</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L229' name='L229'></a> 229         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a> = <a href='../S/1635.html#L224' title='Defined at 224 in Zend/zend_ast.h.'>zend_ast_get_zval</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L230' name='L230'></a> 230         <a href='../D/15659.html' title='Multiple defined in 2 places.'>ZEND_ASSERT</a>(<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>);
+<a id='L231' name='L231'></a> 231         <strong class='reserved'>return</strong> <a href='../S/1731.html#L513' title='Defined at 513 in Zend/zend_types.h.'>Z_STR_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>);
+<a id='L232' name='L232'></a> 232 <em class='brace'>}</em>
+<a id='L233' name='L233'></a> 233 
+<a id='L234' name='L234'></a> 234 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../R/30011.html' title='Multiple referred from 9 places.'>zend_ast_get_num_children</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L235' name='L235'></a> 235         <a href='../D/15659.html' title='Multiple defined in 2 places.'>ZEND_ASSERT</a>(!<a href='../S/1635.html#L216' title='Defined at 216 in Zend/zend_ast.h.'>zend_ast_is_list</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>));
+<a id='L236' name='L236'></a> 236         <strong class='reserved'>return</strong> <a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>-&gt;<a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a> &gt;&gt; <a href='../S/1635.html#L30' title='Defined at 30 in Zend/zend_ast.h.'>ZEND_AST_NUM_CHILDREN_SHIFT</a>;
+<a id='L237' name='L237'></a> 237 <em class='brace'>}</em>
+<a id='L238' name='L238'></a> 238 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../R/30009.html' title='Multiple referred from 2 places.'>zend_ast_get_lineno</a>(<a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>) <em class='brace'>{</em>
+<a id='L239' name='L239'></a> 239         <strong class='reserved'>if</strong> (<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>-&gt;<a href='../Y/24499.html' title='Multiple used in 298 places.'>kind</a> == <a href='../S/1635.html#L34' title='Defined at 34 in Zend/zend_ast.h.'>ZEND_AST_ZVAL</a>) <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a> = <a href='../S/1635.html#L224' title='Defined at 224 in Zend/zend_ast.h.'>zend_ast_get_zval</a>(<a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>);
+<a id='L241' name='L241'></a> 241                 <strong class='reserved'>return</strong> <a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>-&gt;<a href='../Y/39155.html' title='Multiple used in 25 places.'>u2</a>.<a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a>;
+<a id='L242' name='L242'></a> 242         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L243' name='L243'></a> 243                 <strong class='reserved'>return</strong> <a href='../Y/12051.html' title='Multiple used in 931 places.'>ast</a>-&gt;<a href='../Y/25116.html' title='Multiple used in 178 places.'>lineno</a>;
+<a id='L244' name='L244'></a> 244         <em class='brace'>}</em>
+<a id='L245' name='L245'></a> 245 <em class='brace'>}</em>
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../R/29985.html' title='Multiple referred from 12 places.'>zend_ast_create_zval</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>) <em class='brace'>{</em>
+<a id='L248' name='L248'></a> 248         <strong class='reserved'>return</strong> <a href='../S/1634.html#L60' title='Defined at 60 in Zend/zend_ast.c.'>zend_ast_create_zval_ex</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>, 0);
+<a id='L249' name='L249'></a> 249 <em class='brace'>}</em>
+<a id='L250' name='L250'></a> 250 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../R/29988.html' title='Multiple referred from 5 places.'>zend_ast_create_zval_from_str</a>(<a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>) <em class='brace'>{</em>
+<a id='L251' name='L251'></a> 251         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>;
+<a id='L252' name='L252'></a> 252         <a href='../S/1731.html#L620' title='Defined at 620 in Zend/zend_types.h.'>ZVAL_STR</a>(&amp;<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>, <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>);
+<a id='L253' name='L253'></a> 253         <strong class='reserved'>return</strong> <a href='../S/1635.html#L247' title='Defined at 247 in Zend/zend_ast.h.'>zend_ast_create_zval</a>(&amp;<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>);
+<a id='L254' name='L254'></a> 254 <em class='brace'>}</em>
+<a id='L255' name='L255'></a> 255 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../S/1686.html#L316' title='Referred from 316 in Zend/zend_language_parser.y.'>zend_ast_create_zval_from_long</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/25501.html' title='Multiple used in 255 places.'>lval</a>) <em class='brace'>{</em>
+<a id='L256' name='L256'></a> 256         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>;
+<a id='L257' name='L257'></a> 257         <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a>(&amp;<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>, <a href='../Y/25501.html' title='Multiple used in 255 places.'>lval</a>);
+<a id='L258' name='L258'></a> 258         <strong class='reserved'>return</strong> <a href='../S/1635.html#L247' title='Defined at 247 in Zend/zend_ast.h.'>zend_ast_create_zval</a>(&amp;<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>);
+<a id='L259' name='L259'></a> 259 <em class='brace'>}</em>
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../R/29978.html' title='Multiple referred from 20 places.'>zend_ast_create_binary_op</a>(<a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/29690.html' title='Multiple used in 958 places.'>opcode</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/29617.html' title='Multiple used in 3360 places.'>op1</a>) <em class='brace'>{</em>
+<a id='L262' name='L262'></a> 262         <strong class='reserved'>return</strong> <a href='../S/1634.html#L120' title='Defined at 120 in Zend/zend_ast.c.'>zend_ast_create_ex</a>(<a href='../S/1635.html#L109' title='Defined at 109 in Zend/zend_ast.h.'>ZEND_AST_BINARY_OP</a>, <a href='../Y/29690.html' title='Multiple used in 958 places.'>opcode</a>, <a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>, <a href='../Y/29617.html' title='Multiple used in 3360 places.'>op1</a>);
+<a id='L263' name='L263'></a> 263 <em class='brace'>}</em>
+<a id='L264' name='L264'></a> 264 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../R/29977.html' title='Multiple referred from 12 places.'>zend_ast_create_assign_op</a>(<a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../Y/29690.html' title='Multiple used in 958 places.'>opcode</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/29617.html' title='Multiple used in 3360 places.'>op1</a>) <em class='brace'>{</em>
+<a id='L265' name='L265'></a> 265         <strong class='reserved'>return</strong> <a href='../S/1634.html#L120' title='Defined at 120 in Zend/zend_ast.c.'>zend_ast_create_ex</a>(<a href='../S/1635.html#L108' title='Defined at 108 in Zend/zend_ast.h.'>ZEND_AST_ASSIGN_OP</a>, <a href='../Y/29690.html' title='Multiple used in 958 places.'>opcode</a>, <a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>, <a href='../Y/29617.html' title='Multiple used in 3360 places.'>op1</a>);
+<a id='L266' name='L266'></a> 266 <em class='brace'>}</em>
+<a id='L267' name='L267'></a> 267 <strong class='reserved'>static</strong> <a href='../D/33336.html' title='Multiple defined in 6 places.'>zend_always_inline</a> <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../R/29979.html' title='Multiple referred from 7 places.'>zend_ast_create_cast</a>(<a href='../D/32386.html' title='Multiple defined in 10 places.'>uint32_t</a> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../S/1731.html#L93' title='Defined at 93 in Zend/zend_types.h.'>zend_ast</a> *<a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>) <em class='brace'>{</em>
+<a id='L268' name='L268'></a> 268         <strong class='reserved'>return</strong> <a href='../S/1634.html#L120' title='Defined at 120 in Zend/zend_ast.c.'>zend_ast_create_ex</a>(<a href='../S/1635.html#L72' title='Defined at 72 in Zend/zend_ast.h.'>ZEND_AST_CAST</a>, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../Y/29615.html' title='Multiple used in 24 places.'>op0</a>);
+<a id='L269' name='L269'></a> 269 <em class='brace'>}</em>
+<a id='L270' name='L270'></a> 270 
+<a id='L271' name='L271'></a> 271 <em class='sharp'>#endif</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L216'>[^]</a><a href='#L267'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

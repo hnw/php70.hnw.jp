@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/mbstring/libmbfl/mbfl/mbfl_encoding.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1794.html'>mbstring</a>/<a href='../files/1795.html'>libmbfl</a>/<a href='../files/1797.html'>mbfl</a>/mbfl_encoding.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/764.html' title='Multiple included from 8 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * "streamable kanji code filter and converter"</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * Copyright (c) 1998-2002 HappySize, Inc. All rights reserved.</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> *</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * LICENSE NOTICES</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> *</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * This file is part of "streamable kanji code filter and converter",</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * which is distributed under the terms of GNU Lesser General Public</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * License (version 2) as published by the Free Software Foundation.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> *</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * This software is distributed in the hope that it will be useful,</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * but WITHOUT ANY WARRANTY; without even the implied warranty of</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * GNU Lesser General Public License for more details.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * You should have received a copy of the GNU Lesser General Public</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * License along with "streamable kanji code filter and converter";</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * if not, write to the Free Software Foundation, Inc., 59 Temple Place,</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * Suite 330, Boston, MA  02111-1307  USA</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> *</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * The author of this file:</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> */</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>/*</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * The source code included in this files was separated from mbfilter.h</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * by Moriyoshi Koizumi &lt;moriyoshi@php.net&gt; on 20 Dec 2002. The file</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * mbfilter.h is included in this package .</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> *</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> */</em>
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#ifndef</em> <a href='../S/638.html#L32' title='Defined at 32 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>MBFL_ENCODING_H</a>
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#define</em> <a href='../S/638.html#L31' title='Referred from 31 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>MBFL_ENCODING_H</a>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> "<a href='636.html'>mbfl_defs.h</a>"
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>enum</strong> <a href='../R/21392.html' title='Multiple referred from 95 places.'>mbfl_no_encoding</a> <em class='brace'>{</em>
+<a id='L37' name='L37'></a>  37         <a href='../R/21446.html' title='Multiple referred from 30 places.'>mbfl_no_encoding_invalid</a> = -1,
+<a id='L38' name='L38'></a>  38         <a href='../R/21451.html' title='Multiple referred from 9 places.'>mbfl_no_encoding_pass</a>,
+<a id='L39' name='L39'></a>  39         <a href='../S/637.html#L125' title='Referred from 125 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_no_encoding_auto</a>,
+<a id='L40' name='L40'></a>  40         <a href='../R/21481.html' title='Multiple referred from 191 places.'>mbfl_no_encoding_wchar</a>,
+<a id='L41' name='L41'></a>  41         <a href='../R/21420.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_byte2be</a>,
+<a id='L42' name='L42'></a>  42         <a href='../R/21421.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_byte2le</a>,
+<a id='L43' name='L43'></a>  43         <a href='../R/21422.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_byte4be</a>,
+<a id='L44' name='L44'></a>  44         <a href='../R/21423.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_byte4le</a>,
+<a id='L45' name='L45'></a>  45         <a href='../R/21418.html' title='Multiple referred from 20 places.'>mbfl_no_encoding_base64</a>,
+<a id='L46' name='L46'></a>  46         <a href='../R/21480.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_uuencode</a>,
+<a id='L47' name='L47'></a>  47         <a href='../R/21444.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_html_ent</a>,
+<a id='L48' name='L48'></a>  48         <a href='../R/21452.html' title='Multiple referred from 15 places.'>mbfl_no_encoding_qprint</a>,
+<a id='L49' name='L49'></a>  49         <a href='../R/21399.html' title='Multiple referred from 8 places.'>mbfl_no_encoding_7bit</a>,
+<a id='L50' name='L50'></a>  50         <a href='../R/21414.html' title='Multiple referred from 22 places.'>mbfl_no_encoding_8bit</a>,
+<a id='L51' name='L51'></a>  51         mbfl_no_encoding_charset_min,
+<a id='L52' name='L52'></a>  52         <a href='../R/21463.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs4</a>,
+<a id='L53' name='L53'></a>  53         <a href='../R/21464.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs4be</a>,
+<a id='L54' name='L54'></a>  54         <a href='../R/21465.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs4le</a>,
+<a id='L55' name='L55'></a>  55         <a href='../R/21460.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs2</a>,
+<a id='L56' name='L56'></a>  56         <a href='../R/21461.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs2be</a>,
+<a id='L57' name='L57'></a>  57         <a href='../R/21462.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_ucs2le</a>,
+<a id='L58' name='L58'></a>  58         <a href='../R/21470.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf32</a>,
+<a id='L59' name='L59'></a>  59         <a href='../R/21471.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf32be</a>,
+<a id='L60' name='L60'></a>  60         <a href='../R/21472.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf32le</a>,
+<a id='L61' name='L61'></a>  61         <a href='../R/21467.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf16</a>,
+<a id='L62' name='L62'></a>  62         <a href='../R/21468.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf16be</a>,
+<a id='L63' name='L63'></a>  63         <a href='../R/21469.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf16le</a>,
+<a id='L64' name='L64'></a>  64         <a href='../R/21475.html' title='Multiple referred from 22 places.'>mbfl_no_encoding_utf8</a>,
+<a id='L65' name='L65'></a>  65         <a href='../R/21476.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_utf8_docomo</a>,
+<a id='L66' name='L66'></a>  66         <a href='../R/21477.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_utf8_kddi_a</a>,
+<a id='L67' name='L67'></a>  67         <a href='../R/21478.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_utf8_kddi_b</a>,
+<a id='L68' name='L68'></a>  68         <a href='../R/21479.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_utf8_sb</a>,
+<a id='L69' name='L69'></a>  69         <a href='../R/21473.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_utf7</a>,
+<a id='L70' name='L70'></a>  70         <a href='../R/21474.html' title='Multiple referred from 3 places.'>mbfl_no_encoding_utf7imap</a>,
+<a id='L71' name='L71'></a>  71         <a href='../R/21416.html' title='Multiple referred from 17 places.'>mbfl_no_encoding_ascii</a>,
+<a id='L72' name='L72'></a>  72         <a href='../R/21438.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_euc_jp</a>,
+<a id='L73' name='L73'></a>  73         <a href='../R/21441.html' title='Multiple referred from 16 places.'>mbfl_no_encoding_eucjp2004</a>,
+<a id='L74' name='L74'></a>  74         <a href='../R/21453.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_sjis</a>,
+<a id='L75' name='L75'></a>  75         <a href='../R/21442.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_eucjp_win</a>,
+<a id='L76' name='L76'></a>  76         <a href='../R/21458.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_sjis_open</a>,
+<a id='L77' name='L77'></a>  77         <a href='../R/21455.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_sjis_docomo</a>,
+<a id='L78' name='L78'></a>  78         <a href='../R/21456.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_sjis_kddi</a>,
+<a id='L79' name='L79'></a>  79         <a href='../R/21459.html' title='Multiple referred from 10 places.'>mbfl_no_encoding_sjis_sb</a>,
+<a id='L80' name='L80'></a>  80         <a href='../R/21457.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_sjis_mac</a>,
+<a id='L81' name='L81'></a>  81         <a href='../R/21454.html' title='Multiple referred from 11 places.'>mbfl_no_encoding_sjis2004</a>,
+<a id='L82' name='L82'></a>  82         <a href='../R/21434.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp932</a>,
+<a id='L83' name='L83'></a>  83         <a href='../R/21431.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp51932</a>,
+<a id='L84' name='L84'></a>  84         <a href='../R/21447.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_jis</a>,
+<a id='L85' name='L85'></a>  85         <a href='../R/21394.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_2022jp</a>,
+<a id='L86' name='L86'></a>  86         <a href='../R/21395.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_2022jp_2004</a>,
+<a id='L87' name='L87'></a>  87         <a href='../R/21396.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_2022jp_kddi</a>,
+<a id='L88' name='L88'></a>  88         <a href='../R/21397.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_2022jpms</a>,
+<a id='L89' name='L89'></a>  89         <a href='../R/21443.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_gb18030</a>,
+<a id='L90' name='L90'></a>  90         <a href='../R/21425.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp1252</a>,
+<a id='L91' name='L91'></a>  91         <a href='../R/21426.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_cp1254</a>,
+<a id='L92' name='L92'></a>  92         <a href='../R/21400.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_8859_1</a>,
+<a id='L93' name='L93'></a>  93         <a href='../R/21406.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_2</a>,
+<a id='L94' name='L94'></a>  94         <a href='../R/21407.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_3</a>,
+<a id='L95' name='L95'></a>  95         <a href='../R/21408.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_4</a>,
+<a id='L96' name='L96'></a>  96         <a href='../R/21409.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_5</a>,
+<a id='L97' name='L97'></a>  97         <a href='../R/21410.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_6</a>,
+<a id='L98' name='L98'></a>  98         <a href='../R/21411.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_7</a>,
+<a id='L99' name='L99'></a>  99         <a href='../R/21412.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_8</a>,
+<a id='L100' name='L100'></a> 100         <a href='../R/21413.html' title='Multiple referred from 8 places.'>mbfl_no_encoding_8859_9</a>,
+<a id='L101' name='L101'></a> 101         <a href='../R/21401.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_10</a>,
+<a id='L102' name='L102'></a> 102         <a href='../R/21402.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_13</a>,
+<a id='L103' name='L103'></a> 103         <a href='../R/21403.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_14</a>,
+<a id='L104' name='L104'></a> 104         <a href='../R/21404.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_8859_15</a>,
+<a id='L105' name='L105'></a> 105         <a href='../R/21437.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_euc_cn</a>,
+<a id='L106' name='L106'></a> 106         <a href='../R/21435.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_cp936</a>,
+<a id='L107' name='L107'></a> 107         <a href='../R/21440.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_euc_tw</a>,
+<a id='L108' name='L108'></a> 108         <a href='../R/21419.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_big5</a>,
+<a id='L109' name='L109'></a> 109         <a href='../R/21436.html' title='Multiple referred from 8 places.'>mbfl_no_encoding_cp950</a>,
+<a id='L110' name='L110'></a> 110         <a href='../R/21439.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_euc_kr</a>,
+<a id='L111' name='L111'></a> 111         <a href='../R/21398.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_2022kr</a>,
+<a id='L112' name='L112'></a> 112         <a href='../R/21466.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_uhc</a>,
+<a id='L113' name='L113'></a> 113         <a href='../R/21445.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_hz</a>,
+<a id='L114' name='L114'></a> 114         <a href='../R/21424.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_cp1251</a>,
+<a id='L115' name='L115'></a> 115         <a href='../R/21433.html' title='Multiple referred from 5 places.'>mbfl_no_encoding_cp866</a>,
+<a id='L116' name='L116'></a> 116         <a href='../R/21449.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_koi8r</a>,
+<a id='L117' name='L117'></a> 117         <a href='../R/21450.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_koi8u</a>,
+<a id='L118' name='L118'></a> 118         <a href='../R/21405.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_8859_16</a>,
+<a id='L119' name='L119'></a> 119         <a href='../R/21415.html' title='Multiple referred from 6 places.'>mbfl_no_encoding_armscii8</a>,
+<a id='L120' name='L120'></a> 120         <a href='../R/21432.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp850</a>,
+<a id='L121' name='L121'></a> 121         <a href='../R/21448.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_jis_ms</a>,
+<a id='L122' name='L122'></a> 122         <a href='../R/21427.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp50220</a>,
+<a id='L123' name='L123'></a> 123         <a href='../R/21428.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp50220raw</a>,
+<a id='L124' name='L124'></a> 124         <a href='../R/21429.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp50221</a>,
+<a id='L125' name='L125'></a> 125         <a href='../R/21430.html' title='Multiple referred from 4 places.'>mbfl_no_encoding_cp50222</a>,
+<a id='L126' name='L126'></a> 126         mbfl_no_encoding_charset_max
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>;
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../R/21133.html' title='Multiple referred from 2 places.'>mbfl_encoding_id</a>;
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131 <em class='comment'>/*</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'> * encoding</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'> */</em>
+<a id='L134' name='L134'></a> 134 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _mbfl_encoding <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/28588.html' title='Multiple used in 195 places.'>no_encoding</a>;
+<a id='L136' name='L136'></a> 136         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>;
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/26585.html' title='Multiple used in 14 places.'>mime_name</a>;
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *(*<a href='../Y/9070.html' title='Multiple used in 21 places.'>aliases</a>)[];
+<a id='L139' name='L139'></a> 139         <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/26320.html' title='Multiple used in 15 places.'>mblen_table</a>;
+<a id='L140' name='L140'></a> 140         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/18062.html' title='Multiple used in 599 places.'>flag</a>;
+<a id='L141' name='L141'></a> 141 <em class='brace'>}</em> <a href='../R/21125.html' title='Multiple referred from 299 places.'>mbfl_encoding</a>;
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> * <a href='../S/637.html#L226' title='Defined at 226 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_name2encoding</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L144' name='L144'></a> 144 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> * <a href='../S/637.html#L270' title='Defined at 270 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_no2encoding</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/28588.html' title='Multiple used in 195 places.'>no_encoding</a>);
+<a id='L145' name='L145'></a> 145 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../S/637.html#L286' title='Defined at 286 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_name2no_encoding</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L146' name='L146'></a> 146 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <a href='../S/638.html#L141' title='Defined at 141 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_encoding</a> ** <a href='../S/637.html#L312' title='Defined at 312 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_get_supported_encodings</a>();
+<a id='L147' name='L147'></a> 147 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../S/637.html#L299' title='Defined at 299 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_no_encoding2name</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/28588.html' title='Multiple used in 195 places.'>no_encoding</a>);
+<a id='L148' name='L148'></a> 148 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../S/637.html#L318' title='Defined at 318 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_no2preferred_mime_name</a>(<strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/28588.html' title='Multiple used in 195 places.'>no_encoding</a>);
+<a id='L149' name='L149'></a> 149 <a href='../D/4864.html' title='Multiple defined in 4 places.'>MBFLAPI</a> <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../S/637.html#L331' title='Defined at 331 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_is_support_encoding</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152 <em class='sharp'>#endif</em> <em class='comment'>/* MBFL_ENCODING_H */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

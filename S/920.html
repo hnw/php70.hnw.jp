@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/pdo_dblib/pdo_dblib.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1818.html'>pdo_dblib</a>/pdo_dblib.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L83'>[^]</a><a href='#L203'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L83' title='Defined at 83.'>ZEND_GET_MODULE</a></li>
+<li><a href='#L134' title='Defined at 134.'>pdo_dblib_msg_handler</a></li>
+<li><a href='#L155' title='Defined at 155.'>PHP_GINIT_FUNCTION</a></li>
+<li><a href='#L161' title='Defined at 161.'>PHP_RSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L178' title='Defined at 178.'>PHP_MINIT_FUNCTION</a></li>
+<li><a href='#L196' title='Defined at 196.'>PHP_MSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L203' title='Defined at 203.'>PHP_MINFO_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>  | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: Wez Furlong &lt;wez@php.net&gt;                                    |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  |         Frank M. Kromann &lt;frank@kromann.info&gt;                        |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>*/</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='comment'>/* $Id$ */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L23' name='L23'></a>  23 <em class='sharp'># include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#endif</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='1114.html'>ext/standard/info.h</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='914.html'>pdo/php_pdo.h</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='915.html'>pdo/php_pdo_driver.h</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='921.html'>php_pdo_dblib.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='922.html'>php_pdo_dblib_int.h</a>"
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='1653.html'>zend_exceptions.h</a>"
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <a href='../D/16157.html' title='Multiple defined in 12 places.'>ZEND_DECLARE_MODULE_GLOBALS</a>(<a href='../Y/15258.html' title='Multiple used in 9 places.'>dblib</a>)
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>static</strong> <a href='../D/8017.html' title='Multiple defined in 19 places.'>PHP_GINIT_FUNCTION</a>(<a href='../Y/15258.html' title='Multiple used in 9 places.'>dblib</a>);
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>const</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/31526.html' title='Multiple used in 2 places.'>pdo_dblib_functions</a>[] = <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L40' name='L40'></a>  40 <em class='brace'>}</em>;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#if</em> <a href='../S/1695.html#L36' title='Defined at 36 in Zend/zend_modules.h.'>ZEND_MODULE_API_NO</a> &gt;= 20050922
+<a id='L43' name='L43'></a>  43 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../S/1695.html#L71' title='Defined at 71 in Zend/zend_modules.h.'>zend_module_dep</a> <a href='../Y/31523.html' title='Multiple used in 2 places.'>pdo_dblib_deps</a>[] = <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <a href='../S/1695.html#L112' title='Defined at 112 in Zend/zend_modules.h.'>ZEND_MOD_REQUIRED</a>("pdo")
+<a id='L45' name='L45'></a>  45         <a href='../S/1695.html#L116' title='Defined at 116 in Zend/zend_modules.h.'>ZEND_MOD_END</a>
+<a id='L46' name='L46'></a>  46 <em class='brace'>}</em>;
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#endif</em>
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#if</em> <a href='../Y/4895.html' title='Multiple used in 6 places.'>PDO_DBLIB_IS_MSSQL</a>
+<a id='L50' name='L50'></a>  50 <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/31547.html' title='Multiple used in 3 places.'>pdo_mssql_module_entry</a> = <em class='brace'>{</em>
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#else</em>
+<a id='L52' name='L52'></a>  52 <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/31527.html' title='Multiple used in 3 places.'>pdo_dblib_module_entry</a> = <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#endif</em>
+<a id='L54' name='L54'></a>  54 <em class='sharp'>#if</em> <a href='../S/1695.html#L36' title='Defined at 36 in Zend/zend_modules.h.'>ZEND_MODULE_API_NO</a> &gt;= 20050922
+<a id='L55' name='L55'></a>  55         <a href='../S/1695.html#L43' title='Defined at 43 in Zend/zend_modules.h.'>STANDARD_MODULE_HEADER_EX</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L56' name='L56'></a>  56         <a href='../Y/31523.html' title='Multiple used in 2 places.'>pdo_dblib_deps</a>,
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#else</em>
+<a id='L58' name='L58'></a>  58         <a href='../S/1695.html#L44' title='Defined at 44 in Zend/zend_modules.h.'>STANDARD_MODULE_HEADER</a>,
+<a id='L59' name='L59'></a>  59 <em class='sharp'>#endif</em>
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#if</em> <a href='../Y/4895.html' title='Multiple used in 6 places.'>PDO_DBLIB_IS_MSSQL</a>
+<a id='L61' name='L61'></a>  61         "pdo_mssql",
+<a id='L62' name='L62'></a>  62 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong>(<a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>)
+<a id='L63' name='L63'></a>  63         "pdo_sybase",
+<a id='L64' name='L64'></a>  64 <em class='sharp'>#else</em>
+<a id='L65' name='L65'></a>  65         "pdo_dblib",
+<a id='L66' name='L66'></a>  66 <em class='sharp'>#endif</em>
+<a id='L67' name='L67'></a>  67         <a href='../Y/31526.html' title='Multiple used in 2 places.'>pdo_dblib_functions</a>,
+<a id='L68' name='L68'></a>  68         <a href='../S/1378.html#L365' title='Defined at 365 in main/php.h.'>PHP_MINIT</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>),
+<a id='L69' name='L69'></a>  69         <a href='../S/1378.html#L366' title='Defined at 366 in main/php.h.'>PHP_MSHUTDOWN</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>),
+<a id='L70' name='L70'></a>  70         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L71' name='L71'></a>  71         <a href='../S/1378.html#L368' title='Defined at 368 in main/php.h.'>PHP_RSHUTDOWN</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>),
+<a id='L72' name='L72'></a>  72         <a href='../S/1378.html#L369' title='Defined at 369 in main/php.h.'>PHP_MINFO</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>),
+<a id='L73' name='L73'></a>  73         <a href='../S/921.html#L34' title='Defined at 34 in ext/pdo_dblib/php_pdo_dblib.h.'>PHP_PDO_DBLIB_VERSION</a>,
+<a id='L74' name='L74'></a>  74         <a href='../S/1378.html#L381' title='Defined at 381 in main/php.h.'>PHP_MODULE_GLOBALS</a>(<a href='../Y/15258.html' title='Multiple used in 9 places.'>dblib</a>),
+<a id='L75' name='L75'></a>  75         <a href='../S/1378.html#L370' title='Defined at 370 in main/php.h.'>PHP_GINIT</a>(<a href='../Y/15258.html' title='Multiple used in 9 places.'>dblib</a>),
+<a id='L76' name='L76'></a>  76         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L77' name='L77'></a>  77         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L78' name='L78'></a>  78         <a href='../S/1695.html#L51' title='Defined at 51 in Zend/zend_modules.h.'>STANDARD_MODULE_PROPERTIES_EX</a>
+<a id='L79' name='L79'></a>  79 <em class='brace'>}</em>;
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(COMPILE_DL_PDO_DBLIB) || <strong class='reserved'>defined</strong>(COMPILE_DL_PDO_MSSQL)
+<a id='L82' name='L82'></a>  82 <em class='sharp'>#if</em> <a href='../Y/4895.html' title='Multiple used in 6 places.'>PDO_DBLIB_IS_MSSQL</a>
+<a id='L83' name='L83'></a>  83 <a href='../R/14241.html' title='Multiple referred from 44 places.'>ZEND_GET_MODULE</a>(pdo_mssql)
+<a id='L84' name='L84'></a>  84 <em class='sharp'>#else</em>
+<a id='L85' name='L85'></a>  85 <a href='../D/16546.html' title='Multiple defined in 30 places.'>ZEND_GET_MODULE</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>)
+<a id='L86' name='L86'></a>  86 <em class='sharp'>#endif</em>
+<a id='L87' name='L87'></a>  87 <em class='sharp'>#endif</em>
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 <strong class='reserved'>int</strong> <a href='../Y/31525.html' title='Multiple used in 4 places.'>pdo_dblib_error_handler</a>(<a href='../Y/1368.html' title='Multiple used in 5 places.'>DBPROCESS</a> *<a href='../Y/15285.html' title='Multiple used in 7 places.'>dbproc</a>, <strong class='reserved'>int</strong> <a href='../Y/35962.html' title='Multiple used in 66 places.'>severity</a>, <strong class='reserved'>int</strong> <a href='../Y/15239.html' title='Multiple used in 10 places.'>dberr</a>,
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>int</strong> <a href='../Y/30067.html' title='Multiple used in 5 places.'>oserr</a>, <strong class='reserved'>char</strong> *<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>, <strong class='reserved'>char</strong> *<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>)
+<a id='L91' name='L91'></a>  91 <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92         <a href='../S/922.html#L109' title='Defined at 109 in ext/pdo_dblib/php_pdo_dblib_int.h.'>pdo_dblib_err</a> *<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>;
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>char</strong> *<a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a> = "HY000";
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>if</strong>(<a href='../Y/15285.html' title='Multiple used in 7 places.'>dbproc</a>) <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a> = (<a href='../S/922.html#L109' title='Defined at 109 in ext/pdo_dblib/php_pdo_dblib_int.h.'>pdo_dblib_err</a>*)<a href='../Y/15250.html' title='Multiple used in 2 places.'>dbgetuserdata</a>(<a href='../Y/15285.html' title='Multiple used in 7 places.'>dbproc</a>);
+<a id='L97' name='L97'></a>  97                 <strong class='reserved'>if</strong> (!<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>) <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a> = &amp;<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L98' name='L98'></a>  98         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a> = &amp;<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L100' name='L100'></a> 100         <em class='brace'>}</em>
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102         <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/35962.html' title='Multiple used in 66 places.'>severity</a> = <a href='../Y/35962.html' title='Multiple used in 66 places.'>severity</a>;
+<a id='L103' name='L103'></a> 103         <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/30067.html' title='Multiple used in 5 places.'>oserr</a> = <a href='../Y/30067.html' title='Multiple used in 5 places.'>oserr</a>;
+<a id='L104' name='L104'></a> 104         <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/15239.html' title='Multiple used in 10 places.'>dberr</a> = <a href='../Y/15239.html' title='Multiple used in 10 places.'>dberr</a>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <strong class='reserved'>if</strong> (<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>) <em class='brace'>{</em>
+<a id='L107' name='L107'></a> 107                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>);
+<a id='L108' name='L108'></a> 108         <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109         <strong class='reserved'>if</strong> (<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>) <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>);
+<a id='L111' name='L111'></a> 111         <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>if</strong> (<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>) <em class='brace'>{</em>
+<a id='L113' name='L113'></a> 113                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>);
+<a id='L114' name='L114'></a> 114         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L116' name='L116'></a> 116         <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>if</strong> (<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>) <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>);
+<a id='L119' name='L119'></a> 119         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L120' name='L120'></a> 120                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L121' name='L121'></a> 121         <em class='brace'>}</em>
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>switch</strong> (<a href='../Y/15239.html' title='Multiple used in 10 places.'>dberr</a>) <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124                 <strong class='reserved'>case</strong> <a href='../S/922.html#L39' title='Defined at 39 in ext/pdo_dblib/php_pdo_dblib_int.h.'>SYBESEOF</a>:
+<a id='L125' name='L125'></a> 125                 <strong class='reserved'>case</strong> <a href='../S/922.html#L40' title='Defined at 40 in ext/pdo_dblib/php_pdo_dblib_int.h.'>SYBEFCON</a>:  <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a> = "01002"; <strong class='reserved'>break</strong>;
+<a id='L126' name='L126'></a> 126                 <strong class='reserved'>case</strong> <a href='../S/922.html#L41' title='Defined at 41 in ext/pdo_dblib/php_pdo_dblib_int.h.'>SYBEMEM</a>:   <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a> = "HY001"; <strong class='reserved'>break</strong>;
+<a id='L127' name='L127'></a> 127                 <strong class='reserved'>case</strong> <a href='../S/922.html#L42' title='Defined at 42 in ext/pdo_dblib/php_pdo_dblib_int.h.'>SYBEPWD</a>:   <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a> = "28000"; <strong class='reserved'>break</strong>;
+<a id='L128' name='L128'></a> 128         <em class='brace'>}</em>
+<a id='L129' name='L129'></a> 129         <a href='../Y/37568.html' title='Multiple used in 87 places.'>strcpy</a>(<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/36943.html' title='Multiple used in 75 places.'>sqlstate</a>, <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>);
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>return</strong> INT_CANCEL;
+<a id='L132' name='L132'></a> 132 <em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 <strong class='reserved'>int</strong> <a href='../R/22825.html' title='Multiple referred from 3 places.'>pdo_dblib_msg_handler</a>(<a href='../Y/1368.html' title='Multiple used in 5 places.'>DBPROCESS</a> *<a href='../Y/15285.html' title='Multiple used in 7 places.'>dbproc</a>, <a href='../Y/1359.html' title='Multiple used in 3 places.'>DBINT</a> <a href='../Y/26960.html' title='Multiple used in 56 places.'>msgno</a>, <strong class='reserved'>int</strong> <a href='../Y/26966.html' title='Multiple used in 2 places.'>msgstate</a>,
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>int</strong> <a href='../Y/35962.html' title='Multiple used in 66 places.'>severity</a>, <strong class='reserved'>char</strong> *<a href='../Y/26968.html' title='Multiple used in 3 places.'>msgtext</a>, <strong class='reserved'>char</strong> *<a href='../Y/37017.html' title='Multiple used in 2 places.'>srvname</a>, <strong class='reserved'>char</strong> *<a href='../Y/33433.html' title='Multiple used in 2 places.'>procname</a>, <a href='../Y/1381.html' title='Multiple used in 2 places.'>DBUSMALLINT</a> <a href='../Y/25097.html' title='Multiple used in 325 places.'>line</a>)
+<a id='L136' name='L136'></a> 136 <em class='brace'>{</em>
+<a id='L137' name='L137'></a> 137         <a href='../S/922.html#L109' title='Defined at 109 in ext/pdo_dblib/php_pdo_dblib_int.h.'>pdo_dblib_err</a> *<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>;
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139         <strong class='reserved'>if</strong> (<a href='../Y/35962.html' title='Multiple used in 66 places.'>severity</a>) <em class='brace'>{</em>
+<a id='L140' name='L140'></a> 140                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a> = (<a href='../S/922.html#L109' title='Defined at 109 in ext/pdo_dblib/php_pdo_dblib_int.h.'>pdo_dblib_err</a>*)<a href='../Y/15250.html' title='Multiple used in 2 places.'>dbgetuserdata</a>(<a href='../Y/15285.html' title='Multiple used in 7 places.'>dbproc</a>);
+<a id='L141' name='L141'></a> 141                 <strong class='reserved'>if</strong> (!<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>) <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142                         <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a> = &amp;<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L143' name='L143'></a> 143                 <em class='brace'>}</em>
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145                 <strong class='reserved'>if</strong> (<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a>) <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a>);
+<a id='L147' name='L147'></a> 147                 <em class='brace'>}</em>
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149                 <a href='../Y/16514.html' title='Multiple used in 235 places.'>einfo</a>-&gt;<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../Y/26968.html' title='Multiple used in 3 places.'>msgtext</a>);
+<a id='L150' name='L150'></a> 150         <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>return</strong> 0;
+<a id='L153' name='L153'></a> 153 <em class='brace'>}</em>
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155 <strong class='reserved'>static</strong> <a href='../R/7072.html' title='Multiple referred from 40 places.'>PHP_GINIT_FUNCTION</a>(<a href='../Y/15258.html' title='Multiple used in 9 places.'>dblib</a>)
+<a id='L156' name='L156'></a> 156 <em class='brace'>{</em>
+<a id='L157' name='L157'></a> 157         <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(<a href='../Y/15259.html' title='Multiple used in 3 places.'>dblib_globals</a>, 0, <strong class='reserved'>sizeof</strong>(*<a href='../Y/15259.html' title='Multiple used in 3 places.'>dblib_globals</a>));
+<a id='L158' name='L158'></a> 158         <a href='../Y/15259.html' title='Multiple used in 3 places.'>dblib_globals</a>-&gt;<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>.<a href='../Y/36943.html' title='Multiple used in 75 places.'>sqlstate</a> = <a href='../Y/15259.html' title='Multiple used in 3 places.'>dblib_globals</a>-&gt;<a href='../Y/36943.html' title='Multiple used in 75 places.'>sqlstate</a>;
+<a id='L159' name='L159'></a> 159 <em class='brace'>}</em>
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161 <a href='../R/7616.html' title='Multiple referred from 32 places.'>PHP_RSHUTDOWN_FUNCTION</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>)
+<a id='L162' name='L162'></a> 162 <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163         <strong class='reserved'>if</strong> (<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>) <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a>);
+<a id='L165' name='L165'></a> 165                 <a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/30068.html' title='Multiple used in 13 places.'>oserrstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167         <strong class='reserved'>if</strong> (<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>) <em class='brace'>{</em>
+<a id='L168' name='L168'></a> 168                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a>);
+<a id='L169' name='L169'></a> 169                 <a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/15241.html' title='Multiple used in 13 places.'>dberrstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L170' name='L170'></a> 170         <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171         <strong class='reserved'>if</strong> (<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a>) <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a>);
+<a id='L173' name='L173'></a> 173                 <a href='../D/1572.html' title='Multiple defined in 2 places.'>DBLIB_G</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>).<a href='../Y/24695.html' title='Multiple used in 12 places.'>lastmsg</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L174' name='L174'></a> 174         <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L176' name='L176'></a> 176 <em class='brace'>}</em>
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178 <a href='../R/7345.html' title='Multiple referred from 104 places.'>PHP_MINIT_FUNCTION</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>)
+<a id='L179' name='L179'></a> 179 <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180         <strong class='reserved'>if</strong> (<a href='../S/780.html#L146' title='Defined at 146 in ext/mysqlnd/mysqlnd_enum_n_def.h.'>FAIL</a> == dbinit()) <em class='brace'>{</em>
+<a id='L181' name='L181'></a> 181                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L182' name='L182'></a> 182         <em class='brace'>}</em>
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> == <a href='../S/909.html#L175' title='Defined at 175 in ext/pdo/pdo.c.'>php_pdo_register_driver</a>(&amp;<a href='../Y/31524.html' title='Multiple used in 4 places.'>pdo_dblib_driver</a>)) <em class='brace'>{</em>
+<a id='L185' name='L185'></a> 185                 <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L186' name='L186'></a> 186         <em class='brace'>}</em>
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188 <em class='sharp'>#if</em> !<a href='../Y/5001.html' title='Multiple used in 5 places.'>PHP_DBLIB_IS_MSSQL</a>
+<a id='L189' name='L189'></a> 189         <a href='../Y/15240.html' title='Multiple used in 2 places.'>dberrhandle</a>((<a href='../S/922.html#L35' title='Defined at 35 in ext/pdo_dblib/php_pdo_dblib_int.h.'>EHANDLEFUNC</a>) <a href='../Y/31525.html' title='Multiple used in 4 places.'>pdo_dblib_error_handler</a>);
+<a id='L190' name='L190'></a> 190         <a href='../Y/15275.html' title='Multiple used in 2 places.'>dbmsghandle</a>((<a href='../S/922.html#L36' title='Defined at 36 in ext/pdo_dblib/php_pdo_dblib_int.h.'>MHANDLEFUNC</a>) <a href='../S/920.html#L134' title='Defined at 134 in ext/pdo_dblib/pdo_dblib.c.'>pdo_dblib_msg_handler</a>);
+<a id='L191' name='L191'></a> 191 <em class='sharp'>#endif</em>
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L194' name='L194'></a> 194 <em class='brace'>}</em>
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196 <a href='../R/7364.html' title='Multiple referred from 56 places.'>PHP_MSHUTDOWN_FUNCTION</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>)
+<a id='L197' name='L197'></a> 197 <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198         <a href='../S/909.html#L191' title='Defined at 191 in ext/pdo/pdo.c.'>php_pdo_unregister_driver</a>(&amp;<a href='../Y/31524.html' title='Multiple used in 4 places.'>pdo_dblib_driver</a>);
+<a id='L199' name='L199'></a> 199         dbexit();
+<a id='L200' name='L200'></a> 200         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L201' name='L201'></a> 201 <em class='brace'>}</em>
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203 <a href='../R/7343.html' title='Multiple referred from 70 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/31521.html' title='Multiple used in 13 places.'>pdo_dblib</a>)
+<a id='L204' name='L204'></a> 204 <em class='brace'>{</em>
+<a id='L205' name='L205'></a> 205         <a href='../S/1113.html#L1097' title='Defined at 1097 in ext/standard/info.c.'>php_info_print_table_start</a>();
+<a id='L206' name='L206'></a> 206         <a href='../S/1113.html#L1167' title='Defined at 1167 in ext/standard/info.c.'>php_info_print_table_header</a>(2, "PDO Driver for "
+<a id='L207' name='L207'></a> 207 <em class='sharp'>#if</em> <a href='../Y/4895.html' title='Multiple used in 6 places.'>PDO_DBLIB_IS_MSSQL</a>
+<a id='L208' name='L208'></a> 208                 "MSSQL"
+<a id='L209' name='L209'></a> 209 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong>(<a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>)
+<a id='L210' name='L210'></a> 210                 "FreeTDS/Sybase/MSSQL"
+<a id='L211' name='L211'></a> 211 <em class='sharp'>#else</em>
+<a id='L212' name='L212'></a> 212                 "FreeTDS/Sybase"
+<a id='L213' name='L213'></a> 213 <em class='sharp'>#endif</em>
+<a id='L214' name='L214'></a> 214                 " DB-lib", "enabled");
+<a id='L215' name='L215'></a> 215         <a href='../S/1113.html#L1251' title='Defined at 1251 in ext/standard/info.c.'>php_info_print_table_row</a>(2, "Flavour", <a href='../S/922.html#L26' title='Defined at 26 in ext/pdo_dblib/php_pdo_dblib_int.h.'>PDO_DBLIB_FLAVOUR</a>);
+<a id='L216' name='L216'></a> 216         <a href='../S/1113.html#L1107' title='Defined at 1107 in ext/standard/info.c.'>php_info_print_table_end</a>();
+<a id='L217' name='L217'></a> 217 <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L83'>[^]</a><a href='#L203'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

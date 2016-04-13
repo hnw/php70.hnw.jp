@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/pcre/pcrelib/pcreposix.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1814.html'>pcre</a>/<a href='../files/1815.html'>pcrelib</a>/pcreposix.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L208'>[^]</a><a href='#L320'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L208' title='Defined at 208.'>regerror</a></li>
+<li><a href='#L243' title='Defined at 243.'>regfree</a></li>
+<li><a href='#L266' title='Defined at 266.'>regcomp</a></li>
+<li><a href='#L320' title='Defined at 320.'>regexec</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*************************************************</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>*      Perl-Compatible Regular Expressions       *</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>*************************************************/</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='comment'>/* PCRE is a library of functions to support regular expressions whose syntax</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>and semantics are as close as possible to those of the Perl 5 language.</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'></em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>                       Written by Philip Hazel</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>           Copyright (c) 1997-2014 University of Cambridge</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>-----------------------------------------------------------------------------</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>Redistribution and use in source and binary forms, with or without</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>modification, are permitted provided that the following conditions are met:</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'></em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>    * Redistributions of source code must retain the above copyright notice,</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>      this list of conditions and the following disclaimer.</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'></em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>    * Redistributions in binary form must reproduce the above copyright</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>      notice, this list of conditions and the following disclaimer in the</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>      documentation and/or other materials provided with the distribution.</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'></em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>    * Neither the name of the University of Cambridge nor the names of its</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>      contributors may be used to endorse or promote products derived from</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>      this software without specific prior written permission.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'></em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'>INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'>ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'>POSSIBILITY OF SUCH DAMAGE.</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>-----------------------------------------------------------------------------</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>*/</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='comment'>/* This module is a wrapper that provides a POSIX API to the underlying PCRE</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'>functions. */</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <em class='comment'>/* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>compiling these functions. This must come before including pcreposix.h, where</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'>they are set for an application (using these functions) if they have not</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>previously been set. */</em>
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../D/18142.html' title='Multiple defined in 2 places.'>_WIN32</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../S/1379.html#L375' title='Defined at 375 in main/php_compat.h.'>PCRE_STATIC</a>)
+<a id='L54' name='L54'></a>  54 <em class='sharp'>#  define</em> <a href='../R/6197.html' title='Multiple referred from 6 places.'>PCREPOSIX_EXP_DECL</a> <strong class='reserved'>extern</strong> <a href='../D/18198.html' title='Multiple defined in 7 places.'>__declspec</a>(<a href='../Y/15835.html' title='Multiple used in 45 places.'>dllexport</a>)
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#  define</em> <a href='../R/6198.html' title='Multiple referred from 4 places.'>PCREPOSIX_EXP_DEFN</a> <a href='../D/18198.html' title='Multiple defined in 7 places.'>__declspec</a>(<a href='../Y/15835.html' title='Multiple used in 45 places.'>dllexport</a>)
+<a id='L56' name='L56'></a>  56 <em class='sharp'>#endif</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <em class='comment'>/* We include pcre.h before pcre_internal.h so that the PCRE library functions</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>are declared as "import" for Windows by defining PCRE_EXP_DECL as "import".</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>This is needed even though pcre_internal.h itself includes pcre.h, because it</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>does so after it has set PCRE_EXP_DECL to "export" if it is not already set. */</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 <em class='sharp'>#include</em> "<a href='860.html'>pcre.h</a>"
+<a id='L64' name='L64'></a>  64 <em class='sharp'>#include</em> "<a href='868.html'>pcre_internal.h</a>"
+<a id='L65' name='L65'></a>  65 <em class='sharp'>#include</em> "<a href='883.html'>pcreposix.h</a>"
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 <em class='comment'>/* Table to translate PCRE compile time error codes into POSIX error codes. */</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/16515.html' title='Multiple used in 4 places.'>eint</a>[] = <em class='brace'>{</em>
+<a id='L71' name='L71'></a>  71   0,           <em class='comment'>/* no error */</em>
+<a id='L72' name='L72'></a>  72   <a href='../D/9669.html' title='Multiple defined in 2 places.'>REG_EESCAPE</a>, <em class='comment'>/* \ at end of pattern */</em>
+<a id='L73' name='L73'></a>  73   <a href='../D/9669.html' title='Multiple defined in 2 places.'>REG_EESCAPE</a>, <em class='comment'>/* \c at end of pattern */</em>
+<a id='L74' name='L74'></a>  74   <a href='../D/9669.html' title='Multiple defined in 2 places.'>REG_EESCAPE</a>, <em class='comment'>/* unrecognized character follows \ */</em>
+<a id='L75' name='L75'></a>  75   <a href='../D/9660.html' title='Multiple defined in 2 places.'>REG_BADBR</a>,   <em class='comment'>/* numbers out of order in {} quantifier */</em>
+<a id='L76' name='L76'></a>  76   <em class='comment'>/* 5 */</em>
+<a id='L77' name='L77'></a>  77   <a href='../D/9660.html' title='Multiple defined in 2 places.'>REG_BADBR</a>,   <em class='comment'>/* number too big in {} quantifier */</em>
+<a id='L78' name='L78'></a>  78   <a href='../D/9666.html' title='Multiple defined in 2 places.'>REG_EBRACK</a>,  <em class='comment'>/* missing terminating ] for character class */</em>
+<a id='L79' name='L79'></a>  79   <a href='../D/9668.html' title='Multiple defined in 2 places.'>REG_ECTYPE</a>,  <em class='comment'>/* invalid escape sequence in character class */</em>
+<a id='L80' name='L80'></a>  80   <a href='../D/9676.html' title='Multiple defined in 2 places.'>REG_ERANGE</a>,  <em class='comment'>/* range out of order in character class */</em>
+<a id='L81' name='L81'></a>  81   <a href='../D/9662.html' title='Multiple defined in 2 places.'>REG_BADRPT</a>,  <em class='comment'>/* nothing to repeat */</em>
+<a id='L82' name='L82'></a>  82   <em class='comment'>/* 10 */</em>
+<a id='L83' name='L83'></a>  83   <a href='../D/9662.html' title='Multiple defined in 2 places.'>REG_BADRPT</a>,  <em class='comment'>/* operand of unlimited repeat could match the empty string */</em>
+<a id='L84' name='L84'></a>  84   <a href='../S/883.html#L75' title='Defined at 75 in ext/pcre/pcrelib/pcreposix.h.'>REG_ASSERT</a>,  <em class='comment'>/* internal error: unexpected repeat */</em>
+<a id='L85' name='L85'></a>  85   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* unrecognized character after (? */</em>
+<a id='L86' name='L86'></a>  86   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* POSIX named classes are supported only within a class */</em>
+<a id='L87' name='L87'></a>  87   <a href='../D/9675.html' title='Multiple defined in 2 places.'>REG_EPAREN</a>,  <em class='comment'>/* missing ) */</em>
+<a id='L88' name='L88'></a>  88   <em class='comment'>/* 15 */</em>
+<a id='L89' name='L89'></a>  89   <a href='../D/9679.html' title='Multiple defined in 2 places.'>REG_ESUBREG</a>, <em class='comment'>/* reference to non-existent subpattern */</em>
+<a id='L90' name='L90'></a>  90   <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>,  <em class='comment'>/* erroffset passed as NULL */</em>
+<a id='L91' name='L91'></a>  91   <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>,  <em class='comment'>/* unknown option bit(s) set */</em>
+<a id='L92' name='L92'></a>  92   <a href='../D/9675.html' title='Multiple defined in 2 places.'>REG_EPAREN</a>,  <em class='comment'>/* missing ) after comment */</em>
+<a id='L93' name='L93'></a>  93   <a href='../S/883.html#L87' title='Defined at 87 in ext/pcre/pcrelib/pcreposix.h.'>REG_ESIZE</a>,   <em class='comment'>/* parentheses nested too deeply */</em>
+<a id='L94' name='L94'></a>  94   <em class='comment'>/* 20 */</em>
+<a id='L95' name='L95'></a>  95   <a href='../S/883.html#L87' title='Defined at 87 in ext/pcre/pcrelib/pcreposix.h.'>REG_ESIZE</a>,   <em class='comment'>/* regular expression too large */</em>
+<a id='L96' name='L96'></a>  96   <a href='../D/9678.html' title='Multiple defined in 2 places.'>REG_ESPACE</a>,  <em class='comment'>/* failed to get memory */</em>
+<a id='L97' name='L97'></a>  97   <a href='../D/9675.html' title='Multiple defined in 2 places.'>REG_EPAREN</a>,  <em class='comment'>/* unmatched parentheses */</em>
+<a id='L98' name='L98'></a>  98   <a href='../S/883.html#L75' title='Defined at 75 in ext/pcre/pcrelib/pcreposix.h.'>REG_ASSERT</a>,  <em class='comment'>/* internal error: code overflow */</em>
+<a id='L99' name='L99'></a>  99   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* unrecognized character after (?&lt; */</em>
+<a id='L100' name='L100'></a> 100   <em class='comment'>/* 25 */</em>
+<a id='L101' name='L101'></a> 101   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* lookbehind assertion is not fixed length */</em>
+<a id='L102' name='L102'></a> 102   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* malformed number or name after (?( */</em>
+<a id='L103' name='L103'></a> 103   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* conditional group contains more than two branches */</em>
+<a id='L104' name='L104'></a> 104   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* assertion expected after (?( */</em>
+<a id='L105' name='L105'></a> 105   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* (?R or (?[+-]digits must be followed by ) */</em>
+<a id='L106' name='L106'></a> 106   <em class='comment'>/* 30 */</em>
+<a id='L107' name='L107'></a> 107   <a href='../D/9668.html' title='Multiple defined in 2 places.'>REG_ECTYPE</a>,  <em class='comment'>/* unknown POSIX class name */</em>
+<a id='L108' name='L108'></a> 108   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* POSIX collating elements are not supported */</em>
+<a id='L109' name='L109'></a> 109   <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>,  <em class='comment'>/* this version of PCRE is not compiled with PCRE_UTF8 support */</em>
+<a id='L110' name='L110'></a> 110   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* spare error */</em>
+<a id='L111' name='L111'></a> 111   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* character value in \x{} or \o{} is too large */</em>
+<a id='L112' name='L112'></a> 112   <em class='comment'>/* 35 */</em>
+<a id='L113' name='L113'></a> 113   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* invalid condition (?(0) */</em>
+<a id='L114' name='L114'></a> 114   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* \C not allowed in lookbehind assertion */</em>
+<a id='L115' name='L115'></a> 115   <a href='../D/9669.html' title='Multiple defined in 2 places.'>REG_EESCAPE</a>, <em class='comment'>/* PCRE does not support \L, \l, \N, \U, or \u */</em>
+<a id='L116' name='L116'></a> 116   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* number after (?C is &gt; 255 */</em>
+<a id='L117' name='L117'></a> 117   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* closing ) for (?C expected */</em>
+<a id='L118' name='L118'></a> 118   <em class='comment'>/* 40 */</em>
+<a id='L119' name='L119'></a> 119   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* recursive call could loop indefinitely */</em>
+<a id='L120' name='L120'></a> 120   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* unrecognized character after (?P */</em>
+<a id='L121' name='L121'></a> 121   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* syntax error in subpattern name (missing terminator) */</em>
+<a id='L122' name='L122'></a> 122   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* two named subpatterns have the same name */</em>
+<a id='L123' name='L123'></a> 123   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* invalid UTF-8 string */</em>
+<a id='L124' name='L124'></a> 124   <em class='comment'>/* 45 */</em>
+<a id='L125' name='L125'></a> 125   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* support for \P, \p, and \X has not been compiled */</em>
+<a id='L126' name='L126'></a> 126   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* malformed \P or \p sequence */</em>
+<a id='L127' name='L127'></a> 127   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* unknown property name after \P or \p */</em>
+<a id='L128' name='L128'></a> 128   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* subpattern name is too long (maximum 32 characters) */</em>
+<a id='L129' name='L129'></a> 129   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* too many named subpatterns (maximum 10,000) */</em>
+<a id='L130' name='L130'></a> 130   <em class='comment'>/* 50 */</em>
+<a id='L131' name='L131'></a> 131   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* repeated subpattern is too long */</em>
+<a id='L132' name='L132'></a> 132   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* octal value is greater than \377 (not in UTF-8 mode) */</em>
+<a id='L133' name='L133'></a> 133   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* internal error: overran compiling workspace */</em>
+<a id='L134' name='L134'></a> 134   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* internal error: previously-checked referenced subpattern not found */</em>
+<a id='L135' name='L135'></a> 135   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* DEFINE group contains more than one branch */</em>
+<a id='L136' name='L136'></a> 136   <em class='comment'>/* 55 */</em>
+<a id='L137' name='L137'></a> 137   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* repeating a DEFINE group is not allowed */</em>
+<a id='L138' name='L138'></a> 138   <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>,  <em class='comment'>/* inconsistent NEWLINE options */</em>
+<a id='L139' name='L139'></a> 139   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* \g is not followed followed by an (optionally braced) non-zero number */</em>
+<a id='L140' name='L140'></a> 140   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* a numbered reference must not be zero */</em>
+<a id='L141' name='L141'></a> 141   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT) */</em>
+<a id='L142' name='L142'></a> 142   <em class='comment'>/* 60 */</em>
+<a id='L143' name='L143'></a> 143   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* (*VERB) not recognized */</em>
+<a id='L144' name='L144'></a> 144   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* number is too big */</em>
+<a id='L145' name='L145'></a> 145   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* subpattern name expected */</em>
+<a id='L146' name='L146'></a> 146   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* digit expected after (?+ */</em>
+<a id='L147' name='L147'></a> 147   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* ] is an invalid data character in JavaScript compatibility mode */</em>
+<a id='L148' name='L148'></a> 148   <em class='comment'>/* 65 */</em>
+<a id='L149' name='L149'></a> 149   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* different names for subpatterns of the same number are not allowed */</em>
+<a id='L150' name='L150'></a> 150   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* (*MARK) must have an argument */</em>
+<a id='L151' name='L151'></a> 151   <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>,  <em class='comment'>/* this version of PCRE is not compiled with PCRE_UCP support */</em>
+<a id='L152' name='L152'></a> 152   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* \c must be followed by an ASCII character */</em>
+<a id='L153' name='L153'></a> 153   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* \k is not followed by a braced, angle-bracketed, or quoted name */</em>
+<a id='L154' name='L154'></a> 154   <em class='comment'>/* 70 */</em>
+<a id='L155' name='L155'></a> 155   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* internal error: unknown opcode in find_fixedlength() */</em>
+<a id='L156' name='L156'></a> 156   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* \N is not supported in a class */</em>
+<a id='L157' name='L157'></a> 157   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* too many forward references */</em>
+<a id='L158' name='L158'></a> 158   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* disallowed UTF-8/16/32 code point (&gt;= 0xd800 &amp;&amp; &lt;= 0xdfff) */</em>
+<a id='L159' name='L159'></a> 159   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* invalid UTF-16 string (should not occur) */</em>
+<a id='L160' name='L160'></a> 160   <em class='comment'>/* 75 */</em>
+<a id='L161' name='L161'></a> 161   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* overlong MARK name */</em>
+<a id='L162' name='L162'></a> 162   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* character value in \u.... sequence is too large */</em>
+<a id='L163' name='L163'></a> 163   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* invalid UTF-32 string (should not occur) */</em>
+<a id='L164' name='L164'></a> 164   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* setting UTF is disabled by the application */</em>
+<a id='L165' name='L165'></a> 165   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* non-hex character in \\x{} (closing brace missing?) */</em>
+<a id='L166' name='L166'></a> 166   <em class='comment'>/* 80 */</em>
+<a id='L167' name='L167'></a> 167   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* non-octal character in \o{} (closing brace missing?) */</em>
+<a id='L168' name='L168'></a> 168   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* missing opening brace after \o */</em>
+<a id='L169' name='L169'></a> 169   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* parentheses too deeply nested */</em>
+<a id='L170' name='L170'></a> 170   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* invalid range in character class */</em>
+<a id='L171' name='L171'></a> 171   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* group name must start with a non-digit */</em>
+<a id='L172' name='L172'></a> 172   <em class='comment'>/* 85 */</em>
+<a id='L173' name='L173'></a> 173   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>,  <em class='comment'>/* parentheses too deeply nested (stack check) */</em>
+<a id='L174' name='L174'></a> 174   <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>   <em class='comment'>/* missing digits in \x{} or \o{} */</em>
+<a id='L175' name='L175'></a> 175 <em class='brace'>}</em>;
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177 <em class='comment'>/* Table of texts corresponding to POSIX error codes */</em>
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<strong class='reserved'>const</strong> <a href='../Y/33644.html' title='Multiple used in 3 places.'>pstring</a>[] = <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180   "",                                <em class='comment'>/* Dummy for value 0 */</em>
+<a id='L181' name='L181'></a> 181   "internal error",                  <em class='comment'>/* REG_ASSERT */</em>
+<a id='L182' name='L182'></a> 182   "invalid repeat counts in {}",     <em class='comment'>/* BADBR      */</em>
+<a id='L183' name='L183'></a> 183   "pattern error",                   <em class='comment'>/* BADPAT     */</em>
+<a id='L184' name='L184'></a> 184   "? * + invalid",                   <em class='comment'>/* BADRPT     */</em>
+<a id='L185' name='L185'></a> 185   "unbalanced {}",                   <em class='comment'>/* EBRACE     */</em>
+<a id='L186' name='L186'></a> 186   "unbalanced []",                   <em class='comment'>/* EBRACK     */</em>
+<a id='L187' name='L187'></a> 187   "collation error - not relevant",  <em class='comment'>/* ECOLLATE   */</em>
+<a id='L188' name='L188'></a> 188   "bad class",                       <em class='comment'>/* ECTYPE     */</em>
+<a id='L189' name='L189'></a> 189   "bad escape sequence",             <em class='comment'>/* EESCAPE    */</em>
+<a id='L190' name='L190'></a> 190   "empty expression",                <em class='comment'>/* EMPTY      */</em>
+<a id='L191' name='L191'></a> 191   "unbalanced ()",                   <em class='comment'>/* EPAREN     */</em>
+<a id='L192' name='L192'></a> 192   "bad range inside []",             <em class='comment'>/* ERANGE     */</em>
+<a id='L193' name='L193'></a> 193   "expression too big",              <em class='comment'>/* ESIZE      */</em>
+<a id='L194' name='L194'></a> 194   "failed to get memory",            <em class='comment'>/* ESPACE     */</em>
+<a id='L195' name='L195'></a> 195   "bad back reference",              <em class='comment'>/* ESUBREG    */</em>
+<a id='L196' name='L196'></a> 196   "bad argument",                    <em class='comment'>/* INVARG     */</em>
+<a id='L197' name='L197'></a> 197   "match failed"                     <em class='comment'>/* NOMATCH    */</em>
+<a id='L198' name='L198'></a> 198 <em class='brace'>}</em>;
+<a id='L199' name='L199'></a> 199 
+<a id='L200' name='L200'></a> 200 
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203 <em class='comment'>/*************************************************</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'>*          Translate error code to string        *</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>*************************************************/</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 <a href='../D/7051.html' title='Multiple defined in 4 places.'>PCREPOSIX_EXP_DEFN</a> <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L208' name='L208'></a> 208 <a href='../R/25845.html' title='Multiple referred from 8 places.'>regerror</a>(<strong class='reserved'>int</strong> <a href='../Y/17009.html' title='Multiple used in 429 places.'>errcode</a>, <strong class='reserved'>const</strong> <a href='../D/29100.html' title='Multiple defined in 6 places.'>regex_t</a> *<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>, <strong class='reserved'>char</strong> *<a href='../Y/17005.html' title='Multiple used in 47 places.'>errbuf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/17007.html' title='Multiple used in 5 places.'>errbuf_size</a>)
+<a id='L209' name='L209'></a> 209 <em class='brace'>{</em>
+<a id='L210' name='L210'></a> 210 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, *<a href='../Y/8853.html' title='Multiple used in 4 places.'>addmessage</a>;
+<a id='L211' name='L211'></a> 211 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>, <a href='../Y/8852.html' title='Multiple used in 4 places.'>addlength</a>;
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213 <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a> = (<a href='../Y/17009.html' title='Multiple used in 429 places.'>errcode</a> &gt;= (<strong class='reserved'>int</strong>)(<strong class='reserved'>sizeof</strong>(<a href='../Y/33644.html' title='Multiple used in 3 places.'>pstring</a>)/<strong class='reserved'>sizeof</strong>(<strong class='reserved'>char</strong> *)))?
+<a id='L214' name='L214'></a> 214   "unknown error code" : <a href='../Y/33644.html' title='Multiple used in 3 places.'>pstring</a>[<a href='../Y/17009.html' title='Multiple used in 429 places.'>errcode</a>];
+<a id='L215' name='L215'></a> 215 <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>) + 1;
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217 <a href='../Y/8853.html' title='Multiple used in 4 places.'>addmessage</a> = " at offset ";
+<a id='L218' name='L218'></a> 218 <a href='../Y/8852.html' title='Multiple used in 4 places.'>addlength</a> = (<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> &amp;&amp; (<strong class='reserved'>int</strong>)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34034.html' title='Multiple used in 5 places.'>re_erroffset</a> != -1)?
+<a id='L219' name='L219'></a> 219   <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/8853.html' title='Multiple used in 4 places.'>addmessage</a>) + 6 : 0;
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221 <strong class='reserved'>if</strong> (<a href='../Y/17007.html' title='Multiple used in 5 places.'>errbuf_size</a> &gt; 0)
+<a id='L222' name='L222'></a> 222   <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223   <strong class='reserved'>if</strong> (<a href='../Y/8852.html' title='Multiple used in 4 places.'>addlength</a> &gt; 0 &amp;&amp; <a href='../Y/17007.html' title='Multiple used in 5 places.'>errbuf_size</a> &gt;= <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a> + <a href='../Y/8852.html' title='Multiple used in 4 places.'>addlength</a>)
+<a id='L224' name='L224'></a> 224     <a href='../D/30283.html' title='Multiple defined in 5 places.'>sprintf</a>(<a href='../Y/17005.html' title='Multiple used in 47 places.'>errbuf</a>, "%s%s%-6d", <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, <a href='../Y/8853.html' title='Multiple used in 4 places.'>addmessage</a>, (<strong class='reserved'>int</strong>)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34034.html' title='Multiple used in 5 places.'>re_erroffset</a>);
+<a id='L225' name='L225'></a> 225   <strong class='reserved'>else</strong>
+<a id='L226' name='L226'></a> 226     <em class='brace'>{</em>
+<a id='L227' name='L227'></a> 227     <a href='../Y/37729.html' title='Multiple used in 45 places.'>strncpy</a>(<a href='../Y/17005.html' title='Multiple used in 47 places.'>errbuf</a>, <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, <a href='../Y/17007.html' title='Multiple used in 5 places.'>errbuf_size</a> - 1);
+<a id='L228' name='L228'></a> 228     <a href='../Y/17005.html' title='Multiple used in 47 places.'>errbuf</a>[<a href='../Y/17007.html' title='Multiple used in 5 places.'>errbuf_size</a>-1] = 0;
+<a id='L229' name='L229'></a> 229     <em class='brace'>}</em>
+<a id='L230' name='L230'></a> 230   <em class='brace'>}</em>
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232 <strong class='reserved'>return</strong> <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a> + <a href='../Y/8852.html' title='Multiple used in 4 places.'>addlength</a>;
+<a id='L233' name='L233'></a> 233 <em class='brace'>}</em>
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236 
+<a id='L237' name='L237'></a> 237 
+<a id='L238' name='L238'></a> 238 <em class='comment'>/*************************************************</em>
+<a id='L239' name='L239'></a> 239 <em class='comment'>*           Free store held by a regex           *</em>
+<a id='L240' name='L240'></a> 240 <em class='comment'>*************************************************/</em>
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242 <a href='../D/7051.html' title='Multiple defined in 4 places.'>PCREPOSIX_EXP_DEFN</a> <strong class='reserved'>void</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L243' name='L243'></a> 243 <a href='../R/25849.html' title='Multiple referred from 5 places.'>regfree</a>(<a href='../D/29100.html' title='Multiple defined in 6 places.'>regex_t</a> *<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>)
+<a id='L244' name='L244'></a> 244 <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245 (<a href='../D/9356.html' title='Multiple defined in 4 places.'>PUBL</a>(<a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>))(<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a>);
+<a id='L246' name='L246'></a> 246 <em class='brace'>}</em>
+<a id='L247' name='L247'></a> 247 
+<a id='L248' name='L248'></a> 248 
+<a id='L249' name='L249'></a> 249 
+<a id='L250' name='L250'></a> 250 
+<a id='L251' name='L251'></a> 251 <em class='comment'>/*************************************************</em>
+<a id='L252' name='L252'></a> 252 <em class='comment'>*            Compile a regular expression        *</em>
+<a id='L253' name='L253'></a> 253 <em class='comment'>*************************************************/</em>
+<a id='L254' name='L254'></a> 254 
+<a id='L255' name='L255'></a> 255 <em class='comment'>/*</em>
+<a id='L256' name='L256'></a> 256 <em class='comment'>Arguments:</em>
+<a id='L257' name='L257'></a> 257 <em class='comment'>  preg        points to a structure for recording the compiled expression</em>
+<a id='L258' name='L258'></a> 258 <em class='comment'>  pattern     the pattern to compile</em>
+<a id='L259' name='L259'></a> 259 <em class='comment'>  cflags      compilation flags</em>
+<a id='L260' name='L260'></a> 260 <em class='comment'></em>
+<a id='L261' name='L261'></a> 261 <em class='comment'>Returns:      0 on success</em>
+<a id='L262' name='L262'></a> 262 <em class='comment'>              various non-zero codes on failure</em>
+<a id='L263' name='L263'></a> 263 <em class='comment'>*/</em>
+<a id='L264' name='L264'></a> 264 
+<a id='L265' name='L265'></a> 265 <a href='../D/7051.html' title='Multiple defined in 4 places.'>PCREPOSIX_EXP_DEFN</a> <strong class='reserved'>int</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L266' name='L266'></a> 266 <a href='../R/25844.html' title='Multiple referred from 5 places.'>regcomp</a>(<a href='../D/29100.html' title='Multiple defined in 6 places.'>regex_t</a> *<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, <strong class='reserved'>int</strong> <a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a>)
+<a id='L267' name='L267'></a> 267 <em class='brace'>{</em>
+<a id='L268' name='L268'></a> 268 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/17104.html' title='Multiple used in 46 places.'>errorptr</a>;
+<a id='L269' name='L269'></a> 269 <strong class='reserved'>int</strong> <a href='../Y/17027.html' title='Multiple used in 9 places.'>erroffset</a>;
+<a id='L270' name='L270'></a> 270 <strong class='reserved'>int</strong> <a href='../Y/17097.html' title='Multiple used in 81 places.'>errorcode</a>;
+<a id='L271' name='L271'></a> 271 <strong class='reserved'>int</strong> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> = 0;
+<a id='L272' name='L272'></a> 272 <strong class='reserved'>int</strong> <a href='../Y/34036.html' title='Multiple used in 11 places.'>re_nsub</a> = 0;
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../D/9681.html' title='Multiple defined in 2 places.'>REG_ICASE</a>) != 0)    <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L127' title='Defined at 127 in ext/pcre/pcrelib/pcre.h.'>PCRE_CASELESS</a>;
+<a id='L275' name='L275'></a> 275 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../D/9684.html' title='Multiple defined in 2 places.'>REG_NEWLINE</a>) != 0)  <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L128' title='Defined at 128 in ext/pcre/pcrelib/pcre.h.'>PCRE_MULTILINE</a>;
+<a id='L276' name='L276'></a> 276 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../S/883.html#L59' title='Defined at 59 in ext/pcre/pcrelib/pcreposix.h.'>REG_DOTALL</a>) != 0)   <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L129' title='Defined at 129 in ext/pcre/pcrelib/pcre.h.'>PCRE_DOTALL</a>;
+<a id='L277' name='L277'></a> 277 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../D/9686.html' title='Multiple defined in 2 places.'>REG_NOSUB</a>) != 0)    <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L141' title='Defined at 141 in ext/pcre/pcrelib/pcre.h.'>PCRE_NO_AUTO_CAPTURE</a>;
+<a id='L278' name='L278'></a> 278 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../S/883.html#L61' title='Defined at 61 in ext/pcre/pcrelib/pcreposix.h.'>REG_UTF8</a>) != 0)     <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L138' title='Defined at 138 in ext/pcre/pcrelib/pcre.h.'>PCRE_UTF8</a>;
+<a id='L279' name='L279'></a> 279 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../S/883.html#L65' title='Defined at 65 in ext/pcre/pcrelib/pcreposix.h.'>REG_UCP</a>) != 0)      <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L171' title='Defined at 171 in ext/pcre/pcrelib/pcre.h.'>PCRE_UCP</a>;
+<a id='L280' name='L280'></a> 280 <strong class='reserved'>if</strong> ((<a href='../Y/13505.html' title='Multiple used in 13 places.'>cflags</a> &amp; <a href='../S/883.html#L64' title='Defined at 64 in ext/pcre/pcrelib/pcreposix.h.'>REG_UNGREEDY</a>) != 0) <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L136' title='Defined at 136 in ext/pcre/pcrelib/pcre.h.'>PCRE_UNGREEDY</a>;
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282 <a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a> = <a href='../D/25803.html' title='Multiple defined in 2 places.'>pcre_compile2</a>(<a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, &amp;<a href='../Y/17097.html' title='Multiple used in 81 places.'>errorcode</a>, &amp;<a href='../Y/17104.html' title='Multiple used in 46 places.'>errorptr</a>,
+<a id='L283' name='L283'></a> 283   &amp;<a href='../Y/17027.html' title='Multiple used in 9 places.'>erroffset</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L284' name='L284'></a> 284 <a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34034.html' title='Multiple used in 5 places.'>re_erroffset</a> = <a href='../Y/17027.html' title='Multiple used in 9 places.'>erroffset</a>;
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286 <em class='comment'>/* Safety: if the error code is too big for the translation vector (which</em>
+<a id='L287' name='L287'></a> 287 <em class='comment'>should not happen, but we all make mistakes), return REG_BADPAT. */</em>
+<a id='L288' name='L288'></a> 288 
+<a id='L289' name='L289'></a> 289 <strong class='reserved'>if</strong> (<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L290' name='L290'></a> 290   <em class='brace'>{</em>
+<a id='L291' name='L291'></a> 291   <strong class='reserved'>return</strong> (<a href='../Y/17097.html' title='Multiple used in 81 places.'>errorcode</a> &lt; (<strong class='reserved'>int</strong>)(<strong class='reserved'>sizeof</strong>(<a href='../Y/16515.html' title='Multiple used in 4 places.'>eint</a>)/<strong class='reserved'>sizeof</strong>(<strong class='reserved'>const</strong> <strong class='reserved'>int</strong>)))?
+<a id='L292' name='L292'></a> 292     <a href='../Y/16515.html' title='Multiple used in 4 places.'>eint</a>[<a href='../Y/17097.html' title='Multiple used in 81 places.'>errorcode</a>] : <a href='../D/9661.html' title='Multiple defined in 2 places.'>REG_BADPAT</a>;
+<a id='L293' name='L293'></a> 293   <em class='brace'>}</em>
+<a id='L294' name='L294'></a> 294 
+<a id='L295' name='L295'></a> 295 (<strong class='reserved'>void</strong>)<a href='../D/25813.html' title='Multiple defined in 2 places.'>pcre_fullinfo</a>((<strong class='reserved'>const</strong> <a href='../S/860.html#L325' title='Defined at 325 in ext/pcre/pcrelib/pcre.h.'>pcre</a> *)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/860.html#L259' title='Defined at 259 in ext/pcre/pcrelib/pcre.h.'>PCRE_INFO_CAPTURECOUNT</a>,
+<a id='L296' name='L296'></a> 296   &amp;<a href='../Y/34036.html' title='Multiple used in 11 places.'>re_nsub</a>);
+<a id='L297' name='L297'></a> 297 <a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34036.html' title='Multiple used in 11 places.'>re_nsub</a> = (<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>)<a href='../Y/34036.html' title='Multiple used in 11 places.'>re_nsub</a>;
+<a id='L298' name='L298'></a> 298 <strong class='reserved'>return</strong> 0;
+<a id='L299' name='L299'></a> 299 <em class='brace'>}</em>
+<a id='L300' name='L300'></a> 300 
+<a id='L301' name='L301'></a> 301 
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303 
+<a id='L304' name='L304'></a> 304 <em class='comment'>/*************************************************</em>
+<a id='L305' name='L305'></a> 305 <em class='comment'>*              Match a regular expression        *</em>
+<a id='L306' name='L306'></a> 306 <em class='comment'>*************************************************/</em>
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308 <em class='comment'>/* Unfortunately, PCRE requires 3 ints of working space for each captured</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'>substring, so we have to get and release working store instead of just using</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'>the POSIX structures as was done in earlier releases when PCRE needed only 2</em>
+<a id='L311' name='L311'></a> 311 <em class='comment'>ints. However, if the number of possible capturing brackets is small, use a</em>
+<a id='L312' name='L312'></a> 312 <em class='comment'>block of store on the stack, to reduce the use of malloc/free. The threshold is</em>
+<a id='L313' name='L313'></a> 313 <em class='comment'>in a macro that can be changed at configure time.</em>
+<a id='L314' name='L314'></a> 314 <em class='comment'></em>
+<a id='L315' name='L315'></a> 315 <em class='comment'>If REG_NOSUB was specified at compile time, the PCRE_NO_AUTO_CAPTURE flag will</em>
+<a id='L316' name='L316'></a> 316 <em class='comment'>be set. When this is the case, the nmatch and pmatch arguments are ignored, and</em>
+<a id='L317' name='L317'></a> 317 <em class='comment'>the only result is yes/no/error. */</em>
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319 <a href='../D/7051.html' title='Multiple defined in 4 places.'>PCREPOSIX_EXP_DEFN</a> <strong class='reserved'>int</strong> <a href='../S/868.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre_internal.h.'>PCRE_CALL_CONVENTION</a>
+<a id='L320' name='L320'></a> 320 <a href='../R/25848.html' title='Multiple referred from 5 places.'>regexec</a>(<strong class='reserved'>const</strong> <a href='../D/29100.html' title='Multiple defined in 6 places.'>regex_t</a> *<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a>,
+<a id='L321' name='L321'></a> 321   <a href='../D/29113.html' title='Multiple defined in 2 places.'>regmatch_t</a> <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[], <strong class='reserved'>int</strong> <a href='../Y/16507.html' title='Multiple used in 5 places.'>eflags</a>)
+<a id='L322' name='L322'></a> 322 <em class='brace'>{</em>
+<a id='L323' name='L323'></a> 323 <strong class='reserved'>int</strong> <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>, <a href='../Y/36421.html' title='Multiple used in 4 places.'>so</a>, <a href='../Y/16937.html' title='Multiple used in 4 places.'>eo</a>;
+<a id='L324' name='L324'></a> 324 <strong class='reserved'>int</strong> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> = 0;
+<a id='L325' name='L325'></a> 325 <strong class='reserved'>int</strong> *<a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L326' name='L326'></a> 326 <strong class='reserved'>int</strong> <a href='../Y/36347.html' title='Multiple used in 2 places.'>small_ovector</a>[<a href='../S/858.html#L383' title='Defined at 383 in ext/pcre/pcrelib/config.h.'>POSIX_MALLOC_THRESHOLD</a> * 3];
+<a id='L327' name='L327'></a> 327 <a href='../S/868.html#L1159' title='Defined at 1159 in ext/pcre/pcrelib/pcre_internal.h.'>BOOL</a> <a href='../Y/9106.html' title='Multiple used in 4 places.'>allocated_ovector</a> = <a href='../D/2350.html' title='Multiple defined in 23 places.'>FALSE</a>;
+<a id='L328' name='L328'></a> 328 <a href='../S/868.html#L1159' title='Defined at 1159 in ext/pcre/pcrelib/pcre_internal.h.'>BOOL</a> <a href='../Y/28673.html' title='Multiple used in 3 places.'>nosub</a> =
+<a id='L329' name='L329'></a> 329   (<a href='../S/868.html#L2389' title='Defined at 2389 in ext/pcre/pcrelib/pcre_internal.h.'>REAL_PCRE_OPTIONS</a>((<strong class='reserved'>const</strong> <a href='../S/860.html#L325' title='Defined at 325 in ext/pcre/pcrelib/pcre.h.'>pcre</a> *)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a>) &amp; <a href='../S/860.html#L141' title='Defined at 141 in ext/pcre/pcrelib/pcre.h.'>PCRE_NO_AUTO_CAPTURE</a>) != 0;
+<a id='L330' name='L330'></a> 330 
+<a id='L331' name='L331'></a> 331 <strong class='reserved'>if</strong> ((<a href='../Y/16507.html' title='Multiple used in 5 places.'>eflags</a> &amp; <a href='../D/9687.html' title='Multiple defined in 2 places.'>REG_NOTBOL</a>) != 0) <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L134' title='Defined at 134 in ext/pcre/pcrelib/pcre.h.'>PCRE_NOTBOL</a>;
+<a id='L332' name='L332'></a> 332 <strong class='reserved'>if</strong> ((<a href='../Y/16507.html' title='Multiple used in 5 places.'>eflags</a> &amp; <a href='../D/9689.html' title='Multiple defined in 2 places.'>REG_NOTEOL</a>) != 0) <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L135' title='Defined at 135 in ext/pcre/pcrelib/pcre.h.'>PCRE_NOTEOL</a>;
+<a id='L333' name='L333'></a> 333 <strong class='reserved'>if</strong> ((<a href='../Y/16507.html' title='Multiple used in 5 places.'>eflags</a> &amp; <a href='../S/883.html#L63' title='Defined at 63 in ext/pcre/pcrelib/pcreposix.h.'>REG_NOTEMPTY</a>) != 0) <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a> |= <a href='../S/860.html#L137' title='Defined at 137 in ext/pcre/pcrelib/pcre.h.'>PCRE_NOTEMPTY</a>;
+<a id='L334' name='L334'></a> 334 
+<a id='L335' name='L335'></a> 335 ((<a href='../D/29100.html' title='Multiple defined in 6 places.'>regex_t</a> *)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>)-&gt;<a href='../Y/34034.html' title='Multiple used in 5 places.'>re_erroffset</a> = (<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>)(-1);  <em class='comment'>/* Only has meaning after compile */</em>
+<a id='L336' name='L336'></a> 336 
+<a id='L337' name='L337'></a> 337 <em class='comment'>/* When no string data is being returned, or no vector has been passed in which</em>
+<a id='L338' name='L338'></a> 338 <em class='comment'>to put it, ensure that nmatch is zero. Otherwise, ensure the vector for holding</em>
+<a id='L339' name='L339'></a> 339 <em class='comment'>the return data is large enough. */</em>
+<a id='L340' name='L340'></a> 340 
+<a id='L341' name='L341'></a> 341 <strong class='reserved'>if</strong> (<a href='../Y/28673.html' title='Multiple used in 3 places.'>nosub</a> || <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> = 0;
+<a id='L342' name='L342'></a> 342 
+<a id='L343' name='L343'></a> 343 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> &gt; 0)
+<a id='L344' name='L344'></a> 344   <em class='brace'>{</em>
+<a id='L345' name='L345'></a> 345   <strong class='reserved'>if</strong> (<a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> &lt;= <a href='../S/858.html#L383' title='Defined at 383 in ext/pcre/pcrelib/config.h.'>POSIX_MALLOC_THRESHOLD</a>)
+<a id='L346' name='L346'></a> 346     <em class='brace'>{</em>
+<a id='L347' name='L347'></a> 347     <a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a> = &amp;(<a href='../Y/36347.html' title='Multiple used in 2 places.'>small_ovector</a>[0]);
+<a id='L348' name='L348'></a> 348     <em class='brace'>}</em>
+<a id='L349' name='L349'></a> 349   <strong class='reserved'>else</strong>
+<a id='L350' name='L350'></a> 350     <em class='brace'>{</em>
+<a id='L351' name='L351'></a> 351     <strong class='reserved'>if</strong> (<a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> &gt; <a href='../S/1378.html#L227' title='Defined at 227 in main/php.h.'>INT_MAX</a>/(<strong class='reserved'>sizeof</strong>(<strong class='reserved'>int</strong>) * 3)) <strong class='reserved'>return</strong> <a href='../D/9678.html' title='Multiple defined in 2 places.'>REG_ESPACE</a>;
+<a id='L352' name='L352'></a> 352     <a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a> = (<strong class='reserved'>int</strong> *)<a href='../S/1215.html#L35' title='Defined at 35 in ext/xmlrpc/libxmlrpc/base64.h.'>malloc</a>(<strong class='reserved'>sizeof</strong>(<strong class='reserved'>int</strong>) * <a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> * 3);
+<a id='L353' name='L353'></a> 353     <strong class='reserved'>if</strong> (<a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <strong class='reserved'>return</strong> <a href='../D/9678.html' title='Multiple defined in 2 places.'>REG_ESPACE</a>;
+<a id='L354' name='L354'></a> 354     <a href='../Y/9106.html' title='Multiple used in 4 places.'>allocated_ovector</a> = <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>;
+<a id='L355' name='L355'></a> 355     <em class='brace'>}</em>
+<a id='L356' name='L356'></a> 356   <em class='brace'>}</em>
+<a id='L357' name='L357'></a> 357 
+<a id='L358' name='L358'></a> 358 <em class='comment'>/* REG_STARTEND is a BSD extension, to allow for non-NUL-terminated strings.</em>
+<a id='L359' name='L359'></a> 359 <em class='comment'>The man page from OS X says "REG_STARTEND affects only the location of the</em>
+<a id='L360' name='L360'></a> 360 <em class='comment'>string, not how it is matched". That is why the "so" value is used to bump the</em>
+<a id='L361' name='L361'></a> 361 <em class='comment'>start location rather than being passed as a PCRE "starting offset". */</em>
+<a id='L362' name='L362'></a> 362 
+<a id='L363' name='L363'></a> 363 <strong class='reserved'>if</strong> ((<a href='../Y/16507.html' title='Multiple used in 5 places.'>eflags</a> &amp; <a href='../S/883.html#L62' title='Defined at 62 in ext/pcre/pcrelib/pcreposix.h.'>REG_STARTEND</a>) != 0)
+<a id='L364' name='L364'></a> 364   <em class='brace'>{</em>
+<a id='L365' name='L365'></a> 365   <a href='../Y/36421.html' title='Multiple used in 4 places.'>so</a> = <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[0].<a href='../Y/34991.html' title='Multiple used in 17 places.'>rm_so</a>;
+<a id='L366' name='L366'></a> 366   <a href='../Y/16937.html' title='Multiple used in 4 places.'>eo</a> = <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[0].<a href='../Y/34989.html' title='Multiple used in 16 places.'>rm_eo</a>;
+<a id='L367' name='L367'></a> 367   <em class='brace'>}</em>
+<a id='L368' name='L368'></a> 368 <strong class='reserved'>else</strong>
+<a id='L369' name='L369'></a> 369   <em class='brace'>{</em>
+<a id='L370' name='L370'></a> 370   <a href='../Y/36421.html' title='Multiple used in 4 places.'>so</a> = 0;
+<a id='L371' name='L371'></a> 371   <a href='../Y/16937.html' title='Multiple used in 4 places.'>eo</a> = (<strong class='reserved'>int</strong>)<a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>);
+<a id='L372' name='L372'></a> 372   <em class='brace'>}</em>
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374 <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = <a href='../D/25807.html' title='Multiple defined in 2 places.'>pcre_exec</a>((<strong class='reserved'>const</strong> <a href='../S/860.html#L325' title='Defined at 325 in ext/pcre/pcrelib/pcre.h.'>pcre</a> *)<a href='../Y/33255.html' title='Multiple used in 15 places.'>preg</a>-&gt;<a href='../Y/34038.html' title='Multiple used in 7 places.'>re_pcre</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a> + <a href='../Y/36421.html' title='Multiple used in 4 places.'>so</a>, (<a href='../Y/16937.html' title='Multiple used in 4 places.'>eo</a> - <a href='../Y/36421.html' title='Multiple used in 4 places.'>so</a>),
+<a id='L375' name='L375'></a> 375   0, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a>, (<strong class='reserved'>int</strong>)(<a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a> * 3));
+<a id='L376' name='L376'></a> 376 
+<a id='L377' name='L377'></a> 377 <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> == 0) <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = (<strong class='reserved'>int</strong>)<a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a>;    <em class='comment'>/* All captured slots were filled in */</em>
+<a id='L378' name='L378'></a> 378 
+<a id='L379' name='L379'></a> 379 <em class='comment'>/* Successful match */</em>
+<a id='L380' name='L380'></a> 380 
+<a id='L381' name='L381'></a> 381 <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> &gt;= 0)
+<a id='L382' name='L382'></a> 382   <em class='brace'>{</em>
+<a id='L383' name='L383'></a> 383   <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L384' name='L384'></a> 384   <strong class='reserved'>if</strong> (!<a href='../Y/28673.html' title='Multiple used in 3 places.'>nosub</a>)
+<a id='L385' name='L385'></a> 385     <em class='brace'>{</em>
+<a id='L386' name='L386'></a> 386     <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; (<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>)<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++)
+<a id='L387' name='L387'></a> 387       <em class='brace'>{</em>
+<a id='L388' name='L388'></a> 388       <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/34991.html' title='Multiple used in 17 places.'>rm_so</a> = <a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>*2];
+<a id='L389' name='L389'></a> 389       <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/34989.html' title='Multiple used in 16 places.'>rm_eo</a> = <a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>*2+1];
+<a id='L390' name='L390'></a> 390       <em class='brace'>}</em>
+<a id='L391' name='L391'></a> 391     <strong class='reserved'>if</strong> (<a href='../Y/9106.html' title='Multiple used in 4 places.'>allocated_ovector</a>) <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a>);
+<a id='L392' name='L392'></a> 392     <strong class='reserved'>for</strong> (; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/28564.html' title='Multiple used in 18 places.'>nmatch</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/34991.html' title='Multiple used in 17 places.'>rm_so</a> = <a href='../Y/32870.html' title='Multiple used in 25 places.'>pmatch</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>].<a href='../Y/34989.html' title='Multiple used in 16 places.'>rm_eo</a> = -1;
+<a id='L393' name='L393'></a> 393     <em class='brace'>}</em>
+<a id='L394' name='L394'></a> 394   <strong class='reserved'>return</strong> 0;
+<a id='L395' name='L395'></a> 395   <em class='brace'>}</em>
+<a id='L396' name='L396'></a> 396 
+<a id='L397' name='L397'></a> 397 <em class='comment'>/* Unsuccessful match */</em>
+<a id='L398' name='L398'></a> 398 
+<a id='L399' name='L399'></a> 399 <strong class='reserved'>if</strong> (<a href='../Y/9106.html' title='Multiple used in 4 places.'>allocated_ovector</a>) <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/30210.html' title='Multiple used in 68 places.'>ovector</a>);
+<a id='L400' name='L400'></a> 400 <strong class='reserved'>switch</strong>(<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>)
+<a id='L401' name='L401'></a> 401   <em class='brace'>{</em>
+<a id='L402' name='L402'></a> 402 <em class='comment'>/* ========================================================================== */</em>
+<a id='L403' name='L403'></a> 403   <em class='comment'>/* These cases are never obeyed. This is a fudge that causes a compile-time</em>
+<a id='L404' name='L404'></a> 404 <em class='comment'>  error if the vector eint, which is indexed by compile-time error number, is</em>
+<a id='L405' name='L405'></a> 405 <em class='comment'>  not the correct length. It seems to be the only way to do such a check at</em>
+<a id='L406' name='L406'></a> 406 <em class='comment'>  compile time, as the sizeof() operator does not work in the C preprocessor.</em>
+<a id='L407' name='L407'></a> 407 <em class='comment'>  As all the PCRE_ERROR_xxx values are negative, we can use 0 and 1. */</em>
+<a id='L408' name='L408'></a> 408 
+<a id='L409' name='L409'></a> 409   <strong class='reserved'>case</strong> 0:
+<a id='L410' name='L410'></a> 410   <strong class='reserved'>case</strong> (<strong class='reserved'>sizeof</strong>(<a href='../Y/16515.html' title='Multiple used in 4 places.'>eint</a>)/<strong class='reserved'>sizeof</strong>(<strong class='reserved'>int</strong>) == <a href='../S/868.html#L2292' title='Defined at 2292 in ext/pcre/pcrelib/pcre_internal.h.'>ERRCOUNT</a>):
+<a id='L411' name='L411'></a> 411   <strong class='reserved'>return</strong> <a href='../S/883.html#L75' title='Defined at 75 in ext/pcre/pcrelib/pcreposix.h.'>REG_ASSERT</a>;
+<a id='L412' name='L412'></a> 412 <em class='comment'>/* ========================================================================== */</em>
+<a id='L413' name='L413'></a> 413 
+<a id='L414' name='L414'></a> 414   <strong class='reserved'>case</strong> <a href='../S/860.html#L175' title='Defined at 175 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_NOMATCH</a>: <strong class='reserved'>return</strong> <a href='../D/9685.html' title='Multiple defined in 2 places.'>REG_NOMATCH</a>;
+<a id='L415' name='L415'></a> 415   <strong class='reserved'>case</strong> <a href='../S/860.html#L176' title='Defined at 176 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_NULL</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L416' name='L416'></a> 416   <strong class='reserved'>case</strong> <a href='../S/860.html#L177' title='Defined at 177 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADOPTION</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L417' name='L417'></a> 417   <strong class='reserved'>case</strong> <a href='../S/860.html#L178' title='Defined at 178 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADMAGIC</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L418' name='L418'></a> 418   <strong class='reserved'>case</strong> <a href='../S/860.html#L180' title='Defined at 180 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_UNKNOWN_NODE</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L75' title='Defined at 75 in ext/pcre/pcrelib/pcreposix.h.'>REG_ASSERT</a>;
+<a id='L419' name='L419'></a> 419   <strong class='reserved'>case</strong> <a href='../S/860.html#L181' title='Defined at 181 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_NOMEMORY</a>: <strong class='reserved'>return</strong> <a href='../D/9678.html' title='Multiple defined in 2 places.'>REG_ESPACE</a>;
+<a id='L420' name='L420'></a> 420   <strong class='reserved'>case</strong> <a href='../S/860.html#L183' title='Defined at 183 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_MATCHLIMIT</a>: <strong class='reserved'>return</strong> <a href='../D/9678.html' title='Multiple defined in 2 places.'>REG_ESPACE</a>;
+<a id='L421' name='L421'></a> 421   <strong class='reserved'>case</strong> <a href='../S/860.html#L185' title='Defined at 185 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADUTF8</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L422' name='L422'></a> 422   <strong class='reserved'>case</strong> <a href='../S/860.html#L188' title='Defined at 188 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADUTF8_OFFSET</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L423' name='L423'></a> 423   <strong class='reserved'>case</strong> <a href='../S/860.html#L207' title='Defined at 207 in ext/pcre/pcrelib/pcre.h.'>PCRE_ERROR_BADMODE</a>: <strong class='reserved'>return</strong> <a href='../S/883.html#L90' title='Defined at 90 in ext/pcre/pcrelib/pcreposix.h.'>REG_INVARG</a>;
+<a id='L424' name='L424'></a> 424   <strong class='reserved'>default</strong>: <strong class='reserved'>return</strong> <a href='../S/883.html#L75' title='Defined at 75 in ext/pcre/pcrelib/pcreposix.h.'>REG_ASSERT</a>;
+<a id='L425' name='L425'></a> 425   <em class='brace'>}</em>
+<a id='L426' name='L426'></a> 426 <em class='brace'>}</em>
+<a id='L427' name='L427'></a> 427 
+<a id='L428' name='L428'></a> 428 <em class='comment'>/* End of pcreposix.c */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L208'>[^]</a><a href='#L320'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

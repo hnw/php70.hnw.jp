@@ -1,0 +1,1117 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>generator</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1654.html#L2424'>generator</a>        2424 Zend/zend_execute.c 	zend_generator *generator = (zend_generator *) EX(return_value);</span>
+<span class='curline'><a href='../S/1654.html#L2427'>generator</a>        2427 Zend/zend_execute.c 	return generator;</span>
+<span class='curline'><a href='../S/1663.html#L34'>generator</a>          34 Zend/zend_generators.c static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */</span>
+<span class='curline'><a href='../S/1663.html#L36'>generator</a>          36 Zend/zend_generators.c 	zend_execute_data *execute_data = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L46'>generator</a>          46 Zend/zend_generators.c 		EG(vm_stack_top) = generator-&gt;stack-&gt;top;</span>
+<span class='curline'><a href='../S/1663.html#L47'>generator</a>          47 Zend/zend_generators.c 		EG(vm_stack_end) = generator-&gt;stack-&gt;end;</span>
+<span class='curline'><a href='../S/1663.html#L48'>generator</a>          48 Zend/zend_generators.c 		EG(vm_stack) = generator-&gt;stack;</span>
+<span class='curline'><a href='../S/1663.html#L52'>generator</a>          52 Zend/zend_generators.c 		generator-&gt;stack = EG(vm_stack);</span>
+<span class='curline'><a href='../S/1663.html#L53'>generator</a>          53 Zend/zend_generators.c 		generator-&gt;stack-&gt;top = EG(vm_stack_top);</span>
+<span class='curline'><a href='../S/1663.html#L61'>generator</a>          61 Zend/zend_generators.c ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */</span>
+<span class='curline'><a href='../S/1663.html#L63'>generator</a>          63 Zend/zend_generators.c 	if (EXPECTED(generator-&gt;execute_data)) {</span>
+<span class='curline'><a href='../S/1663.html#L64'>generator</a>          64 Zend/zend_generators.c 		zend_execute_data *execute_data = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L79'>generator</a>          79 Zend/zend_generators.c 			generator-&gt;execute_data = NULL;</span>
+<span class='curline'><a href='../S/1663.html#L83'>generator</a>          83 Zend/zend_generators.c 		zend_vm_stack_free_extra_args(generator-&gt;execute_data);</span>
+<span class='curline'><a href='../S/1663.html#L88'>generator</a>          88 Zend/zend_generators.c 			zend_generator_cleanup_unfinished_execution(generator);</span>
+<span class='curline'><a href='../S/1663.html#L96'>generator</a>          96 Zend/zend_generators.c 		efree(generator-&gt;stack);</span>
+<span class='curline'><a href='../S/1663.html#L97'>generator</a>          97 Zend/zend_generators.c 		generator-&gt;execute_data = NULL;</span>
+<span class='curline'><a href='../S/1663.html#L106'>generator</a>         106 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*) object;</span>
+<span class='curline'><a href='../S/1663.html#L107'>generator</a>         107 Zend/zend_generators.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L112'>generator</a>         112 Zend/zend_generators.c 	if (UNEXPECTED(Z_TYPE(generator-&gt;values) != IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1663.html#L113'>generator</a>         113 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L114'>generator</a>         114 Zend/zend_generators.c 		ZVAL_UNDEF(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L117'>generator</a>         117 Zend/zend_generators.c 	if (EXPECTED(generator-&gt;node.children == 0)) {</span>
+<span class='curline'><a href='../S/1663.html#L118'>generator</a>         118 Zend/zend_generators.c 		zend_generator *root = generator-&gt;node.ptr.root, *next;</span>
+<span class='curline'><a href='../S/1663.html#L119'>generator</a>         119 Zend/zend_generators.c 		while (UNEXPECTED(root != generator)) {</span>
+<span class='curline'><a href='../S/1663.html#L120'>generator</a>         120 Zend/zend_generators.c 			next = zend_generator_get_child(&amp;root-&gt;node, generator);</span>
+<span class='curline'><a href='../S/1663.html#L124'>generator</a>         124 Zend/zend_generators.c 		generator-&gt;node.parent = NULL;</span>
+<span class='curline'><a href='../S/1663.html#L161'>generator</a>         161 Zend/zend_generators.c 		generator-&gt;flags |= ZEND_GENERATOR_FORCED_CLOSE;</span>
+<span class='curline'><a href='../S/1663.html#L162'>generator</a>         162 Zend/zend_generators.c 		zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L169'>generator</a>         169 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*) object;</span>
+<span class='curline'><a href='../S/1663.html#L171'>generator</a>         171 Zend/zend_generators.c 	zend_generator_close(generator, 0);</span>
+<span class='curline'><a href='../S/1663.html#L174'>generator</a>         174 Zend/zend_generators.c 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1663.html#L175'>generator</a>         175 Zend/zend_generators.c 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L177'>generator</a>         177 Zend/zend_generators.c 	if (EXPECTED(!Z_ISUNDEF(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1663.html#L178'>generator</a>         178 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1663.html#L181'>generator</a>         181 Zend/zend_generators.c 	if (UNEXPECTED(generator-&gt;node.children &gt; 4)) {</span>
+<span class='curline'><a href='../S/1663.html#L182'>generator</a>         182 Zend/zend_generators.c 		zend_hash_destroy(&amp;generator-&gt;node.child.ht);</span>
+<span class='curline'><a href='../S/1663.html#L185'>generator</a>         185 Zend/zend_generators.c 	zend_object_std_dtor(&amp;generator-&gt;std);</span>
+<span class='curline'><a href='../S/1663.html#L187'>generator</a>         187 Zend/zend_generators.c 	if (generator-&gt;iterator) {</span>
+<span class='curline'><a href='../S/1663.html#L188'>generator</a>         188 Zend/zend_generators.c 		zend_iterator_dtor(generator-&gt;iterator);</span>
+<span class='curline'><a href='../S/1663.html#L195'>generator</a>         195 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*) Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1663.html#L196'>generator</a>         196 Zend/zend_generators.c 	*table = &amp;generator-&gt;value;</span>
+<span class='curline'><a href='../S/1663.html#L204'>generator</a>         204 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L206'>generator</a>         206 Zend/zend_generators.c 	generator = emalloc(sizeof(zend_generator));</span>
+<span class='curline'><a href='../S/1663.html#L207'>generator</a>         207 Zend/zend_generators.c 	memset(generator, 0, sizeof(zend_generator));</span>
+<span class='curline'><a href='../S/1663.html#L210'>generator</a>         210 Zend/zend_generators.c 	generator-&gt;largest_used_integer_key = -1;</span>
+<span class='curline'><a href='../S/1663.html#L212'>generator</a>         212 Zend/zend_generators.c 	ZVAL_UNDEF(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1663.html#L213'>generator</a>         213 Zend/zend_generators.c 	ZVAL_UNDEF(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L216'>generator</a>         216 Zend/zend_generators.c 	generator-&gt;node.parent = NULL;</span>
+<span class='curline'><a href='../S/1663.html#L217'>generator</a>         217 Zend/zend_generators.c 	generator-&gt;node.children = 0;</span>
+<span class='curline'><a href='../S/1663.html#L218'>generator</a>         218 Zend/zend_generators.c 	generator-&gt;node.ptr.root = generator;</span>
+<span class='curline'><a href='../S/1663.html#L220'>generator</a>         220 Zend/zend_generators.c 	zend_object_std_init(&amp;generator-&gt;std, class_type);</span>
+<span class='curline'><a href='../S/1663.html#L221'>generator</a>         221 Zend/zend_generators.c 	generator-&gt;std.handlers = &amp;zend_generator_handlers;</span>
+<span class='curline'><a href='../S/1663.html#L223'>generator</a>         223 Zend/zend_generators.c 	return (zend_object*)generator;</span>
+<span class='curline'><a href='../S/1663.html#L230'>generator</a>         230 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L249'>generator</a>         249 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(return_value);</span>
+<span class='curline'><a href='../S/1663.html#L250'>generator</a>         250 Zend/zend_generators.c 	generator-&gt;execute_data = execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L251'>generator</a>         251 Zend/zend_generators.c 	generator-&gt;stack = EG(vm_stack);</span>
+<span class='curline'><a href='../S/1663.html#L252'>generator</a>         252 Zend/zend_generators.c 	generator-&gt;stack-&gt;top = EG(vm_stack_top);</span>
+<span class='curline'><a href='../S/1663.html#L258'>generator</a>         258 Zend/zend_generators.c 	execute_data-&gt;return_value = (zval*)generator;</span>
+<span class='curline'><a href='../S/1663.html#L260'>generator</a>         260 Zend/zend_generators.c 	memset(&amp;generator-&gt;execute_fake, 0, sizeof(zend_execute_data));</span>
+<span class='curline'><a href='../S/1663.html#L261'>generator</a>         261 Zend/zend_generators.c 	Z_OBJ(generator-&gt;execute_fake.This) = (zend_object *) generator;</span>
+<span class='curline'><a href='../S/1663.html#L277'>generator</a>         277 Zend/zend_generators.c 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr-&gt;This);</span>
+<span class='curline'><a href='../S/1663.html#L278'>generator</a>         278 Zend/zend_generators.c 			zend_generator *root = (generator-&gt;node.children &lt; 1 ? generator : generator-&gt;node.ptr.leaf)-&gt;node.ptr.root;</span>
+<span class='curline'><a href='../S/1663.html#L280'>generator</a>         280 Zend/zend_generators.c 			if (generator-&gt;node.parent != root) {</span>
+<span class='curline'><a href='../S/1663.html#L282'>generator</a>         282 Zend/zend_generators.c 					generator-&gt;execute_data-&gt;prev_execute_data = prev;</span>
+<span class='curline'><a href='../S/1663.html#L283'>generator</a>         283 Zend/zend_generators.c 					prev = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L284'>generator</a>         284 Zend/zend_generators.c 					generator = generator-&gt;node.parent;</span>
+<span class='curline'><a href='../S/1663.html#L285'>generator</a>         285 Zend/zend_generators.c 				} while (generator-&gt;node.parent != root);</span>
+<span class='curline'><a href='../S/1663.html#L287'>generator</a>         287 Zend/zend_generators.c 			generator-&gt;execute_data-&gt;prev_execute_data = prev;</span>
+<span class='curline'><a href='../S/1663.html#L288'>generator</a>         288 Zend/zend_generators.c 			ptr = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L294'>generator</a>         294 Zend/zend_generators.c static void zend_generator_throw_exception(zend_generator *generator, zval *exception)</span>
+<span class='curline'><a href='../S/1663.html#L297'>generator</a>         297 Zend/zend_generators.c 	if (UNEXPECTED(Z_TYPE(generator-&gt;values) != IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1663.html#L298'>generator</a>         298 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L299'>generator</a>         299 Zend/zend_generators.c 		ZVAL_UNDEF(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L305'>generator</a>         305 Zend/zend_generators.c 	EG(current_execute_data) = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L306'>generator</a>         306 Zend/zend_generators.c 	generator-&gt;execute_data-&gt;opline--;</span>
+<span class='curline'><a href='../S/1663.html#L312'>generator</a>         312 Zend/zend_generators.c 	generator-&gt;execute_data-&gt;opline++;</span>
+<span class='curline'><a href='../S/1663.html#L390'>generator</a>         390 Zend/zend_generators.c static void zend_generator_add_child(zend_generator *generator, zend_generator *child)</span>
+<span class='curline'><a href='../S/1663.html#L394'>generator</a>         394 Zend/zend_generators.c 	zend_bool was_leaf = generator-&gt;node.children == 0;</span>
+<span class='curline'><a href='../S/1663.html#L397'>generator</a>         397 Zend/zend_generators.c 		zend_generator *next = generator-&gt;node.parent;</span>
+<span class='curline'><a href='../S/1663.html#L398'>generator</a>         398 Zend/zend_generators.c 		leaf-&gt;node.ptr.root = generator-&gt;node.ptr.root;</span>
+<span class='curline'><a href='../S/1663.html#L399'>generator</a>         399 Zend/zend_generators.c 		++GC_REFCOUNT(&amp;generator-&gt;std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */</span>
+<span class='curline'><a href='../S/1663.html#L400'>generator</a>         400 Zend/zend_generators.c 		generator-&gt;node.ptr.leaf = leaf;</span>
+<span class='curline'><a href='../S/1663.html#L405'>generator</a>         405 Zend/zend_generators.c 					zend_generator *child = zend_hash_index_find_ptr(&amp;next-&gt;node.child.ht, (zend_ulong) generator);</span>
+<span class='curline'><a href='../S/1663.html#L406'>generator</a>         406 Zend/zend_generators.c 					zend_hash_index_del(&amp;next-&gt;node.child.ht, (zend_ulong) generator);</span>
+<span class='curline'><a href='../S/1663.html#L411'>generator</a>         411 Zend/zend_generators.c 							if (next-&gt;node.child.array[x].leaf == generator) { \</span>
+<span class='curline'><a href='../S/1663.html#L431'>generator</a>         431 Zend/zend_generators.c 		zend_generator_add_single_child(&amp;generator-&gt;node, child, leaf);</span>
+<span class='curline'><a href='../S/1663.html#L432'>generator</a>         432 Zend/zend_generators.c 	} else if (generator-&gt;node.children == 1) {</span>
+<span class='curline'><a href='../S/1663.html#L433'>generator</a>         433 Zend/zend_generators.c 		multi_children_node = zend_generator_search_multi_children_node(&amp;generator-&gt;node);</span>
+<span class='curline'><a href='../S/1663.html#L435'>generator</a>         435 Zend/zend_generators.c 			generator-&gt;node.children = 0;</span>
+<span class='curline'><a href='../S/1663.html#L436'>generator</a>         436 Zend/zend_generators.c 			zend_generator_merge_child_nodes(&amp;generator-&gt;node, multi_children_node, generator-&gt;node.child.array[0].child);</span>
+<span class='curline'><a href='../S/1663.html#L447'>generator</a>         447 Zend/zend_generators.c 		zend_generator *parent = generator-&gt;node.parent, *cur = generator;</span>
+<span class='curline'><a href='../S/1663.html#L450'>generator</a>         450 Zend/zend_generators.c 			zend_generator_merge_child_nodes(&amp;generator-&gt;node, multi_children_node, child);</span>
+<span class='curline'><a href='../S/1663.html#L452'>generator</a>         452 Zend/zend_generators.c 			zend_generator_add_single_child(&amp;generator-&gt;node, child, leaf);</span>
+<span class='curline'><a href='../S/1663.html#L471'>generator</a>         471 Zend/zend_generators.c void zend_generator_yield_from(zend_generator *generator, zend_generator *from)</span>
+<span class='curline'><a href='../S/1663.html#L473'>generator</a>         473 Zend/zend_generators.c 	zend_generator_add_child(from, generator);</span>
+<span class='curline'><a href='../S/1663.html#L475'>generator</a>         475 Zend/zend_generators.c 	generator-&gt;node.parent = from;</span>
+<span class='curline'><a href='../S/1663.html#L476'>generator</a>         476 Zend/zend_generators.c 	zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L480'>generator</a>         480 Zend/zend_generators.c ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf)</span>
+<span class='curline'><a href='../S/1663.html#L485'>generator</a>         485 Zend/zend_generators.c 	if (root != generator) {</span>
+<span class='curline'><a href='../S/1663.html#L492'>generator</a>         492 Zend/zend_generators.c 	while (!root-&gt;execute_data &amp;&amp; root != generator) {</span>
+<span class='curline'><a href='../S/1663.html#L510'>generator</a>         510 Zend/zend_generators.c 						if (root == generator) {</span>
+<span class='curline'><a href='../S/1663.html#L513'>generator</a>         513 Zend/zend_generators.c 							root-&gt;execute_data-&gt;prev_execute_data = &amp;generator-&gt;execute_fake;</span>
+<span class='curline'><a href='../S/1663.html#L514'>generator</a>         514 Zend/zend_generators.c 							generator-&gt;execute_fake.prev_execute_data = original_execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L544'>generator</a>         544 Zend/zend_generators.c static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */</span>
+<span class='curline'><a href='../S/1663.html#L547'>generator</a>         547 Zend/zend_generators.c 	if (Z_TYPE(generator-&gt;values) == IS_ARRAY) {</span>
+<span class='curline'><a href='../S/1663.html#L548'>generator</a>         548 Zend/zend_generators.c 		HashTable *ht = Z_ARR(generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L549'>generator</a>         549 Zend/zend_generators.c 		HashPosition pos = Z_FE_POS(generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L566'>generator</a>         566 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1663.html#L567'>generator</a>         567 Zend/zend_generators.c 		ZVAL_COPY(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1663.html#L569'>generator</a>         569 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L571'>generator</a>         571 Zend/zend_generators.c 			ZVAL_STR_COPY(&amp;generator-&gt;key, p-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L573'>generator</a>         573 Zend/zend_generators.c 			ZVAL_LONG(&amp;generator-&gt;key, p-&gt;h);</span>
+<span class='curline'><a href='../S/1663.html#L576'>generator</a>         576 Zend/zend_generators.c 		Z_FE_POS(generator-&gt;values) = pos;</span>
+<span class='curline'><a href='../S/1663.html#L578'>generator</a>         578 Zend/zend_generators.c 		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L599'>generator</a>         599 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1663.html#L600'>generator</a>         600 Zend/zend_generators.c 		ZVAL_COPY(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1663.html#L602'>generator</a>         602 Zend/zend_generators.c 		zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L604'>generator</a>         604 Zend/zend_generators.c 			iter-&gt;funcs-&gt;get_current_key(iter, &amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L606'>generator</a>         606 Zend/zend_generators.c 				ZVAL_UNDEF(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1663.html#L610'>generator</a>         610 Zend/zend_generators.c 			ZVAL_LONG(&amp;generator-&gt;key, iter-&gt;index);</span>
+<span class='curline'><a href='../S/1663.html#L617'>generator</a>         617 Zend/zend_generators.c 		EG(current_execute_data) = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L623'>generator</a>         623 Zend/zend_generators.c 	zval_ptr_dtor(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L624'>generator</a>         624 Zend/zend_generators.c 	ZVAL_UNDEF(&amp;generator-&gt;values);</span>
+<span class='curline'><a href='../S/1663.html#L631'>generator</a>         631 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L638'>generator</a>         638 Zend/zend_generators.c 	generator = zend_generator_get_current(orig_generator);</span>
+<span class='curline'><a href='../S/1663.html#L641'>generator</a>         641 Zend/zend_generators.c 	if (generator-&gt;flags &amp; ZEND_GENERATOR_CURRENTLY_RUNNING) {</span>
+<span class='curline'><a href='../S/1663.html#L646'>generator</a>         646 Zend/zend_generators.c 	if (UNEXPECTED((orig_generator-&gt;flags &amp; ZEND_GENERATOR_DO_INIT) != 0 &amp;&amp; !Z_ISUNDEF(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1663.html#L651'>generator</a>         651 Zend/zend_generators.c 	if (UNEXPECTED(!Z_ISUNDEF(generator-&gt;values))) {</span>
+<span class='curline'><a href='../S/1663.html#L652'>generator</a>         652 Zend/zend_generators.c 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {</span>
+<span class='curline'><a href='../S/1663.html#L670'>generator</a>         670 Zend/zend_generators.c 		EG(current_execute_data) = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L671'>generator</a>         671 Zend/zend_generators.c 		EG(scope) = generator-&gt;execute_data-&gt;func-&gt;common.scope;</span>
+<span class='curline'><a href='../S/1663.html#L672'>generator</a>         672 Zend/zend_generators.c 		EG(vm_stack_top) = generator-&gt;stack-&gt;top;</span>
+<span class='curline'><a href='../S/1663.html#L673'>generator</a>         673 Zend/zend_generators.c 		EG(vm_stack_end) = generator-&gt;stack-&gt;end;</span>
+<span class='curline'><a href='../S/1663.html#L674'>generator</a>         674 Zend/zend_generators.c 		EG(vm_stack) = generator-&gt;stack;</span>
+<span class='curline'><a href='../S/1663.html#L679'>generator</a>         679 Zend/zend_generators.c 		if (generator == orig_generator) {</span>
+<span class='curline'><a href='../S/1663.html#L680'>generator</a>         680 Zend/zend_generators.c 			generator-&gt;execute_data-&gt;prev_execute_data = original_execute_data;</span>
+<span class='curline'><a href='../S/1663.html#L684'>generator</a>         684 Zend/zend_generators.c 			generator-&gt;execute_data-&gt;prev_execute_data = &amp;orig_generator-&gt;execute_fake;</span>
+<span class='curline'><a href='../S/1663.html#L689'>generator</a>         689 Zend/zend_generators.c 		generator-&gt;flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;</span>
+<span class='curline'><a href='../S/1663.html#L690'>generator</a>         690 Zend/zend_generators.c 		zend_execute_ex(generator-&gt;execute_data);</span>
+<span class='curline'><a href='../S/1663.html#L691'>generator</a>         691 Zend/zend_generators.c 		generator-&gt;flags &amp;= ~ZEND_GENERATOR_CURRENTLY_RUNNING;</span>
+<span class='curline'><a href='../S/1663.html#L694'>generator</a>         694 Zend/zend_generators.c 		if (EXPECTED(generator-&gt;execute_data)) {</span>
+<span class='curline'><a href='../S/1663.html#L695'>generator</a>         695 Zend/zend_generators.c 			generator-&gt;stack = EG(vm_stack);</span>
+<span class='curline'><a href='../S/1663.html#L696'>generator</a>         696 Zend/zend_generators.c 			generator-&gt;stack-&gt;top = EG(vm_stack_top);</span>
+<span class='curline'><a href='../S/1663.html#L711'>generator</a>         711 Zend/zend_generators.c 			if (generator == orig_generator) {</span>
+<span class='curline'><a href='../S/1663.html#L712'>generator</a>         712 Zend/zend_generators.c 				zend_generator_close(generator, 0);</span>
+<span class='curline'><a href='../S/1663.html#L715'>generator</a>         715 Zend/zend_generators.c 				generator = zend_generator_get_current(orig_generator);</span>
+<span class='curline'><a href='../S/1663.html#L716'>generator</a>         716 Zend/zend_generators.c 				zend_generator_throw_exception(generator, NULL);</span>
+<span class='curline'><a href='../S/1663.html#L722'>generator</a>         722 Zend/zend_generators.c 		if (UNEXPECTED((generator != orig_generator &amp;&amp; !Z_ISUNDEF(generator-&gt;retval)) || (generator-&gt;execute_data &amp;&amp; (generator-&gt;execute_data-&gt;opline - 1)-&gt;opcode == ZEND_YIELD_FROM))) {</span>
+<span class='curline'><a href='../S/1663.html#L723'>generator</a>         723 Zend/zend_generators.c 			generator = zend_generator_get_current(orig_generator);</span>
+<span class='curline'><a href='../S/1663.html#L730'>generator</a>         730 Zend/zend_generators.c static void inline zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */</span>
+<span class='curline'><a href='../S/1663.html#L732'>generator</a>         732 Zend/zend_generators.c 	if (UNEXPECTED(Z_TYPE(generator-&gt;value) == IS_UNDEF) &amp;&amp; EXPECTED(generator-&gt;execute_data) &amp;&amp; EXPECTED(generator-&gt;node.parent == NULL)) {</span>
+<span class='curline'><a href='../S/1663.html#L733'>generator</a>         733 Zend/zend_generators.c 		generator-&gt;flags |= ZEND_GENERATOR_DO_INIT;</span>
+<span class='curline'><a href='../S/1663.html#L734'>generator</a>         734 Zend/zend_generators.c 		zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L735'>generator</a>         735 Zend/zend_generators.c 		generator-&gt;flags &amp;= ~ZEND_GENERATOR_DO_INIT;</span>
+<span class='curline'><a href='../S/1663.html#L736'>generator</a>         736 Zend/zend_generators.c 		generator-&gt;flags |= ZEND_GENERATOR_AT_FIRST_YIELD;</span>
+<span class='curline'><a href='../S/1663.html#L741'>generator</a>         741 Zend/zend_generators.c static void inline zend_generator_rewind(zend_generator *generator) /* {{{ */</span>
+<span class='curline'><a href='../S/1663.html#L743'>generator</a>         743 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L745'>generator</a>         745 Zend/zend_generators.c 	if (!(generator-&gt;flags &amp; ZEND_GENERATOR_AT_FIRST_YIELD)) {</span>
+<span class='curline'><a href='../S/1663.html#L755'>generator</a>         755 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L761'>generator</a>         761 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L763'>generator</a>         763 Zend/zend_generators.c 	zend_generator_rewind(generator);</span>
+<span class='curline'><a href='../S/1663.html#L771'>generator</a>         771 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L777'>generator</a>         777 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L779'>generator</a>         779 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L781'>generator</a>         781 Zend/zend_generators.c 	zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L783'>generator</a>         783 Zend/zend_generators.c 	RETURN_BOOL(EXPECTED(generator-&gt;execute_data != NULL));</span>
+<span class='curline'><a href='../S/1663.html#L791'>generator</a>         791 Zend/zend_generators.c 	zend_generator *generator, *root;</span>
+<span class='curline'><a href='../S/1663.html#L797'>generator</a>         797 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L799'>generator</a>         799 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L801'>generator</a>         801 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L802'>generator</a>         802 Zend/zend_generators.c 	if (EXPECTED(generator-&gt;execute_data != NULL &amp;&amp; Z_TYPE(root-&gt;value) != IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1663.html#L815'>generator</a>         815 Zend/zend_generators.c 	zend_generator *generator, *root;</span>
+<span class='curline'><a href='../S/1663.html#L821'>generator</a>         821 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L823'>generator</a>         823 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L825'>generator</a>         825 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L826'>generator</a>         826 Zend/zend_generators.c 	if (EXPECTED(generator-&gt;execute_data != NULL &amp;&amp; Z_TYPE(root-&gt;key) != IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1663.html#L839'>generator</a>         839 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L845'>generator</a>         845 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L847'>generator</a>         847 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L849'>generator</a>         849 Zend/zend_generators.c 	zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L858'>generator</a>         858 Zend/zend_generators.c 	zend_generator *generator, *root;</span>
+<span class='curline'><a href='../S/1663.html#L870'>generator</a>         870 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L872'>generator</a>         872 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L875'>generator</a>         875 Zend/zend_generators.c 	if (UNEXPECTED(!generator-&gt;execute_data)) {</span>
+<span class='curline'><a href='../S/1663.html#L879'>generator</a>         879 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L885'>generator</a>         885 Zend/zend_generators.c 	zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L887'>generator</a>         887 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L888'>generator</a>         888 Zend/zend_generators.c 	if (EXPECTED(generator-&gt;execute_data)) {</span>
+<span class='curline'><a href='../S/1663.html#L902'>generator</a>         902 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L916'>generator</a>         916 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L918'>generator</a>         918 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L920'>generator</a>         920 Zend/zend_generators.c 	if (generator-&gt;execute_data) {</span>
+<span class='curline'><a href='../S/1663.html#L921'>generator</a>         921 Zend/zend_generators.c 		zend_generator *root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L925'>generator</a>         925 Zend/zend_generators.c 		zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L927'>generator</a>         927 Zend/zend_generators.c 		root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L928'>generator</a>         928 Zend/zend_generators.c 		if (generator-&gt;execute_data) {</span>
+<span class='curline'><a href='../S/1663.html#L946'>generator</a>         946 Zend/zend_generators.c 	zend_generator *generator;</span>
+<span class='curline'><a href='../S/1663.html#L952'>generator</a>         952 Zend/zend_generators.c 	generator = (zend_generator *) Z_OBJ_P(getThis());</span>
+<span class='curline'><a href='../S/1663.html#L954'>generator</a>         954 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L959'>generator</a>         959 Zend/zend_generators.c 	if (Z_ISUNDEF(generator-&gt;retval)) {</span>
+<span class='curline'><a href='../S/1663.html#L966'>generator</a>         966 Zend/zend_generators.c 	ZVAL_COPY(return_value, &amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1663.html#L990'>generator</a>         990 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data);</span>
+<span class='curline'><a href='../S/1663.html#L991'>generator</a>         991 Zend/zend_generators.c 	generator-&gt;iterator = NULL;</span>
+<span class='curline'><a href='../S/1663.html#L999'>generator</a>         999 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data);</span>
+<span class='curline'><a href='../S/1663.html#L1001'>generator</a>        1001 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1003'>generator</a>        1003 Zend/zend_generators.c 	zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1005'>generator</a>        1005 Zend/zend_generators.c 	return generator-&gt;execute_data ? SUCCESS : FAILURE;</span>
+<span class='curline'><a href='../S/1663.html#L1011'>generator</a>        1011 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data), *root;</span>
+<span class='curline'><a href='../S/1663.html#L1013'>generator</a>        1013 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1015'>generator</a>        1015 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1023'>generator</a>        1023 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data), *root;</span>
+<span class='curline'><a href='../S/1663.html#L1025'>generator</a>        1025 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1027'>generator</a>        1027 Zend/zend_generators.c 	root = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1042'>generator</a>        1042 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data);</span>
+<span class='curline'><a href='../S/1663.html#L1044'>generator</a>        1044 Zend/zend_generators.c 	zend_generator_ensure_initialized(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1046'>generator</a>        1046 Zend/zend_generators.c 	zend_generator_resume(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1052'>generator</a>        1052 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator-&gt;data);</span>
+<span class='curline'><a href='../S/1663.html#L1054'>generator</a>        1054 Zend/zend_generators.c 	zend_generator_rewind(generator);</span>
+<span class='curline'><a href='../S/1663.html#L1070'>generator</a>        1070 Zend/zend_generators.c 	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1663.html#L1072'>generator</a>        1072 Zend/zend_generators.c 	if (!generator-&gt;execute_data) {</span>
+<span class='curline'><a href='../S/1663.html#L1077'>generator</a>        1077 Zend/zend_generators.c 	if (UNEXPECTED(by_ref) &amp;&amp; !(generator-&gt;execute_data-&gt;func-&gt;op_array.fn_flags &amp; ZEND_ACC_RETURN_REFERENCE)) {</span>
+<span class='curline'><a href='../S/1663.html#L1082'>generator</a>        1082 Zend/zend_generators.c 	iterator = generator-&gt;iterator = emalloc(sizeof(zend_object_iterator));</span>
+<span class='curline'><a href='../S/1664.html#L103'>generator</a>         103 Zend/zend_generators.h ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);</span>
+<span class='curline'><a href='../S/1664.html#L104'>generator</a>         104 Zend/zend_generators.h ZEND_API void zend_generator_resume(zend_generator *generator);</span>
+<span class='curline'><a href='../S/1664.html#L106'>generator</a>         106 Zend/zend_generators.h void zend_generator_yield_from(zend_generator *generator, zend_generator *from);</span>
+<span class='curline'><a href='../S/1664.html#L109'>generator</a>         109 Zend/zend_generators.h ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf);</span>
+<span class='curline'><a href='../S/1664.html#L110'>generator</a>         110 Zend/zend_generators.h static zend_always_inline zend_generator *zend_generator_get_current(zend_generator *generator)</span>
+<span class='curline'><a href='../S/1664.html#L115'>generator</a>         115 Zend/zend_generators.h 	if (EXPECTED(generator-&gt;node.parent == NULL)) {</span>
+<span class='curline'><a href='../S/1664.html#L117'>generator</a>         117 Zend/zend_generators.h 		return generator;</span>
+<span class='curline'><a href='../S/1664.html#L120'>generator</a>         120 Zend/zend_generators.h 	leaf = generator-&gt;node.children ? generator-&gt;node.ptr.leaf : generator;</span>
+<span class='curline'><a href='../S/1664.html#L128'>generator</a>         128 Zend/zend_generators.h 	return zend_generator_update_current(generator, leaf);</span>
+<span class='curline'><a href='../S/1737.html#L4060'>generator</a>        4060 Zend/zend_vm_def.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L4067'>generator</a>        4067 Zend/zend_vm_def.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1737.html#L4069'>generator</a>        4069 Zend/zend_vm_def.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1737.html#L4070'>generator</a>        4070 Zend/zend_vm_def.h 				zval_copy_ctor_func(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1737.html#L4075'>generator</a>        4075 Zend/zend_vm_def.h 		ZVAL_COPY(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1737.html#L4081'>generator</a>        4081 Zend/zend_vm_def.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1737.html#L4088'>generator</a>        4088 Zend/zend_vm_def.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1737.html#L4093'>generator</a>        4093 Zend/zend_vm_def.h 	zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1737.html#L7175'>generator</a>        7175 Zend/zend_vm_def.h 			zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L7176'>generator</a>        7176 Zend/zend_vm_def.h 			zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1737.html#L7207'>generator</a>        7207 Zend/zend_vm_def.h 				zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L7208'>generator</a>        7208 Zend/zend_vm_def.h 				zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1737.html#L7304'>generator</a>        7304 Zend/zend_vm_def.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L7307'>generator</a>        7307 Zend/zend_vm_def.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1737.html#L7315'>generator</a>        7315 Zend/zend_vm_def.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1737.html#L7318'>generator</a>        7318 Zend/zend_vm_def.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1737.html#L7333'>generator</a>        7333 Zend/zend_vm_def.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1737.html#L7335'>generator</a>        7335 Zend/zend_vm_def.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1737.html#L7336'>generator</a>        7336 Zend/zend_vm_def.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1737.html#L7358'>generator</a>        7358 Zend/zend_vm_def.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1737.html#L7367'>generator</a>        7367 Zend/zend_vm_def.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1737.html#L7368'>generator</a>        7368 Zend/zend_vm_def.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1737.html#L7369'>generator</a>        7369 Zend/zend_vm_def.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1737.html#L7372'>generator</a>        7372 Zend/zend_vm_def.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1737.html#L7374'>generator</a>        7374 Zend/zend_vm_def.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1737.html#L7377'>generator</a>        7377 Zend/zend_vm_def.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1737.html#L7385'>generator</a>        7385 Zend/zend_vm_def.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1737.html#L7395'>generator</a>        7395 Zend/zend_vm_def.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1737.html#L7396'>generator</a>        7396 Zend/zend_vm_def.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1737.html#L7397'>generator</a>        7397 Zend/zend_vm_def.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1737.html#L7400'>generator</a>        7400 Zend/zend_vm_def.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1737.html#L7402'>generator</a>        7402 Zend/zend_vm_def.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1737.html#L7405'>generator</a>        7405 Zend/zend_vm_def.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1737.html#L7411'>generator</a>        7411 Zend/zend_vm_def.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1737.html#L7412'>generator</a>        7412 Zend/zend_vm_def.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1737.html#L7414'>generator</a>        7414 Zend/zend_vm_def.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1737.html#L7418'>generator</a>        7418 Zend/zend_vm_def.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1737.html#L7419'>generator</a>        7419 Zend/zend_vm_def.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1737.html#L7425'>generator</a>        7425 Zend/zend_vm_def.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1737.html#L7426'>generator</a>        7426 Zend/zend_vm_def.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1737.html#L7428'>generator</a>        7428 Zend/zend_vm_def.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1737.html#L7446'>generator</a>        7446 Zend/zend_vm_def.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L7455'>generator</a>        7455 Zend/zend_vm_def.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;values, val);</span>
+<span class='curline'><a href='../S/1737.html#L7459'>generator</a>        7459 Zend/zend_vm_def.h 		Z_FE_POS(generator-&gt;values) = 0;</span>
+<span class='curline'><a href='../S/1737.html#L7473'>generator</a>        7473 Zend/zend_vm_def.h 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {</span>
+<span class='curline'><a href='../S/1737.html#L7477'>generator</a>        7477 Zend/zend_vm_def.h 					zend_generator_yield_from(generator, new_gen);</span>
+<span class='curline'><a href='../S/1737.html#L7508'>generator</a>        7508 Zend/zend_vm_def.h 			ZVAL_OBJ(&amp;generator-&gt;values, &amp;iter-&gt;std);</span>
+<span class='curline'><a href='../S/1737.html#L7522'>generator</a>        7522 Zend/zend_vm_def.h 	generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1737.html#L7597'>generator</a>        7597 Zend/zend_vm_def.h 					zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1737.html#L7598'>generator</a>        7598 Zend/zend_vm_def.h 					zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L1546'>generator</a>        1546 Zend/zend_vm_execute.h 			zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L1547'>generator</a>        1547 Zend/zend_vm_execute.h 			zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L1578'>generator</a>        1578 Zend/zend_vm_execute.h 				zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L1579'>generator</a>        1579 Zend/zend_vm_execute.h 				zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L1657'>generator</a>        1657 Zend/zend_vm_execute.h 					zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L1658'>generator</a>        1658 Zend/zend_vm_execute.h 					zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L3191'>generator</a>        3191 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L3198'>generator</a>        3198 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L3200'>generator</a>        3200 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1738.html#L3201'>generator</a>        3201 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1738.html#L3206'>generator</a>        3206 Zend/zend_vm_execute.h 		ZVAL_COPY(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L3212'>generator</a>        3212 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L3219'>generator</a>        3219 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L3224'>generator</a>        3224 Zend/zend_vm_execute.h 	zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L4114'>generator</a>        4114 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L4123'>generator</a>        4123 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;values, val);</span>
+<span class='curline'><a href='../S/1738.html#L4127'>generator</a>        4127 Zend/zend_vm_execute.h 		Z_FE_POS(generator-&gt;values) = 0;</span>
+<span class='curline'><a href='../S/1738.html#L4139'>generator</a>        4139 Zend/zend_vm_execute.h 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {</span>
+<span class='curline'><a href='../S/1738.html#L4143'>generator</a>        4143 Zend/zend_vm_execute.h 					zend_generator_yield_from(generator, new_gen);</span>
+<span class='curline'><a href='../S/1738.html#L4173'>generator</a>        4173 Zend/zend_vm_execute.h 			ZVAL_OBJ(&amp;generator-&gt;values, &amp;iter-&gt;std);</span>
+<span class='curline'><a href='../S/1738.html#L4187'>generator</a>        4187 Zend/zend_vm_execute.h 	generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L6520'>generator</a>        6520 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L6523'>generator</a>        6523 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L6531'>generator</a>        6531 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6534'>generator</a>        6534 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6549'>generator</a>        6549 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6551'>generator</a>        6551 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L6552'>generator</a>        6552 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6574'>generator</a>        6574 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L6582'>generator</a>        6582 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6583'>generator</a>        6583 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L6584'>generator</a>        6584 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6587'>generator</a>        6587 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6589'>generator</a>        6589 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L6592'>generator</a>        6592 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6600'>generator</a>        6600 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6610'>generator</a>        6610 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6611'>generator</a>        6611 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L6612'>generator</a>        6612 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6615'>generator</a>        6615 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6617'>generator</a>        6617 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L6620'>generator</a>        6620 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6626'>generator</a>        6626 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L6627'>generator</a>        6627 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L6629'>generator</a>        6629 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6633'>generator</a>        6633 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L6634'>generator</a>        6634 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L6640'>generator</a>        6640 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L6641'>generator</a>        6641 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L6643'>generator</a>        6643 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L6697'>generator</a>        6697 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L6700'>generator</a>        6700 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L6708'>generator</a>        6708 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6711'>generator</a>        6711 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6726'>generator</a>        6726 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6728'>generator</a>        6728 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L6729'>generator</a>        6729 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6751'>generator</a>        6751 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L6759'>generator</a>        6759 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6760'>generator</a>        6760 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L6761'>generator</a>        6761 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6764'>generator</a>        6764 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6766'>generator</a>        6766 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L6769'>generator</a>        6769 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L6777'>generator</a>        6777 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L6787'>generator</a>        6787 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6788'>generator</a>        6788 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L6789'>generator</a>        6789 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6792'>generator</a>        6792 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6794'>generator</a>        6794 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L6797'>generator</a>        6797 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L6803'>generator</a>        6803 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L6804'>generator</a>        6804 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L6806'>generator</a>        6806 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L6810'>generator</a>        6810 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L6811'>generator</a>        6811 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L6817'>generator</a>        6817 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L6818'>generator</a>        6818 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L6820'>generator</a>        6820 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L7239'>generator</a>        7239 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L7242'>generator</a>        7242 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L7250'>generator</a>        7250 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L7253'>generator</a>        7253 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L7268'>generator</a>        7268 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L7270'>generator</a>        7270 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L7271'>generator</a>        7271 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L7293'>generator</a>        7293 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L7301'>generator</a>        7301 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L7302'>generator</a>        7302 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L7303'>generator</a>        7303 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L7306'>generator</a>        7306 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L7308'>generator</a>        7308 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L7311'>generator</a>        7311 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L7319'>generator</a>        7319 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L7329'>generator</a>        7329 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L7330'>generator</a>        7330 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L7331'>generator</a>        7331 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L7334'>generator</a>        7334 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L7336'>generator</a>        7336 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L7339'>generator</a>        7339 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L7345'>generator</a>        7345 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L7346'>generator</a>        7346 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L7348'>generator</a>        7348 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L7352'>generator</a>        7352 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L7353'>generator</a>        7353 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L7359'>generator</a>        7359 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L7360'>generator</a>        7360 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L7362'>generator</a>        7362 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L8137'>generator</a>        8137 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L8140'>generator</a>        8140 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L8148'>generator</a>        8148 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L8151'>generator</a>        8151 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L8166'>generator</a>        8166 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L8168'>generator</a>        8168 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L8169'>generator</a>        8169 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L8191'>generator</a>        8191 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L8199'>generator</a>        8199 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L8200'>generator</a>        8200 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L8201'>generator</a>        8201 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L8204'>generator</a>        8204 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L8206'>generator</a>        8206 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L8209'>generator</a>        8209 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L8217'>generator</a>        8217 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L8227'>generator</a>        8227 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L8228'>generator</a>        8228 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L8229'>generator</a>        8229 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L8232'>generator</a>        8232 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L8234'>generator</a>        8234 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L8237'>generator</a>        8237 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L8243'>generator</a>        8243 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L8244'>generator</a>        8244 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L8246'>generator</a>        8246 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L8250'>generator</a>        8250 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L8251'>generator</a>        8251 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L8257'>generator</a>        8257 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L8258'>generator</a>        8258 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L8260'>generator</a>        8260 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L9993'>generator</a>        9993 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L9996'>generator</a>        9996 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L10004'>generator</a>        10004 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L10007'>generator</a>        10007 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L10022'>generator</a>        10022 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L10024'>generator</a>        10024 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L10025'>generator</a>        10025 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L10047'>generator</a>        10047 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L10055'>generator</a>        10055 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L10056'>generator</a>        10056 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L10057'>generator</a>        10057 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L10060'>generator</a>        10060 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L10062'>generator</a>        10062 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L10065'>generator</a>        10065 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L10073'>generator</a>        10073 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L10083'>generator</a>        10083 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L10084'>generator</a>        10084 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L10085'>generator</a>        10085 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L10088'>generator</a>        10088 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L10090'>generator</a>        10090 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L10093'>generator</a>        10093 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L10099'>generator</a>        10099 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L10100'>generator</a>        10100 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L10102'>generator</a>        10102 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L10106'>generator</a>        10106 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L10107'>generator</a>        10107 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L10113'>generator</a>        10113 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L10114'>generator</a>        10114 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L10116'>generator</a>        10116 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L11881'>generator</a>        11881 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L11888'>generator</a>        11888 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L11890'>generator</a>        11890 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1738.html#L11891'>generator</a>        11891 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1738.html#L11896'>generator</a>        11896 Zend/zend_vm_execute.h 		ZVAL_COPY(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L11902'>generator</a>        11902 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L11909'>generator</a>        11909 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L11914'>generator</a>        11914 Zend/zend_vm_execute.h 	zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L12502'>generator</a>        12502 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L12511'>generator</a>        12511 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;values, val);</span>
+<span class='curline'><a href='../S/1738.html#L12515'>generator</a>        12515 Zend/zend_vm_execute.h 		Z_FE_POS(generator-&gt;values) = 0;</span>
+<span class='curline'><a href='../S/1738.html#L12527'>generator</a>        12527 Zend/zend_vm_execute.h 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {</span>
+<span class='curline'><a href='../S/1738.html#L12531'>generator</a>        12531 Zend/zend_vm_execute.h 					zend_generator_yield_from(generator, new_gen);</span>
+<span class='curline'><a href='../S/1738.html#L12562'>generator</a>        12562 Zend/zend_vm_execute.h 			ZVAL_OBJ(&amp;generator-&gt;values, &amp;iter-&gt;std);</span>
+<span class='curline'><a href='../S/1738.html#L12576'>generator</a>        12576 Zend/zend_vm_execute.h 	generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L13037'>generator</a>        13037 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L13040'>generator</a>        13040 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L13048'>generator</a>        13048 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13051'>generator</a>        13051 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13066'>generator</a>        13066 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13068'>generator</a>        13068 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13069'>generator</a>        13069 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13091'>generator</a>        13091 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L13099'>generator</a>        13099 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13100'>generator</a>        13100 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13101'>generator</a>        13101 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13104'>generator</a>        13104 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13106'>generator</a>        13106 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L13109'>generator</a>        13109 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13117'>generator</a>        13117 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13127'>generator</a>        13127 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13128'>generator</a>        13128 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L13129'>generator</a>        13129 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13132'>generator</a>        13132 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13134'>generator</a>        13134 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L13137'>generator</a>        13137 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13143'>generator</a>        13143 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L13144'>generator</a>        13144 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L13146'>generator</a>        13146 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13150'>generator</a>        13150 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L13151'>generator</a>        13151 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L13157'>generator</a>        13157 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L13158'>generator</a>        13158 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L13160'>generator</a>        13160 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L13214'>generator</a>        13214 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L13217'>generator</a>        13217 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L13225'>generator</a>        13225 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13228'>generator</a>        13228 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13243'>generator</a>        13243 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13245'>generator</a>        13245 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13246'>generator</a>        13246 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13268'>generator</a>        13268 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L13276'>generator</a>        13276 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13277'>generator</a>        13277 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13278'>generator</a>        13278 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13281'>generator</a>        13281 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13283'>generator</a>        13283 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L13286'>generator</a>        13286 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13294'>generator</a>        13294 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13304'>generator</a>        13304 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13305'>generator</a>        13305 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L13306'>generator</a>        13306 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13309'>generator</a>        13309 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13311'>generator</a>        13311 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L13314'>generator</a>        13314 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13320'>generator</a>        13320 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L13321'>generator</a>        13321 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L13323'>generator</a>        13323 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13327'>generator</a>        13327 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L13328'>generator</a>        13328 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L13334'>generator</a>        13334 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L13335'>generator</a>        13335 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L13337'>generator</a>        13337 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L13391'>generator</a>        13391 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L13394'>generator</a>        13394 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L13402'>generator</a>        13402 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13405'>generator</a>        13405 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13420'>generator</a>        13420 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13422'>generator</a>        13422 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13423'>generator</a>        13423 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13445'>generator</a>        13445 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L13453'>generator</a>        13453 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13454'>generator</a>        13454 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13455'>generator</a>        13455 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13458'>generator</a>        13458 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13460'>generator</a>        13460 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L13463'>generator</a>        13463 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13471'>generator</a>        13471 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13481'>generator</a>        13481 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13482'>generator</a>        13482 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L13483'>generator</a>        13483 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13486'>generator</a>        13486 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13488'>generator</a>        13488 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L13491'>generator</a>        13491 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13497'>generator</a>        13497 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L13498'>generator</a>        13498 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L13500'>generator</a>        13500 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13504'>generator</a>        13504 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L13505'>generator</a>        13505 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L13511'>generator</a>        13511 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L13512'>generator</a>        13512 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L13514'>generator</a>        13514 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L13761'>generator</a>        13761 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L13764'>generator</a>        13764 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L13772'>generator</a>        13772 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13775'>generator</a>        13775 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13790'>generator</a>        13790 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13792'>generator</a>        13792 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13793'>generator</a>        13793 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13815'>generator</a>        13815 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L13823'>generator</a>        13823 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13824'>generator</a>        13824 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L13825'>generator</a>        13825 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13828'>generator</a>        13828 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13830'>generator</a>        13830 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L13833'>generator</a>        13833 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L13841'>generator</a>        13841 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L13851'>generator</a>        13851 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13852'>generator</a>        13852 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L13853'>generator</a>        13853 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13856'>generator</a>        13856 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13858'>generator</a>        13858 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L13861'>generator</a>        13861 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L13867'>generator</a>        13867 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L13868'>generator</a>        13868 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L13870'>generator</a>        13870 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L13874'>generator</a>        13874 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L13875'>generator</a>        13875 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L13881'>generator</a>        13881 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L13882'>generator</a>        13882 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L13884'>generator</a>        13884 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L14310'>generator</a>        14310 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L14313'>generator</a>        14313 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L14321'>generator</a>        14321 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L14324'>generator</a>        14324 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L14339'>generator</a>        14339 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L14341'>generator</a>        14341 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L14342'>generator</a>        14342 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L14364'>generator</a>        14364 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L14372'>generator</a>        14372 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L14373'>generator</a>        14373 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L14374'>generator</a>        14374 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L14377'>generator</a>        14377 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L14379'>generator</a>        14379 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L14382'>generator</a>        14382 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L14390'>generator</a>        14390 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L14400'>generator</a>        14400 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L14401'>generator</a>        14401 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L14402'>generator</a>        14402 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L14405'>generator</a>        14405 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L14407'>generator</a>        14407 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L14410'>generator</a>        14410 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L14416'>generator</a>        14416 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L14417'>generator</a>        14417 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L14419'>generator</a>        14419 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L14423'>generator</a>        14423 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L14424'>generator</a>        14424 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L14430'>generator</a>        14430 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L14431'>generator</a>        14431 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L14433'>generator</a>        14433 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L15108'>generator</a>        15108 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L15115'>generator</a>        15115 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L15117'>generator</a>        15117 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1738.html#L15118'>generator</a>        15118 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1738.html#L15123'>generator</a>        15123 Zend/zend_vm_execute.h 		ZVAL_COPY(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L15129'>generator</a>        15129 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L15136'>generator</a>        15136 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L15141'>generator</a>        15141 Zend/zend_vm_execute.h 	zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L16321'>generator</a>        16321 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L16330'>generator</a>        16330 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;values, val);</span>
+<span class='curline'><a href='../S/1738.html#L16334'>generator</a>        16334 Zend/zend_vm_execute.h 		Z_FE_POS(generator-&gt;values) = 0;</span>
+<span class='curline'><a href='../S/1738.html#L16348'>generator</a>        16348 Zend/zend_vm_execute.h 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {</span>
+<span class='curline'><a href='../S/1738.html#L16352'>generator</a>        16352 Zend/zend_vm_execute.h 					zend_generator_yield_from(generator, new_gen);</span>
+<span class='curline'><a href='../S/1738.html#L16383'>generator</a>        16383 Zend/zend_vm_execute.h 			ZVAL_OBJ(&amp;generator-&gt;values, &amp;iter-&gt;std);</span>
+<span class='curline'><a href='../S/1738.html#L16397'>generator</a>        16397 Zend/zend_vm_execute.h 	generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L18051'>generator</a>        18051 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L18054'>generator</a>        18054 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L18062'>generator</a>        18062 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18065'>generator</a>        18065 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18080'>generator</a>        18080 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18082'>generator</a>        18082 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18083'>generator</a>        18083 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18105'>generator</a>        18105 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L18114'>generator</a>        18114 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18115'>generator</a>        18115 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18116'>generator</a>        18116 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18119'>generator</a>        18119 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18121'>generator</a>        18121 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L18124'>generator</a>        18124 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18132'>generator</a>        18132 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18142'>generator</a>        18142 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18143'>generator</a>        18143 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L18144'>generator</a>        18144 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18147'>generator</a>        18147 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18149'>generator</a>        18149 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L18152'>generator</a>        18152 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18158'>generator</a>        18158 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L18159'>generator</a>        18159 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L18161'>generator</a>        18161 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18165'>generator</a>        18165 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L18166'>generator</a>        18166 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L18172'>generator</a>        18172 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L18173'>generator</a>        18173 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L18175'>generator</a>        18175 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L18257'>generator</a>        18257 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L18260'>generator</a>        18260 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L18268'>generator</a>        18268 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18271'>generator</a>        18271 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18286'>generator</a>        18286 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18288'>generator</a>        18288 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18289'>generator</a>        18289 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18311'>generator</a>        18311 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L18320'>generator</a>        18320 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18321'>generator</a>        18321 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18322'>generator</a>        18322 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18325'>generator</a>        18325 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18327'>generator</a>        18327 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L18330'>generator</a>        18330 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18338'>generator</a>        18338 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18348'>generator</a>        18348 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18349'>generator</a>        18349 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L18350'>generator</a>        18350 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18353'>generator</a>        18353 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18355'>generator</a>        18355 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L18358'>generator</a>        18358 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18364'>generator</a>        18364 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L18365'>generator</a>        18365 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L18367'>generator</a>        18367 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18371'>generator</a>        18371 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L18372'>generator</a>        18372 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L18378'>generator</a>        18378 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L18379'>generator</a>        18379 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L18381'>generator</a>        18381 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L18523'>generator</a>        18523 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L18526'>generator</a>        18526 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L18534'>generator</a>        18534 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18537'>generator</a>        18537 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18552'>generator</a>        18552 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18554'>generator</a>        18554 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18555'>generator</a>        18555 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18577'>generator</a>        18577 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L18586'>generator</a>        18586 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18587'>generator</a>        18587 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L18588'>generator</a>        18588 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18591'>generator</a>        18591 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18593'>generator</a>        18593 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L18596'>generator</a>        18596 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L18604'>generator</a>        18604 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L18614'>generator</a>        18614 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18615'>generator</a>        18615 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L18616'>generator</a>        18616 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18619'>generator</a>        18619 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18621'>generator</a>        18621 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L18624'>generator</a>        18624 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L18630'>generator</a>        18630 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L18631'>generator</a>        18631 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L18633'>generator</a>        18633 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L18637'>generator</a>        18637 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L18638'>generator</a>        18638 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L18644'>generator</a>        18644 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L18645'>generator</a>        18645 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L18647'>generator</a>        18647 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L19512'>generator</a>        19512 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L19515'>generator</a>        19515 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L19523'>generator</a>        19523 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L19526'>generator</a>        19526 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L19541'>generator</a>        19541 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L19543'>generator</a>        19543 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L19544'>generator</a>        19544 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L19566'>generator</a>        19566 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L19575'>generator</a>        19575 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L19576'>generator</a>        19576 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L19577'>generator</a>        19577 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L19580'>generator</a>        19580 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L19582'>generator</a>        19582 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L19585'>generator</a>        19585 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L19593'>generator</a>        19593 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L19603'>generator</a>        19603 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L19604'>generator</a>        19604 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L19605'>generator</a>        19605 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L19608'>generator</a>        19608 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L19610'>generator</a>        19610 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L19613'>generator</a>        19613 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L19619'>generator</a>        19619 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L19620'>generator</a>        19620 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L19622'>generator</a>        19622 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L19626'>generator</a>        19626 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L19627'>generator</a>        19627 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L19633'>generator</a>        19633 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L19634'>generator</a>        19634 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L19636'>generator</a>        19636 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L21207'>generator</a>        21207 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L21210'>generator</a>        21210 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L21218'>generator</a>        21218 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L21221'>generator</a>        21221 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L21236'>generator</a>        21236 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L21238'>generator</a>        21238 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L21239'>generator</a>        21239 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L21261'>generator</a>        21261 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L21270'>generator</a>        21270 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L21271'>generator</a>        21271 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L21272'>generator</a>        21272 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L21275'>generator</a>        21275 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L21277'>generator</a>        21277 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L21280'>generator</a>        21280 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L21288'>generator</a>        21288 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L21298'>generator</a>        21298 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L21299'>generator</a>        21299 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L21300'>generator</a>        21300 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L21303'>generator</a>        21303 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L21305'>generator</a>        21305 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L21308'>generator</a>        21308 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L21314'>generator</a>        21314 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L21315'>generator</a>        21315 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L21317'>generator</a>        21317 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L21321'>generator</a>        21321 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L21322'>generator</a>        21322 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L21328'>generator</a>        21328 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L21329'>generator</a>        21329 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L21331'>generator</a>        21331 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L24349'>generator</a>        24349 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L24352'>generator</a>        24352 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L24360'>generator</a>        24360 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24363'>generator</a>        24363 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24378'>generator</a>        24378 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24380'>generator</a>        24380 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24381'>generator</a>        24381 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24403'>generator</a>        24403 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L24411'>generator</a>        24411 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24412'>generator</a>        24412 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24413'>generator</a>        24413 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24416'>generator</a>        24416 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24418'>generator</a>        24418 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L24421'>generator</a>        24421 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24429'>generator</a>        24429 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24439'>generator</a>        24439 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24440'>generator</a>        24440 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L24441'>generator</a>        24441 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24444'>generator</a>        24444 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24446'>generator</a>        24446 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L24449'>generator</a>        24449 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24455'>generator</a>        24455 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L24456'>generator</a>        24456 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L24458'>generator</a>        24458 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24462'>generator</a>        24462 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L24463'>generator</a>        24463 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L24469'>generator</a>        24469 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L24470'>generator</a>        24470 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L24472'>generator</a>        24472 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L24490'>generator</a>        24490 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L24493'>generator</a>        24493 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L24501'>generator</a>        24501 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24504'>generator</a>        24504 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24519'>generator</a>        24519 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24521'>generator</a>        24521 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24522'>generator</a>        24522 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24544'>generator</a>        24544 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L24552'>generator</a>        24552 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24553'>generator</a>        24553 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24554'>generator</a>        24554 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24557'>generator</a>        24557 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24559'>generator</a>        24559 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L24562'>generator</a>        24562 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24570'>generator</a>        24570 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24580'>generator</a>        24580 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24581'>generator</a>        24581 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L24582'>generator</a>        24582 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24585'>generator</a>        24585 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24587'>generator</a>        24587 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L24590'>generator</a>        24590 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24596'>generator</a>        24596 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L24597'>generator</a>        24597 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L24599'>generator</a>        24599 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24603'>generator</a>        24603 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L24604'>generator</a>        24604 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L24610'>generator</a>        24610 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L24611'>generator</a>        24611 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L24613'>generator</a>        24613 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L24631'>generator</a>        24631 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L24634'>generator</a>        24634 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L24642'>generator</a>        24642 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24645'>generator</a>        24645 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24660'>generator</a>        24660 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24662'>generator</a>        24662 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24663'>generator</a>        24663 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24685'>generator</a>        24685 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L24693'>generator</a>        24693 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24694'>generator</a>        24694 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L24695'>generator</a>        24695 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24698'>generator</a>        24698 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24700'>generator</a>        24700 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L24703'>generator</a>        24703 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L24711'>generator</a>        24711 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L24721'>generator</a>        24721 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24722'>generator</a>        24722 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L24723'>generator</a>        24723 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24726'>generator</a>        24726 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24728'>generator</a>        24728 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L24731'>generator</a>        24731 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L24737'>generator</a>        24737 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L24738'>generator</a>        24738 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L24740'>generator</a>        24740 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L24744'>generator</a>        24744 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L24745'>generator</a>        24745 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L24751'>generator</a>        24751 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L24752'>generator</a>        24752 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L24754'>generator</a>        24754 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L25170'>generator</a>        25170 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L25173'>generator</a>        25173 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L25181'>generator</a>        25181 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L25184'>generator</a>        25184 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L25199'>generator</a>        25199 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L25201'>generator</a>        25201 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L25202'>generator</a>        25202 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L25224'>generator</a>        25224 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L25232'>generator</a>        25232 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L25233'>generator</a>        25233 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L25234'>generator</a>        25234 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L25237'>generator</a>        25237 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L25239'>generator</a>        25239 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L25242'>generator</a>        25242 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L25250'>generator</a>        25250 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L25260'>generator</a>        25260 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L25261'>generator</a>        25261 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L25262'>generator</a>        25262 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L25265'>generator</a>        25265 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L25267'>generator</a>        25267 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L25270'>generator</a>        25270 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L25276'>generator</a>        25276 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L25277'>generator</a>        25277 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L25279'>generator</a>        25279 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L25283'>generator</a>        25283 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L25284'>generator</a>        25284 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L25290'>generator</a>        25290 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L25291'>generator</a>        25291 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L25293'>generator</a>        25293 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L26657'>generator</a>        26657 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L26660'>generator</a>        26660 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L26668'>generator</a>        26668 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L26671'>generator</a>        26671 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L26686'>generator</a>        26686 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L26688'>generator</a>        26688 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L26689'>generator</a>        26689 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L26711'>generator</a>        26711 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L26719'>generator</a>        26719 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L26720'>generator</a>        26720 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L26721'>generator</a>        26721 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L26724'>generator</a>        26724 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L26726'>generator</a>        26726 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L26729'>generator</a>        26729 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L26737'>generator</a>        26737 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L26747'>generator</a>        26747 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L26748'>generator</a>        26748 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L26749'>generator</a>        26749 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L26752'>generator</a>        26752 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L26754'>generator</a>        26754 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L26757'>generator</a>        26757 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L26763'>generator</a>        26763 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L26764'>generator</a>        26764 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L26766'>generator</a>        26766 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L26770'>generator</a>        26770 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L26771'>generator</a>        26771 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L26777'>generator</a>        26777 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L26778'>generator</a>        26778 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L26780'>generator</a>        26780 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L28687'>generator</a>        28687 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L28694'>generator</a>        28694 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L28696'>generator</a>        28696 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;retval))) {</span>
+<span class='curline'><a href='../S/1738.html#L28697'>generator</a>        28697 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;retval);</span>
+<span class='curline'><a href='../S/1738.html#L28702'>generator</a>        28702 Zend/zend_vm_execute.h 		ZVAL_COPY(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L28708'>generator</a>        28708 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L28715'>generator</a>        28715 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;retval, retval);</span>
+<span class='curline'><a href='../S/1738.html#L28720'>generator</a>        28720 Zend/zend_vm_execute.h 	zend_generator_close(generator, 1);</span>
+<span class='curline'><a href='../S/1738.html#L29685'>generator</a>        29685 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L29694'>generator</a>        29694 Zend/zend_vm_execute.h 		ZVAL_COPY_VALUE(&amp;generator-&gt;values, val);</span>
+<span class='curline'><a href='../S/1738.html#L29698'>generator</a>        29698 Zend/zend_vm_execute.h 		Z_FE_POS(generator-&gt;values) = 0;</span>
+<span class='curline'><a href='../S/1738.html#L29710'>generator</a>        29710 Zend/zend_vm_execute.h 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {</span>
+<span class='curline'><a href='../S/1738.html#L29714'>generator</a>        29714 Zend/zend_vm_execute.h 					zend_generator_yield_from(generator, new_gen);</span>
+<span class='curline'><a href='../S/1738.html#L29744'>generator</a>        29744 Zend/zend_vm_execute.h 			ZVAL_OBJ(&amp;generator-&gt;values, &amp;iter-&gt;std);</span>
+<span class='curline'><a href='../S/1738.html#L29758'>generator</a>        29758 Zend/zend_vm_execute.h 	generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L32804'>generator</a>        32804 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L32807'>generator</a>        32807 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L32815'>generator</a>        32815 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L32818'>generator</a>        32818 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L32833'>generator</a>        32833 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L32835'>generator</a>        32835 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L32836'>generator</a>        32836 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L32858'>generator</a>        32858 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L32866'>generator</a>        32866 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L32867'>generator</a>        32867 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L32868'>generator</a>        32868 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L32871'>generator</a>        32871 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L32873'>generator</a>        32873 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L32876'>generator</a>        32876 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L32884'>generator</a>        32884 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L32894'>generator</a>        32894 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L32895'>generator</a>        32895 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L32896'>generator</a>        32896 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L32899'>generator</a>        32899 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L32901'>generator</a>        32901 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L32904'>generator</a>        32904 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L32910'>generator</a>        32910 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L32911'>generator</a>        32911 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L32913'>generator</a>        32913 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L32917'>generator</a>        32917 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L32918'>generator</a>        32918 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L32924'>generator</a>        32924 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L32925'>generator</a>        32925 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L32927'>generator</a>        32927 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L33100'>generator</a>        33100 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L33103'>generator</a>        33103 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L33111'>generator</a>        33111 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33114'>generator</a>        33114 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33129'>generator</a>        33129 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33131'>generator</a>        33131 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L33132'>generator</a>        33132 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33154'>generator</a>        33154 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L33162'>generator</a>        33162 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33163'>generator</a>        33163 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L33164'>generator</a>        33164 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33167'>generator</a>        33167 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33169'>generator</a>        33169 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L33172'>generator</a>        33172 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33180'>generator</a>        33180 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33190'>generator</a>        33190 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33191'>generator</a>        33191 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L33192'>generator</a>        33192 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33195'>generator</a>        33195 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33197'>generator</a>        33197 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L33200'>generator</a>        33200 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33206'>generator</a>        33206 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L33207'>generator</a>        33207 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L33209'>generator</a>        33209 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33213'>generator</a>        33213 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L33214'>generator</a>        33214 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L33220'>generator</a>        33220 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L33221'>generator</a>        33221 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L33223'>generator</a>        33223 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L33773'>generator</a>        33773 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L33776'>generator</a>        33776 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L33784'>generator</a>        33784 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33787'>generator</a>        33787 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33802'>generator</a>        33802 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33804'>generator</a>        33804 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L33805'>generator</a>        33805 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33827'>generator</a>        33827 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L33835'>generator</a>        33835 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33836'>generator</a>        33836 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L33837'>generator</a>        33837 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33840'>generator</a>        33840 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33842'>generator</a>        33842 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L33845'>generator</a>        33845 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L33853'>generator</a>        33853 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L33863'>generator</a>        33863 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33864'>generator</a>        33864 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L33865'>generator</a>        33865 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33868'>generator</a>        33868 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33870'>generator</a>        33870 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L33873'>generator</a>        33873 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L33879'>generator</a>        33879 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L33880'>generator</a>        33880 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L33882'>generator</a>        33882 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L33886'>generator</a>        33886 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L33887'>generator</a>        33887 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L33893'>generator</a>        33893 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L33894'>generator</a>        33894 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L33896'>generator</a>        33896 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L34968'>generator</a>        34968 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L34971'>generator</a>        34971 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L34979'>generator</a>        34979 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L34982'>generator</a>        34982 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L34997'>generator</a>        34997 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L34999'>generator</a>        34999 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L35000'>generator</a>        35000 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L35022'>generator</a>        35022 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L35030'>generator</a>        35030 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L35031'>generator</a>        35031 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L35032'>generator</a>        35032 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L35035'>generator</a>        35035 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L35037'>generator</a>        35037 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L35040'>generator</a>        35040 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L35048'>generator</a>        35048 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L35058'>generator</a>        35058 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L35059'>generator</a>        35059 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L35060'>generator</a>        35060 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L35063'>generator</a>        35063 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L35065'>generator</a>        35065 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L35068'>generator</a>        35068 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L35074'>generator</a>        35074 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L35075'>generator</a>        35075 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L35077'>generator</a>        35077 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L35081'>generator</a>        35081 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L35082'>generator</a>        35082 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L35088'>generator</a>        35088 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L35089'>generator</a>        35089 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L35091'>generator</a>        35091 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/1738.html#L37664'>generator</a>        37664 Zend/zend_vm_execute.h 	zend_generator *generator = zend_get_running_generator(execute_data);</span>
+<span class='curline'><a href='../S/1738.html#L37667'>generator</a>        37667 Zend/zend_vm_execute.h 	if (UNEXPECTED(generator-&gt;flags &amp; ZEND_GENERATOR_FORCED_CLOSE)) {</span>
+<span class='curline'><a href='../S/1738.html#L37675'>generator</a>        37675 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L37678'>generator</a>        37678 Zend/zend_vm_execute.h 	zval_ptr_dtor(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L37693'>generator</a>        37693 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L37695'>generator</a>        37695 Zend/zend_vm_execute.h 					if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L37696'>generator</a>        37696 Zend/zend_vm_execute.h 						zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L37718'>generator</a>        37718 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, value_ptr);</span>
+<span class='curline'><a href='../S/1738.html#L37726'>generator</a>        37726 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L37727'>generator</a>        37727 Zend/zend_vm_execute.h 				if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;value))) {</span>
+<span class='curline'><a href='../S/1738.html#L37728'>generator</a>        37728 Zend/zend_vm_execute.h 					zval_copy_ctor_func(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L37731'>generator</a>        37731 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L37733'>generator</a>        37733 Zend/zend_vm_execute.h 				ZVAL_COPY(&amp;generator-&gt;value, Z_REFVAL_P(value));</span>
+<span class='curline'><a href='../S/1738.html#L37736'>generator</a>        37736 Zend/zend_vm_execute.h 				ZVAL_COPY_VALUE(&amp;generator-&gt;value, value);</span>
+<span class='curline'><a href='../S/1738.html#L37744'>generator</a>        37744 Zend/zend_vm_execute.h 		ZVAL_NULL(&amp;generator-&gt;value);</span>
+<span class='curline'><a href='../S/1738.html#L37754'>generator</a>        37754 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L37755'>generator</a>        37755 Zend/zend_vm_execute.h 			if (UNEXPECTED(Z_OPT_COPYABLE(generator-&gt;key))) {</span>
+<span class='curline'><a href='../S/1738.html#L37756'>generator</a>        37756 Zend/zend_vm_execute.h 				zval_copy_ctor_func(&amp;generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L37759'>generator</a>        37759 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L37761'>generator</a>        37761 Zend/zend_vm_execute.h 			ZVAL_COPY(&amp;generator-&gt;key, Z_REFVAL_P(key));</span>
+<span class='curline'><a href='../S/1738.html#L37764'>generator</a>        37764 Zend/zend_vm_execute.h 			ZVAL_COPY_VALUE(&amp;generator-&gt;key, key);</span>
+<span class='curline'><a href='../S/1738.html#L37770'>generator</a>        37770 Zend/zend_vm_execute.h 		if (Z_TYPE(generator-&gt;key) == IS_LONG</span>
+<span class='curline'><a href='../S/1738.html#L37771'>generator</a>        37771 Zend/zend_vm_execute.h 		    &amp;&amp; Z_LVAL(generator-&gt;key) &gt; generator-&gt;largest_used_integer_key</span>
+<span class='curline'><a href='../S/1738.html#L37773'>generator</a>        37773 Zend/zend_vm_execute.h 			generator-&gt;largest_used_integer_key = Z_LVAL(generator-&gt;key);</span>
+<span class='curline'><a href='../S/1738.html#L37777'>generator</a>        37777 Zend/zend_vm_execute.h 		generator-&gt;largest_used_integer_key++;</span>
+<span class='curline'><a href='../S/1738.html#L37778'>generator</a>        37778 Zend/zend_vm_execute.h 		ZVAL_LONG(&amp;generator-&gt;key, generator-&gt;largest_used_integer_key);</span>
+<span class='curline'><a href='../S/1738.html#L37784'>generator</a>        37784 Zend/zend_vm_execute.h 		generator-&gt;send_target = EX_VAR(opline-&gt;result.var);</span>
+<span class='curline'><a href='../S/1738.html#L37785'>generator</a>        37785 Zend/zend_vm_execute.h 		ZVAL_NULL(generator-&gt;send_target);</span>
+<span class='curline'><a href='../S/1738.html#L37787'>generator</a>        37787 Zend/zend_vm_execute.h 		generator-&gt;send_target = NULL;</span>
+<span class='curline'><a href='../S/307.html#L108'>generator</a>         108 ext/interbase/interbase.c 	ZEND_ARG_INFO(0, generator)</span>
+<span class='curline'><a href='../S/307.html#L1418'>generator</a>        1418 ext/interbase/interbase.c 	char query[128], *generator;</span>
+<span class='curline'><a href='../S/307.html#L1428'>generator</a>        1428 ext/interbase/interbase.c 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr", &amp;generator, &amp;gen_len,</span>
+<span class='curline'><a href='../S/307.html#L1440'>generator</a>        1440 ext/interbase/interbase.c 	snprintf(query, sizeof(query), "SELECT GEN_ID(%s,%ld) FROM rdb$database", generator, inc);</span>
+<span class='curline'><a href='../S/983.html#L2151'>generator</a>        2151 ext/reflection/php_reflection.c 	zval *generator, *object;</span>
+<span class='curline'><a href='../S/983.html#L2158'>generator</a>        2158 ext/reflection/php_reflection.c 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &amp;generator, zend_ce_generator) == FAILURE) {</span>
+<span class='curline'><a href='../S/983.html#L2162'>generator</a>        2162 ext/reflection/php_reflection.c 	ex = ((zend_generator *) Z_OBJ_P(generator))-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2169'>generator</a>        2169 ext/reflection/php_reflection.c 	ZVAL_COPY(&amp;intern-&gt;obj, generator);</span>
+<span class='curline'><a href='../S/983.html#L2184'>generator</a>        2184 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2187'>generator</a>        2187 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2196'>generator</a>        2196 ext/reflection/php_reflection.c 	root_generator = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/983.html#L2198'>generator</a>        2198 ext/reflection/php_reflection.c 	cur_prev = generator-&gt;execute_data-&gt;prev_execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2199'>generator</a>        2199 ext/reflection/php_reflection.c 	if (generator == root_generator) {</span>
+<span class='curline'><a href='../S/983.html#L2200'>generator</a>        2200 ext/reflection/php_reflection.c 		generator-&gt;execute_data-&gt;prev_execute_data = NULL;</span>
+<span class='curline'><a href='../S/983.html#L2203'>generator</a>        2203 ext/reflection/php_reflection.c 		generator-&gt;execute_fake.prev_execute_data = NULL;</span>
+<span class='curline'><a href='../S/983.html#L2204'>generator</a>        2204 ext/reflection/php_reflection.c 		root_generator-&gt;execute_data-&gt;prev_execute_data = &amp;generator-&gt;execute_fake;</span>
+<span class='curline'><a href='../S/983.html#L2212'>generator</a>        2212 ext/reflection/php_reflection.c 	generator-&gt;execute_data-&gt;prev_execute_data = cur_prev;</span>
+<span class='curline'><a href='../S/983.html#L2219'>generator</a>        2219 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2220'>generator</a>        2220 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2235'>generator</a>        2235 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2236'>generator</a>        2236 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2251'>generator</a>        2251 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2252'>generator</a>        2252 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2275'>generator</a>        2275 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2276'>generator</a>        2276 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2295'>generator</a>        2295 ext/reflection/php_reflection.c 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())-&gt;obj);</span>
+<span class='curline'><a href='../S/983.html#L2296'>generator</a>        2296 ext/reflection/php_reflection.c 	zend_execute_data *ex = generator-&gt;execute_data;</span>
+<span class='curline'><a href='../S/983.html#L2305'>generator</a>        2305 ext/reflection/php_reflection.c 	current = zend_generator_get_current(generator);</span>
+<span class='curline'><a href='../S/983.html#L6138'>generator</a>        6138 ext/reflection/php_reflection.c 	ZEND_ARG_INFO(0, generator)</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/mbstring/php_unicode.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1794.html'>mbstring</a>/php_unicode.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L62'>[^]</a><a href='#L270'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L62' title='Defined at 62.'>prop_lookup</a></li>
+<li><a href='#L101' title='Defined at 101.'>php_unicode_is_prop</a></li>
+<li><a href='#L122' title='Defined at 122.'>case_lookup</a></li>
+<li><a href='#L147' title='Defined at 147.'>php_turkish_toupper</a></li>
+<li><a href='#L155' title='Defined at 155.'>php_turkish_tolower</a></li>
+<li><a href='#L163' title='Defined at 163.'>php_unicode_toupper</a></li>
+<li><a href='#L194' title='Defined at 194.'>php_unicode_tolower</a></li>
+<li><a href='#L225' title='Defined at 225.'>php_unicode_totitle</a></li>
+<li><a href='#L270' title='Defined at 270.'>php_unicode_convert_case</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Wez Furlong (wez@thebrainroom.com)                           |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'></em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>        Based on code from ucdata-2.5, which has the following Copyright:</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'></em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>        Copyright 2001 Computing Research Labs, New Mexico State University</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'></em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>        Permission is hereby granted, free of charge, to any person obtaining a</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>        copy of this software and associated documentation files (the "Software"),</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>        to deal in the Software without restriction, including without limitation</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>        the rights to use, copy, modify, merge, publish, distribute, sublicense,</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>        and/or sell copies of the Software, and to permit persons to whom the</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>        Software is furnished to do so, subject to the following conditions:</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'></em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>        The above copyright notice and this permission notice shall be included in</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>        all copies or substantial portions of the Software.</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>*/</em>
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#endif</em>
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#if</em> <a href='../D/3423.html' title='Multiple defined in 2 places.'>HAVE_MBSTRING</a>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='comment'>/* include case folding data generated from the official UnicodeData.txt file */</em>
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#include</em> "<a href='681.html'>mbstring.h</a>"
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#include</em> "<a href='742.html'>php_unicode.h</a>"
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#include</em> "<a href='744.html'>unicode_data.h</a>"
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <a href='../D/16228.html' title='Multiple defined in 14 places.'>ZEND_EXTERN_MODULE_GLOBALS</a>(<a href='../Y/26344.html' title='Multiple used in 30 places.'>mbstring</a>)
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='comment'>/*</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * A simple array of 32-bit masks for lookup.</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> */</em>
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>static</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/25818.html' title='Multiple used in 3 places.'>masks32</a>[32] = <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53     0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020,
+<a id='L54' name='L54'></a>  54     0x00000040, 0x00000080, 0x00000100, 0x00000200, 0x00000400, 0x00000800,
+<a id='L55' name='L55'></a>  55     0x00001000, 0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
+<a id='L56' name='L56'></a>  56     0x00040000, 0x00080000, 0x00100000, 0x00200000, 0x00400000, 0x00800000,
+<a id='L57' name='L57'></a>  57     0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000,
+<a id='L58' name='L58'></a>  58     0x40000000, 0x80000000
+<a id='L59' name='L59'></a>  59 <em class='brace'>}</em>;
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/25616.html' title='Multiple referred from 2 places.'>prop_lookup</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>)
+<a id='L63' name='L63'></a>  63 <em class='brace'>{</em>
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <em class='comment'>/*</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>         * There is an extra node on the end of the offsets to allow this routine</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>         * to work right.  If the index is 0xffff, then there are no nodes for the</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'>         * property.</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'>         */</em>
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>if</strong> ((<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../Y/8390.html' title='Multiple used in 4 places.'>_ucprop_offsets</a>[<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>]) == 0xffff)
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>return</strong> 0;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <em class='comment'>/*</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>         * Locate the next offset that is not 0xffff.  The sentinel at the end of</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>         * the array is the max index value.</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>         */</em>
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>for</strong> (<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> = 1; <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> + <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &lt; <a href='../Y/8392.html' title='Multiple used in 3 places.'>_ucprop_size</a> &amp;&amp; <a href='../Y/8390.html' title='Multiple used in 4 places.'>_ucprop_offsets</a>[<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> + <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] == 0xffff; <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>++)
+<a id='L79' name='L79'></a>  79                 ;
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/8390.html' title='Multiple used in 4 places.'>_ucprop_offsets</a>[<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> + <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] - 1;
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83         <strong class='reserved'>while</strong> (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> &lt;= <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>) <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84                 <em class='comment'>/*</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'>                 * Determine a "mid" point and adjust to make sure the mid point is at</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'>                 * the beginning of a range pair.</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'>                 */</em>
+<a id='L88' name='L88'></a>  88                 <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> = (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> + <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>) &gt;&gt; 1;
+<a id='L89' name='L89'></a>  89                 <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> -= (<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> &amp; 1);
+<a id='L90' name='L90'></a>  90                 <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &gt; <a href='../Y/8391.html' title='Multiple used in 4 places.'>_ucprop_ranges</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> + 1])
+<a id='L91' name='L91'></a>  91                         <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> + 2;
+<a id='L92' name='L92'></a>  92                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &lt; <a href='../Y/8391.html' title='Multiple used in 4 places.'>_ucprop_ranges</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>])
+<a id='L93' name='L93'></a>  93                         <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> - 2;
+<a id='L94' name='L94'></a>  94                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &gt;= <a href='../Y/8391.html' title='Multiple used in 4 places.'>_ucprop_ranges</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>] &amp;&amp; <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &lt;= <a href='../Y/8391.html' title='Multiple used in 4 places.'>_ucprop_ranges</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> + 1])
+<a id='L95' name='L95'></a>  95                         <strong class='reserved'>return</strong> 1;
+<a id='L96' name='L96'></a>  96         <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>return</strong> 0;
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>int</strong> <a href='../R/25042.html' title='Multiple referred from 55 places.'>php_unicode_is_prop</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/25809.html' title='Multiple used in 10 places.'>mask1</a>,
+<a id='L102' name='L102'></a> 102                 <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/25810.html' title='Multiple used in 9 places.'>mask2</a>)
+<a id='L103' name='L103'></a> 103 <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <strong class='reserved'>if</strong> (<a href='../Y/25809.html' title='Multiple used in 10 places.'>mask1</a> == 0 &amp;&amp; <a href='../Y/25810.html' title='Multiple used in 9 places.'>mask2</a> == 0)
+<a id='L107' name='L107'></a> 107                 <strong class='reserved'>return</strong> 0;
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/25809.html' title='Multiple used in 10 places.'>mask1</a> &amp;&amp; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; 32; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                 <strong class='reserved'>if</strong> ((<a href='../Y/25809.html' title='Multiple used in 10 places.'>mask1</a> &amp; <a href='../Y/25818.html' title='Multiple used in 3 places.'>masks32</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]) &amp;&amp; <a href='../S/741.html#L62' title='Defined at 62 in ext/mbstring/php_unicode.c.'>prop_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>))
+<a id='L111' name='L111'></a> 111                         <strong class='reserved'>return</strong> 1;
+<a id='L112' name='L112'></a> 112         <em class='brace'>}</em>
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 32; <a href='../Y/25810.html' title='Multiple used in 9 places.'>mask2</a> &amp;&amp; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/8392.html' title='Multiple used in 3 places.'>_ucprop_size</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>if</strong> ((<a href='../Y/25810.html' title='Multiple used in 9 places.'>mask2</a> &amp; <a href='../Y/25818.html' title='Multiple used in 3 places.'>masks32</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &amp; 31]) &amp;&amp; <a href='../S/741.html#L62' title='Defined at 62 in ext/mbstring/php_unicode.c.'>prop_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>))
+<a id='L116' name='L116'></a> 116                         <strong class='reserved'>return</strong> 1;
+<a id='L117' name='L117'></a> 117         <em class='brace'>}</em>
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119         <strong class='reserved'>return</strong> 0;
+<a id='L120' name='L120'></a> 120 <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122 <strong class='reserved'>static</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../R/17265.html' title='Multiple referred from 5 places.'>case_lookup</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <strong class='reserved'>long</strong> <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>)
+<a id='L123' name='L123'></a> 123 <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>long</strong> <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>;
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <em class='comment'>/*</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>         * Do the binary search.</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>         */</em>
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>while</strong> (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> &lt;= <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>) <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                 <em class='comment'>/*</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'>                 * Determine a "mid" point and adjust to make sure the mid point is at</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'>                 * the beginning of a case mapping triple.</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'>                 */</em>
+<a id='L134' name='L134'></a> 134                 <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> = (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> + <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>) &gt;&gt; 1;
+<a id='L135' name='L135'></a> 135                 <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> -= (<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> % 3);
+<a id='L136' name='L136'></a> 136                 <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &gt; <a href='../Y/8388.html' title='Multiple used in 5 places.'>_uccase_map</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>])
+<a id='L137' name='L137'></a> 137                         <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> + 3;
+<a id='L138' name='L138'></a> 138                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> &lt; <a href='../Y/8388.html' title='Multiple used in 5 places.'>_uccase_map</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>])
+<a id='L139' name='L139'></a> 139                         <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> - 3;
+<a id='L140' name='L140'></a> 140                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> == <a href='../Y/8388.html' title='Multiple used in 5 places.'>_uccase_map</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>])
+<a id='L141' name='L141'></a> 141                         <strong class='reserved'>return</strong> <a href='../Y/8388.html' title='Multiple used in 5 places.'>_uccase_map</a>[<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a> + <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>];
+<a id='L142' name='L142'></a> 142         <em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144         <strong class='reserved'>return</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>;
+<a id='L145' name='L145'></a> 145 <em class='brace'>}</em>
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../S/741.html#L180' title='Referred from 180 in ext/mbstring/php_unicode.c.'>php_turkish_toupper</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <strong class='reserved'>long</strong> <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>)
+<a id='L148' name='L148'></a> 148 <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149         <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> == 0x0069L) <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150                 <strong class='reserved'>return</strong> 0x0130L;
+<a id='L151' name='L151'></a> 151         <em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>return</strong> <a href='../S/741.html#L122' title='Defined at 122 in ext/mbstring/php_unicode.c.'>case_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L153' name='L153'></a> 153 <em class='brace'>}</em>
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../S/741.html#L211' title='Referred from 211 in ext/mbstring/php_unicode.c.'>php_turkish_tolower</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <strong class='reserved'>long</strong> <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>)
+<a id='L156' name='L156'></a> 156 <em class='brace'>{</em>
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>if</strong> (<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a> == 0x0049L) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <strong class='reserved'>return</strong> 0x0131L;
+<a id='L159' name='L159'></a> 159         <em class='brace'>}</em>
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>return</strong> <a href='../S/741.html#L122' title='Defined at 122 in ext/mbstring/php_unicode.c.'>case_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L161' name='L161'></a> 161 <em class='brace'>}</em>
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../S/741.html#L294' title='Referred from 294 in ext/mbstring/php_unicode.c.'>php_unicode_toupper</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/16616.html' title='Multiple used in 1230 places.'>enc</a>)
+<a id='L164' name='L164'></a> 164 <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165         <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>;
+<a id='L166' name='L166'></a> 166         <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>;
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168         <strong class='reserved'>if</strong> (<a href='../S/742.html#L128' title='Defined at 128 in ext/mbstring/php_unicode.h.'>php_unicode_is_upper</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>))
+<a id='L169' name='L169'></a> 169                 <strong class='reserved'>return</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>;
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171         <strong class='reserved'>if</strong> (<a href='../S/742.html#L129' title='Defined at 129 in ext/mbstring/php_unicode.h.'>php_unicode_is_lower</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>)) <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172                 <em class='comment'>/*</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'>                 * The character is lower case.</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'>                 */</em>
+<a id='L175' name='L175'></a> 175                 <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a> = 2;
+<a id='L176' name='L176'></a> 176                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0];
+<a id='L177' name='L177'></a> 177                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> + <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[1]) - 3;
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179                 <strong class='reserved'>if</strong> (<a href='../Y/16616.html' title='Multiple used in 1230 places.'>enc</a> == <a href='../S/638.html#L100' title='Defined at 100 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_8859_9</a>) <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180                         <strong class='reserved'>return</strong> <a href='../S/741.html#L147' title='Defined at 147 in ext/mbstring/php_unicode.c.'>php_turkish_toupper</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L181' name='L181'></a> 181                 <em class='brace'>}</em>
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184                 <em class='comment'>/*</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'>                 * The character is title case.</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'>                 */</em>
+<a id='L187' name='L187'></a> 187                 <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a> = 1;
+<a id='L188' name='L188'></a> 188                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0] + <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[1];
+<a id='L189' name='L189'></a> 189                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/8389.html' title='Multiple used in 3 places.'>_uccase_size</a> - 3;
+<a id='L190' name='L190'></a> 190         <em class='brace'>}</em>
+<a id='L191' name='L191'></a> 191         <strong class='reserved'>return</strong> <a href='../S/741.html#L122' title='Defined at 122 in ext/mbstring/php_unicode.c.'>case_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L192' name='L192'></a> 192 <em class='brace'>}</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../R/25045.html' title='Multiple referred from 2 places.'>php_unicode_tolower</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/16616.html' title='Multiple used in 1230 places.'>enc</a>)
+<a id='L195' name='L195'></a> 195 <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196         <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>;
+<a id='L197' name='L197'></a> 197         <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>;
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199         <strong class='reserved'>if</strong> (<a href='../S/742.html#L129' title='Defined at 129 in ext/mbstring/php_unicode.h.'>php_unicode_is_lower</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>))
+<a id='L200' name='L200'></a> 200                 <strong class='reserved'>return</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>;
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202         <strong class='reserved'>if</strong> (<a href='../S/742.html#L128' title='Defined at 128 in ext/mbstring/php_unicode.h.'>php_unicode_is_upper</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>)) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203                 <em class='comment'>/*</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'>                 * The character is upper case.</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>                 */</em>
+<a id='L206' name='L206'></a> 206                 <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a> = 1;
+<a id='L207' name='L207'></a> 207                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = 0;
+<a id='L208' name='L208'></a> 208                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0] - 3;
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210                 <strong class='reserved'>if</strong> (<a href='../Y/16616.html' title='Multiple used in 1230 places.'>enc</a> == <a href='../S/638.html#L100' title='Defined at 100 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_8859_9</a>) <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211                         <strong class='reserved'>return</strong> <a href='../S/741.html#L155' title='Defined at 155 in ext/mbstring/php_unicode.c.'>php_turkish_tolower</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L212' name='L212'></a> 212                 <em class='brace'>}</em>
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L215' name='L215'></a> 215                 <em class='comment'>/*</em>
+<a id='L216' name='L216'></a> 216 <em class='comment'>                 * The character is title case.</em>
+<a id='L217' name='L217'></a> 217 <em class='comment'>                 */</em>
+<a id='L218' name='L218'></a> 218                 <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a> = 2;
+<a id='L219' name='L219'></a> 219                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0] + <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[1];
+<a id='L220' name='L220'></a> 220                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/8389.html' title='Multiple used in 3 places.'>_uccase_size</a> - 3;
+<a id='L221' name='L221'></a> 221         <em class='brace'>}</em>
+<a id='L222' name='L222'></a> 222         <strong class='reserved'>return</strong> <a href='../S/741.html#L122' title='Defined at 122 in ext/mbstring/php_unicode.c.'>case_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L223' name='L223'></a> 223 <em class='brace'>}</em>
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../S/741.html#L323' title='Referred from 323 in ext/mbstring/php_unicode.c.'>php_unicode_totitle</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/16616.html' title='Multiple used in 1230 places.'>enc</a>)
+<a id='L226' name='L226'></a> 226 <em class='brace'>{</em>
+<a id='L227' name='L227'></a> 227         <strong class='reserved'>int</strong> <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>;
+<a id='L228' name='L228'></a> 228         <strong class='reserved'>long</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>;
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230         <strong class='reserved'>if</strong> (<a href='../S/742.html#L130' title='Defined at 130 in ext/mbstring/php_unicode.h.'>php_unicode_is_title</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>))
+<a id='L231' name='L231'></a> 231                 <strong class='reserved'>return</strong> <a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>;
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233         <em class='comment'>/*</em>
+<a id='L234' name='L234'></a> 234 <em class='comment'>         * The offset will always be the same for converting to title case.</em>
+<a id='L235' name='L235'></a> 235 <em class='comment'>         */</em>
+<a id='L236' name='L236'></a> 236         <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a> = 2;
+<a id='L237' name='L237'></a> 237 
+<a id='L238' name='L238'></a> 238         <strong class='reserved'>if</strong> (<a href='../S/742.html#L128' title='Defined at 128 in ext/mbstring/php_unicode.h.'>php_unicode_is_upper</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>)) <em class='brace'>{</em>
+<a id='L239' name='L239'></a> 239                 <em class='comment'>/*</em>
+<a id='L240' name='L240'></a> 240 <em class='comment'>                 * The character is upper case.</em>
+<a id='L241' name='L241'></a> 241 <em class='comment'>                 */</em>
+<a id='L242' name='L242'></a> 242                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = 0;
+<a id='L243' name='L243'></a> 243                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0] - 3;
+<a id='L244' name='L244'></a> 244         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245                 <em class='comment'>/*</em>
+<a id='L246' name='L246'></a> 246 <em class='comment'>                 * The character is lower case.</em>
+<a id='L247' name='L247'></a> 247 <em class='comment'>                 */</em>
+<a id='L248' name='L248'></a> 248                 <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[0];
+<a id='L249' name='L249'></a> 249                 <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a> = (<a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> + <a href='../Y/8387.html' title='Multiple used in 9 places.'>_uccase_len</a>[1]) - 3;
+<a id='L250' name='L250'></a> 250         <em class='brace'>}</em>
+<a id='L251' name='L251'></a> 251         <strong class='reserved'>return</strong> <a href='../S/741.html#L122' title='Defined at 122 in ext/mbstring/php_unicode.c.'>case_lookup</a>(<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>, <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <a href='../Y/33919.html' title='Multiple used in 2231 places.'>r</a>, <a href='../Y/17783.html' title='Multiple used in 192 places.'>field</a>);
+<a id='L252' name='L252'></a> 252 
+<a id='L253' name='L253'></a> 253 <em class='brace'>}</em>
+<a id='L254' name='L254'></a> 254 
+<a id='L255' name='L255'></a> 255 
+<a id='L256' name='L256'></a> 256 <em class='sharp'>#define</em> <a href='../R/312.html' title='Multiple referred from 5 places.'>BE_ARY_TO_UINT32</a>(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>) (\
+<a id='L257' name='L257'></a> 257         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[0]&lt;&lt;24 |\
+<a id='L258' name='L258'></a> 258         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[1]&lt;&lt;16 |\
+<a id='L259' name='L259'></a> 259         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[2]&lt;&lt; 8 |\
+<a id='L260' name='L260'></a> 260         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[3] )
+<a id='L261' name='L261'></a> 261 
+<a id='L262' name='L262'></a> 262 <em class='sharp'>#define</em> <a href='../R/12360.html' title='Multiple referred from 4 places.'>UINT32_TO_BE_ARY</a>(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>,<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>) <em class='brace'>{</em> \
+<a id='L263' name='L263'></a> 263         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a> = <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>; \
+<a id='L264' name='L264'></a> 264         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[0] = (<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>&gt;&gt;24) &amp; 0xff,\
+<a id='L265' name='L265'></a> 265         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[1] = (<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>&gt;&gt;16) &amp; 0xff,\
+<a id='L266' name='L266'></a> 266         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[2] = (<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>&gt;&gt; 8) &amp; 0xff,\
+<a id='L267' name='L267'></a> 267         ((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>*)(<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>))[3] = (<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>    ) &amp; 0xff;\
+<a id='L268' name='L268'></a> 268 <em class='brace'>}</em>
+<a id='L269' name='L269'></a> 269 
+<a id='L270' name='L270'></a> 270 <a href='../D/5046.html' title='Multiple defined in 8 places.'>MBSTRING_API</a> <strong class='reserved'>char</strong> *<a href='../R/25040.html' title='Multiple referred from 6 places.'>php_unicode_convert_case</a>(<strong class='reserved'>int</strong> <a href='../Y/13339.html' title='Multiple used in 6 places.'>case_mode</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/37006.html' title='Multiple used in 3 places.'>srcstr</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37005.html' title='Multiple used in 16 places.'>srclen</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *<a href='../Y/34790.html' title='Multiple used in 32 places.'>ret_len</a>,
+<a id='L271' name='L271'></a> 271                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/36975.html' title='Multiple used in 6 places.'>src_encoding</a>)
+<a id='L272' name='L272'></a> 272 <em class='brace'>{</em>
+<a id='L273' name='L273'></a> 273         <strong class='reserved'>char</strong> *<a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a>, *<a href='../Y/28426.html' title='Multiple used in 65 places.'>newstr</a>;
+<a id='L274' name='L274'></a> 274         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>;
+<a id='L275' name='L275'></a> 275         <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>;
+<a id='L276' name='L276'></a> 276         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L277' name='L277'></a> 277         <strong class='reserved'>enum</strong> <a href='../S/638.html#L36' title='Defined at 36 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding</a> <a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a> = <a href='../S/637.html#L286' title='Defined at 286 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.c.'>mbfl_name2no_encoding</a>(<a href='../Y/36975.html' title='Multiple used in 6 places.'>src_encoding</a>);
+<a id='L278' name='L278'></a> 278 
+<a id='L279' name='L279'></a> 279         <strong class='reserved'>if</strong> (<a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a> == <a href='../S/638.html#L37' title='Defined at 37 in ext/mbstring/libmbfl/mbfl/mbfl_encoding.h.'>mbfl_no_encoding_invalid</a>) <em class='brace'>{</em>
+<a id='L280' name='L280'></a> 280                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Unknown encoding \"%s\"", <a href='../Y/36975.html' title='Multiple used in 6 places.'>src_encoding</a>);
+<a id='L281' name='L281'></a> 281                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L282' name='L282'></a> 282         <em class='brace'>}</em>
+<a id='L283' name='L283'></a> 283 
+<a id='L284' name='L284'></a> 284         <a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a> = <a href='../S/680.html#L3111' title='Defined at 3111 in ext/mbstring/mbstring.c.'>php_mb_convert_encoding</a>(<a href='../Y/37006.html' title='Multiple used in 3 places.'>srcstr</a>, <a href='../Y/37005.html' title='Multiple used in 16 places.'>srclen</a>, "UCS-4BE", <a href='../Y/36975.html' title='Multiple used in 6 places.'>src_encoding</a>, &amp;<a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>);
+<a id='L285' name='L285'></a> 285         <strong class='reserved'>if</strong> (<a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L286' name='L286'></a> 286                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L287' name='L287'></a> 287 
+<a id='L288' name='L288'></a> 288         <a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a> = (<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *)<a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a>;
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290         <strong class='reserved'>switch</strong>(<a href='../Y/13339.html' title='Multiple used in 6 places.'>case_mode</a>) <em class='brace'>{</em>
+<a id='L291' name='L291'></a> 291                 <strong class='reserved'>case</strong> <a href='../S/742.html#L109' title='Defined at 109 in ext/mbstring/php_unicode.h.'>PHP_UNICODE_CASE_UPPER</a>:
+<a id='L292' name='L292'></a> 292                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>+=4) <em class='brace'>{</em>
+<a id='L293' name='L293'></a> 293                                 <a href='../S/741.html#L262' title='Defined at 262 in ext/mbstring/php_unicode.c.'>UINT32_TO_BE_ARY</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>],
+<a id='L294' name='L294'></a> 294                                         <a href='../S/741.html#L163' title='Defined at 163 in ext/mbstring/php_unicode.c.'>php_unicode_toupper</a>(<a href='../S/741.html#L256' title='Defined at 256 in ext/mbstring/php_unicode.c.'>BE_ARY_TO_UINT32</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]), <a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a>));
+<a id='L295' name='L295'></a> 295                         <em class='brace'>}</em>
+<a id='L296' name='L296'></a> 296                         <strong class='reserved'>break</strong>;
+<a id='L297' name='L297'></a> 297 
+<a id='L298' name='L298'></a> 298                 <strong class='reserved'>case</strong> <a href='../S/742.html#L110' title='Defined at 110 in ext/mbstring/php_unicode.h.'>PHP_UNICODE_CASE_LOWER</a>:
+<a id='L299' name='L299'></a> 299                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>+=4) <em class='brace'>{</em>
+<a id='L300' name='L300'></a> 300                                 <a href='../S/741.html#L262' title='Defined at 262 in ext/mbstring/php_unicode.c.'>UINT32_TO_BE_ARY</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>],
+<a id='L301' name='L301'></a> 301                                         <a href='../S/741.html#L194' title='Defined at 194 in ext/mbstring/php_unicode.c.'>php_unicode_tolower</a>(<a href='../S/741.html#L256' title='Defined at 256 in ext/mbstring/php_unicode.c.'>BE_ARY_TO_UINT32</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]), <a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a>));
+<a id='L302' name='L302'></a> 302                         <em class='brace'>}</em>
+<a id='L303' name='L303'></a> 303                         <strong class='reserved'>break</strong>;
+<a id='L304' name='L304'></a> 304 
+<a id='L305' name='L305'></a> 305                 <strong class='reserved'>case</strong> <a href='../S/742.html#L111' title='Defined at 111 in ext/mbstring/php_unicode.h.'>PHP_UNICODE_CASE_TITLE</a>: <em class='brace'>{</em>
+<a id='L306' name='L306'></a> 306                         <strong class='reserved'>int</strong> <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a> = 0;
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>+=4) <em class='brace'>{</em>
+<a id='L309' name='L309'></a> 309                                 <strong class='reserved'>int</strong> <a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a> = <a href='../S/741.html#L101' title='Defined at 101 in ext/mbstring/php_unicode.c.'>php_unicode_is_prop</a>(
+<a id='L310' name='L310'></a> 310                                         <a href='../S/741.html#L256' title='Defined at 256 in ext/mbstring/php_unicode.c.'>BE_ARY_TO_UINT32</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]),
+<a id='L311' name='L311'></a> 311                                         <a href='../S/742.html#L41' title='Defined at 41 in ext/mbstring/php_unicode.h.'>UC_MN</a>|<a href='../S/742.html#L43' title='Defined at 43 in ext/mbstring/php_unicode.h.'>UC_ME</a>|<a href='../S/742.html#L51' title='Defined at 51 in ext/mbstring/php_unicode.h.'>UC_CF</a>|<a href='../S/742.html#L58' title='Defined at 58 in ext/mbstring/php_unicode.h.'>UC_LM</a>|<a href='../S/742.html#L67' title='Defined at 67 in ext/mbstring/php_unicode.h.'>UC_SK</a>|<a href='../S/742.html#L55' title='Defined at 55 in ext/mbstring/php_unicode.h.'>UC_LU</a>|<a href='../S/742.html#L56' title='Defined at 56 in ext/mbstring/php_unicode.h.'>UC_LL</a>|<a href='../S/742.html#L57' title='Defined at 57 in ext/mbstring/php_unicode.h.'>UC_LT</a>|<a href='../S/742.html#L64' title='Defined at 64 in ext/mbstring/php_unicode.h.'>UC_PO</a>|<a href='../S/742.html#L52' title='Defined at 52 in ext/mbstring/php_unicode.h.'>UC_OS</a>, 0);
+<a id='L312' name='L312'></a> 312                                 <strong class='reserved'>if</strong> (<a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a>) <em class='brace'>{</em>
+<a id='L313' name='L313'></a> 313                                         <strong class='reserved'>if</strong> (<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>) <em class='brace'>{</em>
+<a id='L314' name='L314'></a> 314                                                 <a href='../S/741.html#L262' title='Defined at 262 in ext/mbstring/php_unicode.c.'>UINT32_TO_BE_ARY</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>],
+<a id='L315' name='L315'></a> 315                                                         <a href='../S/741.html#L194' title='Defined at 194 in ext/mbstring/php_unicode.c.'>php_unicode_tolower</a>(<a href='../S/741.html#L256' title='Defined at 256 in ext/mbstring/php_unicode.c.'>BE_ARY_TO_UINT32</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]), <a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a>));
+<a id='L316' name='L316'></a> 316                                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L317' name='L317'></a> 317                                                 <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a> = 0;
+<a id='L318' name='L318'></a> 318                                         <em class='brace'>}</em>
+<a id='L319' name='L319'></a> 319                                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L320' name='L320'></a> 320                                         <strong class='reserved'>if</strong> (<a href='../Y/34609.html' title='Multiple used in 1498 places.'>res</a>) <em class='brace'>{</em>
+<a id='L321' name='L321'></a> 321                                                 <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a> = 1;
+<a id='L322' name='L322'></a> 322                                                 <a href='../S/741.html#L262' title='Defined at 262 in ext/mbstring/php_unicode.c.'>UINT32_TO_BE_ARY</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>],
+<a id='L323' name='L323'></a> 323                                                         <a href='../S/741.html#L225' title='Defined at 225 in ext/mbstring/php_unicode.c.'>php_unicode_totitle</a>(<a href='../S/741.html#L256' title='Defined at 256 in ext/mbstring/php_unicode.c.'>BE_ARY_TO_UINT32</a>(&amp;<a href='../Y/39551.html' title='Multiple used in 11 places.'>unicode_ptr</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>]), <a href='../Y/8359.html' title='Multiple used in 6 places.'>_src_encoding</a>));
+<a id='L324' name='L324'></a> 324                                         <em class='brace'>}</em>
+<a id='L325' name='L325'></a> 325                                 <em class='brace'>}</em>
+<a id='L326' name='L326'></a> 326                         <em class='brace'>}</em>
+<a id='L327' name='L327'></a> 327                 <em class='brace'>}</em> <strong class='reserved'>break</strong>;
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329         <em class='brace'>}</em>
+<a id='L330' name='L330'></a> 330 
+<a id='L331' name='L331'></a> 331         <a href='../Y/28426.html' title='Multiple used in 65 places.'>newstr</a> = <a href='../S/680.html#L3111' title='Defined at 3111 in ext/mbstring/mbstring.c.'>php_mb_convert_encoding</a>(<a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a>, <a href='../Y/39550.html' title='Multiple used in 6 places.'>unicode_len</a>, <a href='../Y/36975.html' title='Multiple used in 6 places.'>src_encoding</a>, "UCS-4BE", <a href='../Y/34790.html' title='Multiple used in 32 places.'>ret_len</a>);
+<a id='L332' name='L332'></a> 332         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/39548.html' title='Multiple used in 8 places.'>unicode</a>);
+<a id='L333' name='L333'></a> 333 
+<a id='L334' name='L334'></a> 334         <strong class='reserved'>return</strong> <a href='../Y/28426.html' title='Multiple used in 65 places.'>newstr</a>;
+<a id='L335' name='L335'></a> 335 <em class='brace'>}</em>
+<a id='L336' name='L336'></a> 336 
+<a id='L337' name='L337'></a> 337 
+<a id='L338' name='L338'></a> 338 <em class='sharp'>#endif</em> <em class='comment'>/* HAVE_MBSTRING */</em>
+<a id='L339' name='L339'></a> 339 
+<a id='L340' name='L340'></a> 340 <em class='comment'>/*</em>
+<a id='L341' name='L341'></a> 341 <em class='comment'> * Local variables:</em>
+<a id='L342' name='L342'></a> 342 <em class='comment'> * tab-width: 4</em>
+<a id='L343' name='L343'></a> 343 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L344' name='L344'></a> 344 <em class='comment'> * End:</em>
+<a id='L345' name='L345'></a> 345 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L346' name='L346'></a> 346 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L347' name='L347'></a> 347 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L62'>[^]</a><a href='#L270'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>main/snprintf.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1858.html'>main</a>/snprintf.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1536.html' title='Multiple included from 6 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Stig Sæther Bakken &lt;ssb@php.net&gt;                             |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |         Marcus Boerger &lt;helly@php.net&gt;                               |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>*/</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='comment'>/* $Id$ */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='comment'>/*</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'></em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>Comparing: sprintf, snprintf, slprintf, spprintf</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'></em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>sprintf  offers the ability to make a lot of failures since it does not know</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>         the size of the buffer it uses. Therefore usage of sprintf often</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>         results in possible entries for buffer overrun attacks. So please</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>         use this version only if you are sure the call is safe. sprintf</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>         always terminstes the buffer it writes to.</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'></em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>snprintf knows the buffers size and will not write behind it. But you will</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'>         have to use either a static buffer or allocate a dynamic buffer</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>         before being able to call the function. In other words you must</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'>         be sure that you really know the maximum size of the buffer required.</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'>         A bad thing is having a big maximum while in most cases you would</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>         only need a small buffer. If the size of the resulting string is</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>         longer or equal to the buffer size than the buffer is not terminated.</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'>         The function also returns the number of chars not including the</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'>         terminating \0 that were needed to fully comply to the print request.</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'></em>
+<a id='L42' name='L42'></a>  42 <em class='comment'>slprintf same as snprintf with the difference that it actually returns the</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'>         length printed not including the terminating \0.</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'></em>
+<a id='L45' name='L45'></a>  45 <em class='comment'>spprintf is the dynamical version of snprintf. It allocates the buffer in size</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'>         as needed and allows a maximum setting as snprintf (turn this feature</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'>         off by setting max_len to 0). spprintf is a little bit slower than</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'>         snprintf and offers possible memory leakes if you miss freeing the</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>         buffer allocated by the function. Therfore this function should be</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'>         used where either no maximum is known or the maximum is much bigger</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>         than normal size required. spprintf always terminates the buffer.</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'></em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>Example:</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'></em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> #define MAX 1024              | #define MAX 1024               | #define MAX 1024</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> char buffer[MAX]              | char buffer[MAX]               | char *buffer;</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>                               |                                |</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>                               |                                | // No need to initialize buffer:</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>                               |                                | // spprintf ignores value of buffer</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> sprintf(buffer, "test");      | snprintf(buffer, MAX, "test"); | spprintf(&amp;buffer, MAX, "text");</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>                               |                                | if (!buffer)</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'>                               |                                |   return OUT_OF_MEMORY</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> // sprintf always terminates | // manual termination of       | // spprintf allays terminates buffer</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> // buffer                     | // buffer *IS* required        |</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>                               | buffer[MAX-1] = 0;             |</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> action_with_buffer(buffer);   | action_with_buffer(buffer);    | action_with_buffer(buffer);</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>                               |                                | efree(buffer);</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>*/</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <em class='sharp'>#ifndef</em> <a href='../S/1410.html#L71' title='Defined at 71 in main/snprintf.h.'>SNPRINTF_H</a>
+<a id='L71' name='L71'></a>  71 <em class='sharp'>#define</em> <a href='../S/1410.html#L70' title='Referred from 70 in main/snprintf.h.'>SNPRINTF_H</a>
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 <strong class='reserved'>typedef</strong> <strong class='reserved'>int</strong> <a href='../R/17167.html' title='Multiple referred from 10 places.'>bool_int</a>;
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76         <a href='../R/5055.html' title='Multiple referred from 18 places.'>NO</a> = 0, <a href='../R/13227.html' title='Multiple referred from 20 places.'>YES</a> = 1
+<a id='L77' name='L77'></a>  77 <em class='brace'>}</em> <a href='../R/17169.html' title='Multiple referred from 17 places.'>boolean_e</a>;
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80 <a href='../D/355.html' title='Multiple defined in 15 places.'>BEGIN_EXTERN_C</a>()
+<a id='L81' name='L81'></a>  81 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1258' title='Defined at 1258 in main/snprintf.c.'>ap_php_slprintf</a>(<strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>,...);
+<a id='L82' name='L82'></a>  82 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1274' title='Defined at 1274 in main/snprintf.c.'>ap_php_vslprintf</a>(<strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <a href='../Y/40035.html' title='Multiple used in 223 places.'>va_list</a> <a href='../Y/9247.html' title='Multiple used in 451 places.'>ap</a>);
+<a id='L83' name='L83'></a>  83 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1287' title='Defined at 1287 in main/snprintf.c.'>ap_php_snprintf</a>(<strong class='reserved'>char</strong> *, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, ...);
+<a id='L84' name='L84'></a>  84 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1299' title='Defined at 1299 in main/snprintf.c.'>ap_php_vsnprintf</a>(<strong class='reserved'>char</strong> *, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <a href='../Y/40035.html' title='Multiple used in 223 places.'>va_list</a> <a href='../Y/9247.html' title='Multiple used in 451 places.'>ap</a>);
+<a id='L85' name='L85'></a>  85 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1308' title='Defined at 1308 in main/snprintf.c.'>ap_php_vasprintf</a>(<strong class='reserved'>char</strong> **<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <a href='../Y/40035.html' title='Multiple used in 223 places.'>va_list</a> <a href='../Y/9247.html' title='Multiple used in 451 places.'>ap</a>);
+<a id='L86' name='L86'></a>  86 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1409.html#L1332' title='Defined at 1332 in main/snprintf.c.'>ap_php_asprintf</a>(<strong class='reserved'>char</strong> **<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, ...);
+<a id='L87' name='L87'></a>  87 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1395.html#L31' title='Defined at 31 in main/php_sprintf.c.'>php_sprintf</a> (<strong class='reserved'>char</strong>* <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, ...) <a href='../S/1378.html#L236' title='Defined at 236 in main/php.h.'>PHP_ATTRIBUTE_FORMAT</a>(<a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>, 2, 3);
+<a id='L88' name='L88'></a>  88 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>char</strong> * <a href='../S/1409.html#L142' title='Defined at 142 in main/snprintf.c.'>php_gcvt</a>(<strong class='reserved'>double</strong> <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, <strong class='reserved'>int</strong> <a href='../Y/28045.html' title='Multiple used in 16 places.'>ndigit</a>, <strong class='reserved'>char</strong> <a href='../Y/15335.html' title='Multiple used in 22 places.'>dec_point</a>, <strong class='reserved'>char</strong> <a href='../Y/17335.html' title='Multiple used in 24 places.'>exponent</a>, <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>);
+<a id='L89' name='L89'></a>  89 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>char</strong> * <a href='../S/1409.html#L377' title='Defined at 377 in main/snprintf.c.'>php_conv_fp</a>(<strong class='reserved'>register</strong> <strong class='reserved'>char</strong> <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <strong class='reserved'>register</strong> <strong class='reserved'>double</strong> <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>,
+<a id='L90' name='L90'></a>  90                  <a href='../S/1410.html#L77' title='Defined at 77 in main/snprintf.h.'>boolean_e</a> <a href='../Y/8828.html' title='Multiple used in 5 places.'>add_dp</a>, <strong class='reserved'>int</strong> <a href='../Y/33240.html' title='Multiple used in 175 places.'>precision</a>, <strong class='reserved'>char</strong> <a href='../Y/15335.html' title='Multiple used in 22 places.'>dec_point</a>, <a href='../S/1410.html#L73' title='Defined at 73 in main/snprintf.h.'>bool_int</a> * <a href='../Y/23867.html' title='Multiple used in 39 places.'>is_negative</a>, <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <a href='../D/1951.html' title='Multiple defined in 10 places.'>END_EXTERN_C</a>()
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94 <em class='sharp'>#ifdef</em> <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#undef</em> <a href='../S/1410.html#L97' title='Defined at 97 in main/snprintf.h.'>slprintf</a>
+<a id='L96' name='L96'></a>  96 <em class='sharp'>#endif</em>
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#define</em> <a href='../R/26624.html' title='Multiple referred from 127 places.'>slprintf</a> <a href='../S/1409.html#L1258' title='Defined at 1258 in main/snprintf.c.'>ap_php_slprintf</a>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <em class='sharp'>#ifdef</em> <a href='../D/32761.html' title='Multiple defined in 2 places.'>vslprintf</a>
+<a id='L100' name='L100'></a> 100 <em class='sharp'>#undef</em> <a href='../R/29405.html' title='Multiple referred from 5 places.'>vslprintf</a>
+<a id='L101' name='L101'></a> 101 <em class='sharp'>#endif</em>
+<a id='L102' name='L102'></a> 102 <em class='sharp'>#define</em> <a href='../R/29405.html' title='Multiple referred from 5 places.'>vslprintf</a> <a href='../S/1409.html#L1274' title='Defined at 1274 in main/snprintf.c.'>ap_php_vslprintf</a>
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104 <em class='sharp'>#ifdef</em> <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>
+<a id='L105' name='L105'></a> 105 <em class='sharp'>#undef</em> <a href='../R/26664.html' title='Multiple referred from 373 places.'>snprintf</a>
+<a id='L106' name='L106'></a> 106 <em class='sharp'>#endif</em>
+<a id='L107' name='L107'></a> 107 <em class='sharp'>#define</em> <a href='../R/26664.html' title='Multiple referred from 373 places.'>snprintf</a> <a href='../S/1409.html#L1287' title='Defined at 1287 in main/snprintf.c.'>ap_php_snprintf</a>
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109 <em class='sharp'>#ifdef</em> <a href='../D/32762.html' title='Multiple defined in 2 places.'>vsnprintf</a>
+<a id='L110' name='L110'></a> 110 <em class='sharp'>#undef</em> <a href='../R/29406.html' title='Multiple referred from 15 places.'>vsnprintf</a>
+<a id='L111' name='L111'></a> 111 <em class='sharp'>#endif</em>
+<a id='L112' name='L112'></a> 112 <em class='sharp'>#define</em> <a href='../R/29406.html' title='Multiple referred from 15 places.'>vsnprintf</a> <a href='../S/1409.html#L1299' title='Defined at 1299 in main/snprintf.c.'>ap_php_vsnprintf</a>
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114 <em class='sharp'>#ifndef</em> HAVE_VASPRINTF
+<a id='L115' name='L115'></a> 115 <em class='sharp'>#define</em> <a href='../R/29295.html' title='Multiple referred from 2 places.'>vasprintf</a> <a href='../S/1409.html#L1308' title='Defined at 1308 in main/snprintf.c.'>ap_php_vasprintf</a>
+<a id='L116' name='L116'></a> 116 <em class='sharp'>#endif</em>
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118 <em class='sharp'>#ifndef</em> HAVE_ASPRINTF
+<a id='L119' name='L119'></a> 119 <em class='sharp'>#define</em> <a href='../R/17014.html' title='Multiple referred from 23 places.'>asprintf</a> <a href='../S/1409.html#L1332' title='Defined at 1332 in main/snprintf.c.'>ap_php_asprintf</a>
+<a id='L120' name='L120'></a> 120 <em class='sharp'>#endif</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122 <em class='sharp'>#ifdef</em> <a href='../D/30283.html' title='Multiple defined in 5 places.'>sprintf</a>
+<a id='L123' name='L123'></a> 123 <em class='sharp'>#undef</em> <a href='../R/27004.html' title='Multiple referred from 69 places.'>sprintf</a>
+<a id='L124' name='L124'></a> 124 <em class='sharp'>#endif</em>
+<a id='L125' name='L125'></a> 125 <em class='sharp'>#define</em> <a href='../R/27004.html' title='Multiple referred from 69 places.'>sprintf</a> <a href='../S/1395.html#L31' title='Defined at 31 in main/php_sprintf.c.'>php_sprintf</a>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128         <a href='../R/3839.html' title='Multiple referred from 10 places.'>LM_STD</a> = 0,
+<a id='L129' name='L129'></a> 129 <em class='sharp'>#if</em> <a href='../Y/5652.html' title='Multiple used in 16 places.'>SIZEOF_INTMAX_T</a>
+<a id='L130' name='L130'></a> 130         <a href='../R/3832.html' title='Multiple referred from 15 places.'>LM_INTMAX_T</a>,
+<a id='L131' name='L131'></a> 131 <em class='sharp'>#endif</em>
+<a id='L132' name='L132'></a> 132 <em class='sharp'>#if</em> <a href='../Y/5654.html' title='Multiple used in 16 places.'>SIZEOF_PTRDIFF_T</a>
+<a id='L133' name='L133'></a> 133         <a href='../R/3837.html' title='Multiple referred from 15 places.'>LM_PTRDIFF_T</a>,
+<a id='L134' name='L134'></a> 134 <em class='sharp'>#endif</em>
+<a id='L135' name='L135'></a> 135 <em class='sharp'>#if</em> <a href='../D/10656.html' title='Multiple defined in 2 places.'>SIZEOF_LONG_LONG</a>
+<a id='L136' name='L136'></a> 136         <a href='../R/3835.html' title='Multiple referred from 21 places.'>LM_LONG_LONG</a>,
+<a id='L137' name='L137'></a> 137 <em class='sharp'>#endif</em>
+<a id='L138' name='L138'></a> 138         <a href='../R/3838.html' title='Multiple referred from 21 places.'>LM_SIZE_T</a>,
+<a id='L139' name='L139'></a> 139         <a href='../R/3833.html' title='Multiple referred from 21 places.'>LM_LONG</a>,
+<a id='L140' name='L140'></a> 140         <a href='../R/3834.html' title='Multiple referred from 21 places.'>LM_LONG_DOUBLE</a>,
+<a id='L141' name='L141'></a> 141         <a href='../R/3836.html' title='Multiple referred from 10 places.'>LM_PHP_INT_T</a>
+<a id='L142' name='L142'></a> 142 <em class='brace'>}</em> <a href='../R/20867.html' title='Multiple referred from 3 places.'>length_modifier_e</a>;
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <em class='sharp'>#ifdef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L145' name='L145'></a> 145 <em class='sharp'># define</em> <a href='../R/12780.html' title='Multiple referred from 2 places.'>WIDE_INT</a>               <a href='../Y/7999.html' title='Multiple used in 34 places.'>__int64</a>
+<a id='L146' name='L146'></a> 146 <em class='sharp'>#elif</em> SIZEOF_LONG_LONG_INT
+<a id='L147' name='L147'></a> 147 <em class='sharp'># define</em> <a href='../R/12780.html' title='Multiple referred from 2 places.'>WIDE_INT</a>               <strong class='reserved'>long</strong> <strong class='reserved'>long</strong> <strong class='reserved'>int</strong>
+<a id='L148' name='L148'></a> 148 <em class='sharp'>#elif</em> <a href='../D/10656.html' title='Multiple defined in 2 places.'>SIZEOF_LONG_LONG</a>
+<a id='L149' name='L149'></a> 149 <em class='sharp'># define</em> <a href='../R/12780.html' title='Multiple referred from 2 places.'>WIDE_INT</a>               <strong class='reserved'>long</strong> <strong class='reserved'>long</strong>
+<a id='L150' name='L150'></a> 150 <em class='sharp'>#else</em>
+<a id='L151' name='L151'></a> 151 <em class='sharp'># define</em> <a href='../R/12780.html' title='Multiple referred from 2 places.'>WIDE_INT</a>               <strong class='reserved'>long</strong>
+<a id='L152' name='L152'></a> 152 <em class='sharp'>#endif</em>
+<a id='L153' name='L153'></a> 153 <strong class='reserved'>typedef</strong> <a href='../D/14939.html' title='Multiple defined in 4 places.'>WIDE_INT</a> <a href='../R/29516.html' title='Multiple referred from 50 places.'>wide_int</a>;
+<a id='L154' name='L154'></a> 154 <strong class='reserved'>typedef</strong> <strong class='reserved'>unsigned</strong> <a href='../D/14939.html' title='Multiple defined in 4 places.'>WIDE_INT</a> <a href='../R/28861.html' title='Multiple referred from 59 places.'>u_wide_int</a>;
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>char</strong> * <a href='../S/1409.html#L319' title='Defined at 319 in main/snprintf.c.'>ap_php_conv_10</a>(<strong class='reserved'>register</strong> <a href='../S/1410.html#L153' title='Defined at 153 in main/snprintf.h.'>wide_int</a> <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>, <strong class='reserved'>register</strong> <a href='../S/1410.html#L73' title='Defined at 73 in main/snprintf.h.'>bool_int</a> <a href='../Y/23932.html' title='Multiple used in 5 places.'>is_unsigned</a>,
+<a id='L157' name='L157'></a> 157            <strong class='reserved'>register</strong> <a href='../S/1410.html#L73' title='Defined at 73 in main/snprintf.h.'>bool_int</a> * <a href='../Y/23867.html' title='Multiple used in 39 places.'>is_negative</a>, <strong class='reserved'>char</strong> *<a href='../Y/12984.html' title='Multiple used in 45 places.'>buf_end</a>, <strong class='reserved'>register</strong> <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L158' name='L158'></a> 158 
+<a id='L159' name='L159'></a> 159 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>char</strong> * <a href='../S/1409.html#L482' title='Defined at 482 in main/snprintf.c.'>ap_php_conv_p2</a>(<strong class='reserved'>register</strong> <a href='../S/1410.html#L154' title='Defined at 154 in main/snprintf.h.'>u_wide_int</a> <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>, <strong class='reserved'>register</strong> <strong class='reserved'>int</strong> <a href='../Y/28005.html' title='Multiple used in 22 places.'>nbits</a>,
+<a id='L160' name='L160'></a> 160                  <strong class='reserved'>char</strong> <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <strong class='reserved'>char</strong> *<a href='../Y/12984.html' title='Multiple used in 45 places.'>buf_end</a>, <strong class='reserved'>register</strong> <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *<a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>);
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162 <em class='comment'>/* The maximum precision that's allowed for float conversion. Does not include</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'> * decimal separator, exponent, sign, terminator. Currently does not affect</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'> * the modes e/f, only g/k/H, as those have a different limit enforced at</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'> * another level (see NDIG in php_conv_fp()).</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'> * Applies to the formatting functions of both spprintf.c and snprintf.c, which</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'> * use equally sized buffers of MAX_BUF_SIZE = 512 to hold the result of the</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'> * call to php_gcvt().</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'> * This should be reasonably smaller than MAX_BUF_SIZE (I think MAX_BUF_SIZE - 9</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'> * should be enough, but let's give some more space) */</em>
+<a id='L171' name='L171'></a> 171 <em class='sharp'>#define</em> <a href='../R/2392.html' title='Multiple referred from 6 places.'>FORMAT_CONV_MAX_PRECISION</a> 500
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173 <em class='sharp'>#endif</em> <em class='comment'>/* SNPRINTF_H */</em>
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175 <em class='comment'>/*</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'> * Local variables:</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'> * tab-width: 4</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * End:</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

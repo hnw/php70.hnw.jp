@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>tz</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/71.html#L58'>tz</a>                 58 ext/date/lib/parse_tz.c static int read_preamble(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L67'>tz</a>                 67 ext/date/lib/parse_tz.c 	tz-&gt;bc = (**tzf == '\1');</span>
+<span class='curline'><a href='../S/71.html#L71'>tz</a>                 71 ext/date/lib/parse_tz.c 	memcpy(tz-&gt;location.country_code, *tzf, 2);</span>
+<span class='curline'><a href='../S/71.html#L72'>tz</a>                 72 ext/date/lib/parse_tz.c 	tz-&gt;location.country_code[2] = '\0';</span>
+<span class='curline'><a href='../S/71.html#L81'>tz</a>                 81 ext/date/lib/parse_tz.c static void read_header(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L86'>tz</a>                 86 ext/date/lib/parse_tz.c 	tz-&gt;bit32.ttisgmtcnt = timelib_conv_int(buffer[0]);</span>
+<span class='curline'><a href='../S/71.html#L87'>tz</a>                 87 ext/date/lib/parse_tz.c 	tz-&gt;bit32.ttisstdcnt = timelib_conv_int(buffer[1]);</span>
+<span class='curline'><a href='../S/71.html#L88'>tz</a>                 88 ext/date/lib/parse_tz.c 	tz-&gt;bit32.leapcnt    = timelib_conv_int(buffer[2]);</span>
+<span class='curline'><a href='../S/71.html#L89'>tz</a>                 89 ext/date/lib/parse_tz.c 	tz-&gt;bit32.timecnt    = timelib_conv_int(buffer[3]);</span>
+<span class='curline'><a href='../S/71.html#L90'>tz</a>                 90 ext/date/lib/parse_tz.c 	tz-&gt;bit32.typecnt    = timelib_conv_int(buffer[4]);</span>
+<span class='curline'><a href='../S/71.html#L91'>tz</a>                 91 ext/date/lib/parse_tz.c 	tz-&gt;bit32.charcnt    = timelib_conv_int(buffer[5]);</span>
+<span class='curline'><a href='../S/71.html#L95'>tz</a>                 95 ext/date/lib/parse_tz.c static void skip_64bit_transistions(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L97'>tz</a>                 97 ext/date/lib/parse_tz.c 	if (tz-&gt;bit64.timecnt) {</span>
+<span class='curline'><a href='../S/71.html#L98'>tz</a>                 98 ext/date/lib/parse_tz.c 		*tzf += (sizeof(int64_t) * tz-&gt;bit64.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L99'>tz</a>                 99 ext/date/lib/parse_tz.c 		*tzf += (sizeof(unsigned char) * tz-&gt;bit64.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L103'>tz</a>                103 ext/date/lib/parse_tz.c static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L109'>tz</a>                109 ext/date/lib/parse_tz.c 	if (tz-&gt;bit32.timecnt) {</span>
+<span class='curline'><a href='../S/71.html#L110'>tz</a>                110 ext/date/lib/parse_tz.c 		buffer = (int32_t*) timelib_malloc(tz-&gt;bit32.timecnt * sizeof(int32_t));</span>
+<span class='curline'><a href='../S/71.html#L114'>tz</a>                114 ext/date/lib/parse_tz.c 		memcpy(buffer, *tzf, sizeof(int32_t) * tz-&gt;bit32.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L115'>tz</a>                115 ext/date/lib/parse_tz.c 		*tzf += (sizeof(int32_t) * tz-&gt;bit32.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L116'>tz</a>                116 ext/date/lib/parse_tz.c 		for (i = 0; i &lt; tz-&gt;bit32.timecnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L120'>tz</a>                120 ext/date/lib/parse_tz.c 		cbuffer = (unsigned char*) timelib_malloc(tz-&gt;bit32.timecnt * sizeof(unsigned char));</span>
+<span class='curline'><a href='../S/71.html#L125'>tz</a>                125 ext/date/lib/parse_tz.c 		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz-&gt;bit32.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L126'>tz</a>                126 ext/date/lib/parse_tz.c 		*tzf += sizeof(unsigned char) * tz-&gt;bit32.timecnt;</span>
+<span class='curline'><a href='../S/71.html#L129'>tz</a>                129 ext/date/lib/parse_tz.c 	tz-&gt;trans = buffer;</span>
+<span class='curline'><a href='../S/71.html#L130'>tz</a>                130 ext/date/lib/parse_tz.c 	tz-&gt;trans_idx = cbuffer;</span>
+<span class='curline'><a href='../S/71.html#L133'>tz</a>                133 ext/date/lib/parse_tz.c static void skip_64bit_types(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L135'>tz</a>                135 ext/date/lib/parse_tz.c 	*tzf += sizeof(unsigned char) * 6 * tz-&gt;bit64.typecnt;</span>
+<span class='curline'><a href='../S/71.html#L136'>tz</a>                136 ext/date/lib/parse_tz.c 	*tzf += sizeof(char) * tz-&gt;bit64.charcnt;</span>
+<span class='curline'><a href='../S/71.html#L137'>tz</a>                137 ext/date/lib/parse_tz.c 	if (tz-&gt;bit64.leapcnt) {</span>
+<span class='curline'><a href='../S/71.html#L138'>tz</a>                138 ext/date/lib/parse_tz.c 		*tzf += sizeof(int64_t) * tz-&gt;bit64.leapcnt * 2;</span>
+<span class='curline'><a href='../S/71.html#L140'>tz</a>                140 ext/date/lib/parse_tz.c 	if (tz-&gt;bit64.ttisstdcnt) {</span>
+<span class='curline'><a href='../S/71.html#L141'>tz</a>                141 ext/date/lib/parse_tz.c 		*tzf += sizeof(unsigned char) * tz-&gt;bit64.ttisstdcnt;</span>
+<span class='curline'><a href='../S/71.html#L143'>tz</a>                143 ext/date/lib/parse_tz.c 	if (tz-&gt;bit64.ttisgmtcnt) {</span>
+<span class='curline'><a href='../S/71.html#L144'>tz</a>                144 ext/date/lib/parse_tz.c 		*tzf += sizeof(unsigned char) * tz-&gt;bit64.ttisgmtcnt;</span>
+<span class='curline'><a href='../S/71.html#L148'>tz</a>                148 ext/date/lib/parse_tz.c static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L154'>tz</a>                154 ext/date/lib/parse_tz.c 	buffer = (unsigned char*) timelib_malloc(tz-&gt;bit32.typecnt * sizeof(unsigned char) * 6);</span>
+<span class='curline'><a href='../S/71.html#L158'>tz</a>                158 ext/date/lib/parse_tz.c 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz-&gt;bit32.typecnt);</span>
+<span class='curline'><a href='../S/71.html#L159'>tz</a>                159 ext/date/lib/parse_tz.c 	*tzf += sizeof(unsigned char) * 6 * tz-&gt;bit32.typecnt;</span>
+<span class='curline'><a href='../S/71.html#L161'>tz</a>                161 ext/date/lib/parse_tz.c 	tz-&gt;type = (ttinfo*) timelib_malloc(tz-&gt;bit32.typecnt * sizeof(struct ttinfo));</span>
+<span class='curline'><a href='../S/71.html#L162'>tz</a>                162 ext/date/lib/parse_tz.c 	if (!tz-&gt;type) {</span>
+<span class='curline'><a href='../S/71.html#L167'>tz</a>                167 ext/date/lib/parse_tz.c 	for (i = 0; i &lt; tz-&gt;bit32.typecnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L169'>tz</a>                169 ext/date/lib/parse_tz.c 		tz-&gt;type[i].offset = (buffer[j] * 16777216) + (buffer[j + 1] * 65536) + (buffer[j + 2] * 256) + buffer[j + 3];</span>
+<span class='curline'><a href='../S/71.html#L170'>tz</a>                170 ext/date/lib/parse_tz.c 		tz-&gt;type[i].isdst = buffer[j + 4];</span>
+<span class='curline'><a href='../S/71.html#L171'>tz</a>                171 ext/date/lib/parse_tz.c 		tz-&gt;type[i].abbr_idx = buffer[j + 5];</span>
+<span class='curline'><a href='../S/71.html#L175'>tz</a>                175 ext/date/lib/parse_tz.c 	tz-&gt;timezone_abbr = (char*) timelib_malloc(tz-&gt;bit32.charcnt);</span>
+<span class='curline'><a href='../S/71.html#L176'>tz</a>                176 ext/date/lib/parse_tz.c 	if (!tz-&gt;timezone_abbr) {</span>
+<span class='curline'><a href='../S/71.html#L179'>tz</a>                179 ext/date/lib/parse_tz.c 	memcpy(tz-&gt;timezone_abbr, *tzf, sizeof(char) * tz-&gt;bit32.charcnt);</span>
+<span class='curline'><a href='../S/71.html#L180'>tz</a>                180 ext/date/lib/parse_tz.c 	*tzf += sizeof(char) * tz-&gt;bit32.charcnt;</span>
+<span class='curline'><a href='../S/71.html#L182'>tz</a>                182 ext/date/lib/parse_tz.c 	if (tz-&gt;bit32.leapcnt) {</span>
+<span class='curline'><a href='../S/71.html#L183'>tz</a>                183 ext/date/lib/parse_tz.c 		leap_buffer = (int32_t *) timelib_malloc(tz-&gt;bit32.leapcnt * 2 * sizeof(int32_t));</span>
+<span class='curline'><a href='../S/71.html#L187'>tz</a>                187 ext/date/lib/parse_tz.c 		memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz-&gt;bit32.leapcnt * 2);</span>
+<span class='curline'><a href='../S/71.html#L188'>tz</a>                188 ext/date/lib/parse_tz.c 		*tzf += sizeof(int32_t) * tz-&gt;bit32.leapcnt * 2;</span>
+<span class='curline'><a href='../S/71.html#L190'>tz</a>                190 ext/date/lib/parse_tz.c 		tz-&gt;leap_times = (tlinfo*) timelib_malloc(tz-&gt;bit32.leapcnt * sizeof(tlinfo));</span>
+<span class='curline'><a href='../S/71.html#L191'>tz</a>                191 ext/date/lib/parse_tz.c 		if (!tz-&gt;leap_times) {</span>
+<span class='curline'><a href='../S/71.html#L195'>tz</a>                195 ext/date/lib/parse_tz.c 		for (i = 0; i &lt; tz-&gt;bit32.leapcnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L196'>tz</a>                196 ext/date/lib/parse_tz.c 			tz-&gt;leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);</span>
+<span class='curline'><a href='../S/71.html#L197'>tz</a>                197 ext/date/lib/parse_tz.c 			tz-&gt;leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);</span>
+<span class='curline'><a href='../S/71.html#L202'>tz</a>                202 ext/date/lib/parse_tz.c 	if (tz-&gt;bit32.ttisstdcnt) {</span>
+<span class='curline'><a href='../S/71.html#L203'>tz</a>                203 ext/date/lib/parse_tz.c 		buffer = (unsigned char*) timelib_malloc(tz-&gt;bit32.ttisstdcnt * sizeof(unsigned char));</span>
+<span class='curline'><a href='../S/71.html#L207'>tz</a>                207 ext/date/lib/parse_tz.c 		memcpy(buffer, *tzf, sizeof(unsigned char) * tz-&gt;bit32.ttisstdcnt);</span>
+<span class='curline'><a href='../S/71.html#L208'>tz</a>                208 ext/date/lib/parse_tz.c 		*tzf += sizeof(unsigned char) * tz-&gt;bit32.ttisstdcnt;</span>
+<span class='curline'><a href='../S/71.html#L210'>tz</a>                210 ext/date/lib/parse_tz.c 		for (i = 0; i &lt; tz-&gt;bit32.ttisstdcnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L211'>tz</a>                211 ext/date/lib/parse_tz.c 			tz-&gt;type[i].isstdcnt = buffer[i];</span>
+<span class='curline'><a href='../S/71.html#L216'>tz</a>                216 ext/date/lib/parse_tz.c 	if (tz-&gt;bit32.ttisgmtcnt) {</span>
+<span class='curline'><a href='../S/71.html#L217'>tz</a>                217 ext/date/lib/parse_tz.c 		buffer = (unsigned char*) timelib_malloc(tz-&gt;bit32.ttisgmtcnt * sizeof(unsigned char));</span>
+<span class='curline'><a href='../S/71.html#L221'>tz</a>                221 ext/date/lib/parse_tz.c 		memcpy(buffer, *tzf, sizeof(unsigned char) * tz-&gt;bit32.ttisgmtcnt);</span>
+<span class='curline'><a href='../S/71.html#L222'>tz</a>                222 ext/date/lib/parse_tz.c 		*tzf += sizeof(unsigned char) * tz-&gt;bit32.ttisgmtcnt;</span>
+<span class='curline'><a href='../S/71.html#L224'>tz</a>                224 ext/date/lib/parse_tz.c 		for (i = 0; i &lt; tz-&gt;bit32.ttisgmtcnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L225'>tz</a>                225 ext/date/lib/parse_tz.c 			tz-&gt;type[i].isgmtcnt = buffer[i];</span>
+<span class='curline'><a href='../S/71.html#L231'>tz</a>                231 ext/date/lib/parse_tz.c static void skip_posix_string(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L243'>tz</a>                243 ext/date/lib/parse_tz.c static void read_location(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L249'>tz</a>                249 ext/date/lib/parse_tz.c 	tz-&gt;location.latitude = timelib_conv_int(buffer[0]);</span>
+<span class='curline'><a href='../S/71.html#L250'>tz</a>                250 ext/date/lib/parse_tz.c 	tz-&gt;location.latitude = (tz-&gt;location.latitude / 100000) - 90;</span>
+<span class='curline'><a href='../S/71.html#L251'>tz</a>                251 ext/date/lib/parse_tz.c 	tz-&gt;location.longitude = timelib_conv_int(buffer[1]);</span>
+<span class='curline'><a href='../S/71.html#L252'>tz</a>                252 ext/date/lib/parse_tz.c 	tz-&gt;location.longitude = (tz-&gt;location.longitude / 100000) - 180;</span>
+<span class='curline'><a href='../S/71.html#L256'>tz</a>                256 ext/date/lib/parse_tz.c 	tz-&gt;location.comments = timelib_malloc(comments_len + 1);</span>
+<span class='curline'><a href='../S/71.html#L257'>tz</a>                257 ext/date/lib/parse_tz.c 	memcpy(tz-&gt;location.comments, *tzf, comments_len);</span>
+<span class='curline'><a href='../S/71.html#L258'>tz</a>                258 ext/date/lib/parse_tz.c 	tz-&gt;location.comments[comments_len] = '\0';</span>
+<span class='curline'><a href='../S/71.html#L262'>tz</a>                262 ext/date/lib/parse_tz.c void timelib_dump_tzinfo(timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L266'>tz</a>                266 ext/date/lib/parse_tz.c 	printf("Country Code:      %s\n", tz-&gt;location.country_code);</span>
+<span class='curline'><a href='../S/71.html#L267'>tz</a>                267 ext/date/lib/parse_tz.c 	printf("Geo Location:      %f,%f\n", tz-&gt;location.latitude, tz-&gt;location.longitude);</span>
+<span class='curline'><a href='../S/71.html#L268'>tz</a>                268 ext/date/lib/parse_tz.c 	printf("Comments:\n%s\n",          tz-&gt;location.comments);</span>
+<span class='curline'><a href='../S/71.html#L269'>tz</a>                269 ext/date/lib/parse_tz.c 	printf("BC:                %s\n",  tz-&gt;bc ? "" : "yes");</span>
+<span class='curline'><a href='../S/71.html#L270'>tz</a>                270 ext/date/lib/parse_tz.c 	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.ttisgmtcnt);</span>
+<span class='curline'><a href='../S/71.html#L271'>tz</a>                271 ext/date/lib/parse_tz.c 	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.ttisstdcnt);</span>
+<span class='curline'><a href='../S/71.html#L272'>tz</a>                272 ext/date/lib/parse_tz.c 	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.leapcnt);</span>
+<span class='curline'><a href='../S/71.html#L273'>tz</a>                273 ext/date/lib/parse_tz.c 	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.timecnt);</span>
+<span class='curline'><a href='../S/71.html#L274'>tz</a>                274 ext/date/lib/parse_tz.c 	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.typecnt);</span>
+<span class='curline'><a href='../S/71.html#L275'>tz</a>                275 ext/date/lib/parse_tz.c 	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz-&gt;bit32.charcnt);</span>
+<span class='curline'><a href='../S/71.html#L279'>tz</a>                279 ext/date/lib/parse_tz.c 		(long int) tz-&gt;type[0].offset,</span>
+<span class='curline'><a href='../S/71.html#L280'>tz</a>                280 ext/date/lib/parse_tz.c 		tz-&gt;type[0].isdst,</span>
+<span class='curline'><a href='../S/71.html#L281'>tz</a>                281 ext/date/lib/parse_tz.c 		tz-&gt;type[0].abbr_idx,</span>
+<span class='curline'><a href='../S/71.html#L282'>tz</a>                282 ext/date/lib/parse_tz.c 		&amp;tz-&gt;timezone_abbr[tz-&gt;type[0].abbr_idx],</span>
+<span class='curline'><a href='../S/71.html#L283'>tz</a>                283 ext/date/lib/parse_tz.c 		tz-&gt;type[0].isstdcnt,</span>
+<span class='curline'><a href='../S/71.html#L284'>tz</a>                284 ext/date/lib/parse_tz.c 		tz-&gt;type[0].isgmtcnt</span>
+<span class='curline'><a href='../S/71.html#L286'>tz</a>                286 ext/date/lib/parse_tz.c 	for (i = 0; i &lt; tz-&gt;bit32.timecnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L288'>tz</a>                288 ext/date/lib/parse_tz.c 			tz-&gt;trans[i], tz-&gt;trans[i], tz-&gt;trans_idx[i],</span>
+<span class='curline'><a href='../S/71.html#L289'>tz</a>                289 ext/date/lib/parse_tz.c 			(long int) tz-&gt;type[tz-&gt;trans_idx[i]].offset,</span>
+<span class='curline'><a href='../S/71.html#L290'>tz</a>                290 ext/date/lib/parse_tz.c 			tz-&gt;type[tz-&gt;trans_idx[i]].isdst,</span>
+<span class='curline'><a href='../S/71.html#L291'>tz</a>                291 ext/date/lib/parse_tz.c 			tz-&gt;type[tz-&gt;trans_idx[i]].abbr_idx,</span>
+<span class='curline'><a href='../S/71.html#L292'>tz</a>                292 ext/date/lib/parse_tz.c 			&amp;tz-&gt;timezone_abbr[tz-&gt;type[tz-&gt;trans_idx[i]].abbr_idx],</span>
+<span class='curline'><a href='../S/71.html#L293'>tz</a>                293 ext/date/lib/parse_tz.c 			tz-&gt;type[tz-&gt;trans_idx[i]].isstdcnt,</span>
+<span class='curline'><a href='../S/71.html#L294'>tz</a>                294 ext/date/lib/parse_tz.c 			tz-&gt;type[tz-&gt;trans_idx[i]].isgmtcnt</span>
+<span class='curline'><a href='../S/71.html#L297'>tz</a>                297 ext/date/lib/parse_tz.c 	for (i = 0; i &lt; tz-&gt;bit32.leapcnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L299'>tz</a>                299 ext/date/lib/parse_tz.c 			tz-&gt;leap_times[i].trans,</span>
+<span class='curline'><a href='../S/71.html#L300'>tz</a>                300 ext/date/lib/parse_tz.c 			(long) tz-&gt;leap_times[i].trans,</span>
+<span class='curline'><a href='../S/71.html#L301'>tz</a>                301 ext/date/lib/parse_tz.c 			tz-&gt;leap_times[i].offset);</span>
+<span class='curline'><a href='../S/71.html#L361'>tz</a>                361 ext/date/lib/parse_tz.c static void skip_64bit_preamble(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L366'>tz</a>                366 ext/date/lib/parse_tz.c static void read_64bit_header(const unsigned char **tzf, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L371'>tz</a>                371 ext/date/lib/parse_tz.c 	tz-&gt;bit64.ttisgmtcnt = timelib_conv_int(buffer[0]);</span>
+<span class='curline'><a href='../S/71.html#L372'>tz</a>                372 ext/date/lib/parse_tz.c 	tz-&gt;bit64.ttisstdcnt = timelib_conv_int(buffer[1]);</span>
+<span class='curline'><a href='../S/71.html#L373'>tz</a>                373 ext/date/lib/parse_tz.c 	tz-&gt;bit64.leapcnt    = timelib_conv_int(buffer[2]);</span>
+<span class='curline'><a href='../S/71.html#L374'>tz</a>                374 ext/date/lib/parse_tz.c 	tz-&gt;bit64.timecnt    = timelib_conv_int(buffer[3]);</span>
+<span class='curline'><a href='../S/71.html#L375'>tz</a>                375 ext/date/lib/parse_tz.c 	tz-&gt;bit64.typecnt    = timelib_conv_int(buffer[4]);</span>
+<span class='curline'><a href='../S/71.html#L376'>tz</a>                376 ext/date/lib/parse_tz.c 	tz-&gt;bit64.charcnt    = timelib_conv_int(buffer[5]);</span>
+<span class='curline'><a href='../S/71.html#L408'>tz</a>                408 ext/date/lib/parse_tz.c static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)</span>
+<span class='curline'><a href='../S/71.html#L414'>tz</a>                414 ext/date/lib/parse_tz.c 	if (!tz-&gt;bit32.timecnt || !tz-&gt;trans) {</span>
+<span class='curline'><a href='../S/71.html#L416'>tz</a>                416 ext/date/lib/parse_tz.c 		if (tz-&gt;bit32.typecnt == 1) {</span>
+<span class='curline'><a href='../S/71.html#L417'>tz</a>                417 ext/date/lib/parse_tz.c 			return &amp;(tz-&gt;type[0]);</span>
+<span class='curline'><a href='../S/71.html#L426'>tz</a>                426 ext/date/lib/parse_tz.c 	if (ts &lt; tz-&gt;trans[0]) {</span>
+<span class='curline'><a href='../S/71.html#L431'>tz</a>                431 ext/date/lib/parse_tz.c 		while (j &lt; tz-&gt;bit32.timecnt &amp;&amp; tz-&gt;type[tz-&gt;trans_idx[j]].isdst) {</span>
+<span class='curline'><a href='../S/71.html#L434'>tz</a>                434 ext/date/lib/parse_tz.c 		if (j == tz-&gt;bit32.timecnt) {</span>
+<span class='curline'><a href='../S/71.html#L437'>tz</a>                437 ext/date/lib/parse_tz.c 		return &amp;(tz-&gt;type[tz-&gt;trans_idx[j]]);</span>
+<span class='curline'><a href='../S/71.html#L442'>tz</a>                442 ext/date/lib/parse_tz.c 	for (i = 0; i &lt; tz-&gt;bit32.timecnt; i++) {</span>
+<span class='curline'><a href='../S/71.html#L443'>tz</a>                443 ext/date/lib/parse_tz.c 		if (ts &lt; tz-&gt;trans[i]) {</span>
+<span class='curline'><a href='../S/71.html#L444'>tz</a>                444 ext/date/lib/parse_tz.c 			*transition_time = tz-&gt;trans[i - 1];</span>
+<span class='curline'><a href='../S/71.html#L445'>tz</a>                445 ext/date/lib/parse_tz.c 			return &amp;(tz-&gt;type[tz-&gt;trans_idx[i - 1]]);</span>
+<span class='curline'><a href='../S/71.html#L448'>tz</a>                448 ext/date/lib/parse_tz.c 	*transition_time = tz-&gt;trans[tz-&gt;bit32.timecnt - 1];</span>
+<span class='curline'><a href='../S/71.html#L449'>tz</a>                449 ext/date/lib/parse_tz.c 	return &amp;(tz-&gt;type[tz-&gt;trans_idx[tz-&gt;bit32.timecnt - 1]]);</span>
+<span class='curline'><a href='../S/71.html#L452'>tz</a>                452 ext/date/lib/parse_tz.c static tlinfo* fetch_leaptime_offset(timelib_tzinfo *tz, timelib_sll ts)</span>
+<span class='curline'><a href='../S/71.html#L456'>tz</a>                456 ext/date/lib/parse_tz.c 	if (!tz-&gt;bit32.leapcnt || !tz-&gt;leap_times) {</span>
+<span class='curline'><a href='../S/71.html#L460'>tz</a>                460 ext/date/lib/parse_tz.c 	for (i = tz-&gt;bit32.leapcnt - 1; i &gt; 0; i--) {</span>
+<span class='curline'><a href='../S/71.html#L461'>tz</a>                461 ext/date/lib/parse_tz.c 		if (ts &gt; tz-&gt;leap_times[i].trans) {</span>
+<span class='curline'><a href='../S/71.html#L462'>tz</a>                462 ext/date/lib/parse_tz.c 			return &amp;(tz-&gt;leap_times[i]);</span>
+<span class='curline'><a href='../S/71.html#L468'>tz</a>                468 ext/date/lib/parse_tz.c int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L473'>tz</a>                473 ext/date/lib/parse_tz.c 	if ((to = fetch_timezone_offset(tz, ts, &amp;dummy))) {</span>
+<span class='curline'><a href='../S/71.html#L479'>tz</a>                479 ext/date/lib/parse_tz.c timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/71.html#L488'>tz</a>                488 ext/date/lib/parse_tz.c 	if ((to = fetch_timezone_offset(tz, ts, &amp;transistion_time))) {</span>
+<span class='curline'><a href='../S/71.html#L490'>tz</a>                490 ext/date/lib/parse_tz.c 		abbr = &amp;(tz-&gt;timezone_abbr[to-&gt;abbr_idx]);</span>
+<span class='curline'><a href='../S/71.html#L495'>tz</a>                495 ext/date/lib/parse_tz.c 		abbr = tz-&gt;timezone_abbr;</span>
+<span class='curline'><a href='../S/71.html#L500'>tz</a>                500 ext/date/lib/parse_tz.c 	if ((tl = fetch_leaptime_offset(tz, ts))) {</span>
+<span class='curline'><a href='../S/72.html#L138'>tz</a>                138 ext/date/lib/timelib.c timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/72.html#L140'>tz</a>                140 ext/date/lib/timelib.c 	timelib_tzinfo *tmp = timelib_tzinfo_ctor(tz-&gt;name);</span>
+<span class='curline'><a href='../S/72.html#L141'>tz</a>                141 ext/date/lib/timelib.c 	tmp-&gt;bit32.ttisgmtcnt = tz-&gt;bit32.ttisgmtcnt;</span>
+<span class='curline'><a href='../S/72.html#L142'>tz</a>                142 ext/date/lib/timelib.c 	tmp-&gt;bit32.ttisstdcnt = tz-&gt;bit32.ttisstdcnt;</span>
+<span class='curline'><a href='../S/72.html#L143'>tz</a>                143 ext/date/lib/timelib.c 	tmp-&gt;bit32.leapcnt = tz-&gt;bit32.leapcnt;</span>
+<span class='curline'><a href='../S/72.html#L144'>tz</a>                144 ext/date/lib/timelib.c 	tmp-&gt;bit32.timecnt = tz-&gt;bit32.timecnt;</span>
+<span class='curline'><a href='../S/72.html#L145'>tz</a>                145 ext/date/lib/timelib.c 	tmp-&gt;bit32.typecnt = tz-&gt;bit32.typecnt;</span>
+<span class='curline'><a href='../S/72.html#L146'>tz</a>                146 ext/date/lib/timelib.c 	tmp-&gt;bit32.charcnt = tz-&gt;bit32.charcnt;</span>
+<span class='curline'><a href='../S/72.html#L148'>tz</a>                148 ext/date/lib/timelib.c 	tmp-&gt;trans = (int32_t *) timelib_malloc(tz-&gt;bit32.timecnt * sizeof(int32_t));</span>
+<span class='curline'><a href='../S/72.html#L149'>tz</a>                149 ext/date/lib/timelib.c 	tmp-&gt;trans_idx = (unsigned char*) timelib_malloc(tz-&gt;bit32.timecnt * sizeof(unsigned char));</span>
+<span class='curline'><a href='../S/72.html#L150'>tz</a>                150 ext/date/lib/timelib.c 	memcpy(tmp-&gt;trans, tz-&gt;trans, tz-&gt;bit32.timecnt * sizeof(int32_t));</span>
+<span class='curline'><a href='../S/72.html#L151'>tz</a>                151 ext/date/lib/timelib.c 	memcpy(tmp-&gt;trans_idx, tz-&gt;trans_idx, tz-&gt;bit32.timecnt * sizeof(unsigned char));</span>
+<span class='curline'><a href='../S/72.html#L153'>tz</a>                153 ext/date/lib/timelib.c 	tmp-&gt;type = (ttinfo*) timelib_malloc(tz-&gt;bit32.typecnt * sizeof(struct ttinfo));</span>
+<span class='curline'><a href='../S/72.html#L154'>tz</a>                154 ext/date/lib/timelib.c 	memcpy(tmp-&gt;type, tz-&gt;type, tz-&gt;bit32.typecnt * sizeof(struct ttinfo));</span>
+<span class='curline'><a href='../S/72.html#L156'>tz</a>                156 ext/date/lib/timelib.c 	tmp-&gt;timezone_abbr = (char*) timelib_malloc(tz-&gt;bit32.charcnt);</span>
+<span class='curline'><a href='../S/72.html#L157'>tz</a>                157 ext/date/lib/timelib.c 	memcpy(tmp-&gt;timezone_abbr, tz-&gt;timezone_abbr, tz-&gt;bit32.charcnt);</span>
+<span class='curline'><a href='../S/72.html#L159'>tz</a>                159 ext/date/lib/timelib.c 	tmp-&gt;leap_times = (tlinfo*) timelib_malloc(tz-&gt;bit32.leapcnt * sizeof(tlinfo));</span>
+<span class='curline'><a href='../S/72.html#L160'>tz</a>                160 ext/date/lib/timelib.c 	memcpy(tmp-&gt;leap_times, tz-&gt;leap_times, tz-&gt;bit32.leapcnt * sizeof(tlinfo));</span>
+<span class='curline'><a href='../S/72.html#L165'>tz</a>                165 ext/date/lib/timelib.c void timelib_tzinfo_dtor(timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/72.html#L167'>tz</a>                167 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;name);</span>
+<span class='curline'><a href='../S/72.html#L168'>tz</a>                168 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;trans);</span>
+<span class='curline'><a href='../S/72.html#L169'>tz</a>                169 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;trans_idx);</span>
+<span class='curline'><a href='../S/72.html#L170'>tz</a>                170 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;type);</span>
+<span class='curline'><a href='../S/72.html#L171'>tz</a>                171 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;timezone_abbr);</span>
+<span class='curline'><a href='../S/72.html#L172'>tz</a>                172 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;leap_times);</span>
+<span class='curline'><a href='../S/72.html#L173'>tz</a>                173 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz-&gt;location.comments);</span>
+<span class='curline'><a href='../S/72.html#L174'>tz</a>                174 ext/date/lib/timelib.c 	TIMELIB_TIME_FREE(tz);</span>
+<span class='curline'><a href='../S/72.html#L175'>tz</a>                175 ext/date/lib/timelib.c 	tz = NULL;</span>
+<span class='curline'><a href='../S/73.html#L113'>tz</a>                113 ext/date/lib/timelib.h void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L118'>tz</a>                118 ext/date/lib/timelib.h int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L119'>tz</a>                119 ext/date/lib/timelib.h timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L121'>tz</a>                121 ext/date/lib/timelib.h void timelib_dump_tzinfo(timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L130'>tz</a>                130 ext/date/lib/timelib.h void timelib_tzinfo_dtor(timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L131'>tz</a>                131 ext/date/lib/timelib.h timelib_tzinfo* timelib_tzinfo_clone(timelib_tzinfo *tz);</span>
+<span class='curline'><a href='../S/73.html#L135'>tz</a>                135 ext/date/lib/timelib.h timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *tz);</span>
+<span class='curline'><a href='../S/77.html#L373'>tz</a>                373 ext/date/lib/tm2unixtime.c static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)</span>
+<span class='curline'><a href='../S/77.html#L375'>tz</a>                375 ext/date/lib/tm2unixtime.c 	switch (tz-&gt;zone_type) {</span>
+<span class='curline'><a href='../S/77.html#L378'>tz</a>                378 ext/date/lib/tm2unixtime.c 			tz-&gt;is_localtime = 1;</span>
+<span class='curline'><a href='../S/77.html#L379'>tz</a>                379 ext/date/lib/tm2unixtime.c 			return tz-&gt;z * 60;</span>
+<span class='curline'><a href='../S/77.html#L385'>tz</a>                385 ext/date/lib/tm2unixtime.c 			tz-&gt;is_localtime = 1;</span>
+<span class='curline'><a href='../S/77.html#L386'>tz</a>                386 ext/date/lib/tm2unixtime.c 			tmp = tz-&gt;z;</span>
+<span class='curline'><a href='../S/77.html#L387'>tz</a>                387 ext/date/lib/tm2unixtime.c 			tmp -= tz-&gt;dst * 60;</span>
+<span class='curline'><a href='../S/77.html#L394'>tz</a>                394 ext/date/lib/tm2unixtime.c 			tzi = tz-&gt;tz_info;</span>
+<span class='curline'><a href='../S/77.html#L404'>tz</a>                404 ext/date/lib/tm2unixtime.c 				tz-&gt;is_localtime = 1;</span>
+<span class='curline'><a href='../S/77.html#L405'>tz</a>                405 ext/date/lib/tm2unixtime.c 				before = timelib_get_time_zone_info(tz-&gt;sse, tzi);</span>
+<span class='curline'><a href='../S/77.html#L406'>tz</a>                406 ext/date/lib/tm2unixtime.c 				after = timelib_get_time_zone_info(tz-&gt;sse - before-&gt;offset, tzi);</span>
+<span class='curline'><a href='../S/77.html#L407'>tz</a>                407 ext/date/lib/tm2unixtime.c 				timelib_set_timezone(tz, tzi);</span>
+<span class='curline'><a href='../S/77.html#L410'>tz</a>                410 ext/date/lib/tm2unixtime.c 					((tz-&gt;sse - after-&gt;offset) &gt;= (after-&gt;transistion_time + (before-&gt;offset - after-&gt;offset))) &amp;&amp;</span>
+<span class='curline'><a href='../S/77.html#L411'>tz</a>                411 ext/date/lib/tm2unixtime.c 					((tz-&gt;sse - after-&gt;offset) &lt; after-&gt;transistion_time)</span>
+<span class='curline'><a href='../S/77.html#L417'>tz</a>                417 ext/date/lib/tm2unixtime.c 					tmp = -tz-&gt;z;</span>
+<span class='curline'><a href='../S/77.html#L425'>tz</a>                425 ext/date/lib/tm2unixtime.c 					gmt_offset = timelib_get_time_zone_info(tz-&gt;sse + tmp, tzi);</span>
+<span class='curline'><a href='../S/77.html#L426'>tz</a>                426 ext/date/lib/tm2unixtime.c 					tz-&gt;z = gmt_offset-&gt;offset;</span>
+<span class='curline'><a href='../S/77.html#L428'>tz</a>                428 ext/date/lib/tm2unixtime.c 					tz-&gt;dst = gmt_offset-&gt;is_dst;</span>
+<span class='curline'><a href='../S/77.html#L429'>tz</a>                429 ext/date/lib/tm2unixtime.c 					if (tz-&gt;tz_abbr) {</span>
+<span class='curline'><a href='../S/77.html#L430'>tz</a>                430 ext/date/lib/tm2unixtime.c 						timelib_free(tz-&gt;tz_abbr);</span>
+<span class='curline'><a href='../S/77.html#L432'>tz</a>                432 ext/date/lib/tm2unixtime.c 					tz-&gt;tz_abbr = timelib_strdup(gmt_offset-&gt;abbr);</span>
+<span class='curline'><a href='../S/78.html#L182'>tz</a>                182 ext/date/lib/unixtime2tm.c 	timelib_tzinfo      *tz = tm-&gt;tz_info;</span>
+<span class='curline'><a href='../S/78.html#L198'>tz</a>                198 ext/date/lib/unixtime2tm.c 			gmt_offset = timelib_get_time_zone_info(ts, tz);</span>
+<span class='curline'><a href='../S/78.html#L205'>tz</a>                205 ext/date/lib/unixtime2tm.c 			tm-&gt;tz_info = tz;</span>
+<span class='curline'><a href='../S/78.html#L249'>tz</a>                249 ext/date/lib/unixtime2tm.c void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)</span>
+<span class='curline'><a href='../S/78.html#L253'>tz</a>                253 ext/date/lib/unixtime2tm.c 	gmt_offset = timelib_get_time_zone_info(t-&gt;sse, tz);</span>
+<span class='curline'><a href='../S/78.html#L262'>tz</a>                262 ext/date/lib/unixtime2tm.c 	t-&gt;tz_info = tz;</span>
+<span class='curline'><a href='../S/79.html#L1001'>tz</a>               1001 ext/date/php_date.c 	char *tz;</span>
+<span class='curline'><a href='../S/79.html#L1004'>tz</a>               1004 ext/date/php_date.c 	tz = guess_timezone(DATE_TIMEZONEDB);</span>
+<span class='curline'><a href='../S/79.html#L1005'>tz</a>               1005 ext/date/php_date.c 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);</span>
+<span class='curline'><a href='../S/79.html#L2246'>tz</a>               2246 ext/date/php_date.c 			new_obj-&gt;tzi.tz = old_obj-&gt;tzi.tz;</span>
+<span class='curline'><a href='../S/79.html#L2281'>tz</a>               2281 ext/date/php_date.c 			ZVAL_STRING(&amp;zv, tzobj-&gt;tzi.tz-&gt;name);</span>
+<span class='curline'><a href='../S/79.html#L2522'>tz</a>               2522 ext/date/php_date.c 				tzi = tzobj-&gt;tzi.tz;</span>
+<span class='curline'><a href='../S/79.html#L2757'>tz</a>               2757 ext/date/php_date.c 						tzobj-&gt;tzi.tz = tzi;</span>
+<span class='curline'><a href='../S/79.html#L3218'>tz</a>               3218 ext/date/php_date.c                        tzobj-&gt;tzi.tz = t-&gt;tz_info;</span>
+<span class='curline'><a href='../S/79.html#L3273'>tz</a>               3273 ext/date/php_date.c 			timelib_set_timezone(dateobj-&gt;time, tzobj-&gt;tzi.tz);</span>
+<span class='curline'><a href='../S/79.html#L3605'>tz</a>               3605 ext/date/php_date.c static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size_t tz_len) /* {{{ */</span>
+<span class='curline'><a href='../S/79.html#L3609'>tz</a>               3609 ext/date/php_date.c 	char         *orig_tz = tz;</span>
+<span class='curline'><a href='../S/79.html#L3611'>tz</a>               3611 ext/date/php_date.c 	if (strlen(tz) != tz_len) {</span>
+<span class='curline'><a href='../S/79.html#L3616'>tz</a>               3616 ext/date/php_date.c 	dummy_t-&gt;z = timelib_parse_zone(&amp;tz, &amp;dst, dummy_t, &amp;not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);</span>
+<span class='curline'><a href='../S/79.html#L3634'>tz</a>               3634 ext/date/php_date.c 	char *tz;</span>
+<span class='curline'><a href='../S/79.html#L3638'>tz</a>               3638 ext/date/php_date.c 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &amp;tz, &amp;tz_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/79.html#L3642'>tz</a>               3642 ext/date/php_date.c 	if (SUCCESS != timezone_initialize(tzobj, tz, tz_len)) {</span>
+<span class='curline'><a href='../S/79.html#L3654'>tz</a>               3654 ext/date/php_date.c 	char *tz;</span>
+<span class='curline'><a href='../S/79.html#L3659'>tz</a>               3659 ext/date/php_date.c 	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &amp;tz, &amp;tz_len)) {</span>
+<span class='curline'><a href='../S/79.html#L3665'>tz</a>               3665 ext/date/php_date.c 	timezone_initialize(tzobj, tz, tz_len);</span>
+<span class='curline'><a href='../S/79.html#L3747'>tz</a>               3747 ext/date/php_date.c 			RETURN_STRING(tzobj-&gt;tzi.tz-&gt;name);</span>
+<span class='curline'><a href='../S/79.html#L3812'>tz</a>               3812 ext/date/php_date.c 			offset = timelib_get_time_zone_info(dateobj-&gt;time-&gt;sse, tzobj-&gt;tzi.tz);</span>
+<span class='curline'><a href='../S/79.html#L3849'>tz</a>               3849 ext/date/php_date.c 		add_assoc_long(&amp;element, "offset", tzobj-&gt;tzi.tz-&gt;type[0].offset); \</span>
+<span class='curline'><a href='../S/79.html#L3850'>tz</a>               3850 ext/date/php_date.c 		add_assoc_bool(&amp;element, "isdst",  tzobj-&gt;tzi.tz-&gt;type[0].isdst); \</span>
+<span class='curline'><a href='../S/79.html#L3851'>tz</a>               3851 ext/date/php_date.c 		add_assoc_string(&amp;element, "abbr", &amp;tzobj-&gt;tzi.tz-&gt;timezone_abbr[tzobj-&gt;tzi.tz-&gt;type[0].abbr_idx]); \</span>
+<span class='curline'><a href='../S/79.html#L3858'>tz</a>               3858 ext/date/php_date.c 		add_assoc_long(&amp;element, "offset", tzobj-&gt;tzi.tz-&gt;type[tzobj-&gt;tzi.tz-&gt;trans_idx[i]].offset); \</span>
+<span class='curline'><a href='../S/79.html#L3859'>tz</a>               3859 ext/date/php_date.c 		add_assoc_bool(&amp;element, "isdst",  tzobj-&gt;tzi.tz-&gt;type[tzobj-&gt;tzi.tz-&gt;trans_idx[i]].isdst); \</span>
+<span class='curline'><a href='../S/79.html#L3860'>tz</a>               3860 ext/date/php_date.c 		add_assoc_string(&amp;element, "abbr", &amp;tzobj-&gt;tzi.tz-&gt;timezone_abbr[tzobj-&gt;tzi.tz-&gt;type[tzobj-&gt;tzi.tz-&gt;trans_idx[i]].abbr_idx]); \</span>
+<span class='curline'><a href='../S/79.html#L3863'>tz</a>               3863 ext/date/php_date.c #define add_last() add(tzobj-&gt;tzi.tz-&gt;bit32.timecnt - 1, timestamp_begin)</span>
+<span class='curline'><a href='../S/79.html#L3874'>tz</a>               3874 ext/date/php_date.c 		if (tzobj-&gt;tzi.tz-&gt;bit32.timecnt &gt; 0) {</span>
+<span class='curline'><a href='../S/79.html#L3876'>tz</a>               3876 ext/date/php_date.c 				if (tzobj-&gt;tzi.tz-&gt;trans[begin] &gt; timestamp_begin) {</span>
+<span class='curline'><a href='../S/79.html#L3886'>tz</a>               3886 ext/date/php_date.c 			} while (begin &lt; tzobj-&gt;tzi.tz-&gt;bit32.timecnt);</span>
+<span class='curline'><a href='../S/79.html#L3891'>tz</a>               3891 ext/date/php_date.c 		if (tzobj-&gt;tzi.tz-&gt;bit32.timecnt &gt; 0) {</span>
+<span class='curline'><a href='../S/79.html#L3897'>tz</a>               3897 ext/date/php_date.c 		for (i = begin; i &lt; tzobj-&gt;tzi.tz-&gt;bit32.timecnt; ++i) {</span>
+<span class='curline'><a href='../S/79.html#L3898'>tz</a>               3898 ext/date/php_date.c 			if (tzobj-&gt;tzi.tz-&gt;trans[i] &lt; timestamp_end) {</span>
+<span class='curline'><a href='../S/79.html#L3899'>tz</a>               3899 ext/date/php_date.c 				add(i, tzobj-&gt;tzi.tz-&gt;trans[i]);</span>
+<span class='curline'><a href='../S/79.html#L3924'>tz</a>               3924 ext/date/php_date.c 	add_assoc_string(return_value, "country_code", tzobj-&gt;tzi.tz-&gt;location.country_code);</span>
+<span class='curline'><a href='../S/79.html#L3925'>tz</a>               3925 ext/date/php_date.c 	add_assoc_double(return_value, "latitude", tzobj-&gt;tzi.tz-&gt;location.latitude);</span>
+<span class='curline'><a href='../S/79.html#L3926'>tz</a>               3926 ext/date/php_date.c 	add_assoc_double(return_value, "longitude", tzobj-&gt;tzi.tz-&gt;location.longitude);</span>
+<span class='curline'><a href='../S/79.html#L3927'>tz</a>               3927 ext/date/php_date.c 	add_assoc_string(return_value, "comments", tzobj-&gt;tzi.tz-&gt;location.comments);</span>
+<span class='curline'><a href='../S/80.html#L152'>tz</a>                152 ext/date/php_date.h 		timelib_tzinfo   *tz;         /* TIMELIB_ZONETYPE_ID */</span>
+<span class='curline'><a href='../S/340.html#L32'>tz</a>                 32 ext/intl/common/common_date.h U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,</span>
+<span class='curline'><a href='../S/1054.html#L15386'>tz</a>               15386 ext/sqlite3/libsqlite/sqlite3.c   int tz;            /* Timezone offset in minutes */</span>
+<span class='curline'><a href='../S/1054.html#L15465'>tz</a>               15465 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;tz = 0;</span>
+<span class='curline'><a href='../S/1054.html#L15482'>tz</a>               15482 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;tz = sgn*(nMn + nHr*60);</span>
+<span class='curline'><a href='../S/1054.html#L15527'>tz</a>               15527 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;validTZ = (p-&gt;tz!=0)?1:0;</span>
+<span class='curline'><a href='../S/1054.html#L15563'>tz</a>               15563 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;iJD -= p-&gt;tz*60000;</span>
+<span class='curline'><a href='../S/1054.html#L15828'>tz</a>               15828 ext/sqlite3/libsqlite/sqlite3.c   x.tz = 0;</span>
+</pre>
+</body>
+</html>

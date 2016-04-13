@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>win32/glob.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1871.html'>win32</a>/glob.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1712.html' title='Multiple included from 11 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*      $Id$ */</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>/*      OpenBSD: glob.h,v 1.7 2002/02/17 19:42:21 millert Exp   */</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>/*      NetBSD: glob.h,v 1.5 1994/10/26 00:55:56 cgd Exp        */</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='comment'>/*</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * Copyright (c) 1989, 1993</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> *      The Regents of the University of California.  All rights reserved.</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> *</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * This code is derived from software contributed to Berkeley by</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * Guido van Rossum.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> *</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * Redistribution and use in source and binary forms, with or without</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * modification, are permitted provided that the following conditions</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * are met:</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> * 1. Redistributions of source code must retain the above copyright</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> *    notice, this list of conditions and the following disclaimer.</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * 2. Redistributions in binary form must reproduce the above copyright</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *    notice, this list of conditions and the following disclaimer in the</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> *    documentation and/or other materials provided with the distribution.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * 3. All advertising materials mentioning features or use of this software</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> *    must display the following acknowledgement:</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *      This product includes software developed by the University of</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *      California, Berkeley and its contributors.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * 4. Neither the name of the University nor the names of its contributors</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> *    may be used to endorse or promote products derived from this software</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> *    without specific prior written permission.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * SUCH DAMAGE.</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> *      @(#)glob.h      8.1 (Berkeley) 6/2/93</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> */</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#ifndef</em> <a href='../S/1597.html#L44' title='Defined at 44 in win32/glob.h.'>_GLOB_H_</a>
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#define</em> <a href='../S/1597.html#L43' title='Referred from 43 in win32/glob.h.'>_GLOB_H_</a>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#ifndef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L47' name='L47'></a>  47 <em class='sharp'># include</em> &lt;sys/cdefs.h&gt;
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#endif</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#include</em> "<a href='1723.html'>Zend/zend_stream.h</a>"
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>int</strong> <a href='../Y/19313.html' title='Multiple used in 22 places.'>gl_pathc</a>;           <em class='comment'>/* Count of total paths so far. */</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>int</strong> <a href='../Y/19310.html' title='Multiple used in 3 places.'>gl_matchc</a>;          <em class='comment'>/* Count of paths matching pattern. */</em>
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>int</strong> <a href='../Y/19311.html' title='Multiple used in 13 places.'>gl_offs</a>;            <em class='comment'>/* Reserved at beginning of gl_pathv. */</em>
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>int</strong> <a href='../Y/19308.html' title='Multiple used in 18 places.'>gl_flags</a>;           <em class='comment'>/* Copy of flags parameter to glob. */</em>
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>char</strong> **<a href='../Y/19314.html' title='Multiple used in 28 places.'>gl_pathv</a>;        <em class='comment'>/* List of paths matching pattern. */</em>
+<a id='L58' name='L58'></a>  58                                 <em class='comment'>/* Copy of errfunc parameter to glob. */</em>
+<a id='L59' name='L59'></a>  59         <strong class='reserved'>int</strong> (*<a href='../Y/19307.html' title='Multiple used in 4 places.'>gl_errfunc</a>)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <strong class='reserved'>int</strong>);
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61         <em class='comment'>/*</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'>         * Alternate filesystem access methods for glob; replacement</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'>         * versions of closedir(3), readdir(3), opendir(3), stat(2)</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>         * and lstat(2).</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>         */</em>
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>void</strong> (*<a href='../Y/19306.html' title='Multiple used in 2 places.'>gl_closedir</a>)(<strong class='reserved'>void</strong> *);
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>struct</strong> <a href='../D/21022.html' title='Multiple defined in 2 places.'>dirent</a> *(*<a href='../Y/19315.html' title='Multiple used in 2 places.'>gl_readdir</a>)(<strong class='reserved'>void</strong> *);
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>void</strong> *(*<a href='../Y/19312.html' title='Multiple used in 2 places.'>gl_opendir</a>)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *);
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>int</strong> (*<a href='../Y/19309.html' title='Multiple used in 2 places.'>gl_lstat</a>)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <a href='../D/34685.html' title='Multiple defined in 2 places.'>zend_stat_t</a> *);
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>int</strong> (*<a href='../Y/19316.html' title='Multiple used in 2 places.'>gl_stat</a>)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <a href='../D/34685.html' title='Multiple defined in 2 places.'>zend_stat_t</a> *);
+<a id='L71' name='L71'></a>  71 <em class='brace'>}</em> <a href='../R/20360.html' title='Multiple referred from 33 places.'>glob_t</a>;
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 <em class='comment'>/* Flags */</em>
+<a id='L74' name='L74'></a>  74 <em class='sharp'>#define</em> <a href='../R/2844.html' title='Multiple referred from 3 places.'>GLOB_APPEND</a>     0x0001  <em class='comment'>/* Append to output from previous call. */</em>
+<a id='L75' name='L75'></a>  75 <em class='sharp'>#define</em> <a href='../S/1596.html#L183' title='Referred from 183 in win32/glob.c.'>GLOB_DOOFFS</a>     0x0002  <em class='comment'>/* Use gl_offs. */</em>
+<a id='L76' name='L76'></a>  76 <em class='sharp'>#define</em> <a href='../R/2848.html' title='Multiple referred from 7 places.'>GLOB_ERR</a>        0x0004  <em class='comment'>/* Return on error. */</em>
+<a id='L77' name='L77'></a>  77 <em class='sharp'>#define</em> <a href='../R/2852.html' title='Multiple referred from 7 places.'>GLOB_MARK</a>       0x0008  <em class='comment'>/* Append / to matching directories. */</em>
+<a id='L78' name='L78'></a>  78 <em class='sharp'>#define</em> <a href='../R/2853.html' title='Multiple referred from 6 places.'>GLOB_NOCHECK</a>    0x0010  <em class='comment'>/* Return pattern itself if nothing matches. */</em>
+<a id='L79' name='L79'></a>  79 <em class='sharp'>#define</em> <a href='../R/2857.html' title='Multiple referred from 6 places.'>GLOB_NOSORT</a>     0x0020  <em class='comment'>/* Don't sort. */</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81 <em class='sharp'>#ifndef</em> _POSIX_SOURCE
+<a id='L82' name='L82'></a>  82 <em class='sharp'>#define</em> <a href='../R/2843.html' title='Multiple referred from 5 places.'>GLOB_ALTDIRFUNC</a> 0x0040  <em class='comment'>/* Use alternately specified directory funcs. */</em>
+<a id='L83' name='L83'></a>  83 <em class='sharp'>#define</em> <a href='../R/2846.html' title='Multiple referred from 6 places.'>GLOB_BRACE</a>      0x0080  <em class='comment'>/* Expand braces ala csh. */</em>
+<a id='L84' name='L84'></a>  84 <em class='sharp'>#define</em> <a href='../R/2851.html' title='Multiple referred from 5 places.'>GLOB_MAGCHAR</a>    0x0100  <em class='comment'>/* Pattern had globbing characters. */</em>
+<a id='L85' name='L85'></a>  85 <em class='sharp'>#define</em> <a href='../S/1596.html#L511' title='Referred from 511 in win32/glob.c.'>GLOB_NOMAGIC</a>    0x0200  <em class='comment'>/* GLOB_NOCHECK without magic chars (csh). */</em>
+<a id='L86' name='L86'></a>  86 <em class='sharp'>#define</em> GLOB_QUOTE      0x0400  <em class='comment'>/* Quote special chars with \. */</em>
+<a id='L87' name='L87'></a>  87 <em class='sharp'>#define</em> <a href='../S/1596.html#L369' title='Referred from 369 in win32/glob.c.'>GLOB_TILDE</a>      0x0800  <em class='comment'>/* Expand tilde names from the passwd file. */</em>
+<a id='L88' name='L88'></a>  88 <em class='sharp'>#define</em> <a href='../R/2854.html' title='Multiple referred from 7 places.'>GLOB_NOESCAPE</a>   0x1000  <em class='comment'>/* Disable backslash escaping. */</em>
+<a id='L89' name='L89'></a>  89 <em class='sharp'>#define</em> <a href='../S/1596.html#L752' title='Referred from 752 in win32/glob.c.'>GLOB_LIMIT</a>      0x2000  <em class='comment'>/* Limit pattern match output to ARG_MAX */</em>
+<a id='L90' name='L90'></a>  90 <em class='sharp'>#endif</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <em class='comment'>/* Error values returned by glob(3) */</em>
+<a id='L93' name='L93'></a>  93 <em class='sharp'>#define</em> <a href='../R/2858.html' title='Multiple referred from 4 places.'>GLOB_NOSPACE</a>    (-1)    <em class='comment'>/* Malloc call failed. */</em>
+<a id='L94' name='L94'></a>  94 <em class='sharp'>#define</em> <a href='../R/2842.html' title='Multiple referred from 3 places.'>GLOB_ABORTED</a>    (-2)    <em class='comment'>/* Unignored error. */</em>
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#define</em> <a href='../R/2856.html' title='Multiple referred from 11 places.'>GLOB_NOMATCH</a>    (-3)    <em class='comment'>/* No match and GLOB_NOCHECK not set. */</em>
+<a id='L96' name='L96'></a>  96 <em class='sharp'>#define</em> GLOB_NOSYS      (-4)    <em class='comment'>/* Function not supported. */</em>
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#define</em> GLOB_ABEND      <a href='../S/1597.html#L94' title='Defined at 94 in win32/glob.h.'>GLOB_ABORTED</a>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <a href='../D/355.html' title='Multiple defined in 15 places.'>BEGIN_EXTERN_C</a>()
+<a id='L100' name='L100'></a> 100 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong>      <a href='../S/1596.html#L163' title='Defined at 163 in win32/glob.c.'>glob</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <strong class='reserved'>int</strong>, <strong class='reserved'>int</strong> (*)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *, <strong class='reserved'>int</strong>), <a href='../S/1597.html#L71' title='Defined at 71 in win32/glob.h.'>glob_t</a> *);
+<a id='L101' name='L101'></a> 101 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>void</strong>     <a href='../S/1596.html#L816' title='Defined at 816 in win32/glob.c.'>globfree</a>(<a href='../S/1597.html#L71' title='Defined at 71 in win32/glob.h.'>glob_t</a> *);
+<a id='L102' name='L102'></a> 102 <a href='../D/1951.html' title='Multiple defined in 10 places.'>END_EXTERN_C</a>()
+<a id='L103' name='L103'></a> 103 <em class='sharp'>#endif</em> <em class='comment'>/* !_GLOB_H_ */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

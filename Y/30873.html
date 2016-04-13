@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pStmt</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L3533'>pStmt</a>            3533 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_sql(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L3565'>pStmt</a>            3565 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_stmt_readonly(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L3847'>pStmt</a>            3847 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_count(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L4064'>pStmt</a>            4064 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L4298'>pStmt</a>            4298 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_finalize(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L4325'>pStmt</a>            4325 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_reset(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L5228'>pStmt</a>            5228 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API sqlite3_stmt *SQLITE_STDCALL sqlite3_next_stmt(sqlite3 *pDb, sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L7893'>pStmt</a>            7893 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt,      /* Prepared statement for which info desired */</span>
+<span class='curline'><a href='../S/1054.html#L64840'>pStmt</a>            64840 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_sql(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L64841'>pStmt</a>            64841 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69003'>pStmt</a>            69003 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_expired(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69004'>pStmt</a>            69004 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69040'>pStmt</a>            69040 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_finalize(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69042'>pStmt</a>            69042 ext/sqlite3/libsqlite/sqlite3.c   if( pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L69047'>pStmt</a>            69047 ext/sqlite3/libsqlite/sqlite3.c     Vdbe *v = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69066'>pStmt</a>            69066 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_reset(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69068'>pStmt</a>            69068 ext/sqlite3/libsqlite/sqlite3.c   if( pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L69071'>pStmt</a>            69071 ext/sqlite3/libsqlite/sqlite3.c     Vdbe *v = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69085'>pStmt</a>            69085 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_clear_bindings(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69088'>pStmt</a>            69088 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69090'>pStmt</a>            69090 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_mutex *mutex = ((Vdbe*)pStmt)-&gt;db-&gt;mutex;</span>
+<span class='curline'><a href='../S/1054.html#L69539'>pStmt</a>            69539 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_step(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69542'>pStmt</a>            69542 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *v = (Vdbe*)pStmt;  /* the prepared statement */</span>
+<span class='curline'><a href='../S/1054.html#L69557'>pStmt</a>            69557 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69781'>pStmt</a>            69781 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_count(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69782'>pStmt</a>            69782 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *pVm = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69790'>pStmt</a>            69790 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L69791'>pStmt</a>            69791 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *pVm = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69838'>pStmt</a>            69838 ext/sqlite3/libsqlite/sqlite3.c static Mem *columnMem(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69842'>pStmt</a>            69842 ext/sqlite3/libsqlite/sqlite3.c   pVm = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69874'>pStmt</a>            69874 ext/sqlite3/libsqlite/sqlite3.c static void columnMallocFailure(sqlite3_stmt *pStmt)</span>
+<span class='curline'><a href='../S/1054.html#L69881'>pStmt</a>            69881 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69892'>pStmt</a>            69892 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_blob(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69894'>pStmt</a>            69894 ext/sqlite3/libsqlite/sqlite3.c   val = sqlite3_value_blob( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69899'>pStmt</a>            69899 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69902'>pStmt</a>            69902 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_bytes(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69903'>pStmt</a>            69903 ext/sqlite3/libsqlite/sqlite3.c   int val = sqlite3_value_bytes( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69904'>pStmt</a>            69904 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69907'>pStmt</a>            69907 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_bytes16(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69908'>pStmt</a>            69908 ext/sqlite3/libsqlite/sqlite3.c   int val = sqlite3_value_bytes16( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69909'>pStmt</a>            69909 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69912'>pStmt</a>            69912 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API double SQLITE_STDCALL sqlite3_column_double(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69913'>pStmt</a>            69913 ext/sqlite3/libsqlite/sqlite3.c   double val = sqlite3_value_double( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69914'>pStmt</a>            69914 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69917'>pStmt</a>            69917 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_int(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69918'>pStmt</a>            69918 ext/sqlite3/libsqlite/sqlite3.c   int val = sqlite3_value_int( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69919'>pStmt</a>            69919 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69922'>pStmt</a>            69922 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API sqlite_int64 SQLITE_STDCALL sqlite3_column_int64(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69923'>pStmt</a>            69923 ext/sqlite3/libsqlite/sqlite3.c   sqlite_int64 val = sqlite3_value_int64( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69924'>pStmt</a>            69924 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69927'>pStmt</a>            69927 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const unsigned char *SQLITE_STDCALL sqlite3_column_text(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69928'>pStmt</a>            69928 ext/sqlite3/libsqlite/sqlite3.c   const unsigned char *val = sqlite3_value_text( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69929'>pStmt</a>            69929 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69932'>pStmt</a>            69932 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API sqlite3_value *SQLITE_STDCALL sqlite3_column_value(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69933'>pStmt</a>            69933 ext/sqlite3/libsqlite/sqlite3.c   Mem *pOut = columnMem(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L69938'>pStmt</a>            69938 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69942'>pStmt</a>            69942 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_text16(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69943'>pStmt</a>            69943 ext/sqlite3/libsqlite/sqlite3.c   const void *val = sqlite3_value_text16( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69944'>pStmt</a>            69944 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69948'>pStmt</a>            69948 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_column_type(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L69949'>pStmt</a>            69949 ext/sqlite3/libsqlite/sqlite3.c   int iType = sqlite3_value_type( columnMem(pStmt,i) );</span>
+<span class='curline'><a href='../S/1054.html#L69950'>pStmt</a>            69950 ext/sqlite3/libsqlite/sqlite3.c   columnMallocFailure(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L69971'>pStmt</a>            69971 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt,</span>
+<span class='curline'><a href='../S/1054.html#L69981'>pStmt</a>            69981 ext/sqlite3/libsqlite/sqlite3.c   if( pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L69987'>pStmt</a>            69987 ext/sqlite3/libsqlite/sqlite3.c   p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L69990'>pStmt</a>            69990 ext/sqlite3/libsqlite/sqlite3.c   n = sqlite3_column_count(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L70012'>pStmt</a>            70012 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_column_name(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70014'>pStmt</a>            70014 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_NAME);</span>
+<span class='curline'><a href='../S/1054.html#L70017'>pStmt</a>            70017 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_name16(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70019'>pStmt</a>            70019 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_NAME);</span>
+<span class='curline'><a href='../S/1054.html#L70037'>pStmt</a>            70037 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_column_decltype(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70039'>pStmt</a>            70039 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_DECLTYPE);</span>
+<span class='curline'><a href='../S/1054.html#L70042'>pStmt</a>            70042 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_decltype16(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70044'>pStmt</a>            70044 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DECLTYPE);</span>
+<span class='curline'><a href='../S/1054.html#L70055'>pStmt</a>            70055 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_column_database_name(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70057'>pStmt</a>            70057 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_DATABASE);</span>
+<span class='curline'><a href='../S/1054.html#L70060'>pStmt</a>            70060 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_database_name16(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70062'>pStmt</a>            70062 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DATABASE);</span>
+<span class='curline'><a href='../S/1054.html#L70071'>pStmt</a>            70071 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_column_table_name(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70073'>pStmt</a>            70073 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_TABLE);</span>
+<span class='curline'><a href='../S/1054.html#L70076'>pStmt</a>            70076 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_table_name16(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70078'>pStmt</a>            70078 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_TABLE);</span>
+<span class='curline'><a href='../S/1054.html#L70087'>pStmt</a>            70087 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_column_origin_name(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70089'>pStmt</a>            70089 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_COLUMN);</span>
+<span class='curline'><a href='../S/1054.html#L70092'>pStmt</a>            70092 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const void *SQLITE_STDCALL sqlite3_column_origin_name16(sqlite3_stmt *pStmt, int N){</span>
+<span class='curline'><a href='../S/1054.html#L70094'>pStmt</a>            70094 ext/sqlite3/libsqlite/sqlite3.c       pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_COLUMN);</span>
+<span class='curline'><a href='../S/1054.html#L70160'>pStmt</a>            70160 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt,   /* The statement to bind against */</span>
+<span class='curline'><a href='../S/1054.html#L70167'>pStmt</a>            70167 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70194'>pStmt</a>            70194 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L70200'>pStmt</a>            70200 ext/sqlite3/libsqlite/sqlite3.c   return bindText(pStmt, i, zData, nData, xDel, 0);</span>
+<span class='curline'><a href='../S/1054.html#L70203'>pStmt</a>            70203 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L70213'>pStmt</a>            70213 ext/sqlite3/libsqlite/sqlite3.c     return bindText(pStmt, i, zData, (int)nData, xDel, 0);</span>
+<span class='curline'><a href='../S/1054.html#L70216'>pStmt</a>            70216 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_double(sqlite3_stmt *pStmt, int i, double rValue){</span>
+<span class='curline'><a href='../S/1054.html#L70218'>pStmt</a>            70218 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70229'>pStmt</a>            70229 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_int64(sqlite3_stmt *pStmt, int i, sqlite_int64 iValue){</span>
+<span class='curline'><a href='../S/1054.html#L70231'>pStmt</a>            70231 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70239'>pStmt</a>            70239 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_null(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L70241'>pStmt</a>            70241 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70249'>pStmt</a>            70249 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L70255'>pStmt</a>            70255 ext/sqlite3/libsqlite/sqlite3.c   return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF8);</span>
+<span class='curline'><a href='../S/1054.html#L70258'>pStmt</a>            70258 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L70270'>pStmt</a>            70270 ext/sqlite3/libsqlite/sqlite3.c     return bindText(pStmt, i, zData, (int)nData, xDel, enc);</span>
+<span class='curline'><a href='../S/1054.html#L70275'>pStmt</a>            70275 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L70281'>pStmt</a>            70281 ext/sqlite3/libsqlite/sqlite3.c   return bindText(pStmt, i, zData, nData, xDel, SQLITE_UTF16NATIVE);</span>
+<span class='curline'><a href='../S/1054.html#L70284'>pStmt</a>            70284 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_value(sqlite3_stmt *pStmt, int i, const sqlite3_value *pValue){</span>
+<span class='curline'><a href='../S/1054.html#L70288'>pStmt</a>            70288 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_bind_int64(pStmt, i, pValue-&gt;u.i);</span>
+<span class='curline'><a href='../S/1054.html#L70292'>pStmt</a>            70292 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_bind_double(pStmt, i, pValue-&gt;u.r);</span>
+<span class='curline'><a href='../S/1054.html#L70297'>pStmt</a>            70297 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_bind_zeroblob(pStmt, i, pValue-&gt;u.nZero);</span>
+<span class='curline'><a href='../S/1054.html#L70299'>pStmt</a>            70299 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_bind_blob(pStmt, i, pValue-&gt;z, pValue-&gt;n,SQLITE_TRANSIENT);</span>
+<span class='curline'><a href='../S/1054.html#L70304'>pStmt</a>            70304 ext/sqlite3/libsqlite/sqlite3.c       rc = bindText(pStmt,i,  pValue-&gt;z, pValue-&gt;n, SQLITE_TRANSIENT,</span>
+<span class='curline'><a href='../S/1054.html#L70309'>pStmt</a>            70309 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_bind_null(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L70315'>pStmt</a>            70315 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_zeroblob(sqlite3_stmt *pStmt, int i, int n){</span>
+<span class='curline'><a href='../S/1054.html#L70317'>pStmt</a>            70317 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe *)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70330'>pStmt</a>            70330 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_parameter_count(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70331'>pStmt</a>            70331 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70341'>pStmt</a>            70341 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API const char *SQLITE_STDCALL sqlite3_bind_parameter_name(sqlite3_stmt *pStmt, int i){</span>
+<span class='curline'><a href='../S/1054.html#L70342'>pStmt</a>            70342 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70369'>pStmt</a>            70369 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_bind_parameter_index(sqlite3_stmt *pStmt, const char *zName){</span>
+<span class='curline'><a href='../S/1054.html#L70370'>pStmt</a>            70370 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3VdbeParameterIndex((Vdbe*)pStmt, zName, sqlite3Strlen30(zName));</span>
+<span class='curline'><a href='../S/1054.html#L70425'>pStmt</a>            70425 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API sqlite3 *SQLITE_STDCALL sqlite3_db_handle(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70426'>pStmt</a>            70426 ext/sqlite3/libsqlite/sqlite3.c   return pStmt ? ((Vdbe*)pStmt)-&gt;db : 0;</span>
+<span class='curline'><a href='../S/1054.html#L70433'>pStmt</a>            70433 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_stmt_readonly(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70434'>pStmt</a>            70434 ext/sqlite3/libsqlite/sqlite3.c   return pStmt ? ((Vdbe*)pStmt)-&gt;readOnly : 1;</span>
+<span class='curline'><a href='../S/1054.html#L70440'>pStmt</a>            70440 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_stmt_busy(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70441'>pStmt</a>            70441 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *v = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70451'>pStmt</a>            70451 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API sqlite3_stmt *SQLITE_STDCALL sqlite3_next_stmt(sqlite3 *pDb, sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70460'>pStmt</a>            70460 ext/sqlite3/libsqlite/sqlite3.c   if( pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L70463'>pStmt</a>            70463 ext/sqlite3/libsqlite/sqlite3.c     pNext = (sqlite3_stmt*)((Vdbe*)pStmt)-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L70472'>pStmt</a>            70472 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_stmt_status(sqlite3_stmt *pStmt, int op, int resetFlag){</span>
+<span class='curline'><a href='../S/1054.html#L70473'>pStmt</a>            70473 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *pVdbe = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70476'>pStmt</a>            70476 ext/sqlite3/libsqlite/sqlite3.c   if( !pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L70491'>pStmt</a>            70491 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt,            /* Prepared statement being queried */</span>
+<span class='curline'><a href='../S/1054.html#L70496'>pStmt</a>            70496 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L70549'>pStmt</a>            70549 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API void SQLITE_STDCALL sqlite3_stmt_scanstatus_reset(sqlite3_stmt *pStmt){</span>
+<span class='curline'><a href='../S/1054.html#L70550'>pStmt</a>            70550 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *p = (Vdbe*)pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L77453'>pStmt</a>            77453 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;    /* Statement holding cursor open */</span>
+<span class='curline'><a href='../S/1054.html#L77478'>pStmt</a>            77478 ext/sqlite3/libsqlite/sqlite3.c   Vdbe *v = (Vdbe *)p-&gt;pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L77487'>pStmt</a>            77487 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_step(p-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77496'>pStmt</a>            77496 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_finalize(p-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77497'>pStmt</a>            77497 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L77508'>pStmt</a>            77508 ext/sqlite3/libsqlite/sqlite3.c   }else if( p-&gt;pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L77509'>pStmt</a>            77509 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_finalize(p-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77510'>pStmt</a>            77510 ext/sqlite3/libsqlite/sqlite3.c     p-&gt;pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L77686'>pStmt</a>            77686 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;pStmt = (sqlite3_stmt *)sqlite3VdbeCreate(pParse);</span>
+<span class='curline'><a href='../S/1054.html#L77687'>pStmt</a>            77687 ext/sqlite3/libsqlite/sqlite3.c     assert( pBlob-&gt;pStmt || db-&gt;mallocFailed );</span>
+<span class='curline'><a href='../S/1054.html#L77688'>pStmt</a>            77688 ext/sqlite3/libsqlite/sqlite3.c     if( pBlob-&gt;pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L77689'>pStmt</a>            77689 ext/sqlite3/libsqlite/sqlite3.c       Vdbe *v = (Vdbe *)pBlob-&gt;pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L77742'>pStmt</a>            77742 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pBlob-&gt;pStmt, 1, iRow);</span>
+<span class='curline'><a href='../S/1054.html#L77750'>pStmt</a>            77750 ext/sqlite3/libsqlite/sqlite3.c     if( pBlob &amp;&amp; pBlob-&gt;pStmt ) sqlite3VdbeFinalize((Vdbe *)pBlob-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77774'>pStmt</a>            77774 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_finalize(p-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77801'>pStmt</a>            77801 ext/sqlite3/libsqlite/sqlite3.c   v = (Vdbe*)p-&gt;pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L77821'>pStmt</a>            77821 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L77854'>pStmt</a>            77854 ext/sqlite3/libsqlite/sqlite3.c   return (p &amp;&amp; p-&gt;pStmt) ? p-&gt;nByte : 0;</span>
+<span class='curline'><a href='../S/1054.html#L77876'>pStmt</a>            77876 ext/sqlite3/libsqlite/sqlite3.c   if( p-&gt;pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L77892'>pStmt</a>            77892 ext/sqlite3/libsqlite/sqlite3.c   assert( rc==SQLITE_OK || p-&gt;pStmt==0 );</span>
+<span class='curline'><a href='../S/1054.html#L89733'>pStmt</a>            89733 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;      /* An SQL statement being run */</span>
+<span class='curline'><a href='../S/1054.html#L89743'>pStmt</a>            89743 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L89747'>pStmt</a>            89747 ext/sqlite3/libsqlite/sqlite3.c   while( sqlite3_step(pStmt)==SQLITE_ROW ){</span>
+<span class='curline'><a href='../S/1054.html#L89757'>pStmt</a>            89757 ext/sqlite3/libsqlite/sqlite3.c     zIndex = (char *)sqlite3_column_text(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L89759'>pStmt</a>            89759 ext/sqlite3/libsqlite/sqlite3.c     nSample = sqlite3_column_int(pStmt, 1);</span>
+<span class='curline'><a href='../S/1054.html#L89780'>pStmt</a>            89780 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L89792'>pStmt</a>            89792 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L89799'>pStmt</a>            89799 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L89803'>pStmt</a>            89803 ext/sqlite3/libsqlite/sqlite3.c   while( sqlite3_step(pStmt)==SQLITE_ROW ){</span>
+<span class='curline'><a href='../S/1054.html#L89808'>pStmt</a>            89808 ext/sqlite3/libsqlite/sqlite3.c     zIndex = (char *)sqlite3_column_text(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L89821'>pStmt</a>            89821 ext/sqlite3/libsqlite/sqlite3.c     decodeIntArray((char*)sqlite3_column_text(pStmt,1),nCol,pSample-&gt;anEq,0,0);</span>
+<span class='curline'><a href='../S/1054.html#L89822'>pStmt</a>            89822 ext/sqlite3/libsqlite/sqlite3.c     decodeIntArray((char*)sqlite3_column_text(pStmt,2),nCol,pSample-&gt;anLt,0,0);</span>
+<span class='curline'><a href='../S/1054.html#L89823'>pStmt</a>            89823 ext/sqlite3/libsqlite/sqlite3.c     decodeIntArray((char*)sqlite3_column_text(pStmt,3),nCol,pSample-&gt;anDLt,0,0);</span>
+<span class='curline'><a href='../S/1054.html#L89831'>pStmt</a>            89831 ext/sqlite3/libsqlite/sqlite3.c     pSample-&gt;n = sqlite3_column_bytes(pStmt, 4);</span>
+<span class='curline'><a href='../S/1054.html#L89834'>pStmt</a>            89834 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L89837'>pStmt</a>            89837 ext/sqlite3/libsqlite/sqlite3.c     memcpy(pSample-&gt;p, sqlite3_column_blob(pStmt, 4), pSample-&gt;n);</span>
+<span class='curline'><a href='../S/1054.html#L89840'>pStmt</a>            89840 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101728'>pStmt</a>            101728 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;    /* The current SQL statement */</span>
+<span class='curline'><a href='../S/1054.html#L101741'>pStmt</a>            101741 ext/sqlite3/libsqlite/sqlite3.c     pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L101742'>pStmt</a>            101742 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_prepare_v2(db, zSql, -1, &amp;pStmt, &amp;zLeftover);</span>
+<span class='curline'><a href='../S/1054.html#L101743'>pStmt</a>            101743 ext/sqlite3/libsqlite/sqlite3.c     assert( rc==SQLITE_OK || pStmt==0 );</span>
+<span class='curline'><a href='../S/1054.html#L101747'>pStmt</a>            101747 ext/sqlite3/libsqlite/sqlite3.c     if( !pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L101754'>pStmt</a>            101754 ext/sqlite3/libsqlite/sqlite3.c     nCol = sqlite3_column_count(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101758'>pStmt</a>            101758 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101770'>pStmt</a>            101770 ext/sqlite3/libsqlite/sqlite3.c             azCols[i] = (char *)sqlite3_column_name(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L101780'>pStmt</a>            101780 ext/sqlite3/libsqlite/sqlite3.c             azVals[i] = (char *)sqlite3_column_text(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L101781'>pStmt</a>            101781 ext/sqlite3/libsqlite/sqlite3.c             if( !azVals[i] &amp;&amp; sqlite3_column_type(pStmt, i)!=SQLITE_NULL ){</span>
+<span class='curline'><a href='../S/1054.html#L101792'>pStmt</a>            101792 ext/sqlite3/libsqlite/sqlite3.c           sqlite3VdbeFinalize((Vdbe *)pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101793'>pStmt</a>            101793 ext/sqlite3/libsqlite/sqlite3.c           pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L101800'>pStmt</a>            101800 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3VdbeFinalize((Vdbe *)pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101801'>pStmt</a>            101801 ext/sqlite3/libsqlite/sqlite3.c         pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L101813'>pStmt</a>            101813 ext/sqlite3/libsqlite/sqlite3.c   if( pStmt ) sqlite3VdbeFinalize((Vdbe *)pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101914'>pStmt</a>            101914 ext/sqlite3/libsqlite/sqlite3.c   int  (*column_count)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101948'>pStmt</a>            101948 ext/sqlite3/libsqlite/sqlite3.c   int  (*data_count)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101957'>pStmt</a>            101957 ext/sqlite3/libsqlite/sqlite3.c   int  (*finalize)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L101977'>pStmt</a>            101977 ext/sqlite3/libsqlite/sqlite3.c   int  (*reset)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L105649'>pStmt</a>            105649 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L105656'>pStmt</a>            105656 ext/sqlite3/libsqlite/sqlite3.c     TESTONLY(rcp = ) sqlite3_prepare(db, argv[2], -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L105672'>pStmt</a>            105672 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L114198'>pStmt</a>            114198 ext/sqlite3/libsqlite/sqlite3.c static int vacuumFinalize(sqlite3 *db, sqlite3_stmt *pStmt, char **pzErrMsg){</span>
+<span class='curline'><a href='../S/1054.html#L114200'>pStmt</a>            114200 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3VdbeFinalize((Vdbe*)pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L114211'>pStmt</a>            114211 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L114216'>pStmt</a>            114216 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_OK!=sqlite3_prepare(db, zSql, -1, &amp;pStmt, 0) ){</span>
+<span class='curline'><a href='../S/1054.html#L114220'>pStmt</a>            114220 ext/sqlite3/libsqlite/sqlite3.c   VVA_ONLY( rc = ) sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L114222'>pStmt</a>            114222 ext/sqlite3/libsqlite/sqlite3.c   return vacuumFinalize(db, pStmt, pzErrMsg);</span>
+<span class='curline'><a href='../S/1054.html#L114230'>pStmt</a>            114230 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L114233'>pStmt</a>            114233 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L114236'>pStmt</a>            114236 ext/sqlite3/libsqlite/sqlite3.c   while( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L114237'>pStmt</a>            114237 ext/sqlite3/libsqlite/sqlite3.c     rc = execSql(db, pzErrMsg, (char*)sqlite3_column_text(pStmt, 0));</span>
+<span class='curline'><a href='../S/1054.html#L114239'>pStmt</a>            114239 ext/sqlite3/libsqlite/sqlite3.c       vacuumFinalize(db, pStmt, pzErrMsg);</span>
+<span class='curline'><a href='../S/1054.html#L114244'>pStmt</a>            114244 ext/sqlite3/libsqlite/sqlite3.c   return vacuumFinalize(db, pStmt, pzErrMsg);</span>
+<span class='curline'><a href='../S/1054.html#L132970'>pStmt</a>            132970 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;            /* Prepared statement in use by the cursor */</span>
+<span class='curline'><a href='../S/1054.html#L133701'>pStmt</a>            133701 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt;          /* Compiled "PRAGMA %Q.page_size" statement */</span>
+<span class='curline'><a href='../S/1054.html#L133707'>pStmt</a>            133707 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare(p-&gt;db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L133709'>pStmt</a>            133709 ext/sqlite3/libsqlite/sqlite3.c         sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L133710'>pStmt</a>            133710 ext/sqlite3/libsqlite/sqlite3.c         p-&gt;nPgsz = sqlite3_column_int(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L133711'>pStmt</a>            133711 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L134038'>pStmt</a>            134038 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;        /* Compiled version of zSql */</span>
+<span class='curline'><a href='../S/1054.html#L134044'>pStmt</a>            134044 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_prepare(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L134060'>pStmt</a>            134060 ext/sqlite3/libsqlite/sqlite3.c     nCol = sqlite3_column_count(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L134062'>pStmt</a>            134062 ext/sqlite3/libsqlite/sqlite3.c       const char *zCol = sqlite3_column_name(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L134073'>pStmt</a>            134073 ext/sqlite3/libsqlite/sqlite3.c         const char *zCol = sqlite3_column_name(pStmt, i);</span>
+<span class='curline'><a href='../S/1054.html#L134080'>pStmt</a>            134080 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L134667'>pStmt</a>            134667 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_finalize(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L134690'>pStmt</a>            134690 ext/sqlite3/libsqlite/sqlite3.c   if( pCsr-&gt;pStmt==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L134695'>pStmt</a>            134695 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L134698'>pStmt</a>            134698 ext/sqlite3/libsqlite/sqlite3.c   *ppStmt = pCsr-&gt;pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L134710'>pStmt</a>            134710 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L134712'>pStmt</a>            134712 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3CursorSeekStmt(pCsr, &amp;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L134714'>pStmt</a>            134714 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int64(pCsr-&gt;pStmt, 1, pCsr-&gt;iPrevId);</span>
+<span class='curline'><a href='../S/1054.html#L134716'>pStmt</a>            134716 ext/sqlite3/libsqlite/sqlite3.c       if( SQLITE_ROW==sqlite3_step(pCsr-&gt;pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L134719'>pStmt</a>            134719 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L135806'>pStmt</a>            135806 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;        /* Statement to iterate through segments */</span>
+<span class='curline'><a href='../S/1054.html#L135825'>pStmt</a>            135825 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3Fts3AllSegdirs(p, iLangid, iIndex, iLevel, &amp;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L135828'>pStmt</a>            135828 ext/sqlite3/libsqlite/sqlite3.c     while( rc==SQLITE_OK &amp;&amp; SQLITE_ROW==(rc = sqlite3_step(pStmt)) ){</span>
+<span class='curline'><a href='../S/1054.html#L135832'>pStmt</a>            135832 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_int64 iStartBlock = sqlite3_column_int64(pStmt, 1);</span>
+<span class='curline'><a href='../S/1054.html#L135833'>pStmt</a>            135833 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_int64 iLeavesEndBlock = sqlite3_column_int64(pStmt, 2);</span>
+<span class='curline'><a href='../S/1054.html#L135834'>pStmt</a>            135834 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_int64 iEndBlock = sqlite3_column_int64(pStmt, 3);</span>
+<span class='curline'><a href='../S/1054.html#L135835'>pStmt</a>            135835 ext/sqlite3/libsqlite/sqlite3.c       int nRoot = sqlite3_column_bytes(pStmt, 4);</span>
+<span class='curline'><a href='../S/1054.html#L135836'>pStmt</a>            135836 ext/sqlite3/libsqlite/sqlite3.c       char const *zRoot = sqlite3_column_blob(pStmt, 4);</span>
+<span class='curline'><a href='../S/1054.html#L135858'>pStmt</a>            135858 ext/sqlite3/libsqlite/sqlite3.c   rc2 = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L136078'>pStmt</a>            136078 ext/sqlite3/libsqlite/sqlite3.c     if( SQLITE_ROW!=sqlite3_step(pCsr-&gt;pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L136080'>pStmt</a>            136080 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L136082'>pStmt</a>            136082 ext/sqlite3/libsqlite/sqlite3.c       pCsr-&gt;iPrevId = sqlite3_column_int64(pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L136170'>pStmt</a>            136170 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_finalize(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L136232'>pStmt</a>            136232 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L136238'>pStmt</a>            136238 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3CursorSeekStmt(pCsr, &amp;pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L136240'>pStmt</a>            136240 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_bind_value(pCsr-&gt;pStmt, 1, pCons);</span>
+<span class='curline'><a href='../S/1054.html#L136311'>pStmt</a>            136311 ext/sqlite3/libsqlite/sqlite3.c           iLangid = sqlite3_column_int(pCsr-&gt;pStmt, p-&gt;nColumn+1);</span>
+<span class='curline'><a href='../S/1054.html#L136314'>pStmt</a>            136314 ext/sqlite3/libsqlite/sqlite3.c       }else if( sqlite3_data_count(pCsr-&gt;pStmt)&gt;(iCol+1) ){</span>
+<span class='curline'><a href='../S/1054.html#L136315'>pStmt</a>            136315 ext/sqlite3/libsqlite/sqlite3.c         sqlite3_result_value(pCtx, sqlite3_column_value(pCsr-&gt;pStmt, iCol+1));</span>
+<span class='curline'><a href='../S/1054.html#L136397'>pStmt</a>            136397 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L136398'>pStmt</a>            136398 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L136400'>pStmt</a>            136400 ext/sqlite3/libsqlite/sqlite3.c         int bHasStat = (sqlite3_step(pStmt)==SQLITE_ROW);</span>
+<span class='curline'><a href='../S/1054.html#L136401'>pStmt</a>            136401 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L137739'>pStmt</a>            137739 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L137745'>pStmt</a>            137745 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3Fts3SelectDoctotal(p, &amp;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L137747'>pStmt</a>            137747 ext/sqlite3/libsqlite/sqlite3.c     a = sqlite3_column_blob(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L137750'>pStmt</a>            137750 ext/sqlite3/libsqlite/sqlite3.c     pEnd = &amp;a[sqlite3_column_bytes(pStmt, 0)];</span>
+<span class='curline'><a href='../S/1054.html#L137756'>pStmt</a>            137756 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L137763'>pStmt</a>            137763 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L138450'>pStmt</a>            138450 ext/sqlite3/libsqlite/sqlite3.c         sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L138452'>pStmt</a>            138452 ext/sqlite3/libsqlite/sqlite3.c       assert( sqlite3_data_count(pCsr-&gt;pStmt)==0 );</span>
+<span class='curline'><a href='../S/1054.html#L138608'>pStmt</a>            138608 ext/sqlite3/libsqlite/sqlite3.c         if( pCsr-&gt;isRequireSeek==0 ) sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L138609'>pStmt</a>            138609 ext/sqlite3/libsqlite/sqlite3.c         assert( sqlite3_data_count(pCsr-&gt;pStmt)==0 );</span>
+<span class='curline'><a href='../S/1054.html#L140534'>pStmt</a>            140534 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L140538'>pStmt</a>            140538 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare_v2(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L140543'>pStmt</a>            140543 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_text(pStmt, 1, zName, -1, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L140544'>pStmt</a>            140544 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L140545'>pStmt</a>            140545 ext/sqlite3/libsqlite/sqlite3.c     if( sqlite3_column_type(pStmt, 0)==SQLITE_BLOB ){</span>
+<span class='curline'><a href='../S/1054.html#L140546'>pStmt</a>            140546 ext/sqlite3/libsqlite/sqlite3.c       memcpy((void *)pp, sqlite3_column_blob(pStmt, 0), sizeof(*pp));</span>
+<span class='curline'><a href='../S/1054.html#L140550'>pStmt</a>            140550 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L142110'>pStmt</a>            142110 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L142113'>pStmt</a>            142113 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare_v2(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L142118'>pStmt</a>            142118 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_text(pStmt, 1, zName, -1, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L142119'>pStmt</a>            142119 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_blob(pStmt, 2, &amp;p, sizeof(p), SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L142120'>pStmt</a>            142120 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L142122'>pStmt</a>            142122 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L142132'>pStmt</a>            142132 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L142136'>pStmt</a>            142136 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_prepare_v2(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L142141'>pStmt</a>            142141 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_text(pStmt, 1, zName, -1, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L142142'>pStmt</a>            142142 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L142143'>pStmt</a>            142143 ext/sqlite3/libsqlite/sqlite3.c     if( sqlite3_column_type(pStmt, 0)==SQLITE_BLOB ){</span>
+<span class='curline'><a href='../S/1054.html#L142144'>pStmt</a>            142144 ext/sqlite3/libsqlite/sqlite3.c       memcpy((void *)pp, sqlite3_column_blob(pStmt, 0), sizeof(*pp));</span>
+<span class='curline'><a href='../S/1054.html#L142148'>pStmt</a>            142148 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143350'>pStmt</a>            143350 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143355'>pStmt</a>            143355 ext/sqlite3/libsqlite/sqlite3.c   pStmt = p-&gt;aStmt[eStmt];</span>
+<span class='curline'><a href='../S/1054.html#L143356'>pStmt</a>            143356 ext/sqlite3/libsqlite/sqlite3.c   if( !pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L143368'>pStmt</a>            143368 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pStmt, NULL);</span>
+<span class='curline'><a href='../S/1054.html#L143370'>pStmt</a>            143370 ext/sqlite3/libsqlite/sqlite3.c       assert( rc==SQLITE_OK || pStmt==0 );</span>
+<span class='curline'><a href='../S/1054.html#L143371'>pStmt</a>            143371 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;aStmt[eStmt] = pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143376'>pStmt</a>            143376 ext/sqlite3/libsqlite/sqlite3.c     int nParam = sqlite3_bind_parameter_count(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143378'>pStmt</a>            143378 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_bind_value(pStmt, i+1, apVal[i]);</span>
+<span class='curline'><a href='../S/1054.html#L143381'>pStmt</a>            143381 ext/sqlite3/libsqlite/sqlite3.c   *pp = pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143391'>pStmt</a>            143391 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;        /* Statement requested from fts3SqlStmt() */</span>
+<span class='curline'><a href='../S/1054.html#L143394'>pStmt</a>            143394 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(pTab, SQL_SELECT_DOCSIZE, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L143396'>pStmt</a>            143396 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 1, iDocid);</span>
+<span class='curline'><a href='../S/1054.html#L143397'>pStmt</a>            143397 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143398'>pStmt</a>            143398 ext/sqlite3/libsqlite/sqlite3.c     if( rc!=SQLITE_ROW || sqlite3_column_type(pStmt, 0)!=SQLITE_BLOB ){</span>
+<span class='curline'><a href='../S/1054.html#L143399'>pStmt</a>            143399 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143401'>pStmt</a>            143401 ext/sqlite3/libsqlite/sqlite3.c       pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L143407'>pStmt</a>            143407 ext/sqlite3/libsqlite/sqlite3.c   *ppStmt = pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143415'>pStmt</a>            143415 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L143417'>pStmt</a>            143417 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(pTab, SQL_SELECT_STAT, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L143419'>pStmt</a>            143419 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int(pStmt, 1, FTS_STAT_DOCTOTAL);</span>
+<span class='curline'><a href='../S/1054.html#L143420'>pStmt</a>            143420 ext/sqlite3/libsqlite/sqlite3.c     if( sqlite3_step(pStmt)!=SQLITE_ROW</span>
+<span class='curline'><a href='../S/1054.html#L143421'>pStmt</a>            143421 ext/sqlite3/libsqlite/sqlite3.c      || sqlite3_column_type(pStmt, 0)!=SQLITE_BLOB</span>
+<span class='curline'><a href='../S/1054.html#L143423'>pStmt</a>            143423 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143425'>pStmt</a>            143425 ext/sqlite3/libsqlite/sqlite3.c       pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L143428'>pStmt</a>            143428 ext/sqlite3/libsqlite/sqlite3.c   *ppStmt = pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143454'>pStmt</a>            143454 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143457'>pStmt</a>            143457 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, eStmt, &amp;pStmt, apVal); </span>
+<span class='curline'><a href='../S/1054.html#L143459'>pStmt</a>            143459 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143460'>pStmt</a>            143460 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143484'>pStmt</a>            143484 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L143485'>pStmt</a>            143485 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_DELETE_SEGDIR_LEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L143487'>pStmt</a>            143487 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_null(pStmt, 1);</span>
+<span class='curline'><a href='../S/1054.html#L143488'>pStmt</a>            143488 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143489'>pStmt</a>            143489 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L143559'>pStmt</a>            143559 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L143567'>pStmt</a>            143567 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_SELECT_LEVEL_RANGE, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L143569'>pStmt</a>            143569 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int64(pStmt, 1, getAbsoluteLevel(p, iLangid, iIndex, 0));</span>
+<span class='curline'><a href='../S/1054.html#L143570'>pStmt</a>            143570 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int64(pStmt, 2, </span>
+<span class='curline'><a href='../S/1054.html#L143576'>pStmt</a>            143576 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_SELECT_LEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L143578'>pStmt</a>            143578 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int64(pStmt, 1, getAbsoluteLevel(p, iLangid, iIndex,iLevel));</span>
+<span class='curline'><a href='../S/1054.html#L143581'>pStmt</a>            143581 ext/sqlite3/libsqlite/sqlite3.c   *ppStmt = pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L144849'>pStmt</a>            144849 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L144850'>pStmt</a>            144850 ext/sqlite3/libsqlite/sqlite3.c   int rc = fts3SqlStmt(p, SQL_INSERT_SEGMENTS, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L144852'>pStmt</a>            144852 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 1, iBlock);</span>
+<span class='curline'><a href='../S/1054.html#L144853'>pStmt</a>            144853 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_blob(pStmt, 2, z, n, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L144854'>pStmt</a>            144854 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L144855'>pStmt</a>            144855 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L144868'>pStmt</a>            144868 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L144870'>pStmt</a>            144870 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_SELECT_MXLEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L144872'>pStmt</a>            144872 ext/sqlite3/libsqlite/sqlite3.c     if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L144873'>pStmt</a>            144873 ext/sqlite3/libsqlite/sqlite3.c       mxLevel = sqlite3_column_int(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L144875'>pStmt</a>            144875 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L144895'>pStmt</a>            144895 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L144896'>pStmt</a>            144896 ext/sqlite3/libsqlite/sqlite3.c   int rc = fts3SqlStmt(p, SQL_INSERT_SEGDIR, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L144898'>pStmt</a>            144898 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 1, iLevel);</span>
+<span class='curline'><a href='../S/1054.html#L144899'>pStmt</a>            144899 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int(pStmt, 2, iIdx);</span>
+<span class='curline'><a href='../S/1054.html#L144900'>pStmt</a>            144900 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 3, iStartBlock);</span>
+<span class='curline'><a href='../S/1054.html#L144901'>pStmt</a>            144901 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 4, iLeafEndBlock);</span>
+<span class='curline'><a href='../S/1054.html#L144903'>pStmt</a>            144903 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int64(pStmt, 5, iEndBlock);</span>
+<span class='curline'><a href='../S/1054.html#L144907'>pStmt</a>            144907 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_text(pStmt, 5, zEnd, -1, sqlite3_free);</span>
+<span class='curline'><a href='../S/1054.html#L144909'>pStmt</a>            144909 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_blob(pStmt, 6, zRoot, nRoot, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L144910'>pStmt</a>            144910 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L144911'>pStmt</a>            144911 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L145163'>pStmt</a>            145163 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L145177'>pStmt</a>            145177 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_NEXT_SEGMENTS_ID, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145179'>pStmt</a>            145179 ext/sqlite3/libsqlite/sqlite3.c     if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L145180'>pStmt</a>            145180 ext/sqlite3/libsqlite/sqlite3.c       pWriter-&gt;iFree = sqlite3_column_int64(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145183'>pStmt</a>            145183 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L145344'>pStmt</a>            145344 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L145351'>pStmt</a>            145351 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_IS_EMPTY, &amp;pStmt, &amp;pRowid);</span>
+<span class='curline'><a href='../S/1054.html#L145353'>pStmt</a>            145353 ext/sqlite3/libsqlite/sqlite3.c       if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L145354'>pStmt</a>            145354 ext/sqlite3/libsqlite/sqlite3.c         *pisEmpty = sqlite3_column_int(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145356'>pStmt</a>            145356 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L145376'>pStmt</a>            145376 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L145386'>pStmt</a>            145386 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_SELECT_SEGDIR_MAX_LEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145388'>pStmt</a>            145388 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pStmt, 1, getAbsoluteLevel(p, iLangid, iIndex, 0));</span>
+<span class='curline'><a href='../S/1054.html#L145389'>pStmt</a>            145389 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pStmt, 2, </span>
+<span class='curline'><a href='../S/1054.html#L145392'>pStmt</a>            145392 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L145393'>pStmt</a>            145393 ext/sqlite3/libsqlite/sqlite3.c     *pnMax = sqlite3_column_int64(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145395'>pStmt</a>            145395 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L145414'>pStmt</a>            145414 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L145415'>pStmt</a>            145415 ext/sqlite3/libsqlite/sqlite3.c   int rc = fts3SqlStmt(p, SQL_SELECT_SEGDIR_MAX_LEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L145417'>pStmt</a>            145417 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pStmt, 1, iAbsLevel+1);</span>
+<span class='curline'><a href='../S/1054.html#L145418'>pStmt</a>            145418 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pStmt, 2, </span>
+<span class='curline'><a href='../S/1054.html#L145423'>pStmt</a>            145423 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L145424'>pStmt</a>            145424 ext/sqlite3/libsqlite/sqlite3.c     *pbMax = sqlite3_column_type(pStmt, 0)==SQLITE_NULL;</span>
+<span class='curline'><a href='../S/1054.html#L145426'>pStmt</a>            145426 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L145975'>pStmt</a>            145975 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt, </span>
+<span class='curline'><a href='../S/1054.html#L145980'>pStmt</a>            145980 ext/sqlite3/libsqlite/sqlite3.c   const unsigned char *zText = sqlite3_column_text(pStmt, iCol);</span>
+<span class='curline'><a href='../S/1054.html#L146222'>pStmt</a>            146222 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L146223'>pStmt</a>            146223 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_SELECT_STAT, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146225'>pStmt</a>            146225 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_bind_int(pStmt, 1, FTS_STAT_AUTOINCRMERGE);</span>
+<span class='curline'><a href='../S/1054.html#L146226'>pStmt</a>            146226 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146228'>pStmt</a>            146228 ext/sqlite3/libsqlite/sqlite3.c         p-&gt;nAutoincrmerge = sqlite3_column_int(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146233'>pStmt</a>            146233 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146286'>pStmt</a>            146286 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;     /* Statement used to insert the encoding */</span>
+<span class='curline'><a href='../S/1054.html#L146296'>pStmt</a>            146296 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_REPLACE_DOCSIZE, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146302'>pStmt</a>            146302 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pStmt, 1, p-&gt;iPrevDocid);</span>
+<span class='curline'><a href='../S/1054.html#L146303'>pStmt</a>            146303 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_blob(pStmt, 2, pBlob, nBlob, sqlite3_free);</span>
+<span class='curline'><a href='../S/1054.html#L146304'>pStmt</a>            146304 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146305'>pStmt</a>            146305 ext/sqlite3/libsqlite/sqlite3.c   *pRC = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146333'>pStmt</a>            146333 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;     /* Statement for reading and writing */</span>
+<span class='curline'><a href='../S/1054.html#L146346'>pStmt</a>            146346 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_SELECT_STAT, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146352'>pStmt</a>            146352 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int(pStmt, 1, FTS_STAT_DOCTOTAL);</span>
+<span class='curline'><a href='../S/1054.html#L146353'>pStmt</a>            146353 ext/sqlite3/libsqlite/sqlite3.c   if( sqlite3_step(pStmt)==SQLITE_ROW ){</span>
+<span class='curline'><a href='../S/1054.html#L146355'>pStmt</a>            146355 ext/sqlite3/libsqlite/sqlite3.c          sqlite3_column_blob(pStmt, 0),</span>
+<span class='curline'><a href='../S/1054.html#L146356'>pStmt</a>            146356 ext/sqlite3/libsqlite/sqlite3.c          sqlite3_column_bytes(pStmt, 0));</span>
+<span class='curline'><a href='../S/1054.html#L146360'>pStmt</a>            146360 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146381'>pStmt</a>            146381 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_REPLACE_STAT, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146387'>pStmt</a>            146387 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int(pStmt, 1, FTS_STAT_DOCTOTAL);</span>
+<span class='curline'><a href='../S/1054.html#L146388'>pStmt</a>            146388 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_blob(pStmt, 2, pBlob, nBlob, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L146389'>pStmt</a>            146389 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146390'>pStmt</a>            146390 ext/sqlite3/libsqlite/sqlite3.c   *pRC = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146447'>pStmt</a>            146447 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L146455'>pStmt</a>            146455 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146471'>pStmt</a>            146471 ext/sqlite3/libsqlite/sqlite3.c     while( rc==SQLITE_OK &amp;&amp; SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L146473'>pStmt</a>            146473 ext/sqlite3/libsqlite/sqlite3.c       int iLangid = langidFromSelect(p, pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146474'>pStmt</a>            146474 ext/sqlite3/libsqlite/sqlite3.c       rc = fts3PendingTermsDocid(p, iLangid, sqlite3_column_int64(pStmt, 0));</span>
+<span class='curline'><a href='../S/1054.html#L146478'>pStmt</a>            146478 ext/sqlite3/libsqlite/sqlite3.c           const char *z = (const char *) sqlite3_column_text(pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L146480'>pStmt</a>            146480 ext/sqlite3/libsqlite/sqlite3.c           aSz[p-&gt;nColumn] += sqlite3_column_bytes(pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L146487'>pStmt</a>            146487 ext/sqlite3/libsqlite/sqlite3.c         sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146488'>pStmt</a>            146488 ext/sqlite3/libsqlite/sqlite3.c         pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L146501'>pStmt</a>            146501 ext/sqlite3/libsqlite/sqlite3.c     if( pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L146502'>pStmt</a>            146502 ext/sqlite3/libsqlite/sqlite3.c       int rc2 = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L146526'>pStmt</a>            146526 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;        /* Statement used to read %_segdir entry */  </span>
+<span class='curline'><a href='../S/1054.html#L146538'>pStmt</a>            146538 ext/sqlite3/libsqlite/sqlite3.c     rc = fts3SqlStmt(p, SQL_SELECT_LEVEL, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L146543'>pStmt</a>            146543 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pStmt, 1, iAbsLevel);</span>
+<span class='curline'><a href='../S/1054.html#L146545'>pStmt</a>            146545 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; rc==SQLITE_OK &amp;&amp; sqlite3_step(pStmt)==SQLITE_ROW &amp;&amp; i&lt;nSeg; i++){</span>
+<span class='curline'><a href='../S/1054.html#L146547'>pStmt</a>            146547 ext/sqlite3/libsqlite/sqlite3.c           sqlite3_column_int64(pStmt, 1),        /* segdir.start_block */</span>
+<span class='curline'><a href='../S/1054.html#L146548'>pStmt</a>            146548 ext/sqlite3/libsqlite/sqlite3.c           sqlite3_column_int64(pStmt, 2),        /* segdir.leaves_end_block */</span>
+<span class='curline'><a href='../S/1054.html#L146549'>pStmt</a>            146549 ext/sqlite3/libsqlite/sqlite3.c           sqlite3_column_int64(pStmt, 3),        /* segdir.end_block */</span>
+<span class='curline'><a href='../S/1054.html#L146550'>pStmt</a>            146550 ext/sqlite3/libsqlite/sqlite3.c           sqlite3_column_blob(pStmt, 4),         /* segdir.root */</span>
+<span class='curline'><a href='../S/1054.html#L146551'>pStmt</a>            146551 ext/sqlite3/libsqlite/sqlite3.c           sqlite3_column_bytes(pStmt, 4),        /* segdir.root */</span>
+<span class='curline'><a href='../S/1054.html#L146556'>pStmt</a>            146556 ext/sqlite3/libsqlite/sqlite3.c     rc2 = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L147970'>pStmt</a>            147970 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L147980'>pStmt</a>            147980 ext/sqlite3/libsqlite/sqlite3.c   rc = fts3SqlStmt(p, SQL_REPLACE_STAT, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L147982'>pStmt</a>            147982 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int(pStmt, 1, FTS_STAT_AUTOINCRMERGE);</span>
+<span class='curline'><a href='../S/1054.html#L147983'>pStmt</a>            147983 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int(pStmt, 2, p-&gt;nAutoincrmerge);</span>
+<span class='curline'><a href='../S/1054.html#L147984'>pStmt</a>            147984 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L147985'>pStmt</a>            147985 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_reset(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L148123'>pStmt</a>            148123 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L148130'>pStmt</a>            148130 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(p-&gt;db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L148134'>pStmt</a>            148134 ext/sqlite3/libsqlite/sqlite3.c     while( rc==SQLITE_OK &amp;&amp; SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L148135'>pStmt</a>            148135 ext/sqlite3/libsqlite/sqlite3.c       i64 iDocid = sqlite3_column_int64(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L148136'>pStmt</a>            148136 ext/sqlite3/libsqlite/sqlite3.c       int iLang = langidFromSelect(p, pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L148141'>pStmt</a>            148141 ext/sqlite3/libsqlite/sqlite3.c           const char *zText = (const char *)sqlite3_column_text(pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L148142'>pStmt</a>            148142 ext/sqlite3/libsqlite/sqlite3.c           int nText = sqlite3_column_bytes(pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L148173'>pStmt</a>            148173 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L148312'>pStmt</a>            148312 ext/sqlite3/libsqlite/sqlite3.c     iDocid = sqlite3_column_int64(pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L148316'>pStmt</a>            148316 ext/sqlite3/libsqlite/sqlite3.c         const char *zText = (const char *)sqlite3_column_text(pCsr-&gt;pStmt, i+1);</span>
+<span class='curline'><a href='../S/1054.html#L149253'>pStmt</a>            149253 ext/sqlite3/libsqlite/sqlite3.c   zDoc = (const char *)sqlite3_column_text(pCsr-&gt;pStmt, iCol);</span>
+<span class='curline'><a href='../S/1054.html#L149255'>pStmt</a>            149255 ext/sqlite3/libsqlite/sqlite3.c     if( sqlite3_column_type(pCsr-&gt;pStmt, iCol)!=SQLITE_NULL ){</span>
+<span class='curline'><a href='../S/1054.html#L149260'>pStmt</a>            149260 ext/sqlite3/libsqlite/sqlite3.c   nDoc = sqlite3_column_bytes(pCsr-&gt;pStmt, iCol);</span>
+<span class='curline'><a href='../S/1054.html#L149538'>pStmt</a>            149538 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L149546'>pStmt</a>            149546 ext/sqlite3/libsqlite/sqlite3.c   pStmt = *ppStmt;</span>
+<span class='curline'><a href='../S/1054.html#L149547'>pStmt</a>            149547 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_data_count(pStmt)==1 );</span>
+<span class='curline'><a href='../S/1054.html#L149549'>pStmt</a>            149549 ext/sqlite3/libsqlite/sqlite3.c   a = sqlite3_column_blob(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L150088'>pStmt</a>            150088 ext/sqlite3/libsqlite/sqlite3.c     zDoc = (const char *)sqlite3_column_text(pCsr-&gt;pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L150089'>pStmt</a>            150089 ext/sqlite3/libsqlite/sqlite3.c     nDoc = sqlite3_column_bytes(pCsr-&gt;pStmt, iCol+1);</span>
+<span class='curline'><a href='../S/1054.html#L150091'>pStmt</a>            150091 ext/sqlite3/libsqlite/sqlite3.c       if( sqlite3_column_type(pCsr-&gt;pStmt, iCol+1)==SQLITE_NULL ){</span>
+<span class='curline'><a href='../S/1054.html#L154059'>pStmt</a>            154059 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *pStmt = 0;</span>
+<span class='curline'><a href='../S/1054.html#L154060'>pStmt</a>            154060 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_prepare_v2(db, zSql, -1, &amp;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L154062'>pStmt</a>            154062 ext/sqlite3/libsqlite/sqlite3.c       if( SQLITE_ROW==sqlite3_step(pStmt) ){</span>
+<span class='curline'><a href='../S/1054.html#L154063'>pStmt</a>            154063 ext/sqlite3/libsqlite/sqlite3.c         *piVal = sqlite3_column_int(pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L154065'>pStmt</a>            154065 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_finalize(pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155318'>pStmt</a>            155318 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_stmt *pStmt;            /* Iterates through set of root pages */</span>
+<span class='curline'><a href='../S/1054.html#L155448'>pStmt</a>            155448 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3_prepare_v2(pTab-&gt;db, zSql, -1, &amp;pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L155476'>pStmt</a>            155476 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155491'>pStmt</a>            155491 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_finalize(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155653'>pStmt</a>            155653 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_step(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155656'>pStmt</a>            155656 ext/sqlite3/libsqlite/sqlite3.c       u32 iRoot = (u32)sqlite3_column_int64(pCsr-&gt;pStmt, 1);</span>
+<span class='curline'><a href='../S/1054.html#L155660'>pStmt</a>            155660 ext/sqlite3/libsqlite/sqlite3.c         return sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155670'>pStmt</a>            155670 ext/sqlite3/libsqlite/sqlite3.c       return sqlite3_reset(pCsr-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L155685'>pStmt</a>            155685 ext/sqlite3/libsqlite/sqlite3.c         pCsr-&gt;zName = (char *)sqlite3_column_text(pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1054.html#L155736'>pStmt</a>            155736 ext/sqlite3/libsqlite/sqlite3.c     pCsr-&gt;zName = (char *)sqlite3_column_text(pCsr-&gt;pStmt, 0);</span>
+<span class='curline'><a href='../S/1055.html#L3326'>pStmt</a>            3326 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API const char *SQLITE_STDCALL sqlite3_sql(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L3358'>pStmt</a>            3358 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_stmt_readonly(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L3640'>pStmt</a>            3640 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_column_count(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L3857'>pStmt</a>            3857 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_data_count(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L4091'>pStmt</a>            4091 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_finalize(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L4118'>pStmt</a>            4118 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API int SQLITE_STDCALL sqlite3_reset(sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L5021'>pStmt</a>            5021 ext/sqlite3/libsqlite/sqlite3.h SQLITE_API sqlite3_stmt *SQLITE_STDCALL sqlite3_next_stmt(sqlite3 *pDb, sqlite3_stmt *pStmt);</span>
+<span class='curline'><a href='../S/1055.html#L7686'>pStmt</a>            7686 ext/sqlite3/libsqlite/sqlite3.h   sqlite3_stmt *pStmt,      /* Prepared statement for which info desired */</span>
+<span class='curline'><a href='../S/1056.html#L59'>pStmt</a>              59 ext/sqlite3/libsqlite/sqlite3ext.h   int  (*column_count)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1056.html#L93'>pStmt</a>              93 ext/sqlite3/libsqlite/sqlite3ext.h   int  (*data_count)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1056.html#L102'>pStmt</a>             102 ext/sqlite3/libsqlite/sqlite3ext.h   int  (*finalize)(sqlite3_stmt*pStmt);</span>
+<span class='curline'><a href='../S/1056.html#L122'>pStmt</a>             122 ext/sqlite3/libsqlite/sqlite3ext.h   int  (*reset)(sqlite3_stmt*pStmt);</span>
+</pre>
+</body>
+</html>

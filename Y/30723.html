@@ -1,0 +1,634 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pPage</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L10358'>pPage</a>            10358 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_pcache_page *pPage;    /* Pcache object page handle */</span>
+<span class='curline'><a href='../S/1054.html#L10425'>pPage</a>            10425 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE PgHdr *sqlite3PcacheFetchFinish(PCache*, Pgno, sqlite3_pcache_page *pPage);</span>
+<span class='curline'><a href='../S/1054.html#L12797'>pPage</a>            12797 ext/sqlite3/libsqlite/sqlite3.c   void *pPage;                      /* Page cache memory */</span>
+<span class='curline'><a href='../S/1054.html#L20709'>pPage</a>            20709 ext/sqlite3/libsqlite/sqlite3.c   if( sqlite3GlobalConfig.pPage==0 || sqlite3GlobalConfig.szPage&lt;512</span>
+<span class='curline'><a href='../S/1054.html#L20711'>pPage</a>            20711 ext/sqlite3/libsqlite/sqlite3.c     sqlite3GlobalConfig.pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39300'>pPage</a>            39300 ext/sqlite3/libsqlite/sqlite3.c static void pcacheManageDirtyList(PgHdr *pPage, u8 addRemove){</span>
+<span class='curline'><a href='../S/1054.html#L39301'>pPage</a>            39301 ext/sqlite3/libsqlite/sqlite3.c   PCache *p = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L39304'>pPage</a>            39304 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;pDirtyNext || pPage==p-&gt;pDirtyTail );</span>
+<span class='curline'><a href='../S/1054.html#L39305'>pPage</a>            39305 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;pDirtyPrev || pPage==p-&gt;pDirty );</span>
+<span class='curline'><a href='../S/1054.html#L39308'>pPage</a>            39308 ext/sqlite3/libsqlite/sqlite3.c     if( p-&gt;pSynced==pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L39309'>pPage</a>            39309 ext/sqlite3/libsqlite/sqlite3.c       PgHdr *pSynced = pPage-&gt;pDirtyPrev;</span>
+<span class='curline'><a href='../S/1054.html#L39316'>pPage</a>            39316 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;pDirtyNext ){</span>
+<span class='curline'><a href='../S/1054.html#L39317'>pPage</a>            39317 ext/sqlite3/libsqlite/sqlite3.c       pPage-&gt;pDirtyNext-&gt;pDirtyPrev = pPage-&gt;pDirtyPrev;</span>
+<span class='curline'><a href='../S/1054.html#L39319'>pPage</a>            39319 ext/sqlite3/libsqlite/sqlite3.c       assert( pPage==p-&gt;pDirtyTail );</span>
+<span class='curline'><a href='../S/1054.html#L39320'>pPage</a>            39320 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pDirtyTail = pPage-&gt;pDirtyPrev;</span>
+<span class='curline'><a href='../S/1054.html#L39322'>pPage</a>            39322 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;pDirtyPrev ){</span>
+<span class='curline'><a href='../S/1054.html#L39323'>pPage</a>            39323 ext/sqlite3/libsqlite/sqlite3.c       pPage-&gt;pDirtyPrev-&gt;pDirtyNext = pPage-&gt;pDirtyNext;</span>
+<span class='curline'><a href='../S/1054.html#L39325'>pPage</a>            39325 ext/sqlite3/libsqlite/sqlite3.c       assert( pPage==p-&gt;pDirty );</span>
+<span class='curline'><a href='../S/1054.html#L39326'>pPage</a>            39326 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pDirty = pPage-&gt;pDirtyNext;</span>
+<span class='curline'><a href='../S/1054.html#L39332'>pPage</a>            39332 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pDirtyNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39333'>pPage</a>            39333 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pDirtyPrev = 0;</span>
+<span class='curline'><a href='../S/1054.html#L39336'>pPage</a>            39336 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;pDirtyNext==0 &amp;&amp; pPage-&gt;pDirtyPrev==0 &amp;&amp; p-&gt;pDirty!=pPage );</span>
+<span class='curline'><a href='../S/1054.html#L39338'>pPage</a>            39338 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pDirtyNext = p-&gt;pDirty;</span>
+<span class='curline'><a href='../S/1054.html#L39339'>pPage</a>            39339 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;pDirtyNext ){</span>
+<span class='curline'><a href='../S/1054.html#L39340'>pPage</a>            39340 ext/sqlite3/libsqlite/sqlite3.c       assert( pPage-&gt;pDirtyNext-&gt;pDirtyPrev==0 );</span>
+<span class='curline'><a href='../S/1054.html#L39341'>pPage</a>            39341 ext/sqlite3/libsqlite/sqlite3.c       pPage-&gt;pDirtyNext-&gt;pDirtyPrev = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L39343'>pPage</a>            39343 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pDirtyTail = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L39349'>pPage</a>            39349 ext/sqlite3/libsqlite/sqlite3.c     p-&gt;pDirty = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L39350'>pPage</a>            39350 ext/sqlite3/libsqlite/sqlite3.c     if( !p-&gt;pSynced &amp;&amp; 0==(pPage-&gt;flags&amp;PGHDR_NEED_SYNC) ){</span>
+<span class='curline'><a href='../S/1054.html#L39351'>pPage</a>            39351 ext/sqlite3/libsqlite/sqlite3.c       p-&gt;pSynced = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L39365'>pPage</a>            39365 ext/sqlite3/libsqlite/sqlite3.c     sqlite3GlobalConfig.pcache2.xUnpin(p-&gt;pCache-&gt;pCache, p-&gt;pPage, 0);</span>
+<span class='curline'><a href='../S/1054.html#L39576'>pPage</a>            39576 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_pcache_page *pPage  /* Page obtained by prior PcacheFetch() call */</span>
+<span class='curline'><a href='../S/1054.html#L39579'>pPage</a>            39579 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L39580'>pPage</a>            39580 ext/sqlite3/libsqlite/sqlite3.c   pPgHdr = (PgHdr*)pPage-&gt;pExtra;</span>
+<span class='curline'><a href='../S/1054.html#L39581'>pPage</a>            39581 ext/sqlite3/libsqlite/sqlite3.c   assert( pPgHdr-&gt;pPage==0 );</span>
+<span class='curline'><a href='../S/1054.html#L39583'>pPage</a>            39583 ext/sqlite3/libsqlite/sqlite3.c   pPgHdr-&gt;pPage = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L39584'>pPage</a>            39584 ext/sqlite3/libsqlite/sqlite3.c   pPgHdr-&gt;pData = pPage-&gt;pBuf;</span>
+<span class='curline'><a href='../S/1054.html#L39589'>pPage</a>            39589 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3PcacheFetchFinish(pCache,pgno,pPage);</span>
+<span class='curline'><a href='../S/1054.html#L39601'>pPage</a>            39601 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_pcache_page *pPage  /* Page obtained by prior PcacheFetch() call */</span>
+<span class='curline'><a href='../S/1054.html#L39605'>pPage</a>            39605 ext/sqlite3/libsqlite/sqlite3.c   if( pPage==0 ) return 0;</span>
+<span class='curline'><a href='../S/1054.html#L39606'>pPage</a>            39606 ext/sqlite3/libsqlite/sqlite3.c   pPgHdr = (PgHdr *)pPage-&gt;pExtra;</span>
+<span class='curline'><a href='../S/1054.html#L39608'>pPage</a>            39608 ext/sqlite3/libsqlite/sqlite3.c   if( !pPgHdr-&gt;pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L39609'>pPage</a>            39609 ext/sqlite3/libsqlite/sqlite3.c     return pcacheFetchFinishWithInit(pCache, pgno, pPage);</span>
+<span class='curline'><a href='../S/1054.html#L39661'>pPage</a>            39661 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xUnpin(p-&gt;pCache-&gt;pCache, p-&gt;pPage, 1);</span>
+<span class='curline'><a href='../S/1054.html#L39719'>pPage</a>            39719 ext/sqlite3/libsqlite/sqlite3.c   sqlite3GlobalConfig.pcache2.xRekey(pCache-&gt;pCache, p-&gt;pPage, p-&gt;pgno,newPgno);</span>
+<span class='curline'><a href='../S/1054.html#L40331'>pPage</a>            40331 ext/sqlite3/libsqlite/sqlite3.c       PgHdr1 *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40333'>pPage</a>            40333 ext/sqlite3/libsqlite/sqlite3.c       while( (pPage = pNext)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L40334'>pPage</a>            40334 ext/sqlite3/libsqlite/sqlite3.c         unsigned int h = pPage-&gt;iKey % nNew;</span>
+<span class='curline'><a href='../S/1054.html#L40335'>pPage</a>            40335 ext/sqlite3/libsqlite/sqlite3.c         pNext = pPage-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L40336'>pPage</a>            40336 ext/sqlite3/libsqlite/sqlite3.c         pPage-&gt;pNext = apNew[h];</span>
+<span class='curline'><a href='../S/1054.html#L40337'>pPage</a>            40337 ext/sqlite3/libsqlite/sqlite3.c         apNew[h] = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40353'>pPage</a>            40353 ext/sqlite3/libsqlite/sqlite3.c static void pcache1PinPage(PgHdr1 *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L40357'>pPage</a>            40357 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L40358'>pPage</a>            40358 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;isPinned==0 );</span>
+<span class='curline'><a href='../S/1054.html#L40359'>pPage</a>            40359 ext/sqlite3/libsqlite/sqlite3.c   pCache = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40361'>pPage</a>            40361 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pLruNext || pPage==pGroup-&gt;pLruTail );</span>
+<span class='curline'><a href='../S/1054.html#L40362'>pPage</a>            40362 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pLruPrev || pPage==pGroup-&gt;pLruHead );</span>
+<span class='curline'><a href='../S/1054.html#L40364'>pPage</a>            40364 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;pLruPrev ){</span>
+<span class='curline'><a href='../S/1054.html#L40365'>pPage</a>            40365 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pLruPrev-&gt;pLruNext = pPage-&gt;pLruNext;</span>
+<span class='curline'><a href='../S/1054.html#L40367'>pPage</a>            40367 ext/sqlite3/libsqlite/sqlite3.c     pGroup-&gt;pLruHead = pPage-&gt;pLruNext;</span>
+<span class='curline'><a href='../S/1054.html#L40369'>pPage</a>            40369 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;pLruNext ){</span>
+<span class='curline'><a href='../S/1054.html#L40370'>pPage</a>            40370 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pLruNext-&gt;pLruPrev = pPage-&gt;pLruPrev;</span>
+<span class='curline'><a href='../S/1054.html#L40372'>pPage</a>            40372 ext/sqlite3/libsqlite/sqlite3.c     pGroup-&gt;pLruTail = pPage-&gt;pLruPrev;</span>
+<span class='curline'><a href='../S/1054.html#L40374'>pPage</a>            40374 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pLruNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40375'>pPage</a>            40375 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pLruPrev = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40376'>pPage</a>            40376 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;isPinned = 1;</span>
+<span class='curline'><a href='../S/1054.html#L40387'>pPage</a>            40387 ext/sqlite3/libsqlite/sqlite3.c static void pcache1RemoveFromHash(PgHdr1 *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L40389'>pPage</a>            40389 ext/sqlite3/libsqlite/sqlite3.c   PCache1 *pCache = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40393'>pPage</a>            40393 ext/sqlite3/libsqlite/sqlite3.c   h = pPage-&gt;iKey % pCache-&gt;nHash;</span>
+<span class='curline'><a href='../S/1054.html#L40394'>pPage</a>            40394 ext/sqlite3/libsqlite/sqlite3.c   for(pp=&amp;pCache-&gt;apHash[h]; (*pp)!=pPage; pp=&amp;(*pp)-&gt;pNext);</span>
+<span class='curline'><a href='../S/1054.html#L40432'>pPage</a>            40432 ext/sqlite3/libsqlite/sqlite3.c     PgHdr1 *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40433'>pPage</a>            40433 ext/sqlite3/libsqlite/sqlite3.c     while( (pPage = *pp)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L40434'>pPage</a>            40434 ext/sqlite3/libsqlite/sqlite3.c       if( pPage-&gt;iKey&gt;=iLimit ){</span>
+<span class='curline'><a href='../S/1054.html#L40436'>pPage</a>            40436 ext/sqlite3/libsqlite/sqlite3.c         *pp = pPage-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L40437'>pPage</a>            40437 ext/sqlite3/libsqlite/sqlite3.c         if( !pPage-&gt;isPinned ) pcache1PinPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40438'>pPage</a>            40438 ext/sqlite3/libsqlite/sqlite3.c         pcache1FreePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40440'>pPage</a>            40440 ext/sqlite3/libsqlite/sqlite3.c         pp = &amp;pPage-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L40607'>pPage</a>            40607 ext/sqlite3/libsqlite/sqlite3.c   PgHdr1 *pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40632'>pPage</a>            40632 ext/sqlite3/libsqlite/sqlite3.c     pPage = pGroup-&gt;pLruTail;</span>
+<span class='curline'><a href='../S/1054.html#L40633'>pPage</a>            40633 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;isPinned==0 );</span>
+<span class='curline'><a href='../S/1054.html#L40634'>pPage</a>            40634 ext/sqlite3/libsqlite/sqlite3.c     pcache1RemoveFromHash(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40635'>pPage</a>            40635 ext/sqlite3/libsqlite/sqlite3.c     pcache1PinPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40636'>pPage</a>            40636 ext/sqlite3/libsqlite/sqlite3.c     pOther = pPage-&gt;pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40646'>pPage</a>            40646 ext/sqlite3/libsqlite/sqlite3.c       pcache1FreePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40647'>pPage</a>            40647 ext/sqlite3/libsqlite/sqlite3.c       pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40656'>pPage</a>            40656 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L40658'>pPage</a>            40658 ext/sqlite3/libsqlite/sqlite3.c     pPage = pcache1AllocPage(pCache);</span>
+<span class='curline'><a href='../S/1054.html#L40662'>pPage</a>            40662 ext/sqlite3/libsqlite/sqlite3.c   if( pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L40665'>pPage</a>            40665 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;iKey = iKey;</span>
+<span class='curline'><a href='../S/1054.html#L40666'>pPage</a>            40666 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pNext = pCache-&gt;apHash[h];</span>
+<span class='curline'><a href='../S/1054.html#L40667'>pPage</a>            40667 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pCache = pCache;</span>
+<span class='curline'><a href='../S/1054.html#L40668'>pPage</a>            40668 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pLruPrev = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40669'>pPage</a>            40669 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;pLruNext = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40670'>pPage</a>            40670 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isPinned = 1;</span>
+<span class='curline'><a href='../S/1054.html#L40671'>pPage</a>            40671 ext/sqlite3/libsqlite/sqlite3.c     *(void **)pPage-&gt;page.pExtra = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40672'>pPage</a>            40672 ext/sqlite3/libsqlite/sqlite3.c     pCache-&gt;apHash[h] = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40677'>pPage</a>            40677 ext/sqlite3/libsqlite/sqlite3.c   return pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40740'>pPage</a>            40740 ext/sqlite3/libsqlite/sqlite3.c   PgHdr1 *pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40751'>pPage</a>            40751 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCache-&gt;apHash[iKey % pCache-&gt;nHash];</span>
+<span class='curline'><a href='../S/1054.html#L40752'>pPage</a>            40752 ext/sqlite3/libsqlite/sqlite3.c   while( pPage &amp;&amp; pPage-&gt;iKey!=iKey ){ pPage = pPage-&gt;pNext; }</span>
+<span class='curline'><a href='../S/1054.html#L40755'>pPage</a>            40755 ext/sqlite3/libsqlite/sqlite3.c   if( pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L40756'>pPage</a>            40756 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;isPinned ) pcache1PinPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40759'>pPage</a>            40759 ext/sqlite3/libsqlite/sqlite3.c     pPage = pcache1FetchStage2(pCache, iKey, createFlag);</span>
+<span class='curline'><a href='../S/1054.html#L40761'>pPage</a>            40761 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage==0 || pCache-&gt;iMaxKey&gt;=iKey );</span>
+<span class='curline'><a href='../S/1054.html#L40763'>pPage</a>            40763 ext/sqlite3/libsqlite/sqlite3.c   return (sqlite3_pcache_page*)pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40778'>pPage</a>            40778 ext/sqlite3/libsqlite/sqlite3.c   PgHdr1 *pPage = (PgHdr1 *)pPg;</span>
+<span class='curline'><a href='../S/1054.html#L40781'>pPage</a>            40781 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pCache==pCache );</span>
+<span class='curline'><a href='../S/1054.html#L40787'>pPage</a>            40787 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pLruPrev==0 &amp;&amp; pPage-&gt;pLruNext==0 );</span>
+<span class='curline'><a href='../S/1054.html#L40788'>pPage</a>            40788 ext/sqlite3/libsqlite/sqlite3.c   assert( pGroup-&gt;pLruHead!=pPage &amp;&amp; pGroup-&gt;pLruTail!=pPage );</span>
+<span class='curline'><a href='../S/1054.html#L40789'>pPage</a>            40789 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;isPinned==1 );</span>
+<span class='curline'><a href='../S/1054.html#L40792'>pPage</a>            40792 ext/sqlite3/libsqlite/sqlite3.c     pcache1RemoveFromHash(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40793'>pPage</a>            40793 ext/sqlite3/libsqlite/sqlite3.c     pcache1FreePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L40797'>pPage</a>            40797 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;pLruHead-&gt;pLruPrev = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40798'>pPage</a>            40798 ext/sqlite3/libsqlite/sqlite3.c       pPage-&gt;pLruNext = pGroup-&gt;pLruHead;</span>
+<span class='curline'><a href='../S/1054.html#L40799'>pPage</a>            40799 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;pLruHead = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40801'>pPage</a>            40801 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;pLruTail = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40802'>pPage</a>            40802 ext/sqlite3/libsqlite/sqlite3.c       pGroup-&gt;pLruHead = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L40805'>pPage</a>            40805 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isPinned = 0;</span>
+<span class='curline'><a href='../S/1054.html#L40821'>pPage</a>            40821 ext/sqlite3/libsqlite/sqlite3.c   PgHdr1 *pPage = (PgHdr1 *)pPg;</span>
+<span class='curline'><a href='../S/1054.html#L40824'>pPage</a>            40824 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;iKey==iOld );</span>
+<span class='curline'><a href='../S/1054.html#L40825'>pPage</a>            40825 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pCache==pCache );</span>
+<span class='curline'><a href='../S/1054.html#L40831'>pPage</a>            40831 ext/sqlite3/libsqlite/sqlite3.c   while( (*pp)!=pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L40834'>pPage</a>            40834 ext/sqlite3/libsqlite/sqlite3.c   *pp = pPage-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L40837'>pPage</a>            40837 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;iKey = iNew;</span>
+<span class='curline'><a href='../S/1054.html#L40838'>pPage</a>            40838 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pNext = pCache-&gt;apHash[h];</span>
+<span class='curline'><a href='../S/1054.html#L40839'>pPage</a>            40839 ext/sqlite3/libsqlite/sqlite3.c   pCache-&gt;apHash[h] = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L42818'>pPage</a>            42818 ext/sqlite3/libsqlite/sqlite3.c static u32 pager_pagehash(PgHdr *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L42819'>pPage</a>            42819 ext/sqlite3/libsqlite/sqlite3.c   return pager_datahash(pPage-&gt;pPager-&gt;pageSize, (unsigned char *)pPage-&gt;pData);</span>
+<span class='curline'><a href='../S/1054.html#L42821'>pPage</a>            42821 ext/sqlite3/libsqlite/sqlite3.c static void pager_set_pagehash(PgHdr *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L42822'>pPage</a>            42822 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pageHash = pager_pagehash(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L45546'>pPage</a>            45546 ext/sqlite3/libsqlite/sqlite3.c   assert( p-&gt;pPage==0 );</span>
+<span class='curline'><a href='../S/1054.html#L47073'>pPage</a>            47073 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_pcache_page *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L47077'>pPage</a>            47077 ext/sqlite3/libsqlite/sqlite3.c   pPage = sqlite3PcacheFetch(pPager-&gt;pPCache, pgno, 0);</span>
+<span class='curline'><a href='../S/1054.html#L47078'>pPage</a>            47078 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage==0 || pPager-&gt;hasBeenUsed );</span>
+<span class='curline'><a href='../S/1054.html#L47079'>pPage</a>            47079 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3PcacheFetchFinish(pPager-&gt;pPCache, pgno, pPage);</span>
+<span class='curline'><a href='../S/1054.html#L47464'>pPage</a>            47464 ext/sqlite3/libsqlite/sqlite3.c     PgHdr *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L47467'>pPage</a>            47467 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3PagerGet(pPager, pg, &amp;pPage);</span>
+<span class='curline'><a href='../S/1054.html#L47469'>pPage</a>            47469 ext/sqlite3/libsqlite/sqlite3.c           rc = pager_write(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L47470'>pPage</a>            47470 ext/sqlite3/libsqlite/sqlite3.c           if( pPage-&gt;flags&amp;PGHDR_NEED_SYNC ){</span>
+<span class='curline'><a href='../S/1054.html#L47473'>pPage</a>            47473 ext/sqlite3/libsqlite/sqlite3.c           sqlite3PagerUnrefNotNull(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L47476'>pPage</a>            47476 ext/sqlite3/libsqlite/sqlite3.c     }else if( (pPage = sqlite3PagerLookup(pPager, pg))!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L47477'>pPage</a>            47477 ext/sqlite3/libsqlite/sqlite3.c       if( pPage-&gt;flags&amp;PGHDR_NEED_SYNC ){</span>
+<span class='curline'><a href='../S/1054.html#L47480'>pPage</a>            47480 ext/sqlite3/libsqlite/sqlite3.c       sqlite3PagerUnrefNotNull(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L47493'>pPage</a>            47493 ext/sqlite3/libsqlite/sqlite3.c       PgHdr *pPage = sqlite3PagerLookup(pPager, pg1+ii);</span>
+<span class='curline'><a href='../S/1054.html#L47494'>pPage</a>            47494 ext/sqlite3/libsqlite/sqlite3.c       if( pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L47495'>pPage</a>            47495 ext/sqlite3/libsqlite/sqlite3.c         pPage-&gt;flags |= PGHDR_NEED_SYNC;</span>
+<span class='curline'><a href='../S/1054.html#L47496'>pPage</a>            47496 ext/sqlite3/libsqlite/sqlite3.c         sqlite3PagerUnrefNotNull(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L48051'>pPage</a>            48051 ext/sqlite3/libsqlite/sqlite3.c SQLITE_PRIVATE int sqlite3PagerPageRefcount(DbPage *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L48052'>pPage</a>            48052 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3PcachePageRefcount(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L51644'>pPage</a>            51644 ext/sqlite3/libsqlite/sqlite3.c   PgHdr *pPage,               /* The page of the frame to be written */</span>
+<span class='curline'><a href='../S/1054.html#L51652'>pPage</a>            51652 ext/sqlite3/libsqlite/sqlite3.c   if( (pData = sqlite3PagerCodec(pPage))==0 ) return SQLITE_NOMEM;</span>
+<span class='curline'><a href='../S/1054.html#L51654'>pPage</a>            51654 ext/sqlite3/libsqlite/sqlite3.c   pData = pPage-&gt;pData;</span>
+<span class='curline'><a href='../S/1054.html#L51656'>pPage</a>            51656 ext/sqlite3/libsqlite/sqlite3.c   walEncodeFrame(p-&gt;pWal, pPage-&gt;pgno, nTruncate, pData, aFrame);</span>
+<span class='curline'><a href='../S/1054.html#L53493'>pPage</a>            53493 ext/sqlite3/libsqlite/sqlite3.c static void releasePage(MemPage *pPage);  /* Forward reference */</span>
+<span class='curline'><a href='../S/1054.html#L54017'>pPage</a>            54017 ext/sqlite3/libsqlite/sqlite3.c static u8 *findOverflowCell(MemPage *pPage, int iCell){</span>
+<span class='curline'><a href='../S/1054.html#L54019'>pPage</a>            54019 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54020'>pPage</a>            54020 ext/sqlite3/libsqlite/sqlite3.c   for(i=pPage-&gt;nOverflow-1; i&gt;=0; i--){</span>
+<span class='curline'><a href='../S/1054.html#L54022'>pPage</a>            54022 ext/sqlite3/libsqlite/sqlite3.c     k = pPage-&gt;aiOvfl[i];</span>
+<span class='curline'><a href='../S/1054.html#L54025'>pPage</a>            54025 ext/sqlite3/libsqlite/sqlite3.c         return pPage-&gt;apOvfl[i];</span>
+<span class='curline'><a href='../S/1054.html#L54030'>pPage</a>            54030 ext/sqlite3/libsqlite/sqlite3.c   return findCell(pPage, iCell);</span>
+<span class='curline'><a href='../S/1054.html#L54040'>pPage</a>            54040 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage,         /* Page containing the cell */</span>
+<span class='curline'><a href='../S/1054.html#L54047'>pPage</a>            54047 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54048'>pPage</a>            54048 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;leaf==0 || pPage-&gt;leaf==1 );</span>
+<span class='curline'><a href='../S/1054.html#L54049'>pPage</a>            54049 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;intKeyLeaf ){</span>
+<span class='curline'><a href='../S/1054.html#L54050'>pPage</a>            54050 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;childPtrSize==0 );</span>
+<span class='curline'><a href='../S/1054.html#L54053'>pPage</a>            54053 ext/sqlite3/libsqlite/sqlite3.c   }else if( pPage-&gt;noPayload ){</span>
+<span class='curline'><a href='../S/1054.html#L54054'>pPage</a>            54054 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;childPtrSize==4 );</span>
+<span class='curline'><a href='../S/1054.html#L54062'>pPage</a>            54062 ext/sqlite3/libsqlite/sqlite3.c     pIter = pCell + pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L54068'>pPage</a>            54068 ext/sqlite3/libsqlite/sqlite3.c   testcase( nPayload==pPage-&gt;maxLocal );</span>
+<span class='curline'><a href='../S/1054.html#L54069'>pPage</a>            54069 ext/sqlite3/libsqlite/sqlite3.c   testcase( nPayload==pPage-&gt;maxLocal+1 );</span>
+<span class='curline'><a href='../S/1054.html#L54070'>pPage</a>            54070 ext/sqlite3/libsqlite/sqlite3.c   if( nPayload&lt;=pPage-&gt;maxLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L54092'>pPage</a>            54092 ext/sqlite3/libsqlite/sqlite3.c     minLocal = pPage-&gt;minLocal;</span>
+<span class='curline'><a href='../S/1054.html#L54093'>pPage</a>            54093 ext/sqlite3/libsqlite/sqlite3.c     maxLocal = pPage-&gt;maxLocal;</span>
+<span class='curline'><a href='../S/1054.html#L54094'>pPage</a>            54094 ext/sqlite3/libsqlite/sqlite3.c     surplus = minLocal + (nPayload - minLocal)%(pPage-&gt;pBt-&gt;usableSize - 4);</span>
+<span class='curline'><a href='../S/1054.html#L54107'>pPage</a>            54107 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage,         /* Page containing the cell */</span>
+<span class='curline'><a href='../S/1054.html#L54111'>pPage</a>            54111 ext/sqlite3/libsqlite/sqlite3.c   btreeParseCellPtr(pPage, findCell(pPage, iCell), pInfo);</span>
+<span class='curline'><a href='../S/1054.html#L54120'>pPage</a>            54120 ext/sqlite3/libsqlite/sqlite3.c static u16 cellSizePtr(MemPage *pPage, u8 *pCell){</span>
+<span class='curline'><a href='../S/1054.html#L54121'>pPage</a>            54121 ext/sqlite3/libsqlite/sqlite3.c   u8 *pIter = pCell + pPage-&gt;childPtrSize; /* For looping over bytes of pCell */</span>
+<span class='curline'><a href='../S/1054.html#L54131'>pPage</a>            54131 ext/sqlite3/libsqlite/sqlite3.c   btreeParseCellPtr(pPage, pCell, &amp;debuginfo);</span>
+<span class='curline'><a href='../S/1054.html#L54134'>pPage</a>            54134 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;noPayload ){</span>
+<span class='curline'><a href='../S/1054.html#L54137'>pPage</a>            54137 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;childPtrSize==4 );</span>
+<span class='curline'><a href='../S/1054.html#L54149'>pPage</a>            54149 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L54156'>pPage</a>            54156 ext/sqlite3/libsqlite/sqlite3.c   testcase( nSize==pPage-&gt;maxLocal );</span>
+<span class='curline'><a href='../S/1054.html#L54157'>pPage</a>            54157 ext/sqlite3/libsqlite/sqlite3.c   testcase( nSize==pPage-&gt;maxLocal+1 );</span>
+<span class='curline'><a href='../S/1054.html#L54158'>pPage</a>            54158 ext/sqlite3/libsqlite/sqlite3.c   if( nSize&lt;=pPage-&gt;maxLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L54162'>pPage</a>            54162 ext/sqlite3/libsqlite/sqlite3.c     int minLocal = pPage-&gt;minLocal;</span>
+<span class='curline'><a href='../S/1054.html#L54163'>pPage</a>            54163 ext/sqlite3/libsqlite/sqlite3.c     nSize = minLocal + (nSize - minLocal) % (pPage-&gt;pBt-&gt;usableSize - 4);</span>
+<span class='curline'><a href='../S/1054.html#L54164'>pPage</a>            54164 ext/sqlite3/libsqlite/sqlite3.c     testcase( nSize==pPage-&gt;maxLocal );</span>
+<span class='curline'><a href='../S/1054.html#L54165'>pPage</a>            54165 ext/sqlite3/libsqlite/sqlite3.c     testcase( nSize==pPage-&gt;maxLocal+1 );</span>
+<span class='curline'><a href='../S/1054.html#L54166'>pPage</a>            54166 ext/sqlite3/libsqlite/sqlite3.c     if( nSize&gt;pPage-&gt;maxLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L54178'>pPage</a>            54178 ext/sqlite3/libsqlite/sqlite3.c static u16 cellSize(MemPage *pPage, int iCell){</span>
+<span class='curline'><a href='../S/1054.html#L54179'>pPage</a>            54179 ext/sqlite3/libsqlite/sqlite3.c   return cellSizePtr(pPage, findCell(pPage, iCell));</span>
+<span class='curline'><a href='../S/1054.html#L54189'>pPage</a>            54189 ext/sqlite3/libsqlite/sqlite3.c static void ptrmapPutOvflPtr(MemPage *pPage, u8 *pCell, int *pRC){</span>
+<span class='curline'><a href='../S/1054.html#L54193'>pPage</a>            54193 ext/sqlite3/libsqlite/sqlite3.c   btreeParseCellPtr(pPage, pCell, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L54196'>pPage</a>            54196 ext/sqlite3/libsqlite/sqlite3.c     ptrmapPut(pPage-&gt;pBt, ovfl, PTRMAP_OVERFLOW1, pPage-&gt;pgno, pRC);</span>
+<span class='curline'><a href='../S/1054.html#L54213'>pPage</a>            54213 ext/sqlite3/libsqlite/sqlite3.c static int defragmentPage(MemPage *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L54229'>pPage</a>            54229 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54230'>pPage</a>            54230 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pBt!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L54231'>pPage</a>            54231 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pBt-&gt;usableSize &lt;= SQLITE_MAX_PAGE_SIZE );</span>
+<span class='curline'><a href='../S/1054.html#L54232'>pPage</a>            54232 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nOverflow==0 );</span>
+<span class='curline'><a href='../S/1054.html#L54233'>pPage</a>            54233 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54235'>pPage</a>            54235 ext/sqlite3/libsqlite/sqlite3.c   src = data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L54236'>pPage</a>            54236 ext/sqlite3/libsqlite/sqlite3.c   hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L54237'>pPage</a>            54237 ext/sqlite3/libsqlite/sqlite3.c   cellOffset = pPage-&gt;cellOffset;</span>
+<span class='curline'><a href='../S/1054.html#L54238'>pPage</a>            54238 ext/sqlite3/libsqlite/sqlite3.c   nCell = pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L54240'>pPage</a>            54240 ext/sqlite3/libsqlite/sqlite3.c   usableSize = pPage-&gt;pBt-&gt;usableSize;</span>
+<span class='curline'><a href='../S/1054.html#L54259'>pPage</a>            54259 ext/sqlite3/libsqlite/sqlite3.c     size = cellSizePtr(pPage, &amp;src[pc]);</span>
+<span class='curline'><a href='../S/1054.html#L54277'>pPage</a>            54277 ext/sqlite3/libsqlite/sqlite3.c       temp = sqlite3PagerTempSpace(pPage-&gt;pBt-&gt;pPager);</span>
+<span class='curline'><a href='../S/1054.html#L54290'>pPage</a>            54290 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54291'>pPage</a>            54291 ext/sqlite3/libsqlite/sqlite3.c   if( cbrk-iCellFirst!=pPage-&gt;nFree ){</span>
+<span class='curline'><a href='../S/1054.html#L54373'>pPage</a>            54373 ext/sqlite3/libsqlite/sqlite3.c static int allocateSpace(MemPage *pPage, int nByte, int *pIdx){</span>
+<span class='curline'><a href='../S/1054.html#L54374'>pPage</a>            54374 ext/sqlite3/libsqlite/sqlite3.c   const int hdr = pPage-&gt;hdrOffset;    /* Local cache of pPage-&gt;hdrOffset */</span>
+<span class='curline'><a href='../S/1054.html#L54375'>pPage</a>            54375 ext/sqlite3/libsqlite/sqlite3.c   u8 * const data = pPage-&gt;aData;      /* Local cache of pPage-&gt;aData */</span>
+<span class='curline'><a href='../S/1054.html#L54380'>pPage</a>            54380 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54381'>pPage</a>            54381 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pBt );</span>
+<span class='curline'><a href='../S/1054.html#L54382'>pPage</a>            54382 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54384'>pPage</a>            54384 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nFree&gt;=nByte );</span>
+<span class='curline'><a href='../S/1054.html#L54385'>pPage</a>            54385 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nOverflow==0 );</span>
+<span class='curline'><a href='../S/1054.html#L54386'>pPage</a>            54386 ext/sqlite3/libsqlite/sqlite3.c   assert( nByte &lt; (int)(pPage-&gt;pBt-&gt;usableSize-8) );</span>
+<span class='curline'><a href='../S/1054.html#L54388'>pPage</a>            54388 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;cellOffset == hdr + 12 - 4*pPage-&gt;leaf );</span>
+<span class='curline'><a href='../S/1054.html#L54389'>pPage</a>            54389 ext/sqlite3/libsqlite/sqlite3.c   gap = pPage-&gt;cellOffset + 2*pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L54408'>pPage</a>            54408 ext/sqlite3/libsqlite/sqlite3.c     u8 *pSpace = pageFindSlot(pPage, nByte, &amp;rc, &amp;bDefrag);</span>
+<span class='curline'><a href='../S/1054.html#L54424'>pPage</a>            54424 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;nCell&gt;0 || CORRUPT_DB );</span>
+<span class='curline'><a href='../S/1054.html#L54425'>pPage</a>            54425 ext/sqlite3/libsqlite/sqlite3.c     rc = defragmentPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L54440'>pPage</a>            54440 ext/sqlite3/libsqlite/sqlite3.c   assert( top+nByte &lt;= (int)pPage-&gt;pBt-&gt;usableSize );</span>
+<span class='curline'><a href='../S/1054.html#L54458'>pPage</a>            54458 ext/sqlite3/libsqlite/sqlite3.c static int freeSpace(MemPage *pPage, u16 iStart, u16 iSize){</span>
+<span class='curline'><a href='../S/1054.html#L54464'>pPage</a>            54464 ext/sqlite3/libsqlite/sqlite3.c   u32 iLast = pPage-&gt;pBt-&gt;usableSize-4; /* Largest possible freeblock offset */</span>
+<span class='curline'><a href='../S/1054.html#L54466'>pPage</a>            54466 ext/sqlite3/libsqlite/sqlite3.c   unsigned char *data = pPage-&gt;aData;   /* Page content */</span>
+<span class='curline'><a href='../S/1054.html#L54468'>pPage</a>            54468 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pBt!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L54469'>pPage</a>            54469 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54470'>pPage</a>            54470 ext/sqlite3/libsqlite/sqlite3.c   assert( iStart&gt;=pPage-&gt;hdrOffset+6+pPage-&gt;childPtrSize );</span>
+<span class='curline'><a href='../S/1054.html#L54471'>pPage</a>            54471 ext/sqlite3/libsqlite/sqlite3.c   assert( CORRUPT_DB || iEnd &lt;= pPage-&gt;pBt-&gt;usableSize );</span>
+<span class='curline'><a href='../S/1054.html#L54472'>pPage</a>            54472 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54478'>pPage</a>            54478 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;pBt-&gt;btsFlags &amp; BTS_SECURE_DELETE ){</span>
+<span class='curline'><a href='../S/1054.html#L54485'>pPage</a>            54485 ext/sqlite3/libsqlite/sqlite3.c   hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L54540'>pPage</a>            54540 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;nFree += iOrigSize;</span>
+<span class='curline'><a href='../S/1054.html#L54556'>pPage</a>            54556 ext/sqlite3/libsqlite/sqlite3.c static int decodeFlags(MemPage *pPage, int flagByte){</span>
+<span class='curline'><a href='../S/1054.html#L54559'>pPage</a>            54559 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;hdrOffset==(pPage-&gt;pgno==1 ? 100 : 0) );</span>
+<span class='curline'><a href='../S/1054.html#L54560'>pPage</a>            54560 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54561'>pPage</a>            54561 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;leaf = (u8)(flagByte&gt;&gt;3);  assert( PTF_LEAF == 1&lt;&lt;3 );</span>
+<span class='curline'><a href='../S/1054.html#L54563'>pPage</a>            54563 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;childPtrSize = 4-4*pPage-&gt;leaf;</span>
+<span class='curline'><a href='../S/1054.html#L54564'>pPage</a>            54564 ext/sqlite3/libsqlite/sqlite3.c   pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L54572'>pPage</a>            54572 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;intKey = 1;</span>
+<span class='curline'><a href='../S/1054.html#L54573'>pPage</a>            54573 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;intKeyLeaf = pPage-&gt;leaf;</span>
+<span class='curline'><a href='../S/1054.html#L54574'>pPage</a>            54574 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;noPayload = !pPage-&gt;leaf;</span>
+<span class='curline'><a href='../S/1054.html#L54575'>pPage</a>            54575 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;maxLocal = pBt-&gt;maxLeaf;</span>
+<span class='curline'><a href='../S/1054.html#L54576'>pPage</a>            54576 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;minLocal = pBt-&gt;minLeaf;</span>
+<span class='curline'><a href='../S/1054.html#L54584'>pPage</a>            54584 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;intKey = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54585'>pPage</a>            54585 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;intKeyLeaf = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54586'>pPage</a>            54586 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;noPayload = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54587'>pPage</a>            54587 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;maxLocal = pBt-&gt;maxLocal;</span>
+<span class='curline'><a href='../S/1054.html#L54588'>pPage</a>            54588 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;minLocal = pBt-&gt;minLocal;</span>
+<span class='curline'><a href='../S/1054.html#L54594'>pPage</a>            54594 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;max1bytePayload = pBt-&gt;max1bytePayload;</span>
+<span class='curline'><a href='../S/1054.html#L54607'>pPage</a>            54607 ext/sqlite3/libsqlite/sqlite3.c static int btreeInitPage(MemPage *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L54609'>pPage</a>            54609 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pBt!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L54610'>pPage</a>            54610 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54611'>pPage</a>            54611 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;pgno==sqlite3PagerPagenumber(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54612'>pPage</a>            54612 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage == sqlite3PagerGetExtra(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54613'>pPage</a>            54613 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;aData == sqlite3PagerGetData(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54615'>pPage</a>            54615 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;isInit ){</span>
+<span class='curline'><a href='../S/1054.html#L54627'>pPage</a>            54627 ext/sqlite3/libsqlite/sqlite3.c     pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L54629'>pPage</a>            54629 ext/sqlite3/libsqlite/sqlite3.c     hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L54630'>pPage</a>            54630 ext/sqlite3/libsqlite/sqlite3.c     data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L54633'>pPage</a>            54633 ext/sqlite3/libsqlite/sqlite3.c     if( decodeFlags(pPage, data[hdr]) ) return SQLITE_CORRUPT_BKPT;</span>
+<span class='curline'><a href='../S/1054.html#L54635'>pPage</a>            54635 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;maskPage = (u16)(pBt-&gt;pageSize - 1);</span>
+<span class='curline'><a href='../S/1054.html#L54636'>pPage</a>            54636 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nOverflow = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54638'>pPage</a>            54638 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;cellOffset = cellOffset = hdr + 8 + pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L54639'>pPage</a>            54639 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;aDataEnd = &amp;data[usableSize];</span>
+<span class='curline'><a href='../S/1054.html#L54640'>pPage</a>            54640 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;aCellIdx = &amp;data[cellOffset];</span>
+<span class='curline'><a href='../S/1054.html#L54647'>pPage</a>            54647 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nCell = get2byte(&amp;data[hdr+3]);</span>
+<span class='curline'><a href='../S/1054.html#L54648'>pPage</a>            54648 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;nCell&gt;MX_CELL(pBt) ){</span>
+<span class='curline'><a href='../S/1054.html#L54652'>pPage</a>            54652 ext/sqlite3/libsqlite/sqlite3.c     testcase( pPage-&gt;nCell==MX_CELL(pBt) );</span>
+<span class='curline'><a href='../S/1054.html#L54657'>pPage</a>            54657 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;nCell&gt;0 || top==usableSize || CORRUPT_DB );</span>
+<span class='curline'><a href='../S/1054.html#L54666'>pPage</a>            54666 ext/sqlite3/libsqlite/sqlite3.c     iCellFirst = cellOffset + 2*pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L54673'>pPage</a>            54673 ext/sqlite3/libsqlite/sqlite3.c       if( !pPage-&gt;leaf ) iCellLast--;</span>
+<span class='curline'><a href='../S/1054.html#L54674'>pPage</a>            54674 ext/sqlite3/libsqlite/sqlite3.c       for(i=0; i&lt;pPage-&gt;nCell; i++){</span>
+<span class='curline'><a href='../S/1054.html#L54681'>pPage</a>            54681 ext/sqlite3/libsqlite/sqlite3.c         sz = cellSizePtr(pPage, &amp;data[pc]);</span>
+<span class='curline'><a href='../S/1054.html#L54687'>pPage</a>            54687 ext/sqlite3/libsqlite/sqlite3.c       if( !pPage-&gt;leaf ) iCellLast++;</span>
+<span class='curline'><a href='../S/1054.html#L54728'>pPage</a>            54728 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nFree = (u16)(nFree - iCellFirst);</span>
+<span class='curline'><a href='../S/1054.html#L54729'>pPage</a>            54729 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isInit = 1;</span>
+<span class='curline'><a href='../S/1054.html#L54738'>pPage</a>            54738 ext/sqlite3/libsqlite/sqlite3.c static void zeroPage(MemPage *pPage, int flags){</span>
+<span class='curline'><a href='../S/1054.html#L54739'>pPage</a>            54739 ext/sqlite3/libsqlite/sqlite3.c   unsigned char *data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L54740'>pPage</a>            54740 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L54741'>pPage</a>            54741 ext/sqlite3/libsqlite/sqlite3.c   u8 hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L54744'>pPage</a>            54744 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerPagenumber(pPage-&gt;pDbPage)==pPage-&gt;pgno );</span>
+<span class='curline'><a href='../S/1054.html#L54745'>pPage</a>            54745 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerGetExtra(pPage-&gt;pDbPage) == (void*)pPage );</span>
+<span class='curline'><a href='../S/1054.html#L54746'>pPage</a>            54746 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerGetData(pPage-&gt;pDbPage) == data );</span>
+<span class='curline'><a href='../S/1054.html#L54747'>pPage</a>            54747 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L54757'>pPage</a>            54757 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;nFree = (u16)(pBt-&gt;usableSize - first);</span>
+<span class='curline'><a href='../S/1054.html#L54758'>pPage</a>            54758 ext/sqlite3/libsqlite/sqlite3.c   decodeFlags(pPage, flags);</span>
+<span class='curline'><a href='../S/1054.html#L54759'>pPage</a>            54759 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;cellOffset = first;</span>
+<span class='curline'><a href='../S/1054.html#L54760'>pPage</a>            54760 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;aDataEnd = &amp;data[pBt-&gt;usableSize];</span>
+<span class='curline'><a href='../S/1054.html#L54761'>pPage</a>            54761 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;aCellIdx = &amp;data[first];</span>
+<span class='curline'><a href='../S/1054.html#L54762'>pPage</a>            54762 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;nOverflow = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54764'>pPage</a>            54764 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;maskPage = (u16)(pBt-&gt;pageSize - 1);</span>
+<span class='curline'><a href='../S/1054.html#L54765'>pPage</a>            54765 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;nCell = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54766'>pPage</a>            54766 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;isInit = 1;</span>
+<span class='curline'><a href='../S/1054.html#L54775'>pPage</a>            54775 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = (MemPage*)sqlite3PagerGetExtra(pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L54776'>pPage</a>            54776 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;aData = sqlite3PagerGetData(pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L54777'>pPage</a>            54777 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pDbPage = pDbPage;</span>
+<span class='curline'><a href='../S/1054.html#L54778'>pPage</a>            54778 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pBt = pBt;</span>
+<span class='curline'><a href='../S/1054.html#L54779'>pPage</a>            54779 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;pgno = pgno;</span>
+<span class='curline'><a href='../S/1054.html#L54780'>pPage</a>            54780 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;hdrOffset = pPage-&gt;pgno==1 ? 100 : 0;</span>
+<span class='curline'><a href='../S/1054.html#L54781'>pPage</a>            54781 ext/sqlite3/libsqlite/sqlite3.c   return pPage; </span>
+<span class='curline'><a href='../S/1054.html#L54879'>pPage</a>            54879 ext/sqlite3/libsqlite/sqlite3.c static void releasePage(MemPage *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L54880'>pPage</a>            54880 ext/sqlite3/libsqlite/sqlite3.c   if( pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L54881'>pPage</a>            54881 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;aData );</span>
+<span class='curline'><a href='../S/1054.html#L54882'>pPage</a>            54882 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;pBt );</span>
+<span class='curline'><a href='../S/1054.html#L54883'>pPage</a>            54883 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;pDbPage!=0 );</span>
+<span class='curline'><a href='../S/1054.html#L54884'>pPage</a>            54884 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3PagerGetExtra(pPage-&gt;pDbPage) == (void*)pPage );</span>
+<span class='curline'><a href='../S/1054.html#L54885'>pPage</a>            54885 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3PagerGetData(pPage-&gt;pDbPage)==pPage-&gt;aData );</span>
+<span class='curline'><a href='../S/1054.html#L54886'>pPage</a>            54886 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54887'>pPage</a>            54887 ext/sqlite3/libsqlite/sqlite3.c     sqlite3PagerUnrefNotNull(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L54900'>pPage</a>            54900 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L54901'>pPage</a>            54901 ext/sqlite3/libsqlite/sqlite3.c   pPage = (MemPage *)sqlite3PagerGetExtra(pData);</span>
+<span class='curline'><a href='../S/1054.html#L54903'>pPage</a>            54903 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;isInit ){</span>
+<span class='curline'><a href='../S/1054.html#L54904'>pPage</a>            54904 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L54905'>pPage</a>            54905 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isInit = 0;</span>
+<span class='curline'><a href='../S/1054.html#L54913'>pPage</a>            54913 ext/sqlite3/libsqlite/sqlite3.c       btreeInitPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L56075'>pPage</a>            56075 ext/sqlite3/libsqlite/sqlite3.c static int setChildPtrmaps(MemPage *pPage){</span>
+<span class='curline'><a href='../S/1054.html#L56079'>pPage</a>            56079 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L56080'>pPage</a>            56080 ext/sqlite3/libsqlite/sqlite3.c   u8 isInitOrig = pPage-&gt;isInit;</span>
+<span class='curline'><a href='../S/1054.html#L56081'>pPage</a>            56081 ext/sqlite3/libsqlite/sqlite3.c   Pgno pgno = pPage-&gt;pgno;</span>
+<span class='curline'><a href='../S/1054.html#L56083'>pPage</a>            56083 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L56084'>pPage</a>            56084 ext/sqlite3/libsqlite/sqlite3.c   rc = btreeInitPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L56088'>pPage</a>            56088 ext/sqlite3/libsqlite/sqlite3.c   nCell = pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L56091'>pPage</a>            56091 ext/sqlite3/libsqlite/sqlite3.c     u8 *pCell = findCell(pPage, i);</span>
+<span class='curline'><a href='../S/1054.html#L56093'>pPage</a>            56093 ext/sqlite3/libsqlite/sqlite3.c     ptrmapPutOvflPtr(pPage, pCell, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L56095'>pPage</a>            56095 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L56101'>pPage</a>            56101 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L56102'>pPage</a>            56102 ext/sqlite3/libsqlite/sqlite3.c     Pgno childPgno = get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]);</span>
+<span class='curline'><a href='../S/1054.html#L56107'>pPage</a>            56107 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;isInit = isInitOrig;</span>
+<span class='curline'><a href='../S/1054.html#L56125'>pPage</a>            56125 ext/sqlite3/libsqlite/sqlite3.c static int modifyPagePointer(MemPage *pPage, Pgno iFrom, Pgno iTo, u8 eType){</span>
+<span class='curline'><a href='../S/1054.html#L56126'>pPage</a>            56126 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L56127'>pPage</a>            56127 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L56130'>pPage</a>            56130 ext/sqlite3/libsqlite/sqlite3.c     if( get4byte(pPage-&gt;aData)!=iFrom ){</span>
+<span class='curline'><a href='../S/1054.html#L56133'>pPage</a>            56133 ext/sqlite3/libsqlite/sqlite3.c     put4byte(pPage-&gt;aData, iTo);</span>
+<span class='curline'><a href='../S/1054.html#L56135'>pPage</a>            56135 ext/sqlite3/libsqlite/sqlite3.c     u8 isInitOrig = pPage-&gt;isInit;</span>
+<span class='curline'><a href='../S/1054.html#L56139'>pPage</a>            56139 ext/sqlite3/libsqlite/sqlite3.c     btreeInitPage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L56140'>pPage</a>            56140 ext/sqlite3/libsqlite/sqlite3.c     nCell = pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L56143'>pPage</a>            56143 ext/sqlite3/libsqlite/sqlite3.c       u8 *pCell = findCell(pPage, i);</span>
+<span class='curline'><a href='../S/1054.html#L56146'>pPage</a>            56146 ext/sqlite3/libsqlite/sqlite3.c         btreeParseCellPtr(pPage, pCell, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L56148'>pPage</a>            56148 ext/sqlite3/libsqlite/sqlite3.c          &amp;&amp; pCell+info.iOverflow+3&lt;=pPage-&gt;aData+pPage-&gt;maskPage</span>
+<span class='curline'><a href='../S/1054.html#L56164'>pPage</a>            56164 ext/sqlite3/libsqlite/sqlite3.c           get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8])!=iFrom ){</span>
+<span class='curline'><a href='../S/1054.html#L56167'>pPage</a>            56167 ext/sqlite3/libsqlite/sqlite3.c       put4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8], iTo);</span>
+<span class='curline'><a href='../S/1054.html#L56170'>pPage</a>            56170 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isInit = isInitOrig;</span>
+<span class='curline'><a href='../S/1054.html#L57129'>pPage</a>            57129 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57163'>pPage</a>            57163 ext/sqlite3/libsqlite/sqlite3.c     rc = btreeGetPage(pBt, ovfl, &amp;pPage, (ppPage==0) ? PAGER_GET_READONLY : 0);</span>
+<span class='curline'><a href='../S/1054.html#L57164'>pPage</a>            57164 ext/sqlite3/libsqlite/sqlite3.c     assert( rc==SQLITE_OK || pPage==0 );</span>
+<span class='curline'><a href='../S/1054.html#L57166'>pPage</a>            57166 ext/sqlite3/libsqlite/sqlite3.c       next = get4byte(pPage-&gt;aData);</span>
+<span class='curline'><a href='../S/1054.html#L57172'>pPage</a>            57172 ext/sqlite3/libsqlite/sqlite3.c     *ppPage = pPage;</span>
+<span class='curline'><a href='../S/1054.html#L57174'>pPage</a>            57174 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L57251'>pPage</a>            57251 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = pCur-&gt;apPage[pCur-&gt;iPage]; /* Btree page of current entry */</span>
+<span class='curline'><a href='../S/1054.html#L57258'>pPage</a>            57258 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage );</span>
+<span class='curline'><a href='../S/1054.html#L57260'>pPage</a>            57260 ext/sqlite3/libsqlite/sqlite3.c   assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57271'>pPage</a>            57271 ext/sqlite3/libsqlite/sqlite3.c   if( &amp;aPayload[pCur-&gt;info.nLocal] &gt; &amp;pPage-&gt;aData[pBt-&gt;usableSize] ){</span>
+<span class='curline'><a href='../S/1054.html#L57282'>pPage</a>            57282 ext/sqlite3/libsqlite/sqlite3.c     rc = copyPayload(&amp;aPayload[offset], pBuf, a, (eOp &amp; 0x01), pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L57725'>pPage</a>            57725 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L57729'>pPage</a>            57729 ext/sqlite3/libsqlite/sqlite3.c   while( rc==SQLITE_OK &amp;&amp; !(pPage = pCur-&gt;apPage[pCur-&gt;iPage])-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57730'>pPage</a>            57730 ext/sqlite3/libsqlite/sqlite3.c     assert( pCur-&gt;aiIdx[pCur-&gt;iPage]&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L57731'>pPage</a>            57731 ext/sqlite3/libsqlite/sqlite3.c     pgno = get4byte(findCell(pPage, pCur-&gt;aiIdx[pCur-&gt;iPage]));</span>
+<span class='curline'><a href='../S/1054.html#L57750'>pPage</a>            57750 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L57754'>pPage</a>            57754 ext/sqlite3/libsqlite/sqlite3.c   while( !(pPage = pCur-&gt;apPage[pCur-&gt;iPage])-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57755'>pPage</a>            57755 ext/sqlite3/libsqlite/sqlite3.c     pgno = get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]);</span>
+<span class='curline'><a href='../S/1054.html#L57756'>pPage</a>            57756 ext/sqlite3/libsqlite/sqlite3.c     pCur-&gt;aiIdx[pCur-&gt;iPage] = pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L57760'>pPage</a>            57760 ext/sqlite3/libsqlite/sqlite3.c   pCur-&gt;aiIdx[pCur-&gt;iPage] = pPage-&gt;nCell-1;</span>
+<span class='curline'><a href='../S/1054.html#L57919'>pPage</a>            57919 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L57928'>pPage</a>            57928 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;nCell&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L57929'>pPage</a>            57929 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;intKey==(pIdxKey==0) );</span>
+<span class='curline'><a href='../S/1054.html#L57931'>pPage</a>            57931 ext/sqlite3/libsqlite/sqlite3.c     upr = pPage-&gt;nCell-1;</span>
+<span class='curline'><a href='../S/1054.html#L57938'>pPage</a>            57938 ext/sqlite3/libsqlite/sqlite3.c         pCell = findCell(pPage, idx) + pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L57939'>pPage</a>            57939 ext/sqlite3/libsqlite/sqlite3.c         if( pPage-&gt;intKeyLeaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57941'>pPage</a>            57941 ext/sqlite3/libsqlite/sqlite3.c             if( pCell&gt;=pPage-&gt;aDataEnd ) return SQLITE_CORRUPT_BKPT;</span>
+<span class='curline'><a href='../S/1054.html#L57956'>pPage</a>            57956 ext/sqlite3/libsqlite/sqlite3.c           if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L57971'>pPage</a>            57971 ext/sqlite3/libsqlite/sqlite3.c         pCell = findCell(pPage, idx) + pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L57982'>pPage</a>            57982 ext/sqlite3/libsqlite/sqlite3.c         if( nCell&lt;=pPage-&gt;max1bytePayload ){</span>
+<span class='curline'><a href='../S/1054.html#L57986'>pPage</a>            57986 ext/sqlite3/libsqlite/sqlite3.c           testcase( pCell+nCell+1==pPage-&gt;aDataEnd );</span>
+<span class='curline'><a href='../S/1054.html#L57989'>pPage</a>            57989 ext/sqlite3/libsqlite/sqlite3.c           &amp;&amp; (nCell = ((nCell&amp;0x7f)&lt;&lt;7) + pCell[1])&lt;=pPage-&gt;maxLocal</span>
+<span class='curline'><a href='../S/1054.html#L57993'>pPage</a>            57993 ext/sqlite3/libsqlite/sqlite3.c           testcase( pCell+nCell+2==pPage-&gt;aDataEnd );</span>
+<span class='curline'><a href='../S/1054.html#L58001'>pPage</a>            58001 ext/sqlite3/libsqlite/sqlite3.c           u8 * const pCellBody = pCell - pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L58002'>pPage</a>            58002 ext/sqlite3/libsqlite/sqlite3.c           btreeParseCellPtr(pPage, pCellBody, &amp;pCur-&gt;info);</span>
+<span class='curline'><a href='../S/1054.html#L58039'>pPage</a>            58039 ext/sqlite3/libsqlite/sqlite3.c     assert( lwr==upr+1 || (pPage-&gt;intKey &amp;&amp; !pPage-&gt;leaf) );</span>
+<span class='curline'><a href='../S/1054.html#L58040'>pPage</a>            58040 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L58041'>pPage</a>            58041 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58049'>pPage</a>            58049 ext/sqlite3/libsqlite/sqlite3.c     if( lwr&gt;=pPage-&gt;nCell ){</span>
+<span class='curline'><a href='../S/1054.html#L58050'>pPage</a>            58050 ext/sqlite3/libsqlite/sqlite3.c       chldPg = get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]);</span>
+<span class='curline'><a href='../S/1054.html#L58052'>pPage</a>            58052 ext/sqlite3/libsqlite/sqlite3.c       chldPg = get4byte(findCell(pPage, lwr));</span>
+<span class='curline'><a href='../S/1054.html#L58104'>pPage</a>            58104 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L58130'>pPage</a>            58130 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58132'>pPage</a>            58132 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L58139'>pPage</a>            58139 ext/sqlite3/libsqlite/sqlite3.c   testcase( idx&gt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L58141'>pPage</a>            58141 ext/sqlite3/libsqlite/sqlite3.c   if( idx&gt;=pPage-&gt;nCell ){</span>
+<span class='curline'><a href='../S/1054.html#L58142'>pPage</a>            58142 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58143'>pPage</a>            58143 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]));</span>
+<span class='curline'><a href='../S/1054.html#L58154'>pPage</a>            58154 ext/sqlite3/libsqlite/sqlite3.c       pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58155'>pPage</a>            58155 ext/sqlite3/libsqlite/sqlite3.c     }while( pCur-&gt;aiIdx[pCur-&gt;iPage]&gt;=pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L58156'>pPage</a>            58156 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L58162'>pPage</a>            58162 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58169'>pPage</a>            58169 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L58178'>pPage</a>            58178 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58179'>pPage</a>            58179 ext/sqlite3/libsqlite/sqlite3.c   if( (++pCur-&gt;aiIdx[pCur-&gt;iPage])&gt;=pPage-&gt;nCell ){</span>
+<span class='curline'><a href='../S/1054.html#L58183'>pPage</a>            58183 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58213'>pPage</a>            58213 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L58241'>pPage</a>            58241 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58242'>pPage</a>            58242 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L58243'>pPage</a>            58243 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58245'>pPage</a>            58245 ext/sqlite3/libsqlite/sqlite3.c     rc = moveToChild(pCur, get4byte(findCell(pPage, idx)));</span>
+<span class='curline'><a href='../S/1054.html#L58261'>pPage</a>            58261 ext/sqlite3/libsqlite/sqlite3.c     pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L58262'>pPage</a>            58262 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;intKey &amp;&amp; !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58643'>pPage</a>            58643 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;                     /* Page being freed. May be NULL. */</span>
+<span class='curline'><a href='../S/1054.html#L58652'>pPage</a>            58652 ext/sqlite3/libsqlite/sqlite3.c     pPage = pMemPage;</span>
+<span class='curline'><a href='../S/1054.html#L58653'>pPage</a>            58653 ext/sqlite3/libsqlite/sqlite3.c     sqlite3PagerRef(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L58655'>pPage</a>            58655 ext/sqlite3/libsqlite/sqlite3.c     pPage = btreePageLookup(pBt, iPage);</span>
+<span class='curline'><a href='../S/1054.html#L58668'>pPage</a>            58668 ext/sqlite3/libsqlite/sqlite3.c     if( (!pPage &amp;&amp; ((rc = btreeGetPage(pBt, iPage, &amp;pPage, 0))!=0) )</span>
+<span class='curline'><a href='../S/1054.html#L58669'>pPage</a>            58669 ext/sqlite3/libsqlite/sqlite3.c      ||            ((rc = sqlite3PagerWrite(pPage-&gt;pDbPage))!=0)</span>
+<span class='curline'><a href='../S/1054.html#L58673'>pPage</a>            58673 ext/sqlite3/libsqlite/sqlite3.c     memset(pPage-&gt;aData, 0, pPage-&gt;pBt-&gt;pageSize);</span>
+<span class='curline'><a href='../S/1054.html#L58730'>pPage</a>            58730 ext/sqlite3/libsqlite/sqlite3.c         if( pPage &amp;&amp; (pBt-&gt;btsFlags &amp; BTS_SECURE_DELETE)==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L58731'>pPage</a>            58731 ext/sqlite3/libsqlite/sqlite3.c           sqlite3PagerDontWrite(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L58735'>pPage</a>            58735 ext/sqlite3/libsqlite/sqlite3.c       TRACE(("FREE-PAGE: %d leaf on trunk page %d\n",pPage-&gt;pgno,pTrunk-&gt;pgno));</span>
+<span class='curline'><a href='../S/1054.html#L58746'>pPage</a>            58746 ext/sqlite3/libsqlite/sqlite3.c   if( pPage==0 &amp;&amp; SQLITE_OK!=(rc = btreeGetPage(pBt, iPage, &amp;pPage, 0)) ){</span>
+<span class='curline'><a href='../S/1054.html#L58749'>pPage</a>            58749 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3PagerWrite(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L58753'>pPage</a>            58753 ext/sqlite3/libsqlite/sqlite3.c   put4byte(pPage-&gt;aData, iTrunk);</span>
+<span class='curline'><a href='../S/1054.html#L58754'>pPage</a>            58754 ext/sqlite3/libsqlite/sqlite3.c   put4byte(&amp;pPage-&gt;aData[4], 0);</span>
+<span class='curline'><a href='../S/1054.html#L58756'>pPage</a>            58756 ext/sqlite3/libsqlite/sqlite3.c   TRACE(("FREE-PAGE: %d new trunk page replacing %d\n", pPage-&gt;pgno, iTrunk));</span>
+<span class='curline'><a href='../S/1054.html#L58759'>pPage</a>            58759 ext/sqlite3/libsqlite/sqlite3.c   if( pPage ){</span>
+<span class='curline'><a href='../S/1054.html#L58760'>pPage</a>            58760 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;isInit = 0;</span>
+<span class='curline'><a href='../S/1054.html#L58762'>pPage</a>            58762 ext/sqlite3/libsqlite/sqlite3.c   releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L58766'>pPage</a>            58766 ext/sqlite3/libsqlite/sqlite3.c static void freePage(MemPage *pPage, int *pRC){</span>
+<span class='curline'><a href='../S/1054.html#L58768'>pPage</a>            58768 ext/sqlite3/libsqlite/sqlite3.c     *pRC = freePage2(pPage-&gt;pBt, pPage, pPage-&gt;pgno);</span>
+<span class='curline'><a href='../S/1054.html#L58778'>pPage</a>            58778 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage,          /* The page that contains the Cell */</span>
+<span class='curline'><a href='../S/1054.html#L58782'>pPage</a>            58782 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L58789'>pPage</a>            58789 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L58790'>pPage</a>            58790 ext/sqlite3/libsqlite/sqlite3.c   btreeParseCellPtr(pPage, pCell, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L58795'>pPage</a>            58795 ext/sqlite3/libsqlite/sqlite3.c   if( pCell+info.iOverflow+3 &gt; pPage-&gt;aData+pPage-&gt;maskPage ){</span>
+<span class='curline'><a href='../S/1054.html#L58857'>pPage</a>            58857 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage,                /* The page that contains the cell */</span>
+<span class='curline'><a href='../S/1054.html#L58872'>pPage</a>            58872 ext/sqlite3/libsqlite/sqlite3.c   BtShared *pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L58876'>pPage</a>            58876 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L58880'>pPage</a>            58880 ext/sqlite3/libsqlite/sqlite3.c   assert( pCell&lt;pPage-&gt;aData || pCell&gt;=&amp;pPage-&gt;aData[pBt-&gt;pageSize]</span>
+<span class='curline'><a href='../S/1054.html#L58881'>pPage</a>            58881 ext/sqlite3/libsqlite/sqlite3.c             || sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L58884'>pPage</a>            58884 ext/sqlite3/libsqlite/sqlite3.c   nHeader = pPage-&gt;childPtrSize;</span>
+<span class='curline'><a href='../S/1054.html#L58886'>pPage</a>            58886 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;intKeyLeaf ){</span>
+<span class='curline'><a href='../S/1054.html#L58895'>pPage</a>            58895 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L58907'>pPage</a>            58907 ext/sqlite3/libsqlite/sqlite3.c   if( nPayload&lt;=pPage-&gt;maxLocal ){</span>
+<span class='curline'><a href='../S/1054.html#L58916'>pPage</a>            58916 ext/sqlite3/libsqlite/sqlite3.c     int mn = pPage-&gt;minLocal;</span>
+<span class='curline'><a href='../S/1054.html#L58917'>pPage</a>            58917 ext/sqlite3/libsqlite/sqlite3.c     n = mn + (nPayload - mn) % (pPage-&gt;pBt-&gt;usableSize - 4);</span>
+<span class='curline'><a href='../S/1054.html#L58918'>pPage</a>            58918 ext/sqlite3/libsqlite/sqlite3.c     testcase( n==pPage-&gt;maxLocal );</span>
+<span class='curline'><a href='../S/1054.html#L58919'>pPage</a>            58919 ext/sqlite3/libsqlite/sqlite3.c     testcase( n==pPage-&gt;maxLocal+1 );</span>
+<span class='curline'><a href='../S/1054.html#L58920'>pPage</a>            58920 ext/sqlite3/libsqlite/sqlite3.c     if( n &gt; pPage-&gt;maxLocal ) n = mn;</span>
+<span class='curline'><a href='../S/1054.html#L58942'>pPage</a>            58942 ext/sqlite3/libsqlite/sqlite3.c     btreeParseCellPtr(pPage, pCell, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L58995'>pPage</a>            58995 ext/sqlite3/libsqlite/sqlite3.c       assert( pPrior&lt;pPage-&gt;aData || pPrior&gt;=&amp;pPage-&gt;aData[pBt-&gt;pageSize]</span>
+<span class='curline'><a href='../S/1054.html#L58996'>pPage</a>            58996 ext/sqlite3/libsqlite/sqlite3.c             || sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L59015'>pPage</a>            59015 ext/sqlite3/libsqlite/sqlite3.c     assert( pPayload&lt;pPage-&gt;aData || pPayload&gt;=&amp;pPage-&gt;aData[pBt-&gt;pageSize]</span>
+<span class='curline'><a href='../S/1054.html#L59016'>pPage</a>            59016 ext/sqlite3/libsqlite/sqlite3.c             || sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L59047'>pPage</a>            59047 ext/sqlite3/libsqlite/sqlite3.c static void dropCell(MemPage *pPage, int idx, int sz, int *pRC){</span>
+<span class='curline'><a href='../S/1054.html#L59056'>pPage</a>            59056 ext/sqlite3/libsqlite/sqlite3.c   assert( idx&gt;=0 &amp;&amp; idx&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L59057'>pPage</a>            59057 ext/sqlite3/libsqlite/sqlite3.c   assert( sz==cellSize(pPage, idx) );</span>
+<span class='curline'><a href='../S/1054.html#L59058'>pPage</a>            59058 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L59059'>pPage</a>            59059 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L59060'>pPage</a>            59060 ext/sqlite3/libsqlite/sqlite3.c   data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L59061'>pPage</a>            59061 ext/sqlite3/libsqlite/sqlite3.c   ptr = &amp;pPage-&gt;aCellIdx[2*idx];</span>
+<span class='curline'><a href='../S/1054.html#L59063'>pPage</a>            59063 ext/sqlite3/libsqlite/sqlite3.c   hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L59065'>pPage</a>            59065 ext/sqlite3/libsqlite/sqlite3.c   testcase( pc+sz==pPage-&gt;pBt-&gt;usableSize );</span>
+<span class='curline'><a href='../S/1054.html#L59066'>pPage</a>            59066 ext/sqlite3/libsqlite/sqlite3.c   if( pc &lt; (u32)get2byte(&amp;data[hdr+5]) || pc+sz &gt; pPage-&gt;pBt-&gt;usableSize ){</span>
+<span class='curline'><a href='../S/1054.html#L59070'>pPage</a>            59070 ext/sqlite3/libsqlite/sqlite3.c   rc = freeSpace(pPage, pc, sz);</span>
+<span class='curline'><a href='../S/1054.html#L59075'>pPage</a>            59075 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;nCell--;</span>
+<span class='curline'><a href='../S/1054.html#L59076'>pPage</a>            59076 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;nCell==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L59079'>pPage</a>            59079 ext/sqlite3/libsqlite/sqlite3.c     put2byte(&amp;data[hdr+5], pPage-&gt;pBt-&gt;usableSize);</span>
+<span class='curline'><a href='../S/1054.html#L59080'>pPage</a>            59080 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nFree = pPage-&gt;pBt-&gt;usableSize - pPage-&gt;hdrOffset</span>
+<span class='curline'><a href='../S/1054.html#L59081'>pPage</a>            59081 ext/sqlite3/libsqlite/sqlite3.c                        - pPage-&gt;childPtrSize - 8;</span>
+<span class='curline'><a href='../S/1054.html#L59083'>pPage</a>            59083 ext/sqlite3/libsqlite/sqlite3.c     memmove(ptr, ptr+2, 2*(pPage-&gt;nCell - idx));</span>
+<span class='curline'><a href='../S/1054.html#L59084'>pPage</a>            59084 ext/sqlite3/libsqlite/sqlite3.c     put2byte(&amp;data[hdr+3], pPage-&gt;nCell);</span>
+<span class='curline'><a href='../S/1054.html#L59085'>pPage</a>            59085 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nFree += 2;</span>
+<span class='curline'><a href='../S/1054.html#L59102'>pPage</a>            59102 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage,   /* Page into which we are copying */</span>
+<span class='curline'><a href='../S/1054.html#L59119'>pPage</a>            59119 ext/sqlite3/libsqlite/sqlite3.c   assert( i&gt;=0 &amp;&amp; i&lt;=pPage-&gt;nCell+pPage-&gt;nOverflow );</span>
+<span class='curline'><a href='../S/1054.html#L59120'>pPage</a>            59120 ext/sqlite3/libsqlite/sqlite3.c   assert( MX_CELL(pPage-&gt;pBt)&lt;=10921 );</span>
+<span class='curline'><a href='../S/1054.html#L59121'>pPage</a>            59121 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nCell&lt;=MX_CELL(pPage-&gt;pBt) || CORRUPT_DB );</span>
+<span class='curline'><a href='../S/1054.html#L59122'>pPage</a>            59122 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nOverflow&lt;=ArraySize(pPage-&gt;apOvfl) );</span>
+<span class='curline'><a href='../S/1054.html#L59123'>pPage</a>            59123 ext/sqlite3/libsqlite/sqlite3.c   assert( ArraySize(pPage-&gt;apOvfl)==ArraySize(pPage-&gt;aiOvfl) );</span>
+<span class='curline'><a href='../S/1054.html#L59124'>pPage</a>            59124 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L59130'>pPage</a>            59130 ext/sqlite3/libsqlite/sqlite3.c   assert( sz==cellSizePtr(pPage, pCell) || (sz==8 &amp;&amp; iChild&gt;0) );</span>
+<span class='curline'><a href='../S/1054.html#L59131'>pPage</a>            59131 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;nOverflow || sz+2&gt;pPage-&gt;nFree ){</span>
+<span class='curline'><a href='../S/1054.html#L59139'>pPage</a>            59139 ext/sqlite3/libsqlite/sqlite3.c     j = pPage-&gt;nOverflow++;</span>
+<span class='curline'><a href='../S/1054.html#L59140'>pPage</a>            59140 ext/sqlite3/libsqlite/sqlite3.c     assert( j&lt;(int)(sizeof(pPage-&gt;apOvfl)/sizeof(pPage-&gt;apOvfl[0])) );</span>
+<span class='curline'><a href='../S/1054.html#L59141'>pPage</a>            59141 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;apOvfl[j] = pCell;</span>
+<span class='curline'><a href='../S/1054.html#L59142'>pPage</a>            59142 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;aiOvfl[j] = (u16)i;</span>
+<span class='curline'><a href='../S/1054.html#L59144'>pPage</a>            59144 ext/sqlite3/libsqlite/sqlite3.c     int rc = sqlite3PagerWrite(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L59149'>pPage</a>            59149 ext/sqlite3/libsqlite/sqlite3.c     assert( sqlite3PagerIswriteable(pPage-&gt;pDbPage) );</span>
+<span class='curline'><a href='../S/1054.html#L59150'>pPage</a>            59150 ext/sqlite3/libsqlite/sqlite3.c     data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L59151'>pPage</a>            59151 ext/sqlite3/libsqlite/sqlite3.c     cellOffset = pPage-&gt;cellOffset;</span>
+<span class='curline'><a href='../S/1054.html#L59152'>pPage</a>            59152 ext/sqlite3/libsqlite/sqlite3.c     end = cellOffset + 2*pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L59154'>pPage</a>            59154 ext/sqlite3/libsqlite/sqlite3.c     rc = allocateSpace(pPage, sz, &amp;idx);</span>
+<span class='curline'><a href='../S/1054.html#L59159'>pPage</a>            59159 ext/sqlite3/libsqlite/sqlite3.c     assert( idx+sz &lt;= (int)pPage-&gt;pBt-&gt;usableSize );</span>
+<span class='curline'><a href='../S/1054.html#L59160'>pPage</a>            59160 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nCell++;</span>
+<span class='curline'><a href='../S/1054.html#L59161'>pPage</a>            59161 ext/sqlite3/libsqlite/sqlite3.c     pPage-&gt;nFree -= (u16)(2 + sz);</span>
+<span class='curline'><a href='../S/1054.html#L59168'>pPage</a>            59168 ext/sqlite3/libsqlite/sqlite3.c     put2byte(&amp;data[pPage-&gt;hdrOffset+3], pPage-&gt;nCell);</span>
+<span class='curline'><a href='../S/1054.html#L59170'>pPage</a>            59170 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;pBt-&gt;autoVacuum ){</span>
+<span class='curline'><a href='../S/1054.html#L59174'>pPage</a>            59174 ext/sqlite3/libsqlite/sqlite3.c       ptrmapPutOvflPtr(pPage, pCell, pRC);</span>
+<span class='curline'><a href='../S/1054.html#L59488'>pPage</a>            59488 ext/sqlite3/libsqlite/sqlite3.c static int balance_quick(MemPage *pParent, MemPage *pPage, u8 *pSpace){</span>
+<span class='curline'><a href='../S/1054.html#L59489'>pPage</a>            59489 ext/sqlite3/libsqlite/sqlite3.c   BtShared *const pBt = pPage-&gt;pBt;    /* B-Tree Database */</span>
+<span class='curline'><a href='../S/1054.html#L59494'>pPage</a>            59494 ext/sqlite3/libsqlite/sqlite3.c   assert( sqlite3_mutex_held(pPage-&gt;pBt-&gt;mutex) );</span>
+<span class='curline'><a href='../S/1054.html#L59496'>pPage</a>            59496 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;nOverflow==1 );</span>
+<span class='curline'><a href='../S/1054.html#L59499'>pPage</a>            59499 ext/sqlite3/libsqlite/sqlite3.c   if( NEVER(pPage-&gt;nCell==0) ) return SQLITE_CORRUPT_BKPT;</span>
+<span class='curline'><a href='../S/1054.html#L59510'>pPage</a>            59510 ext/sqlite3/libsqlite/sqlite3.c     u8 *pCell = pPage-&gt;apOvfl[0];</span>
+<span class='curline'><a href='../S/1054.html#L59511'>pPage</a>            59511 ext/sqlite3/libsqlite/sqlite3.c     u16 szCell = cellSizePtr(pPage, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L59515'>pPage</a>            59515 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;aData[0]==(PTF_INTKEY|PTF_LEAFDATA|PTF_LEAF) );</span>
+<span class='curline'><a href='../S/1054.html#L59549'>pPage</a>            59549 ext/sqlite3/libsqlite/sqlite3.c     pCell = findCell(pPage, pPage-&gt;nCell-1);</span>
+<span class='curline'><a href='../S/1054.html#L59557'>pPage</a>            59557 ext/sqlite3/libsqlite/sqlite3.c                0, pPage-&gt;pgno, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L59581'>pPage</a>            59581 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage = apPage[i];</span>
+<span class='curline'><a href='../S/1054.html#L59582'>pPage</a>            59582 ext/sqlite3/libsqlite/sqlite3.c     BtShared *pBt = pPage-&gt;pBt;</span>
+<span class='curline'><a href='../S/1054.html#L59583'>pPage</a>            59583 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L59585'>pPage</a>            59585 ext/sqlite3/libsqlite/sqlite3.c     for(j=0; j&lt;pPage-&gt;nCell; j++){</span>
+<span class='curline'><a href='../S/1054.html#L59589'>pPage</a>            59589 ext/sqlite3/libsqlite/sqlite3.c       z = findCell(pPage, j);</span>
+<span class='curline'><a href='../S/1054.html#L59590'>pPage</a>            59590 ext/sqlite3/libsqlite/sqlite3.c       btreeParseCellPtr(pPage, z, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L59594'>pPage</a>            59594 ext/sqlite3/libsqlite/sqlite3.c         assert( n==pPage-&gt;pgno &amp;&amp; e==PTRMAP_OVERFLOW1 );</span>
+<span class='curline'><a href='../S/1054.html#L59596'>pPage</a>            59596 ext/sqlite3/libsqlite/sqlite3.c       if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L59599'>pPage</a>            59599 ext/sqlite3/libsqlite/sqlite3.c         assert( n==pPage-&gt;pgno &amp;&amp; e==PTRMAP_BTREE );</span>
+<span class='curline'><a href='../S/1054.html#L59602'>pPage</a>            59602 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L59603'>pPage</a>            59603 ext/sqlite3/libsqlite/sqlite3.c       Pgno child = get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]);</span>
+<span class='curline'><a href='../S/1054.html#L59605'>pPage</a>            59605 ext/sqlite3/libsqlite/sqlite3.c       assert( n==pPage-&gt;pgno &amp;&amp; e==PTRMAP_BTREE );</span>
+<span class='curline'><a href='../S/1054.html#L59758'>pPage</a>            59758 ext/sqlite3/libsqlite/sqlite3.c   TRACE(("BALANCE: begin page %d child of %d\n", pPage-&gt;pgno, pParent-&gt;pgno));</span>
+<span class='curline'><a href='../S/1054.html#L60473'>pPage</a>            60473 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage = pCur-&gt;apPage[iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60476'>pPage</a>            60476 ext/sqlite3/libsqlite/sqlite3.c       if( pPage-&gt;nOverflow ){</span>
+<span class='curline'><a href='../S/1054.html#L60483'>pPage</a>            60483 ext/sqlite3/libsqlite/sqlite3.c         rc = balance_deeper(pPage, &amp;pCur-&gt;apPage[1]);</span>
+<span class='curline'><a href='../S/1054.html#L60493'>pPage</a>            60493 ext/sqlite3/libsqlite/sqlite3.c     }else if( pPage-&gt;nOverflow==0 &amp;&amp; pPage-&gt;nFree&lt;=nMin ){</span>
+<span class='curline'><a href='../S/1054.html#L60502'>pPage</a>            60502 ext/sqlite3/libsqlite/sqlite3.c         if( pPage-&gt;intKeyLeaf</span>
+<span class='curline'><a href='../S/1054.html#L60503'>pPage</a>            60503 ext/sqlite3/libsqlite/sqlite3.c          &amp;&amp; pPage-&gt;nOverflow==1</span>
+<span class='curline'><a href='../S/1054.html#L60504'>pPage</a>            60504 ext/sqlite3/libsqlite/sqlite3.c          &amp;&amp; pPage-&gt;aiOvfl[0]==pPage-&gt;nCell</span>
+<span class='curline'><a href='../S/1054.html#L60522'>pPage</a>            60522 ext/sqlite3/libsqlite/sqlite3.c           rc = balance_quick(pParent, pPage, aBalanceQuickSpace);</span>
+<span class='curline'><a href='../S/1054.html#L60561'>pPage</a>            60561 ext/sqlite3/libsqlite/sqlite3.c       pPage-&gt;nOverflow = 0;</span>
+<span class='curline'><a href='../S/1054.html#L60564'>pPage</a>            60564 ext/sqlite3/libsqlite/sqlite3.c       releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L60611'>pPage</a>            60611 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L60669'>pPage</a>            60669 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L60670'>pPage</a>            60670 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;intKey || nKey&gt;=0 );</span>
+<span class='curline'><a href='../S/1054.html#L60671'>pPage</a>            60671 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;leaf || !pPage-&gt;intKey );</span>
+<span class='curline'><a href='../S/1054.html#L60674'>pPage</a>            60674 ext/sqlite3/libsqlite/sqlite3.c           pCur-&gt;pgnoRoot, nKey, nData, pPage-&gt;pgno,</span>
+<span class='curline'><a href='../S/1054.html#L60676'>pPage</a>            60676 ext/sqlite3/libsqlite/sqlite3.c   assert( pPage-&gt;isInit );</span>
+<span class='curline'><a href='../S/1054.html#L60679'>pPage</a>            60679 ext/sqlite3/libsqlite/sqlite3.c   rc = fillInCell(pPage, newCell, pKey, nKey, pData, nData, nZero, &amp;szNew);</span>
+<span class='curline'><a href='../S/1054.html#L60681'>pPage</a>            60681 ext/sqlite3/libsqlite/sqlite3.c   assert( szNew==cellSizePtr(pPage, newCell) );</span>
+<span class='curline'><a href='../S/1054.html#L60686'>pPage</a>            60686 ext/sqlite3/libsqlite/sqlite3.c     assert( idx&lt;pPage-&gt;nCell );</span>
+<span class='curline'><a href='../S/1054.html#L60687'>pPage</a>            60687 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3PagerWrite(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L60691'>pPage</a>            60691 ext/sqlite3/libsqlite/sqlite3.c     oldCell = findCell(pPage, idx);</span>
+<span class='curline'><a href='../S/1054.html#L60692'>pPage</a>            60692 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L60695'>pPage</a>            60695 ext/sqlite3/libsqlite/sqlite3.c     rc = clearCell(pPage, oldCell, &amp;szOld);</span>
+<span class='curline'><a href='../S/1054.html#L60696'>pPage</a>            60696 ext/sqlite3/libsqlite/sqlite3.c     dropCell(pPage, idx, szOld, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L60698'>pPage</a>            60698 ext/sqlite3/libsqlite/sqlite3.c   }else if( loc&lt;0 &amp;&amp; pPage-&gt;nCell&gt;0 ){</span>
+<span class='curline'><a href='../S/1054.html#L60699'>pPage</a>            60699 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;leaf );</span>
+<span class='curline'><a href='../S/1054.html#L60702'>pPage</a>            60702 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;leaf );</span>
+<span class='curline'><a href='../S/1054.html#L60704'>pPage</a>            60704 ext/sqlite3/libsqlite/sqlite3.c   insertCell(pPage, idx, newCell, szNew, 0, 0, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L60705'>pPage</a>            60705 ext/sqlite3/libsqlite/sqlite3.c   assert( rc!=SQLITE_OK || pPage-&gt;nCell&gt;0 || pPage-&gt;nOverflow&gt;0 );</span>
+<span class='curline'><a href='../S/1054.html#L60728'>pPage</a>            60728 ext/sqlite3/libsqlite/sqlite3.c   if( rc==SQLITE_OK &amp;&amp; pPage-&gt;nOverflow ){</span>
+<span class='curline'><a href='../S/1054.html#L60753'>pPage</a>            60753 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;                      /* Page to delete cell from */</span>
+<span class='curline'><a href='../S/1054.html#L60774'>pPage</a>            60774 ext/sqlite3/libsqlite/sqlite3.c   pPage = pCur-&gt;apPage[iCellDepth];</span>
+<span class='curline'><a href='../S/1054.html#L60775'>pPage</a>            60775 ext/sqlite3/libsqlite/sqlite3.c   pCell = findCell(pPage, iCellIdx);</span>
+<span class='curline'><a href='../S/1054.html#L60784'>pPage</a>            60784 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L60804'>pPage</a>            60804 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3PagerWrite(pPage-&gt;pDbPage);</span>
+<span class='curline'><a href='../S/1054.html#L60806'>pPage</a>            60806 ext/sqlite3/libsqlite/sqlite3.c   rc = clearCell(pPage, pCell, &amp;szCell);</span>
+<span class='curline'><a href='../S/1054.html#L60807'>pPage</a>            60807 ext/sqlite3/libsqlite/sqlite3.c   dropCell(pPage, iCellIdx, szCell, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L60815'>pPage</a>            60815 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L60827'>pPage</a>            60827 ext/sqlite3/libsqlite/sqlite3.c     insertCell(pPage, iCellIdx, pCell-4, nCell+4, pTmp, n, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L61032'>pPage</a>            61032 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L61043'>pPage</a>            61043 ext/sqlite3/libsqlite/sqlite3.c   rc = getAndInitPage(pBt, pgno, &amp;pPage, 0);</span>
+<span class='curline'><a href='../S/1054.html#L61045'>pPage</a>            61045 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;bBusy ){</span>
+<span class='curline'><a href='../S/1054.html#L61049'>pPage</a>            61049 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;bBusy = 1;</span>
+<span class='curline'><a href='../S/1054.html#L61050'>pPage</a>            61050 ext/sqlite3/libsqlite/sqlite3.c   hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L61051'>pPage</a>            61051 ext/sqlite3/libsqlite/sqlite3.c   for(i=0; i&lt;pPage-&gt;nCell; i++){</span>
+<span class='curline'><a href='../S/1054.html#L61052'>pPage</a>            61052 ext/sqlite3/libsqlite/sqlite3.c     pCell = findCell(pPage, i);</span>
+<span class='curline'><a href='../S/1054.html#L61053'>pPage</a>            61053 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L61057'>pPage</a>            61057 ext/sqlite3/libsqlite/sqlite3.c     rc = clearCell(pPage, pCell, &amp;szCell);</span>
+<span class='curline'><a href='../S/1054.html#L61060'>pPage</a>            61060 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L61061'>pPage</a>            61061 ext/sqlite3/libsqlite/sqlite3.c     rc = clearDatabasePage(pBt, get4byte(&amp;pPage-&gt;aData[hdr+8]), 1, pnChange);</span>
+<span class='curline'><a href='../S/1054.html#L61064'>pPage</a>            61064 ext/sqlite3/libsqlite/sqlite3.c     assert( pPage-&gt;intKey );</span>
+<span class='curline'><a href='../S/1054.html#L61065'>pPage</a>            61065 ext/sqlite3/libsqlite/sqlite3.c     *pnChange += pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L61068'>pPage</a>            61068 ext/sqlite3/libsqlite/sqlite3.c     freePage(pPage, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L61069'>pPage</a>            61069 ext/sqlite3/libsqlite/sqlite3.c   }else if( (rc = sqlite3PagerWrite(pPage-&gt;pDbPage))==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61070'>pPage</a>            61070 ext/sqlite3/libsqlite/sqlite3.c     zeroPage(pPage, pPage-&gt;aData[hdr] | PTF_LEAF);</span>
+<span class='curline'><a href='../S/1054.html#L61074'>pPage</a>            61074 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;bBusy = 0;</span>
+<span class='curline'><a href='../S/1054.html#L61075'>pPage</a>            61075 ext/sqlite3/libsqlite/sqlite3.c   releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61142'>pPage</a>            61142 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage = 0;</span>
+<span class='curline'><a href='../S/1054.html#L61161'>pPage</a>            61161 ext/sqlite3/libsqlite/sqlite3.c   rc = btreeGetPage(pBt, (Pgno)iTable, &amp;pPage, 0);</span>
+<span class='curline'><a href='../S/1054.html#L61165'>pPage</a>            61165 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61173'>pPage</a>            61173 ext/sqlite3/libsqlite/sqlite3.c     freePage(pPage, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L61174'>pPage</a>            61174 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61184'>pPage</a>            61184 ext/sqlite3/libsqlite/sqlite3.c         freePage(pPage, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L61185'>pPage</a>            61185 ext/sqlite3/libsqlite/sqlite3.c         releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61195'>pPage</a>            61195 ext/sqlite3/libsqlite/sqlite3.c         releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61229'>pPage</a>            61229 ext/sqlite3/libsqlite/sqlite3.c       freePage(pPage, &amp;rc);</span>
+<span class='curline'><a href='../S/1054.html#L61230'>pPage</a>            61230 ext/sqlite3/libsqlite/sqlite3.c       releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61238'>pPage</a>            61238 ext/sqlite3/libsqlite/sqlite3.c     zeroPage(pPage, PTF_INTKEY|PTF_LEAF );</span>
+<span class='curline'><a href='../S/1054.html#L61239'>pPage</a>            61239 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61350'>pPage</a>            61350 ext/sqlite3/libsqlite/sqlite3.c     MemPage *pPage;                    /* Current page of the b-tree */</span>
+<span class='curline'><a href='../S/1054.html#L61356'>pPage</a>            61356 ext/sqlite3/libsqlite/sqlite3.c     pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L61357'>pPage</a>            61357 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;leaf || !pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L61358'>pPage</a>            61358 ext/sqlite3/libsqlite/sqlite3.c       nEntry += pPage-&gt;nCell;</span>
+<span class='curline'><a href='../S/1054.html#L61371'>pPage</a>            61371 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L61382'>pPage</a>            61382 ext/sqlite3/libsqlite/sqlite3.c       pPage = pCur-&gt;apPage[pCur-&gt;iPage];</span>
+<span class='curline'><a href='../S/1054.html#L61389'>pPage</a>            61389 ext/sqlite3/libsqlite/sqlite3.c     if( iIdx==pPage-&gt;nCell ){</span>
+<span class='curline'><a href='../S/1054.html#L61390'>pPage</a>            61390 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]));</span>
+<span class='curline'><a href='../S/1054.html#L61392'>pPage</a>            61392 ext/sqlite3/libsqlite/sqlite3.c       rc = moveToChild(pCur, get4byte(findCell(pPage, iIdx)));</span>
+<span class='curline'><a href='../S/1054.html#L61658'>pPage</a>            61658 ext/sqlite3/libsqlite/sqlite3.c   MemPage *pPage;</span>
+<span class='curline'><a href='../S/1054.html#L61681'>pPage</a>            61681 ext/sqlite3/libsqlite/sqlite3.c   if( (rc = btreeGetPage(pBt, (Pgno)iPage, &amp;pPage, 0))!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61690'>pPage</a>            61690 ext/sqlite3/libsqlite/sqlite3.c   pPage-&gt;isInit = 0;</span>
+<span class='curline'><a href='../S/1054.html#L61691'>pPage</a>            61691 ext/sqlite3/libsqlite/sqlite3.c   if( (rc = btreeInitPage(pPage))!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L61695'>pPage</a>            61695 ext/sqlite3/libsqlite/sqlite3.c     releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L61703'>pPage</a>            61703 ext/sqlite3/libsqlite/sqlite3.c   for(i=0; i&lt;pPage-&gt;nCell &amp;&amp; pCheck-&gt;mxErr; i++){</span>
+<span class='curline'><a href='../S/1054.html#L61713'>pPage</a>            61713 ext/sqlite3/libsqlite/sqlite3.c     pCell = findCell(pPage,i);</span>
+<span class='curline'><a href='../S/1054.html#L61714'>pPage</a>            61714 ext/sqlite3/libsqlite/sqlite3.c     btreeParseCellPtr(pPage, pCell, &amp;info);</span>
+<span class='curline'><a href='../S/1054.html#L61718'>pPage</a>            61718 ext/sqlite3/libsqlite/sqlite3.c     if( pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L61728'>pPage</a>            61728 ext/sqlite3/libsqlite/sqlite3.c      &amp;&amp; (&amp;pCell[info.iOverflow]&lt;=&amp;pPage-&gt;aData[pBt-&gt;usableSize])</span>
+<span class='curline'><a href='../S/1054.html#L61742'>pPage</a>            61742 ext/sqlite3/libsqlite/sqlite3.c     if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L61757'>pPage</a>            61757 ext/sqlite3/libsqlite/sqlite3.c   if( !pPage-&gt;leaf ){</span>
+<span class='curline'><a href='../S/1054.html#L61758'>pPage</a>            61758 ext/sqlite3/libsqlite/sqlite3.c     pgno = get4byte(&amp;pPage-&gt;aData[pPage-&gt;hdrOffset+8]);</span>
+<span class='curline'><a href='../S/1054.html#L61766'>pPage</a>            61766 ext/sqlite3/libsqlite/sqlite3.c     checkTreePage(pCheck, pgno, NULL, !pPage-&gt;nCell?NULL:&amp;nMaxKey);</span>
+<span class='curline'><a href='../S/1054.html#L61774'>pPage</a>            61774 ext/sqlite3/libsqlite/sqlite3.c   if( pPage-&gt;leaf &amp;&amp; pPage-&gt;intKey ){</span>
+<span class='curline'><a href='../S/1054.html#L61809'>pPage</a>            61809 ext/sqlite3/libsqlite/sqlite3.c   data = pPage-&gt;aData;</span>
+<span class='curline'><a href='../S/1054.html#L61810'>pPage</a>            61810 ext/sqlite3/libsqlite/sqlite3.c   hdr = pPage-&gt;hdrOffset;</span>
+<span class='curline'><a href='../S/1054.html#L61825'>pPage</a>            61825 ext/sqlite3/libsqlite/sqlite3.c     cellStart = hdr + 12 - 4*pPage-&gt;leaf;</span>
+<span class='curline'><a href='../S/1054.html#L61832'>pPage</a>            61832 ext/sqlite3/libsqlite/sqlite3.c         size = cellSizePtr(pPage, &amp;data[pc]);</span>
+<span class='curline'><a href='../S/1054.html#L61890'>pPage</a>            61890 ext/sqlite3/libsqlite/sqlite3.c   releasePage(pPage);</span>
+<span class='curline'><a href='../S/1054.html#L128218'>pPage</a>            128218 ext/sqlite3/libsqlite/sqlite3.c       sqlite3PCacheBufferSetup( sqlite3GlobalConfig.pPage, </span>
+<span class='curline'><a href='../S/1054.html#L128430'>pPage</a>            128430 ext/sqlite3/libsqlite/sqlite3.c       sqlite3GlobalConfig.pPage = va_arg(ap, void*);</span>
+</pre>
+</body>
+</html>

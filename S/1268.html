@@ -1,0 +1,474 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/zip/lib/zip_extra_field.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1855.html'>zip</a>/<a href='../files/1856.html'>lib</a>/zip_extra_field.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L362'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L41' title='Defined at 41.'>_zip_ef_clone</a></li>
+<li><a href='#L68' title='Defined at 68.'>_zip_ef_delete_by_id</a></li>
+<li><a href='#L106' title='Defined at 106.'>_zip_ef_free</a></li>
+<li><a href='#L120' title='Defined at 120.'>_zip_ef_get_by_id</a></li>
+<li><a href='#L149' title='Defined at 149.'>_zip_ef_merge</a></li>
+<li><a href='#L184' title='Defined at 184.'>_zip_ef_new</a></li>
+<li><a href='#L209' title='Defined at 209.'>_zip_ef_parse</a></li>
+<li><a href='#L279' title='Defined at 279.'>_zip_ef_remove_internal</a></li>
+<li><a href='#L309' title='Defined at 309.'>_zip_ef_size</a></li>
+<li><a href='#L324' title='Defined at 324.'>_zip_ef_write</a></li>
+<li><a href='#L362' title='Defined at 362.'>_zip_read_local_ef</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  zip_extra_field.c -- manipulate extra fields</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  Copyright (C) 2012-2015 Dieter Baron and Thomas Klausner</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  This file is part of libzip, a library to manipulate ZIP archives.</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  The authors can be contacted at &lt;libzip@nih.at&gt;</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'></em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  Redistribution and use in source and binary forms, with or without</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  modification, are permitted provided that the following conditions</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  are met:</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  1. Redistributions of source code must retain the above copyright</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>     notice, this list of conditions and the following disclaimer.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  2. Redistributions in binary form must reproduce the above copyright</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>     notice, this list of conditions and the following disclaimer in</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>     the documentation and/or other materials provided with the</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>     distribution.</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>  3. The names of the authors may not be used to endorse or promote</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>     products derived from this software without specific prior</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>     written permission.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> </em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>  THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>  ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>  IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>*/</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> "<a href='1356.html'>zipint.h</a>"
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *
+<a id='L41' name='L41'></a>  41 <a href='../R/16491.html' title='Multiple referred from 2 places.'>_zip_ef_clone</a>(<strong class='reserved'>const</strong> <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, <a href='../S/1250.html#L297' title='Defined at 297 in ext/zip/lib/zip.h.'>zip_error_t</a> *<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>)
+<a id='L42' name='L42'></a>  42 <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>, *<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>, *<a href='../Y/15396.html' title='Multiple used in 94 places.'>def</a>;
+<a id='L44' name='L44'></a>  44     
+<a id='L45' name='L45'></a>  45     <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> = <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L46' name='L46'></a>  46     
+<a id='L47' name='L47'></a>  47     <strong class='reserved'>while</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>) <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>if</strong> ((<a href='../Y/15396.html' title='Multiple used in 94 places.'>def</a>=<a href='../S/1268.html#L184' title='Defined at 184 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_new</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49             <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L119' title='Defined at 119 in ext/zip/lib/zip.h.'>ZIP_ER_MEMORY</a>, 0);
+<a id='L50' name='L50'></a>  50             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>);
+<a id='L51' name='L51'></a>  51             <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53         
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>if</strong> (<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L55' name='L55'></a>  55             <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> = <a href='../Y/15396.html' title='Multiple used in 94 places.'>def</a>;
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>if</strong> (<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>)
+<a id='L57' name='L57'></a>  57             <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../Y/15396.html' title='Multiple used in 94 places.'>def</a>;
+<a id='L58' name='L58'></a>  58         <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../Y/15396.html' title='Multiple used in 94 places.'>def</a>;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60         <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L61' name='L61'></a>  61     <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62     
+<a id='L63' name='L63'></a>  63     <strong class='reserved'>return</strong> <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>;
+<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *
+<a id='L68' name='L68'></a>  68 <a href='../R/16492.html' title='Multiple referred from 3 places.'>_zip_ef_delete_by_id</a>(<a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L69' name='L69'></a>  69 <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>, *<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>;
+<a id='L71' name='L71'></a>  71     <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73     <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0;
+<a id='L74' name='L74'></a>  74     <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L75' name='L75'></a>  75     <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L76' name='L76'></a>  76     <strong class='reserved'>for</strong> (; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>=(<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> ? <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> : <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>)) <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>if</strong> ((<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>) &amp;&amp; ((<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> == <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>) || (<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> == <a href='../S/1250.html#L99' title='Defined at 99 in ext/zip/lib/zip.h.'>ZIP_EXTRA_FIELD_ALL</a>))) <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78             <strong class='reserved'>if</strong> (<a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a> == <a href='../S/1250.html#L99' title='Defined at 99 in ext/zip/lib/zip.h.'>ZIP_EXTRA_FIELD_ALL</a> || <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> == <a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a>) <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                 <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp;= ~(<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>);
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>if</strong> ((<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>) == 0) <em class='brace'>{</em>
+<a id='L81' name='L81'></a>  81                     <strong class='reserved'>if</strong> (<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>)
+<a id='L82' name='L82'></a>  82                         <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L83' name='L83'></a>  83                     <strong class='reserved'>else</strong>
+<a id='L84' name='L84'></a>  84                         <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L85' name='L85'></a>  85                     <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L86' name='L86'></a>  86                     <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88                     <strong class='reserved'>if</strong> (<a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a> == <a href='../S/1250.html#L99' title='Defined at 99 in ext/zip/lib/zip.h.'>ZIP_EXTRA_FIELD_ALL</a>)
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>continue</strong>;
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91             <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92             
+<a id='L93' name='L93'></a>  93             <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++;
+<a id='L94' name='L94'></a>  94             <strong class='reserved'>if</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &gt; <a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a>)
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>break</strong>;
+<a id='L96' name='L96'></a>  96         <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97         <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L98' name='L98'></a>  98     <em class='brace'>}</em>
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100     <strong class='reserved'>return</strong> <a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>;
+<a id='L101' name='L101'></a> 101 <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105 <strong class='reserved'>void</strong>
+<a id='L106' name='L106'></a> 106 <a href='../R/16493.html' title='Multiple referred from 20 places.'>_zip_ef_free</a>(<a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>)
+<a id='L107' name='L107'></a> 107 <em class='brace'>{</em>
+<a id='L108' name='L108'></a> 108     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>;
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110     <strong class='reserved'>while</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>) <em class='brace'>{</em>
+<a id='L111' name='L111'></a> 111         <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L112' name='L112'></a> 112         <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>);
+<a id='L113' name='L113'></a> 113         <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L114' name='L114'></a> 114         <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>;
+<a id='L115' name='L115'></a> 115     <em class='brace'>}</em>
+<a id='L116' name='L116'></a> 116 <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119 <strong class='reserved'>const</strong> <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *
+<a id='L120' name='L120'></a> 120 <a href='../R/16494.html' title='Multiple referred from 4 places.'>_zip_ef_get_by_id</a>(<strong class='reserved'>const</strong> <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> *<a href='../Y/25009.html' title='Multiple used in 31 places.'>lenp</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <a href='../S/1250.html#L297' title='Defined at 297 in ext/zip/lib/zip.h.'>zip_error_t</a> *<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>)
+<a id='L121' name='L121'></a> 121 <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122     <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> <a href='../Y/16576.html' title='Multiple used in 23 places.'>empty</a>[1] = <em class='brace'>{</em> '\0' <em class='brace'>}</em>;
+<a id='L123' name='L123'></a> 123     
+<a id='L124' name='L124'></a> 124     <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126     <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0;
+<a id='L127' name='L127'></a> 127     <strong class='reserved'>for</strong> (; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>=<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>) <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> == <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> &amp;&amp; (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>)) <em class='brace'>{</em>
+<a id='L129' name='L129'></a> 129             <strong class='reserved'>if</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/22568.html' title='Multiple used in 6 places.'>id_idx</a>) <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                 <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++;
+<a id='L131' name='L131'></a> 131                 <strong class='reserved'>continue</strong>;
+<a id='L132' name='L132'></a> 132             <em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134             <strong class='reserved'>if</strong> (<a href='../Y/25009.html' title='Multiple used in 31 places.'>lenp</a>)
+<a id='L135' name='L135'></a> 135                 *<a href='../Y/25009.html' title='Multiple used in 31 places.'>lenp</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L136' name='L136'></a> 136             <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> &gt; 0)
+<a id='L137' name='L137'></a> 137                 <strong class='reserved'>return</strong> <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L138' name='L138'></a> 138             <strong class='reserved'>else</strong>
+<a id='L139' name='L139'></a> 139                 <strong class='reserved'>return</strong> <a href='../Y/16576.html' title='Multiple used in 23 places.'>empty</a>;
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141     <em class='brace'>}</em>
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143     <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L114' title='Defined at 114 in ext/zip/lib/zip.h.'>ZIP_ER_NOENT</a>, 0);
+<a id='L144' name='L144'></a> 144     <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L145' name='L145'></a> 145 <em class='brace'>}</em>
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148 <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *
+<a id='L149' name='L149'></a> 149 <a href='../R/16495.html' title='Multiple referred from 3 places.'>_zip_ef_merge</a>(<a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>, <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>)
+<a id='L150' name='L150'></a> 150 <em class='brace'>{</em>
+<a id='L151' name='L151'></a> 151     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>, *<a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>, *<a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>;
+<a id='L152' name='L152'></a> 152     <strong class='reserved'>int</strong> <a href='../Y/16317.html' title='Multiple used in 17 places.'>duplicate</a>;
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154     <strong class='reserved'>if</strong> (<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L155' name='L155'></a> 155         <strong class='reserved'>return</strong> <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>;
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157     <strong class='reserved'>for</strong> (<a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>=<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>; <a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>; <a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>=<a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>)
+<a id='L158' name='L158'></a> 158         ;
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160     <strong class='reserved'>for</strong> (; <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>; <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>=<a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>) <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161         <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a> = <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163         <a href='../Y/16317.html' title='Multiple used in 17 places.'>duplicate</a> = 0;
+<a id='L164' name='L164'></a> 164         <strong class='reserved'>for</strong> (<a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>=<a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>; <a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>; <a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>=<a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165             <strong class='reserved'>if</strong> (<a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> == <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> &amp;&amp; <a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> == <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> &amp;&amp; <a href='../S/868.html#L371' title='Defined at 371 in ext/pcre/pcrelib/pcre_internal.h.'>memcmp</a>(<a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>) == 0) <em class='brace'>{</em>
+<a id='L166' name='L166'></a> 166                 <a href='../Y/39043.html' title='Multiple used in 9 places.'>tt</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> |= (<a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>);
+<a id='L167' name='L167'></a> 167                 <a href='../Y/16317.html' title='Multiple used in 17 places.'>duplicate</a> = 1;
+<a id='L168' name='L168'></a> 168                 <strong class='reserved'>break</strong>;
+<a id='L169' name='L169'></a> 169             <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170         <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172         <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>if</strong> (<a href='../Y/16317.html' title='Multiple used in 17 places.'>duplicate</a>)
+<a id='L174' name='L174'></a> 174             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>);
+<a id='L175' name='L175'></a> 175         <strong class='reserved'>else</strong>
+<a id='L176' name='L176'></a> 176             <a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a> = <a href='../Y/38121.html' title='Multiple used in 112 places.'>tail</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../Y/18411.html' title='Multiple used in 513 places.'>from</a>;
+<a id='L177' name='L177'></a> 177     <em class='brace'>}</em>
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179     <strong class='reserved'>return</strong> <a href='../Y/38728.html' title='Multiple used in 713 places.'>to</a>;
+<a id='L180' name='L180'></a> 180 <em class='brace'>}</em>
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183 <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *
+<a id='L184' name='L184'></a> 184 <a href='../R/16496.html' title='Multiple referred from 6 places.'>_zip_ef_new</a>(<a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>, <strong class='reserved'>const</strong> <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L185' name='L185'></a> 185 <em class='brace'>{</em>
+<a id='L186' name='L186'></a> 186     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188     <strong class='reserved'>if</strong> ((<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>=(<a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *)<a href='../S/1215.html#L35' title='Defined at 35 in ext/xmlrpc/libxmlrpc/base64.h.'>malloc</a>(<strong class='reserved'>sizeof</strong>(*<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>))) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L189' name='L189'></a> 189         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191     <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L192' name='L192'></a> 192     <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> = <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>;
+<a id='L193' name='L193'></a> 193     <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a> = <a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>;
+<a id='L194' name='L194'></a> 194     <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L195' name='L195'></a> 195     <strong class='reserved'>if</strong> (<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> &gt; 0) <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196         <strong class='reserved'>if</strong> ((<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>=(<a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *)<a href='../S/1300.html#L41' title='Defined at 41 in ext/zip/lib/zip_memdup.c.'>_zip_memdup</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L197' name='L197'></a> 197             <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L198' name='L198'></a> 198             <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L199' name='L199'></a> 199         <em class='brace'>}</em>
+<a id='L200' name='L200'></a> 200     <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201     <strong class='reserved'>else</strong>
+<a id='L202' name='L202'></a> 202         <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204     <strong class='reserved'>return</strong> <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L205' name='L205'></a> 205 <em class='brace'>}</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 
+<a id='L208' name='L208'></a> 208 <a href='../D/19960.html' title='Multiple defined in 3 places.'>bool</a>
+<a id='L209' name='L209'></a> 209 <a href='../R/16497.html' title='Multiple referred from 3 places.'>_zip_ef_parse</a>(<strong class='reserved'>const</strong> <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> **<a href='../Y/16494.html' title='Multiple used in 3 places.'>ef_head_p</a>, <a href='../S/1250.html#L297' title='Defined at 297 in ext/zip/lib/zip.h.'>zip_error_t</a> *<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>)
+<a id='L210' name='L210'></a> 210 <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211     <a href='../S/1356.html#L288' title='Defined at 288 in ext/zip/lib/zipint.h.'>zip_buffer_t</a> *<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>;
+<a id='L212' name='L212'></a> 212     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, *<a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>, *<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>;
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214     <strong class='reserved'>if</strong> ((<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a> = <a href='../S/1254.html#L145' title='Defined at 145 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_new</a>((<a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *)<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/24983.html' title='Multiple used in 4653 places.'>len</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L215' name='L215'></a> 215         <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L119' title='Defined at 119 in ext/zip/lib/zip.h.'>ZIP_ER_MEMORY</a>, 0);
+<a id='L216' name='L216'></a> 216         <strong class='reserved'>return</strong> <a href='../D/21618.html' title='Multiple defined in 3 places.'>false</a>;
+<a id='L217' name='L217'></a> 217     <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218     
+<a id='L219' name='L219'></a> 219     <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L220' name='L220'></a> 220     
+<a id='L221' name='L221'></a> 221     <strong class='reserved'>while</strong> (<a href='../S/1254.html#L200' title='Defined at 200 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_ok</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>) &amp;&amp; <a href='../S/1254.html#L138' title='Defined at 138 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_left</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>) &gt;= 4) <em class='brace'>{</em>
+<a id='L222' name='L222'></a> 222         <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/17782.html' title='Multiple used in 3 places.'>fid</a>, <a href='../Y/18087.html' title='Multiple used in 20 places.'>flen</a>;
+<a id='L223' name='L223'></a> 223         <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *<a href='../Y/16492.html' title='Multiple used in 4 places.'>ef_data</a>;
+<a id='L224' name='L224'></a> 224         
+<a id='L225' name='L225'></a> 225         <a href='../Y/17782.html' title='Multiple used in 3 places.'>fid</a> = <a href='../S/1254.html#L85' title='Defined at 85 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L226' name='L226'></a> 226         <a href='../Y/18087.html' title='Multiple used in 20 places.'>flen</a> = <a href='../S/1254.html#L85' title='Defined at 85 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L227' name='L227'></a> 227         <a href='../Y/16492.html' title='Multiple used in 4 places.'>ef_data</a> = <a href='../S/1254.html#L69' title='Defined at 69 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>, <a href='../Y/18087.html' title='Multiple used in 20 places.'>flen</a>);
+<a id='L228' name='L228'></a> 228 
+<a id='L229' name='L229'></a> 229         <strong class='reserved'>if</strong> (<a href='../Y/16492.html' title='Multiple used in 4 places.'>ef_data</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L230' name='L230'></a> 230             <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L126' title='Defined at 126 in ext/zip/lib/zip.h.'>ZIP_ER_INCONS</a>, 0);
+<a id='L231' name='L231'></a> 231             <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L232' name='L232'></a> 232             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>);
+<a id='L233' name='L233'></a> 233             <strong class='reserved'>return</strong> <a href='../D/21618.html' title='Multiple defined in 3 places.'>false</a>;
+<a id='L234' name='L234'></a> 234         <em class='brace'>}</em>
+<a id='L235' name='L235'></a> 235         
+<a id='L236' name='L236'></a> 236         <strong class='reserved'>if</strong> ((<a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>=<a href='../S/1268.html#L184' title='Defined at 184 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_new</a>(<a href='../Y/17782.html' title='Multiple used in 3 places.'>fid</a>, <a href='../Y/18087.html' title='Multiple used in 20 places.'>flen</a>, <a href='../Y/16492.html' title='Multiple used in 4 places.'>ef_data</a>, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L237' name='L237'></a> 237             <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L119' title='Defined at 119 in ext/zip/lib/zip.h.'>ZIP_ER_MEMORY</a>, 0);
+<a id='L238' name='L238'></a> 238             <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L239' name='L239'></a> 239             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>);
+<a id='L240' name='L240'></a> 240             <strong class='reserved'>return</strong> <a href='../D/21618.html' title='Multiple defined in 3 places.'>false</a>;
+<a id='L241' name='L241'></a> 241         <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243         <strong class='reserved'>if</strong> (<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>) <em class='brace'>{</em>
+<a id='L244' name='L244'></a> 244             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>;
+<a id='L245' name='L245'></a> 245             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>;
+<a id='L246' name='L246'></a> 246         <em class='brace'>}</em>
+<a id='L247' name='L247'></a> 247         <strong class='reserved'>else</strong>
+<a id='L248' name='L248'></a> 248             <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../Y/16488.html' title='Multiple used in 15 places.'>ef2</a>;
+<a id='L249' name='L249'></a> 249     <em class='brace'>}</em>
+<a id='L250' name='L250'></a> 250 
+<a id='L251' name='L251'></a> 251     <strong class='reserved'>if</strong> (!<a href='../S/1254.html#L62' title='Defined at 62 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_eof</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>)) <em class='brace'>{</em>
+<a id='L252' name='L252'></a> 252         <em class='comment'>/* Android APK files align stored file data with padding in extra fields; ignore. */</em>
+<a id='L253' name='L253'></a> 253         <em class='comment'>/* see https://android.googlesource.com/platform/build/+/master/tools/zipalign/ZipAlign.cpp */</em>
+<a id='L254' name='L254'></a> 254         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/19317.html' title='Multiple used in 9 places.'>glen</a> = <a href='../S/1254.html#L138' title='Defined at 138 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_left</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L255' name='L255'></a> 255         <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *<a href='../Y/18827.html' title='Multiple used in 53 places.'>garbage</a>;
+<a id='L256' name='L256'></a> 256         <a href='../Y/18827.html' title='Multiple used in 53 places.'>garbage</a> = <a href='../S/1254.html#L69' title='Defined at 69 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>, <a href='../Y/19317.html' title='Multiple used in 9 places.'>glen</a>);
+<a id='L257' name='L257'></a> 257         <strong class='reserved'>if</strong> (<a href='../Y/19317.html' title='Multiple used in 9 places.'>glen</a> &gt;= 4 || <a href='../Y/18827.html' title='Multiple used in 53 places.'>garbage</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> || <a href='../S/868.html#L371' title='Defined at 371 in ext/pcre/pcrelib/pcre_internal.h.'>memcmp</a>(<a href='../Y/18827.html' title='Multiple used in 53 places.'>garbage</a>, "\0\0\0", <a href='../Y/19317.html' title='Multiple used in 9 places.'>glen</a>) != 0) <em class='brace'>{</em>
+<a id='L258' name='L258'></a> 258             <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L126' title='Defined at 126 in ext/zip/lib/zip.h.'>ZIP_ER_INCONS</a>, 0);
+<a id='L259' name='L259'></a> 259             <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L260' name='L260'></a> 260             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>);
+<a id='L261' name='L261'></a> 261             <strong class='reserved'>return</strong> <a href='../D/21618.html' title='Multiple defined in 3 places.'>false</a>;
+<a id='L262' name='L262'></a> 262         <em class='brace'>}</em>
+<a id='L263' name='L263'></a> 263     <em class='brace'>}</em>
+<a id='L264' name='L264'></a> 264 
+<a id='L265' name='L265'></a> 265     <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L266' name='L266'></a> 266 
+<a id='L267' name='L267'></a> 267     <strong class='reserved'>if</strong> (<a href='../Y/16494.html' title='Multiple used in 3 places.'>ef_head_p</a>) <em class='brace'>{</em>
+<a id='L268' name='L268'></a> 268         *<a href='../Y/16494.html' title='Multiple used in 3 places.'>ef_head_p</a> = <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>;
+<a id='L269' name='L269'></a> 269     <em class='brace'>}</em>
+<a id='L270' name='L270'></a> 270     <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L271' name='L271'></a> 271         <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>);
+<a id='L272' name='L272'></a> 272     <em class='brace'>}</em>
+<a id='L273' name='L273'></a> 273     
+<a id='L274' name='L274'></a> 274     <strong class='reserved'>return</strong> <a href='../D/32114.html' title='Multiple defined in 3 places.'>true</a>;
+<a id='L275' name='L275'></a> 275 <em class='brace'>}</em>
+<a id='L276' name='L276'></a> 276 
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278 <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *
+<a id='L279' name='L279'></a> 279 <a href='../R/16498.html' title='Multiple referred from 3 places.'>_zip_ef_remove_internal</a>(<a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>)
+<a id='L280' name='L280'></a> 280 <em class='brace'>{</em>
+<a id='L281' name='L281'></a> 281     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>;
+<a id='L282' name='L282'></a> 282     <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>, *<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L283' name='L283'></a> 283     
+<a id='L284' name='L284'></a> 284     <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L285' name='L285'></a> 285     <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L286' name='L286'></a> 286     
+<a id='L287' name='L287'></a> 287     <strong class='reserved'>while</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>) <em class='brace'>{</em>
+<a id='L288' name='L288'></a> 288         <strong class='reserved'>if</strong> (<a href='../S/1356.html#L196' title='Defined at 196 in ext/zip/lib/zipint.h.'>ZIP_EF_IS_INTERNAL</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>)) <em class='brace'>{</em>
+<a id='L289' name='L289'></a> 289             <a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L290' name='L290'></a> 290             <strong class='reserved'>if</strong> (<a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a> == <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>)
+<a id='L291' name='L291'></a> 291                 <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a> = <a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L292' name='L292'></a> 292             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L293' name='L293'></a> 293             <a href='../S/1268.html#L106' title='Defined at 106 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_free</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L294' name='L294'></a> 294             <strong class='reserved'>if</strong> (<a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>)
+<a id='L295' name='L295'></a> 295                 <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a> = <a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L296' name='L296'></a> 296             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L297' name='L297'></a> 297         <em class='brace'>}</em>
+<a id='L298' name='L298'></a> 298         <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L299' name='L299'></a> 299             <a href='../D/28833.html' title='Multiple defined in 2 places.'>prev</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L300' name='L300'></a> 300             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L301' name='L301'></a> 301         <em class='brace'>}</em>
+<a id='L302' name='L302'></a> 302     <em class='brace'>}</em>
+<a id='L303' name='L303'></a> 303     
+<a id='L304' name='L304'></a> 304     <strong class='reserved'>return</strong> <a href='../Y/16493.html' title='Multiple used in 14 places.'>ef_head</a>;
+<a id='L305' name='L305'></a> 305 <em class='brace'>}</em>
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308 <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a>
+<a id='L309' name='L309'></a> 309 <a href='../R/16499.html' title='Multiple referred from 4 places.'>_zip_ef_size</a>(<strong class='reserved'>const</strong> <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L310' name='L310'></a> 310 <em class='brace'>{</em>
+<a id='L311' name='L311'></a> 311     <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L312' name='L312'></a> 312 
+<a id='L313' name='L313'></a> 313     <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = 0;
+<a id='L314' name='L314'></a> 314     <strong class='reserved'>for</strong> (; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>=<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>) <em class='brace'>{</em>
+<a id='L315' name='L315'></a> 315         <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>)
+<a id='L316' name='L316'></a> 316             <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = (<a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a>)(<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>+4+<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>);
+<a id='L317' name='L317'></a> 317     <em class='brace'>}</em>
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319     <strong class='reserved'>return</strong> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>;
+<a id='L320' name='L320'></a> 320 <em class='brace'>}</em>
+<a id='L321' name='L321'></a> 321 
+<a id='L322' name='L322'></a> 322 
+<a id='L323' name='L323'></a> 323 <strong class='reserved'>int</strong>
+<a id='L324' name='L324'></a> 324 <a href='../R/16501.html' title='Multiple referred from 3 places.'>_zip_ef_write</a>(<a href='../S/1250.html#L296' title='Defined at 296 in ext/zip/lib/zip.h.'>zip_t</a> *<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>, <strong class='reserved'>const</strong> <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, <a href='../S/1250.html#L302' title='Defined at 302 in ext/zip/lib/zip.h.'>zip_flags_t</a> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L325' name='L325'></a> 325 <em class='brace'>{</em>
+<a id='L326' name='L326'></a> 326     <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> <a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>[4];
+<a id='L327' name='L327'></a> 327     <a href='../S/1356.html#L288' title='Defined at 288 in ext/zip/lib/zipint.h.'>zip_buffer_t</a> *<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a> = <a href='../S/1254.html#L145' title='Defined at 145 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_new</a>(<a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>));
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329     <strong class='reserved'>if</strong> (<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L330' name='L330'></a> 330         <strong class='reserved'>return</strong> -1;
+<a id='L331' name='L331'></a> 331     <em class='brace'>}</em>
+<a id='L332' name='L332'></a> 332 
+<a id='L333' name='L333'></a> 333     <strong class='reserved'>for</strong> (; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>; <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>=<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>) <em class='brace'>{</em>
+<a id='L334' name='L334'></a> 334         <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1356.html#L258' title='Defined at 258 in ext/zip/lib/zipint.h.'>ZIP_EF_BOTH</a>) <em class='brace'>{</em>
+<a id='L335' name='L335'></a> 335             <a href='../S/1254.html#L292' title='Defined at 292 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_set_offset</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>, 0);
+<a id='L336' name='L336'></a> 336             <a href='../S/1254.html#L221' title='Defined at 221 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_put_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/22563.html' title='Multiple used in 1232 places.'>id</a>);
+<a id='L337' name='L337'></a> 337             <a href='../S/1254.html#L221' title='Defined at 221 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_put_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>);
+<a id='L338' name='L338'></a> 338             <strong class='reserved'>if</strong> (!<a href='../S/1254.html#L200' title='Defined at 200 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_ok</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>)) <em class='brace'>{</em>
+<a id='L339' name='L339'></a> 339                 <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L125' title='Defined at 125 in ext/zip/lib/zip.h.'>ZIP_ER_INTERNAL</a>, 0);
+<a id='L340' name='L340'></a> 340                 <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L341' name='L341'></a> 341                 <strong class='reserved'>return</strong> -1;
+<a id='L342' name='L342'></a> 342             <em class='brace'>}</em>
+<a id='L343' name='L343'></a> 343             <strong class='reserved'>if</strong> (<a href='../S/1299.html#L124' title='Defined at 124 in ext/zip/lib/zip_io_util.c.'>_zip_write</a>(<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>, <a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>, 4) &lt; 0) <em class='brace'>{</em>
+<a id='L344' name='L344'></a> 344                 <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L345' name='L345'></a> 345                 <strong class='reserved'>return</strong> -1;
+<a id='L346' name='L346'></a> 346             <em class='brace'>}</em>
+<a id='L347' name='L347'></a> 347             <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> &gt; 0) <em class='brace'>{</em>
+<a id='L348' name='L348'></a> 348                 <strong class='reserved'>if</strong> (<a href='../S/1299.html#L124' title='Defined at 124 in ext/zip/lib/zip_io_util.c.'>_zip_write</a>(<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>) &lt; 0) <em class='brace'>{</em>
+<a id='L349' name='L349'></a> 349                     <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L350' name='L350'></a> 350                     <strong class='reserved'>return</strong> -1;
+<a id='L351' name='L351'></a> 351                 <em class='brace'>}</em>
+<a id='L352' name='L352'></a> 352             <em class='brace'>}</em>
+<a id='L353' name='L353'></a> 353         <em class='brace'>}</em>
+<a id='L354' name='L354'></a> 354     <em class='brace'>}</em>
+<a id='L355' name='L355'></a> 355     
+<a id='L356' name='L356'></a> 356     <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L357' name='L357'></a> 357     <strong class='reserved'>return</strong> 0;
+<a id='L358' name='L358'></a> 358 <em class='brace'>}</em>
+<a id='L359' name='L359'></a> 359 
+<a id='L360' name='L360'></a> 360 
+<a id='L361' name='L361'></a> 361 <strong class='reserved'>int</strong>
+<a id='L362' name='L362'></a> 362 <a href='../R/16541.html' title='Multiple referred from 7 places.'>_zip_read_local_ef</a>(<a href='../S/1250.html#L296' title='Defined at 296 in ext/zip/lib/zip.h.'>zip_t</a> *<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>, <a href='../D/35101.html' title='Multiple defined in 4 places.'>zip_uint64_t</a> <a href='../Y/22599.html' title='Multiple used in 957 places.'>idx</a>)
+<a id='L363' name='L363'></a> 363 <em class='brace'>{</em>
+<a id='L364' name='L364'></a> 364     <a href='../S/1356.html#L285' title='Defined at 285 in ext/zip/lib/zipint.h.'>zip_entry_t</a> *<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>;
+<a id='L365' name='L365'></a> 365     <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> <a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>[4];
+<a id='L366' name='L366'></a> 366     <a href='../S/1356.html#L288' title='Defined at 288 in ext/zip/lib/zipint.h.'>zip_buffer_t</a> *<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>;
+<a id='L367' name='L367'></a> 367     <a href='../D/35099.html' title='Multiple defined in 3 places.'>zip_uint16_t</a> <a href='../Y/18131.html' title='Multiple used in 287 places.'>fname_len</a>, <a href='../Y/16497.html' title='Multiple used in 15 places.'>ef_len</a>;
+<a id='L368' name='L368'></a> 368 
+<a id='L369' name='L369'></a> 369     <strong class='reserved'>if</strong> (<a href='../Y/22599.html' title='Multiple used in 957 places.'>idx</a> &gt;= <a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/28117.html' title='Multiple used in 48 places.'>nentry</a>) <em class='brace'>{</em>
+<a id='L370' name='L370'></a> 370         <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L123' title='Defined at 123 in ext/zip/lib/zip.h.'>ZIP_ER_INVAL</a>, 0);
+<a id='L371' name='L371'></a> 371         <strong class='reserved'>return</strong> -1;
+<a id='L372' name='L372'></a> 372     <em class='brace'>}</em>
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374     <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a> = <a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/16872.html' title='Multiple used in 2311 places.'>entry</a>+<a href='../Y/22599.html' title='Multiple used in 957 places.'>idx</a>;
+<a id='L375' name='L375'></a> 375 
+<a id='L376' name='L376'></a> 376     <strong class='reserved'>if</strong> (<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> || <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../Y/25284.html' title='Multiple used in 8 places.'>local_extra_fields_read</a>)
+<a id='L377' name='L377'></a> 377         <strong class='reserved'>return</strong> 0;
+<a id='L378' name='L378'></a> 378 
+<a id='L379' name='L379'></a> 379     <strong class='reserved'>if</strong> (<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> + 26 &gt; <a href='../S/1355.html#L130' title='Defined at 130 in ext/zip/lib/zipconf.h.'>ZIP_INT64_MAX</a>) <em class='brace'>{</em>
+<a id='L380' name='L380'></a> 380         <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L109' title='Defined at 109 in ext/zip/lib/zip.h.'>ZIP_ER_SEEK</a>, <a href='../Y/1720.html' title='Multiple used in 9 places.'>EFBIG</a>);
+<a id='L381' name='L381'></a> 381         <strong class='reserved'>return</strong> -1;
+<a id='L382' name='L382'></a> 382     <em class='brace'>}</em>   
+<a id='L383' name='L383'></a> 383 
+<a id='L384' name='L384'></a> 384     <strong class='reserved'>if</strong> (<a href='../S/1331.html#L39' title='Defined at 39 in ext/zip/lib/zip_source_seek.c.'>zip_source_seek</a>(<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/36955.html' title='Multiple used in 2297 places.'>src</a>, (<a href='../D/35025.html' title='Multiple defined in 4 places.'>zip_int64_t</a>)(<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> + 26), <a href='../S/218.html#L20' title='Defined at 20 in ext/gd/libgd/gd_io_file.c.'>SEEK_SET</a>) &lt; 0) <em class='brace'>{</em>
+<a id='L385' name='L385'></a> 385         <a href='../S/1262.html#L137' title='Defined at 137 in ext/zip/lib/zip_error.c.'>_zip_error_set_from_source</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/36955.html' title='Multiple used in 2297 places.'>src</a>);
+<a id='L386' name='L386'></a> 386         <strong class='reserved'>return</strong> -1;
+<a id='L387' name='L387'></a> 387     <em class='brace'>}</em>
+<a id='L388' name='L388'></a> 388     
+<a id='L389' name='L389'></a> 389     <strong class='reserved'>if</strong> ((<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a> = <a href='../S/1254.html#L174' title='Defined at 174 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_new_from_source</a>(<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/36955.html' title='Multiple used in 2297 places.'>src</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>), <a href='../Y/12221.html' title='Multiple used in 1882 places.'>b</a>, &amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>)) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L390' name='L390'></a> 390         <strong class='reserved'>return</strong> -1;
+<a id='L391' name='L391'></a> 391     <em class='brace'>}</em>
+<a id='L392' name='L392'></a> 392     
+<a id='L393' name='L393'></a> 393     <a href='../Y/18131.html' title='Multiple used in 287 places.'>fname_len</a> = <a href='../S/1254.html#L85' title='Defined at 85 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L394' name='L394'></a> 394     <a href='../Y/16497.html' title='Multiple used in 15 places.'>ef_len</a> = <a href='../S/1254.html#L85' title='Defined at 85 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_get_16</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L395' name='L395'></a> 395     
+<a id='L396' name='L396'></a> 396     <strong class='reserved'>if</strong> (!<a href='../S/1254.html#L62' title='Defined at 62 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_eof</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>)) <em class='brace'>{</em>
+<a id='L397' name='L397'></a> 397         <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L398' name='L398'></a> 398         <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L125' title='Defined at 125 in ext/zip/lib/zip.h.'>ZIP_ER_INTERNAL</a>, 0);
+<a id='L399' name='L399'></a> 399         <strong class='reserved'>return</strong> -1;
+<a id='L400' name='L400'></a> 400     <em class='brace'>}</em>
+<a id='L401' name='L401'></a> 401     
+<a id='L402' name='L402'></a> 402     <a href='../S/1254.html#L47' title='Defined at 47 in ext/zip/lib/zip_buffer.c.'>_zip_buffer_free</a>(<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>);
+<a id='L403' name='L403'></a> 403     
+<a id='L404' name='L404'></a> 404     <strong class='reserved'>if</strong> (<a href='../Y/16497.html' title='Multiple used in 15 places.'>ef_len</a> &gt; 0) <em class='brace'>{</em>
+<a id='L405' name='L405'></a> 405         <a href='../S/1356.html#L286' title='Defined at 286 in ext/zip/lib/zipint.h.'>zip_extra_field_t</a> *<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>;
+<a id='L406' name='L406'></a> 406         <a href='../D/35102.html' title='Multiple defined in 3 places.'>zip_uint8_t</a> *<a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a>;
+<a id='L407' name='L407'></a> 407 
+<a id='L408' name='L408'></a> 408         <strong class='reserved'>if</strong> (<a href='../S/1331.html#L39' title='Defined at 39 in ext/zip/lib/zip_source_seek.c.'>zip_source_seek</a>(<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/36955.html' title='Multiple used in 2297 places.'>src</a>, <a href='../Y/18131.html' title='Multiple used in 287 places.'>fname_len</a>, <a href='../Y/5546.html' title='Multiple used in 47 places.'>SEEK_CUR</a>) &lt; 0) <em class='brace'>{</em>
+<a id='L409' name='L409'></a> 409             <a href='../S/1262.html#L127' title='Defined at 127 in ext/zip/lib/zip_error.c.'>zip_error_set</a>(&amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>, <a href='../S/1250.html#L109' title='Defined at 109 in ext/zip/lib/zip.h.'>ZIP_ER_SEEK</a>, <a href='../D/21460.html' title='Multiple defined in 2 places.'>errno</a>);
+<a id='L410' name='L410'></a> 410             <strong class='reserved'>return</strong> -1;
+<a id='L411' name='L411'></a> 411         <em class='brace'>}</em>
+<a id='L412' name='L412'></a> 412 
+<a id='L413' name='L413'></a> 413         <a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a> = <a href='../S/1299.html#L64' title='Defined at 64 in ext/zip/lib/zip_io_util.c.'>_zip_read_data</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../Y/36955.html' title='Multiple used in 2297 places.'>src</a>, <a href='../Y/16497.html' title='Multiple used in 15 places.'>ef_len</a>, 0, &amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>);
+<a id='L414' name='L414'></a> 414 
+<a id='L415' name='L415'></a> 415         <strong class='reserved'>if</strong> (<a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)
+<a id='L416' name='L416'></a> 416             <strong class='reserved'>return</strong> -1;
+<a id='L417' name='L417'></a> 417 
+<a id='L418' name='L418'></a> 418         <strong class='reserved'>if</strong> (!<a href='../S/1268.html#L209' title='Defined at 209 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_parse</a>(<a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a>, <a href='../Y/16497.html' title='Multiple used in 15 places.'>ef_len</a>, <a href='../S/1356.html#L256' title='Defined at 256 in ext/zip/lib/zipint.h.'>ZIP_EF_LOCAL</a>, &amp;<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>, &amp;<a href='../Y/43616.html' title='Multiple used in 689 places.'>za</a>-&gt;<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>)) <em class='brace'>{</em>
+<a id='L419' name='L419'></a> 419             <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a>);
+<a id='L420' name='L420'></a> 420             <strong class='reserved'>return</strong> -1;
+<a id='L421' name='L421'></a> 421         <em class='brace'>}</em>
+<a id='L422' name='L422'></a> 422         <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/16500.html' title='Multiple used in 6 places.'>ef_raw</a>);
+<a id='L423' name='L423'></a> 423 
+<a id='L424' name='L424'></a> 424         <strong class='reserved'>if</strong> (<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>) <em class='brace'>{</em>
+<a id='L425' name='L425'></a> 425             <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a> = <a href='../S/1268.html#L279' title='Defined at 279 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_remove_internal</a>(<a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L426' name='L426'></a> 426             <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../Y/17419.html' title='Multiple used in 29 places.'>extra_fields</a> = <a href='../S/1268.html#L149' title='Defined at 149 in ext/zip/lib/zip_extra_field.c.'>_zip_ef_merge</a>(<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../Y/17419.html' title='Multiple used in 29 places.'>extra_fields</a>, <a href='../Y/16487.html' title='Multiple used in 130 places.'>ef</a>);
+<a id='L427' name='L427'></a> 427         <em class='brace'>}</em>
+<a id='L428' name='L428'></a> 428     <em class='brace'>}</em>
+<a id='L429' name='L429'></a> 429 
+<a id='L430' name='L430'></a> 430     <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../Y/25284.html' title='Multiple used in 8 places.'>local_extra_fields_read</a> = 1;
+<a id='L431' name='L431'></a> 431     
+<a id='L432' name='L432'></a> 432     <strong class='reserved'>if</strong> (<a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../S/1054.html#L96964' title='Defined at 96964 in ext/sqlite3/libsqlite/sqlite3.c.'>changes</a> &amp;&amp; <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../S/1054.html#L96964' title='Defined at 96964 in ext/sqlite3/libsqlite/sqlite3.c.'>changes</a>-&gt;<a href='../Y/25284.html' title='Multiple used in 8 places.'>local_extra_fields_read</a> == 0) <em class='brace'>{</em>
+<a id='L433' name='L433'></a> 433         <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../S/1054.html#L96964' title='Defined at 96964 in ext/sqlite3/libsqlite/sqlite3.c.'>changes</a>-&gt;<a href='../Y/17419.html' title='Multiple used in 29 places.'>extra_fields</a> = <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../Y/29922.html' title='Multiple used in 124 places.'>orig</a>-&gt;<a href='../Y/17419.html' title='Multiple used in 29 places.'>extra_fields</a>;
+<a id='L434' name='L434'></a> 434         <a href='../Y/16391.html' title='Multiple used in 1069 places.'>e</a>-&gt;<a href='../S/1054.html#L96964' title='Defined at 96964 in ext/sqlite3/libsqlite/sqlite3.c.'>changes</a>-&gt;<a href='../Y/25284.html' title='Multiple used in 8 places.'>local_extra_fields_read</a> = 1;
+<a id='L435' name='L435'></a> 435     <em class='brace'>}</em>
+<a id='L436' name='L436'></a> 436 
+<a id='L437' name='L437'></a> 437     <strong class='reserved'>return</strong> 0;
+<a id='L438' name='L438'></a> 438 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L362'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

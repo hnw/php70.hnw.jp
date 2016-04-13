@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/intl/normalizer/normalizer_normalize.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1773.html'>intl</a>/<a href='../files/1785.html'>normalizer</a>/normalizer_normalize.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L33'>[^]</a><a href='#L170'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L33' title='Defined at 33.'>PHP_FUNCTION</a></li>
+<li><a href='#L170' title='Defined at 170.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                                                                                |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is                |</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | available through the world-wide-web at the following url:                   |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | http://www.php.net/license/3_01.txt                                                                  |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | obtain it through the world-wide-web, please send a note to                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | license@php.net so we can mail you a copy immediately.                               |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | Authors: Ed Batutis &lt;ed@batutis.com&gt;                                                                 |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#endif</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='416.html'>php_intl.h</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "unicode/unorm.h"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='410.html'>normalizer.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='412.html'>normalizer_class.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='414.html'>normalizer_normalize.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='384.html'>intl_convert.h</a>"
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <em class='comment'>/* {{{ proto string Normalizer::normalize( string $input [, string $form = FORM_C] )</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * Normalize a string. }}} */</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>/* {{{ proto string normalizer_normalize( string $input [, string $form = FORM_C] )</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * Normalize a string.</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> */</em>
+<a id='L33' name='L33'></a>  33 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>( <a href='../Y/28670.html' title='Multiple used in 4 places.'>normalizer_normalize</a> )
+<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>char</strong>*                   <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L36' name='L36'></a>  36         <em class='comment'>/* form is optional, defaults to FORM_C */</em>
+<a id='L37' name='L37'></a>  37         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>           <a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a> = <a href='../S/410.html#L33' title='Defined at 33 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_DEFAULT</a>;
+<a id='L38' name='L38'></a>  38         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>                  <a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a> = 0;
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>*                  <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L41' name='L41'></a>  41         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>             <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a> = 0;
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>int</strong>                         <a href='../Y/17314.html' title='Multiple used in 5 places.'>expansion_factor</a> = 1;
+<a id='L43' name='L43'></a>  43         <a href='../Y/6738.html' title='Multiple used in 85 places.'>UErrorCode</a>              <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = <a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>;
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>*                  <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L46' name='L46'></a>  46         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>                 <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> = 0;
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a>*    <a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a>;
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>                 <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <a href='../S/388.html#L90' title='Defined at 90 in ext/intl/intl_error.c.'>intl_error_reset</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> );
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <em class='comment'>/* Parse parameters. */</em>
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "s|l",
+<a id='L56' name='L56'></a>  56                                 &amp;<a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, &amp;<a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a>, &amp;<a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L57' name='L57'></a>  57         <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L59' name='L59'></a>  59                                                  "normalizer_normalize: unable to parse input params", 0 );
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L62' name='L62'></a>  62         <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <a href='../Y/17314.html' title='Multiple used in 5 places.'>expansion_factor</a> = 1;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>switch</strong>(<a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>) <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67                 <strong class='reserved'>case</strong> <a href='../S/410.html#L24' title='Defined at 24 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_NONE</a>:
+<a id='L68' name='L68'></a>  68                         <strong class='reserved'>break</strong>;
+<a id='L69' name='L69'></a>  69                 <strong class='reserved'>case</strong> <a href='../S/410.html#L25' title='Defined at 25 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_D</a>:
+<a id='L70' name='L70'></a>  70                         <a href='../Y/17314.html' title='Multiple used in 5 places.'>expansion_factor</a> = 3;
+<a id='L71' name='L71'></a>  71                         <strong class='reserved'>break</strong>;
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>case</strong> <a href='../S/410.html#L27' title='Defined at 27 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_KD</a>:
+<a id='L73' name='L73'></a>  73                         <a href='../Y/17314.html' title='Multiple used in 5 places.'>expansion_factor</a> = 3;
+<a id='L74' name='L74'></a>  74                         <strong class='reserved'>break</strong>;
+<a id='L75' name='L75'></a>  75                 <strong class='reserved'>case</strong> <a href='../S/410.html#L29' title='Defined at 29 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_C</a>:
+<a id='L76' name='L76'></a>  76                 <strong class='reserved'>case</strong> <a href='../S/410.html#L31' title='Defined at 31 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_KC</a>:
+<a id='L77' name='L77'></a>  77                         <strong class='reserved'>break</strong>;
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>default</strong>:
+<a id='L79' name='L79'></a>  79                         <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L80' name='L80'></a>  80                                                 "normalizer_normalize: illegal normalization form", 0 );
+<a id='L81' name='L81'></a>  81                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L82' name='L82'></a>  82         <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <em class='comment'>/*</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'>         * Normalize string (converting it to UTF-16 first).</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'>         */</em>
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         <em class='comment'>/* First convert the string to UTF-16. */</em>
+<a id='L89' name='L89'></a>  89         <a href='../S/383.html#L50' title='Defined at 50 in ext/intl/intl_convert.c.'>intl_convert_utf8_to_utf16</a>(&amp;<a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>, &amp;<a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a>, <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> );
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>if</strong>( <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>( <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> ) )
+<a id='L92' name='L92'></a>  92         <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93                 <em class='comment'>/* Set global error code. */</em>
+<a id='L94' name='L94'></a>  94                 <a href='../S/388.html#L159' title='Defined at 159 in ext/intl/intl_error.c.'>intl_error_set_code</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> );
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96                 <em class='comment'>/* Set error messages. */</em>
+<a id='L97' name='L97'></a>  97                 <a href='../S/388.html#L104' title='Defined at 104 in ext/intl/intl_error.c.'>intl_error_set_custom_msg</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, "Error converting input string to UTF-16", 0 );
+<a id='L98' name='L98'></a>  98                 <strong class='reserved'>if</strong> (<a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>) <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L100' name='L100'></a> 100                 <em class='brace'>}</em>
+<a id='L101' name='L101'></a> 101                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L102' name='L102'></a> 102         <em class='brace'>}</em>
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <em class='comment'>/* Allocate memory for the destination buffer for normalization */</em>
+<a id='L106' name='L106'></a> 106         <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> = <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a> * <a href='../Y/17314.html' title='Multiple used in 5 places.'>expansion_factor</a>;
+<a id='L107' name='L107'></a> 107         <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> = <a href='../S/382.html#L33' title='Defined at 33 in ext/intl/intl_common.h.'>eumalloc</a>( <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> + 1 );
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109         <em class='comment'>/* normalize */</em>
+<a id='L110' name='L110'></a> 110         <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a> = <a href='../Y/39610.html' title='Multiple used in 2 places.'>unorm_normalize</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>, <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a>, <a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>, (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>) 0 <em class='comment'>/* options */</em>, <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a>, <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>);
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <em class='comment'>/* Bail out if an unexpected error occurred.</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>         * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'>         * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).</em>
+<a id='L115' name='L115'></a> 115 <em class='comment'>         */</em>
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>if</strong>( <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>) &amp;&amp; <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> != <a href='../Y/6931.html' title='Multiple used in 22 places.'>U_BUFFER_OVERFLOW_ERROR</a> &amp;&amp; <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> != <a href='../Y/7048.html' title='Multiple used in 5 places.'>U_STRING_NOT_TERMINATED_WARNING</a> ) <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> );
+<a id='L118' name='L118'></a> 118                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L119' name='L119'></a> 119                 <a href='../S/1632.html#L630' title='Defined at 630 in Zend/zend_API.h.'>RETURN_NULL</a>();
+<a id='L120' name='L120'></a> 120         <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <strong class='reserved'>if</strong> ( <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a> &gt; <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> ) <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                 <em class='comment'>/* realloc does not seem to work properly - memory is corrupted</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'>                 * uret_buf =  eurealloc(uret_buf, size_needed + 1);</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'>                 */</em>
+<a id='L126' name='L126'></a> 126                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> );
+<a id='L127' name='L127'></a> 127                 <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> = <a href='../S/382.html#L33' title='Defined at 33 in ext/intl/intl_common.h.'>eumalloc</a>( <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a> + 1 );
+<a id='L128' name='L128'></a> 128                 <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> = <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a>;
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130                 <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = <a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>;
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132                 <em class='comment'>/* try normalize again */</em>
+<a id='L133' name='L133'></a> 133                 <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a> = <a href='../Y/39610.html' title='Multiple used in 2 places.'>unorm_normalize</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>, <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a>, <a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>, (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>) 0 <em class='comment'>/* options */</em>, <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a>, <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>);
+<a id='L134' name='L134'></a> 134 
+<a id='L135' name='L135'></a> 135                 <em class='comment'>/* Bail out if an unexpected error occurred. */</em>
+<a id='L136' name='L136'></a> 136                 <strong class='reserved'>if</strong>( <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>)  ) <em class='brace'>{</em>
+<a id='L137' name='L137'></a> 137                         <em class='comment'>/* Set error messages. */</em>
+<a id='L138' name='L138'></a> 138                         <a href='../S/388.html#L104' title='Defined at 104 in ext/intl/intl_error.c.'>intl_error_set_custom_msg</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,"Error normalizing string", 0 );
+<a id='L139' name='L139'></a> 139                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> );
+<a id='L140' name='L140'></a> 140                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L141' name='L141'></a> 141                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L142' name='L142'></a> 142                 <em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143         <em class='brace'>}</em>
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147         <em class='comment'>/* the buffer we actually used */</em>
+<a id='L148' name='L148'></a> 148         <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a> = <a href='../Y/36243.html' title='Multiple used in 7 places.'>size_needed</a>;
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         <em class='comment'>/* Convert normalized string from UTF-16 to UTF-8. */</em>
+<a id='L151' name='L151'></a> 151         <a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a> = <a href='../S/383.html#L118' title='Defined at 118 in ext/intl/intl_convert.c.'>intl_convert_utf16_to_utf8</a>(<a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a>, <a href='../Y/39735.html' title='Multiple used in 9 places.'>uret_len</a>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> );
+<a id='L152' name='L152'></a> 152         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39734.html' title='Multiple used in 10 places.'>uret_buf</a> );
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>if</strong>( !<a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a> )
+<a id='L154' name='L154'></a> 154         <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>,
+<a id='L156' name='L156'></a> 156                                 "normalizer_normalize: error converting normalized text UTF-8", 0 );
+<a id='L157' name='L157'></a> 157                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L158' name='L158'></a> 158         <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160         <em class='comment'>/* Return it. */</em>
+<a id='L161' name='L161'></a> 161         <a href='../S/1632.html#L617' title='Defined at 617 in Zend/zend_API.h.'>RETVAL_NEW_STR</a>( <a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a> );
+<a id='L162' name='L162'></a> 162 <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'>/* }}} */</em>
+<a id='L164' name='L164'></a> 164 
+<a id='L165' name='L165'></a> 165 <em class='comment'>/* {{{ proto bool Normalizer::isNormalized( string $input [, string $form = FORM_C] )</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'> * Test if a string is in a given normalization form. }}} */</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'>/* {{{ proto bool normalizer_is_normalize( string $input [, string $form = FORM_C] )</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'> * Test if a string is in a given normalization form.</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'> */</em>
+<a id='L170' name='L170'></a> 170 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>( <a href='../Y/28669.html' title='Multiple used in 4 places.'>normalizer_is_normalized</a> )
+<a id='L171' name='L171'></a> 171 <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172         <strong class='reserved'>char</strong>*           <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L173' name='L173'></a> 173         <em class='comment'>/* form is optional, defaults to FORM_C */</em>
+<a id='L174' name='L174'></a> 174         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>               <a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a> = <a href='../S/410.html#L33' title='Defined at 33 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_DEFAULT</a>;
+<a id='L175' name='L175'></a> 175         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>          <a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a> = 0;
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>*          <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L178' name='L178'></a> 178         <strong class='reserved'>int</strong>             <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a> = 0;
+<a id='L179' name='L179'></a> 179         <a href='../Y/6738.html' title='Multiple used in 85 places.'>UErrorCode</a>      <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> = <a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>;
+<a id='L180' name='L180'></a> 180 
+<a id='L181' name='L181'></a> 181         <a href='../Y/6692.html' title='Multiple used in 8 places.'>UBool</a>           <a href='../Y/39733.html' title='Multiple used in 3 places.'>uret</a> = <a href='../D/2350.html' title='Multiple defined in 23 places.'>FALSE</a>;
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183         <a href='../S/388.html#L90' title='Defined at 90 in ext/intl/intl_error.c.'>intl_error_reset</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a> );
+<a id='L184' name='L184'></a> 184 
+<a id='L185' name='L185'></a> 185         <em class='comment'>/* Parse parameters. */</em>
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "s|l",
+<a id='L187' name='L187'></a> 187                                 &amp;<a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, &amp;<a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a>, &amp;<a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L188' name='L188'></a> 188         <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L190' name='L190'></a> 190                                 "normalizer_is_normalized: unable to parse input params", 0 );
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L193' name='L193'></a> 193         <em class='brace'>}</em>
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195         <strong class='reserved'>switch</strong>(<a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>) <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196                 <em class='comment'>/* case NORMALIZER_NONE: not allowed - doesn't make sense */</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198                 <strong class='reserved'>case</strong> <a href='../S/410.html#L25' title='Defined at 25 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_D</a>:
+<a id='L199' name='L199'></a> 199                 <strong class='reserved'>case</strong> <a href='../S/410.html#L27' title='Defined at 27 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_KD</a>:
+<a id='L200' name='L200'></a> 200                 <strong class='reserved'>case</strong> <a href='../S/410.html#L29' title='Defined at 29 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_C</a>:
+<a id='L201' name='L201'></a> 201                 <strong class='reserved'>case</strong> <a href='../S/410.html#L31' title='Defined at 31 in ext/intl/normalizer/normalizer.h.'>NORMALIZER_FORM_KC</a>:
+<a id='L202' name='L202'></a> 202                         <strong class='reserved'>break</strong>;
+<a id='L203' name='L203'></a> 203                 <strong class='reserved'>default</strong>:
+<a id='L204' name='L204'></a> 204                         <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L205' name='L205'></a> 205                                                 "normalizer_normalize: illegal normalization form", 0 );
+<a id='L206' name='L206'></a> 206                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L207' name='L207'></a> 207         <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210         <em class='comment'>/*</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'>         * Test normalization of string (converting it to UTF-16 first).</em>
+<a id='L212' name='L212'></a> 212 <em class='comment'>         */</em>
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214         <em class='comment'>/* First convert the string to UTF-16. */</em>
+<a id='L215' name='L215'></a> 215         <a href='../S/383.html#L50' title='Defined at 50 in ext/intl/intl_convert.c.'>intl_convert_utf8_to_utf16</a>(&amp;<a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>, &amp;<a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a>, <a href='../Y/23281.html' title='Multiple used in 531 places.'>input</a>, <a href='../Y/23297.html' title='Multiple used in 16 places.'>input_len</a>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> );
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>if</strong>( <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>( <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> ) )
+<a id='L218' name='L218'></a> 218         <em class='brace'>{</em>
+<a id='L219' name='L219'></a> 219                 <em class='comment'>/* Set global error code. */</em>
+<a id='L220' name='L220'></a> 220                 <a href='../S/388.html#L159' title='Defined at 159 in ext/intl/intl_error.c.'>intl_error_set_code</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a> );
+<a id='L221' name='L221'></a> 221 
+<a id='L222' name='L222'></a> 222                 <em class='comment'>/* Set error messages. */</em>
+<a id='L223' name='L223'></a> 223                 <a href='../S/388.html#L104' title='Defined at 104 in ext/intl/intl_error.c.'>intl_error_set_custom_msg</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, "Error converting string to UTF-16.", 0 );
+<a id='L224' name='L224'></a> 224                 <strong class='reserved'>if</strong> (<a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>) <em class='brace'>{</em>
+<a id='L225' name='L225'></a> 225                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L226' name='L226'></a> 226                 <em class='brace'>}</em>
+<a id='L227' name='L227'></a> 227                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L228' name='L228'></a> 228         <em class='brace'>}</em>
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231         <em class='comment'>/* test string */</em>
+<a id='L232' name='L232'></a> 232         <a href='../Y/39733.html' title='Multiple used in 3 places.'>uret</a> = unorm_isNormalizedWithOptions( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a>, <a href='../Y/39468.html' title='Multiple used in 8 places.'>uinput_len</a>, <a href='../Y/18196.html' title='Multiple used in 39 places.'>form</a>, (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>) 0 <em class='comment'>/* options */</em>, &amp;<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>);
+<a id='L233' name='L233'></a> 233 
+<a id='L234' name='L234'></a> 234         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>( <a href='../Y/39467.html' title='Multiple used in 15 places.'>uinput</a> );
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         <em class='comment'>/* Bail out if an unexpected error occurred. */</em>
+<a id='L237' name='L237'></a> 237         <strong class='reserved'>if</strong>( <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/800.html#L502' title='Defined at 502 in ext/mysqlnd/mysqlnd_structs.h.'>status</a>)  ) <em class='brace'>{</em>
+<a id='L238' name='L238'></a> 238                 <em class='comment'>/* Set error messages. */</em>
+<a id='L239' name='L239'></a> 239                 <a href='../S/388.html#L104' title='Defined at 104 in ext/intl/intl_error.c.'>intl_error_set_custom_msg</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,"Error testing if string is the given normalization form.", 0 );
+<a id='L240' name='L240'></a> 240                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L241' name='L241'></a> 241         <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243         <strong class='reserved'>if</strong> ( <a href='../Y/39733.html' title='Multiple used in 3 places.'>uret</a> )
+<a id='L244' name='L244'></a> 244                 <a href='../S/1632.html#L645' title='Defined at 645 in Zend/zend_API.h.'>RETURN_TRUE</a>;
+<a id='L245' name='L245'></a> 245 
+<a id='L246' name='L246'></a> 246         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L247' name='L247'></a> 247 <em class='brace'>}</em>
+<a id='L248' name='L248'></a> 248 <em class='comment'>/* }}} */</em>
+<a id='L249' name='L249'></a> 249 
+<a id='L250' name='L250'></a> 250 <em class='comment'>/*</em>
+<a id='L251' name='L251'></a> 251 <em class='comment'> * Local variables:</em>
+<a id='L252' name='L252'></a> 252 <em class='comment'> * tab-width: 4</em>
+<a id='L253' name='L253'></a> 253 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L254' name='L254'></a> 254 <em class='comment'> * End:</em>
+<a id='L255' name='L255'></a> 255 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L256' name='L256'></a> 256 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L257' name='L257'></a> 257 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L33'>[^]</a><a href='#L170'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

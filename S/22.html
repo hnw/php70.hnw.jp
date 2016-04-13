@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/bcmath/libbcmath/src/recmul.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1744.html'>bcmath</a>/<a href='../files/1745.html'>libbcmath</a>/<a href='../files/1746.html'>src</a>/recmul.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L278'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L54' title='Defined at 54.'>new_sub_num</a></li>
+<li><a href='#L81' title='Defined at 81.'>_bc_simp_mul</a></li>
+<li><a href='#L116' title='Defined at 116.'>_bc_shift_addsub</a></li>
+<li><a href='#L182' title='Defined at 182.'>_bc_rec_mul</a></li>
+<li><a href='#L278' title='Defined at 278.'>bc_multiply</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/* recmul.c: bcmath library file. */</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>/*</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>    Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>    Copyright (C) 2000 Philip A. Nelson</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'></em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>    This library is free software; you can redistribute it and/or</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>    modify it under the terms of the GNU Lesser General Public</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>    License as published by the Free Software Foundation; either</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>    version 2 of the License, or (at your option) any later version.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>    This library is distributed in the hope that it will be useful,</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>    but WITHOUT ANY WARRANTY; without even the implied warranty of</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>    Lesser General Public License for more details.  (COPYING.LIB)</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'></em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>    You should have received a copy of the GNU Lesser General Public</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>    License along with this library; if not, write to:</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'></em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>      The Free Software Foundation, Inc.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>      59 Temple Place, Suite 330</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>      Boston, MA 02111-1307 USA.</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'></em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>    You may contact the author by:</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>       e-mail:  philnelson@acm.org</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>      us-mail:  Philip A. Nelson</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>                Computer Science Department, 9062</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>                Western Washington University</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>                Bellingham, WA 98226-9062</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'></em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>*************************************************************************/</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> &lt;<a href='../I/132.html'>config.h</a>&gt;
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> &lt;stdio.h&gt;
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;assert.h&gt;
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> &lt;ctype.h&gt;
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> &lt;stdarg.h&gt;
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#include</em> "<a href='4.html'>bcmath.h</a>"
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#include</em> "<a href='19.html'>private.h</a>"
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='comment'>/* Recursive vs non-recursive multiply crossover ranges. */</em>
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(MULDIGITS)
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#include</em> "muldigits.h"
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#else</em>
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#define</em> <a href='../S/22.html#L48' title='Referred from 48 in ext/bcmath/libbcmath/src/recmul.c.'>MUL_BASE_DIGITS</a> 80
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#endif</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <strong class='reserved'>int</strong> <a href='../Y/26987.html' title='Multiple used in 3 places.'>mul_base_digits</a> = <a href='../S/22.html#L45' title='Defined at 45 in ext/bcmath/libbcmath/src/recmul.c.'>MUL_BASE_DIGITS</a>;
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#define</em> <a href='../R/4583.html' title='Multiple referred from 2 places.'>MUL_SMALL_DIGITS</a> <a href='../Y/26987.html' title='Multiple used in 3 places.'>mul_base_digits</a>/4
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 <em class='comment'>/* Multiply utility routines */</em>
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <strong class='reserved'>static</strong> <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a>
+<a id='L54' name='L54'></a>  54 <a href='../R/22116.html' title='Multiple referred from 6 places.'>new_sub_num</a> (<a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>, <a href='../S/255.html#L4' title='Defined at 4 in ext/gd/libgd/mathmake.c.'>scale</a>, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>)
+<a id='L55' name='L55'></a>  55      <strong class='reserved'>int</strong> <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>, <a href='../S/255.html#L4' title='Defined at 4 in ext/gd/libgd/mathmake.c.'>scale</a>;
+<a id='L56' name='L56'></a>  56      <strong class='reserved'>char</strong> *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>;
+<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58   <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#ifdef</em> <a href='../Y/5486.html' title='Multiple used in 4 places.'>SANDER_0</a>
+<a id='L61' name='L61'></a>  61   <strong class='reserved'>if</strong> (<a href='../Y/8125.html' title='Multiple used in 10 places.'>_bc_Free_list</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L62' name='L62'></a>  62     <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a> = <a href='../Y/8125.html' title='Multiple used in 10 places.'>_bc_Free_list</a>;
+<a id='L63' name='L63'></a>  63     <a href='../Y/8125.html' title='Multiple used in 10 places.'>_bc_Free_list</a> = <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27905.html' title='Multiple used in 4 places.'>n_next</a>;
+<a id='L64' name='L64'></a>  64   <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65 <em class='sharp'>#endif</em>
+<a id='L66' name='L66'></a>  66     <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a> = (<a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a>) <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a> (<strong class='reserved'>sizeof</strong>(<a href='../D/19896.html' title='Multiple defined in 2 places.'>bc_struct</a>));
+<a id='L67' name='L67'></a>  67 <em class='sharp'>#ifdef</em> <a href='../Y/5486.html' title='Multiple used in 4 places.'>SANDER_0</a>
+<a id='L68' name='L68'></a>  68     <strong class='reserved'>if</strong> (<a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <a href='../S/17.html#L42' title='Defined at 42 in ext/bcmath/libbcmath/src/outofmem.c.'>bc_out_of_memory</a> ();
+<a id='L69' name='L69'></a>  69   <em class='brace'>}</em>
+<a id='L70' name='L70'></a>  70 <em class='sharp'>#endif</em>
+<a id='L71' name='L71'></a>  71   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> = <a href='../S/4.html#L35' title='Defined at 35 in ext/bcmath/libbcmath/src/bcmath.h.'>PLUS</a>;
+<a id='L72' name='L72'></a>  72   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> = <a href='../D/23811.html' title='Multiple defined in 3 places.'>length</a>;
+<a id='L73' name='L73'></a>  73   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a> = <a href='../S/255.html#L4' title='Defined at 4 in ext/gd/libgd/mathmake.c.'>scale</a>;
+<a id='L74' name='L74'></a>  74   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27907.html' title='Multiple used in 6 places.'>n_refs</a> = 1;
+<a id='L75' name='L75'></a>  75   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27906.html' title='Multiple used in 9 places.'>n_ptr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L76' name='L76'></a>  76   <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> = <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>;
+<a id='L77' name='L77'></a>  77   <strong class='reserved'>return</strong> <a href='../Y/38200.html' title='Multiple used in 313 places.'>temp</a>;
+<a id='L78' name='L78'></a>  78 <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L81' name='L81'></a>  81 <a href='../S/22.html#L194' title='Referred from 194 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_simp_mul</a> (<a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>, <strong class='reserved'>int</strong> <a href='../Y/27435.html' title='Multiple used in 3 places.'>n1len</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>, <strong class='reserved'>int</strong> <a href='../Y/27440.html' title='Multiple used in 5 places.'>n2len</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>,
+<a id='L82' name='L82'></a>  82               <strong class='reserved'>int</strong> <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>)
+<a id='L83' name='L83'></a>  83 <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84   <strong class='reserved'>char</strong> *<a href='../Y/27436.html' title='Multiple used in 21 places.'>n1ptr</a>, *<a href='../Y/27441.html' title='Multiple used in 35 places.'>n2ptr</a>, *<a href='../Y/33777.html' title='Multiple used in 4 places.'>pvptr</a>;
+<a id='L85' name='L85'></a>  85   <strong class='reserved'>char</strong> *<a href='../Y/27434.html' title='Multiple used in 3 places.'>n1end</a>, *<a href='../Y/27439.html' title='Multiple used in 4 places.'>n2end</a>;          <em class='comment'>/* To the end of n1 and n2. */</em>
+<a id='L86' name='L86'></a>  86   <strong class='reserved'>int</strong> <a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a>, <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a>, <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a>;
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88   <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a> = <a href='../Y/27435.html' title='Multiple used in 3 places.'>n1len</a>+<a href='../Y/27440.html' title='Multiple used in 5 places.'>n2len</a>+1;
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90   *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a> = <a href='../S/4.html#L159' title='Defined at 159 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_new_num</a> (<a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a>, 0);
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92   <a href='../Y/27434.html' title='Multiple used in 3 places.'>n1end</a> = (<strong class='reserved'>char</strong> *) (<a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> + <a href='../Y/27435.html' title='Multiple used in 3 places.'>n1len</a> - 1);
+<a id='L93' name='L93'></a>  93   <a href='../Y/27439.html' title='Multiple used in 4 places.'>n2end</a> = (<strong class='reserved'>char</strong> *) (<a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> + <a href='../Y/27440.html' title='Multiple used in 5 places.'>n2len</a> - 1);
+<a id='L94' name='L94'></a>  94   <a href='../Y/33777.html' title='Multiple used in 4 places.'>pvptr</a> = (<strong class='reserved'>char</strong> *) ((*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>)-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> + <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a> - 1);
+<a id='L95' name='L95'></a>  95   <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> = 0;
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97   <em class='comment'>/* Here is the loop... */</em>
+<a id='L98' name='L98'></a>  98   <strong class='reserved'>for</strong> (<a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a> = 0; <a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a> &lt; <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a>-1; <a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a>++)
+<a id='L99' name='L99'></a>  99     <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100       <a href='../Y/27436.html' title='Multiple used in 21 places.'>n1ptr</a> = (<strong class='reserved'>char</strong> *) (<a href='../Y/27434.html' title='Multiple used in 3 places.'>n1end</a> - <a href='../D/4788.html' title='Multiple defined in 19 places.'>MAX</a>(0, <a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a>-<a href='../Y/27440.html' title='Multiple used in 5 places.'>n2len</a>+1));
+<a id='L101' name='L101'></a> 101       <a href='../Y/27441.html' title='Multiple used in 35 places.'>n2ptr</a> = (<strong class='reserved'>char</strong> *) (<a href='../Y/27439.html' title='Multiple used in 4 places.'>n2end</a> - <a href='../D/5132.html' title='Multiple defined in 21 places.'>MIN</a>(<a href='../Y/23128.html' title='Multiple used in 26 places.'>indx</a>, <a href='../Y/27440.html' title='Multiple used in 5 places.'>n2len</a>-1));
+<a id='L102' name='L102'></a> 102       <strong class='reserved'>while</strong> ((<a href='../Y/27436.html' title='Multiple used in 21 places.'>n1ptr</a> &gt;= <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>) &amp;&amp; (<a href='../Y/27441.html' title='Multiple used in 35 places.'>n2ptr</a> &lt;= <a href='../Y/27439.html' title='Multiple used in 4 places.'>n2end</a>))
+<a id='L103' name='L103'></a> 103         <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> += *<a href='../Y/27436.html' title='Multiple used in 21 places.'>n1ptr</a>-- * *<a href='../Y/27441.html' title='Multiple used in 35 places.'>n2ptr</a>++;
+<a id='L104' name='L104'></a> 104       *<a href='../Y/33777.html' title='Multiple used in 4 places.'>pvptr</a>-- = <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> % <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L105' name='L105'></a> 105       <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> = <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> / <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L106' name='L106'></a> 106     <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107   *<a href='../Y/33777.html' title='Multiple used in 4 places.'>pvptr</a> = <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a>;
+<a id='L108' name='L108'></a> 108 <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111 <em class='comment'>/* A special adder/subtractor for the recursive divide and conquer</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>   multiply algorithm.  Note: if sub is called, accum must</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>   be larger that what is being subtracted.  Also, accum and val</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'>   must have n_scale = 0.  (e.g. they must look like integers. *) */</em>
+<a id='L115' name='L115'></a> 115 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L116' name='L116'></a> 116 <a href='../R/15780.html' title='Multiple referred from 5 places.'>_bc_shift_addsub</a> (<a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>, <strong class='reserved'>int</strong> <a href='../Y/36013.html' title='Multiple used in 93 places.'>shift</a>, <strong class='reserved'>int</strong> <a href='../Y/37789.html' title='Multiple used in 153 places.'>sub</a>)
+<a id='L117' name='L117'></a> 117 <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118   <strong class='reserved'>signed</strong> <strong class='reserved'>char</strong> *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>, *<a href='../Y/40068.html' title='Multiple used in 4 places.'>valp</a>;
+<a id='L119' name='L119'></a> 119   <strong class='reserved'>int</strong>  <a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>, <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121   <a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a> = <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>;
+<a id='L122' name='L122'></a> 122   <strong class='reserved'>if</strong> (<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>[0] == 0)
+<a id='L123' name='L123'></a> 123     <a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>--;
+<a id='L124' name='L124'></a> 124   <a href='../S/1378.html#L85' title='Defined at 85 in main/php.h.'>assert</a> (<a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>+<a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a> &gt;= <a href='../Y/36013.html' title='Multiple used in 93 places.'>shift</a>+<a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>);
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126   <em class='comment'>/* Set up pointers and others */</em>
+<a id='L127' name='L127'></a> 127   <a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> = (<strong class='reserved'>signed</strong> <strong class='reserved'>char</strong> *)(<a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> +
+<a id='L128' name='L128'></a> 128                          <a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> + <a href='../Y/8727.html' title='Multiple used in 7 places.'>accum</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a> - <a href='../Y/36013.html' title='Multiple used in 93 places.'>shift</a> - 1);
+<a id='L129' name='L129'></a> 129   <a href='../Y/40068.html' title='Multiple used in 4 places.'>valp</a> = (<strong class='reserved'>signed</strong> <strong class='reserved'>char</strong> *)(<a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> + <a href='../Y/40037.html' title='Multiple used in 2923 places.'>val</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> - 1);
+<a id='L130' name='L130'></a> 130   <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 0;
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132   <strong class='reserved'>if</strong> (<a href='../Y/37789.html' title='Multiple used in 153 places.'>sub</a>) <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133     <em class='comment'>/* Subtraction, carry is really borrow. */</em>
+<a id='L134' name='L134'></a> 134     <strong class='reserved'>while</strong> (<a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>--) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135       *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> -= *<a href='../Y/40068.html' title='Multiple used in 4 places.'>valp</a>-- + <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>;
+<a id='L136' name='L136'></a> 136       <strong class='reserved'>if</strong> (*<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> &lt; 0) <em class='brace'>{</em>
+<a id='L137' name='L137'></a> 137         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 1;
+<a id='L138' name='L138'></a> 138         *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>-- += <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L139' name='L139'></a> 139       <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L140' name='L140'></a> 140         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 0;
+<a id='L141' name='L141'></a> 141         <a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>--;
+<a id='L142' name='L142'></a> 142       <em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143     <em class='brace'>}</em>
+<a id='L144' name='L144'></a> 144     <strong class='reserved'>while</strong> (<a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>) <em class='brace'>{</em>
+<a id='L145' name='L145'></a> 145       *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> -= <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>;
+<a id='L146' name='L146'></a> 146       <strong class='reserved'>if</strong> (*<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> &lt; 0)
+<a id='L147' name='L147'></a> 147         *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>-- += <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L148' name='L148'></a> 148       <strong class='reserved'>else</strong>
+<a id='L149' name='L149'></a> 149         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 0;
+<a id='L150' name='L150'></a> 150     <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151   <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L152' name='L152'></a> 152     <em class='comment'>/* Addition */</em>
+<a id='L153' name='L153'></a> 153     <strong class='reserved'>while</strong> (<a href='../Y/14477.html' title='Multiple used in 1357 places.'>count</a>--) <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154       *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> += *<a href='../Y/40068.html' title='Multiple used in 4 places.'>valp</a>-- + <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>;
+<a id='L155' name='L155'></a> 155       <strong class='reserved'>if</strong> (*<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> &gt; (<a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>-1)) <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 1;
+<a id='L157' name='L157'></a> 157         *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>-- -= <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L158' name='L158'></a> 158       <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 0;
+<a id='L160' name='L160'></a> 160         <a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>--;
+<a id='L161' name='L161'></a> 161       <em class='brace'>}</em>
+<a id='L162' name='L162'></a> 162     <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163     <strong class='reserved'>while</strong> (<a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>) <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164       *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> += <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a>;
+<a id='L165' name='L165'></a> 165       <strong class='reserved'>if</strong> (*<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a> &gt; (<a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>-1))
+<a id='L166' name='L166'></a> 166         *<a href='../Y/8725.html' title='Multiple used in 16 places.'>accp</a>-- -= <a href='../S/4.html#L65' title='Defined at 65 in ext/bcmath/libbcmath/src/bcmath.h.'>BASE</a>;
+<a id='L167' name='L167'></a> 167       <strong class='reserved'>else</strong>
+<a id='L168' name='L168'></a> 168         <a href='../Y/13330.html' title='Multiple used in 97 places.'>carry</a> = 0;
+<a id='L169' name='L169'></a> 169     <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170   <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171 <em class='brace'>}</em>
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173 <em class='comment'>/* Recursive divide and conquer multiply algorithm.</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'>   Based on</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'>   Let u = u0 + u1*(b^n)</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'>   Let v = v0 + v1*(b^n)</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'>   Then uv = (B^2n+B^n)*u1*v1 + B^n*(u1-u0)*(v0-v1) + (B^n+1)*u0*v0</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'></em>
+<a id='L179' name='L179'></a> 179 <em class='comment'>   B is the base of storage, number of digits in u1,u0 close to equal.</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'>*/</em>
+<a id='L181' name='L181'></a> 181 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>
+<a id='L182' name='L182'></a> 182 <a href='../R/15778.html' title='Multiple referred from 4 places.'>_bc_rec_mul</a> (<a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/39152.html' title='Multiple used in 2069 places.'>u</a>, <strong class='reserved'>int</strong> <a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>, <strong class='reserved'>int</strong> <a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>,
+<a id='L183' name='L183'></a> 183              <strong class='reserved'>int</strong> <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>)
+<a id='L184' name='L184'></a> 184 <em class='brace'>{</em>
+<a id='L185' name='L185'></a> 185   <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>, <a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>, <a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>, <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>;
+<a id='L186' name='L186'></a> 186   <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>, <a href='../Y/25516.html' title='Multiple used in 46 places.'>m2</a>, <a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a>, <a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>, <a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>;
+<a id='L187' name='L187'></a> 187   <strong class='reserved'>int</strong> <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a>, <a href='../Y/25515.html' title='Multiple used in 4 places.'>m1zero</a>;
+<a id='L188' name='L188'></a> 188   <strong class='reserved'>int</strong> <a href='../Y/14949.html' title='Multiple used in 3 places.'>d1len</a>, <a href='../Y/14956.html' title='Multiple used in 3 places.'>d2len</a>;
+<a id='L189' name='L189'></a> 189 
+<a id='L190' name='L190'></a> 190   <em class='comment'>/* Base case? */</em>
+<a id='L191' name='L191'></a> 191   <strong class='reserved'>if</strong> ((<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>+<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>) &lt; <a href='../Y/26987.html' title='Multiple used in 3 places.'>mul_base_digits</a>
+<a id='L192' name='L192'></a> 192       || <a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a> &lt; <a href='../S/22.html#L49' title='Defined at 49 in ext/bcmath/libbcmath/src/recmul.c.'>MUL_SMALL_DIGITS</a>
+<a id='L193' name='L193'></a> 193       || <a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a> &lt; <a href='../S/22.html#L49' title='Defined at 49 in ext/bcmath/libbcmath/src/recmul.c.'>MUL_SMALL_DIGITS</a> ) <em class='brace'>{</em>
+<a id='L194' name='L194'></a> 194     <a href='../S/22.html#L81' title='Defined at 81 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_simp_mul</a> (<a href='../Y/39152.html' title='Multiple used in 2069 places.'>u</a>, <a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>, <a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>, <a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>);
+<a id='L195' name='L195'></a> 195     <strong class='reserved'>return</strong>;
+<a id='L196' name='L196'></a> 196   <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198   <em class='comment'>/* Calculate n -- the u and v split point in digits. */</em>
+<a id='L199' name='L199'></a> 199   <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> = (<a href='../D/4788.html' title='Multiple defined in 19 places.'>MAX</a>(<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>, <a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>)+1) / 2;
+<a id='L200' name='L200'></a> 200 
+<a id='L201' name='L201'></a> 201   <em class='comment'>/* Split u and v. */</em>
+<a id='L202' name='L202'></a> 202   <strong class='reserved'>if</strong> (<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a> &lt; <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203     <a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a> = <a href='../S/11.html#L117' title='Defined at 117 in ext/bcmath/libbcmath/src/init.c.'>bc_copy_num</a> (<a href='../S/29.html#L59' title='Defined at 59 in ext/bcmath/php_bcmath.h.'>BCG</a>(<a href='../Y/8425.html' title='Multiple used in 13 places.'>_zero_</a>));
+<a id='L204' name='L204'></a> 204     <a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>,0, <a href='../Y/39152.html' title='Multiple used in 2069 places.'>u</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>);
+<a id='L205' name='L205'></a> 205   <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206     <a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>-<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0, <a href='../Y/39152.html' title='Multiple used in 2069 places.'>u</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>);
+<a id='L207' name='L207'></a> 207     <a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0, <a href='../Y/39152.html' title='Multiple used in 2069 places.'>u</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>+<a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>-<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>);
+<a id='L208' name='L208'></a> 208   <em class='brace'>}</em>
+<a id='L209' name='L209'></a> 209   <strong class='reserved'>if</strong> (<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a> &lt; <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>) <em class='brace'>{</em>
+<a id='L210' name='L210'></a> 210     <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a> = <a href='../S/11.html#L117' title='Defined at 117 in ext/bcmath/libbcmath/src/init.c.'>bc_copy_num</a> (<a href='../S/29.html#L59' title='Defined at 59 in ext/bcmath/php_bcmath.h.'>BCG</a>(<a href='../Y/8425.html' title='Multiple used in 13 places.'>_zero_</a>));
+<a id='L211' name='L211'></a> 211     <a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>,0, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>);
+<a id='L212' name='L212'></a> 212   <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L213' name='L213'></a> 213     <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>-<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>);
+<a id='L214' name='L214'></a> 214     <a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a> = <a href='../S/22.html#L54' title='Defined at 54 in ext/bcmath/libbcmath/src/recmul.c.'>new_sub_num</a> (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a>+<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>-<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>);
+<a id='L215' name='L215'></a> 215     <em class='brace'>}</em>
+<a id='L216' name='L216'></a> 216   <a href='../S/23.html#L46' title='Defined at 46 in ext/bcmath/libbcmath/src/rmzero.c.'>_bc_rm_leading_zeros</a> (<a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>);
+<a id='L217' name='L217'></a> 217   <a href='../S/23.html#L46' title='Defined at 46 in ext/bcmath/libbcmath/src/rmzero.c.'>_bc_rm_leading_zeros</a> (<a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>);
+<a id='L218' name='L218'></a> 218   <a href='../S/23.html#L46' title='Defined at 46 in ext/bcmath/libbcmath/src/rmzero.c.'>_bc_rm_leading_zeros</a> (<a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>);
+<a id='L219' name='L219'></a> 219   <a href='../S/23.html#L46' title='Defined at 46 in ext/bcmath/libbcmath/src/rmzero.c.'>_bc_rm_leading_zeros</a> (<a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>);
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221   <a href='../Y/25515.html' title='Multiple used in 4 places.'>m1zero</a> = <a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>) || <a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>);
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223   <em class='comment'>/* Calculate sub results ... */</em>
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225   <a href='../S/11.html#L127' title='Defined at 127 in ext/bcmath/libbcmath/src/init.c.'>bc_init_num</a>(&amp;<a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>);
+<a id='L226' name='L226'></a> 226   <a href='../S/11.html#L127' title='Defined at 127 in ext/bcmath/libbcmath/src/init.c.'>bc_init_num</a>(&amp;<a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>);
+<a id='L227' name='L227'></a> 227   <a href='../S/27.html#L47' title='Defined at 47 in ext/bcmath/libbcmath/src/sub.c.'>bc_sub</a> (<a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>, <a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>, &amp;<a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>, 0);
+<a id='L228' name='L228'></a> 228   <a href='../Y/14949.html' title='Multiple used in 3 places.'>d1len</a> = <a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>;
+<a id='L229' name='L229'></a> 229   <a href='../S/27.html#L47' title='Defined at 47 in ext/bcmath/libbcmath/src/sub.c.'>bc_sub</a> (<a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>, <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>, &amp;<a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>, 0);
+<a id='L230' name='L230'></a> 230   <a href='../Y/14956.html' title='Multiple used in 3 places.'>d2len</a> = <a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>;
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233   <em class='comment'>/* Do recursive multiplies and shifted adds. */</em>
+<a id='L234' name='L234'></a> 234   <strong class='reserved'>if</strong> (<a href='../Y/25515.html' title='Multiple used in 4 places.'>m1zero</a>)
+<a id='L235' name='L235'></a> 235     <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a> = <a href='../S/11.html#L117' title='Defined at 117 in ext/bcmath/libbcmath/src/init.c.'>bc_copy_num</a> (<a href='../S/29.html#L59' title='Defined at 59 in ext/bcmath/php_bcmath.h.'>BCG</a>(<a href='../Y/8425.html' title='Multiple used in 13 places.'>_zero_</a>));
+<a id='L236' name='L236'></a> 236   <strong class='reserved'>else</strong>
+<a id='L237' name='L237'></a> 237     <a href='../S/22.html#L182' title='Defined at 182 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_rec_mul</a> (<a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>, <a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>, <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>, <a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>, &amp;<a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>, 0);
+<a id='L238' name='L238'></a> 238 
+<a id='L239' name='L239'></a> 239   <strong class='reserved'>if</strong> (<a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>) || <a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>))
+<a id='L240' name='L240'></a> 240     <a href='../Y/25516.html' title='Multiple used in 46 places.'>m2</a> = <a href='../S/11.html#L117' title='Defined at 117 in ext/bcmath/libbcmath/src/init.c.'>bc_copy_num</a> (<a href='../S/29.html#L59' title='Defined at 59 in ext/bcmath/php_bcmath.h.'>BCG</a>(<a href='../Y/8425.html' title='Multiple used in 13 places.'>_zero_</a>));
+<a id='L241' name='L241'></a> 241   <strong class='reserved'>else</strong>
+<a id='L242' name='L242'></a> 242     <a href='../S/22.html#L182' title='Defined at 182 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_rec_mul</a> (<a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>, <a href='../Y/14949.html' title='Multiple used in 3 places.'>d1len</a>, <a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>, <a href='../Y/14956.html' title='Multiple used in 3 places.'>d2len</a>, &amp;<a href='../Y/25516.html' title='Multiple used in 46 places.'>m2</a>, 0);
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244   <strong class='reserved'>if</strong> (<a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>) || <a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a>(<a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>))
+<a id='L245' name='L245'></a> 245     <a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a> = <a href='../S/11.html#L117' title='Defined at 117 in ext/bcmath/libbcmath/src/init.c.'>bc_copy_num</a> (<a href='../S/29.html#L59' title='Defined at 59 in ext/bcmath/php_bcmath.h.'>BCG</a>(<a href='../Y/8425.html' title='Multiple used in 13 places.'>_zero_</a>));
+<a id='L246' name='L246'></a> 246   <strong class='reserved'>else</strong>
+<a id='L247' name='L247'></a> 247     <a href='../S/22.html#L182' title='Defined at 182 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_rec_mul</a> (<a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>, <a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>, <a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>, <a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a>, &amp;<a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a>, 0);
+<a id='L248' name='L248'></a> 248 
+<a id='L249' name='L249'></a> 249   <em class='comment'>/* Initialize product */</em>
+<a id='L250' name='L250'></a> 250   <a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a> = <a href='../S/735.html#L23' title='Defined at 23 in ext/mbstring/oniguruma/testu.c.'>ulen</a>+<a href='../Y/40264.html' title='Multiple used in 31 places.'>vlen</a>+1;
+<a id='L251' name='L251'></a> 251   *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a> = <a href='../S/4.html#L159' title='Defined at 159 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_new_num</a>(<a href='../Y/33438.html' title='Multiple used in 8 places.'>prodlen</a>, 0);
+<a id='L252' name='L252'></a> 252 
+<a id='L253' name='L253'></a> 253   <strong class='reserved'>if</strong> (!<a href='../Y/25515.html' title='Multiple used in 4 places.'>m1zero</a>) <em class='brace'>{</em>
+<a id='L254' name='L254'></a> 254     <a href='../S/22.html#L116' title='Defined at 116 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_shift_addsub</a> (*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>, 2*<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0);
+<a id='L255' name='L255'></a> 255     <a href='../S/22.html#L116' title='Defined at 116 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_shift_addsub</a> (*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0);
+<a id='L256' name='L256'></a> 256   <em class='brace'>}</em>
+<a id='L257' name='L257'></a> 257   <a href='../S/22.html#L116' title='Defined at 116 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_shift_addsub</a> (*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 0);
+<a id='L258' name='L258'></a> 258   <a href='../S/22.html#L116' title='Defined at 116 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_shift_addsub</a> (*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a>, 0, 0);
+<a id='L259' name='L259'></a> 259   <a href='../S/22.html#L116' title='Defined at 116 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_shift_addsub</a> (*<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <a href='../Y/25516.html' title='Multiple used in 46 places.'>m2</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> != <a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a>);
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261   <em class='comment'>/* Now clean up! */</em>
+<a id='L262' name='L262'></a> 262   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/39154.html' title='Multiple used in 27 places.'>u1</a>);
+<a id='L263' name='L263'></a> 263   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/39153.html' title='Multiple used in 8 places.'>u0</a>);
+<a id='L264' name='L264'></a> 264   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/40020.html' title='Multiple used in 68 places.'>v1</a>);
+<a id='L265' name='L265'></a> 265   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/25514.html' title='Multiple used in 57 places.'>m1</a>);
+<a id='L266' name='L266'></a> 266   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/40019.html' title='Multiple used in 8 places.'>v0</a>);
+<a id='L267' name='L267'></a> 267   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/25516.html' title='Multiple used in 46 places.'>m2</a>);
+<a id='L268' name='L268'></a> 268   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/25517.html' title='Multiple used in 15 places.'>m3</a>);
+<a id='L269' name='L269'></a> 269   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../D/20793.html' title='Multiple defined in 4 places.'>d1</a>);
+<a id='L270' name='L270'></a> 270   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (&amp;<a href='../Y/14950.html' title='Multiple used in 64 places.'>d2</a>);
+<a id='L271' name='L271'></a> 271 <em class='brace'>}</em>
+<a id='L272' name='L272'></a> 272 
+<a id='L273' name='L273'></a> 273 <em class='comment'>/* The multiply routine.  N2 times N1 is put int PROD with the scale of</em>
+<a id='L274' name='L274'></a> 274 <em class='comment'>   the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).</em>
+<a id='L275' name='L275'></a> 275 <em class='comment'>   */</em>
+<a id='L276' name='L276'></a> 276 
+<a id='L277' name='L277'></a> 277 <strong class='reserved'>void</strong>
+<a id='L278' name='L278'></a> 278 <a href='../R/17091.html' title='Multiple referred from 12 places.'>bc_multiply</a> (<a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>, <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>, <strong class='reserved'>int</strong> <a href='../S/255.html#L4' title='Defined at 4 in ext/gd/libgd/mathmake.c.'>scale</a>)
+<a id='L279' name='L279'></a> 279 <em class='brace'>{</em>
+<a id='L280' name='L280'></a> 280   <a href='../S/4.html#L37' title='Defined at 37 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_num</a> <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>;
+<a id='L281' name='L281'></a> 281   <strong class='reserved'>int</strong> <a href='../Y/24984.html' title='Multiple used in 67 places.'>len1</a>, <a href='../Y/24985.html' title='Multiple used in 107 places.'>len2</a>;
+<a id='L282' name='L282'></a> 282   <strong class='reserved'>int</strong> <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>, <a href='../Y/33437.html' title='Multiple used in 3 places.'>prod_scale</a>;
+<a id='L283' name='L283'></a> 283 
+<a id='L284' name='L284'></a> 284   <em class='comment'>/* Initialize things. */</em>
+<a id='L285' name='L285'></a> 285   <a href='../Y/24984.html' title='Multiple used in 67 places.'>len1</a> = <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> + <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a>;
+<a id='L286' name='L286'></a> 286   <a href='../Y/24985.html' title='Multiple used in 107 places.'>len2</a> = <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> + <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a>;
+<a id='L287' name='L287'></a> 287   <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a> = <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a> + <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a>;
+<a id='L288' name='L288'></a> 288   <a href='../Y/33437.html' title='Multiple used in 3 places.'>prod_scale</a> = <a href='../D/5132.html' title='Multiple defined in 21 places.'>MIN</a>(<a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>,<a href='../D/4788.html' title='Multiple defined in 19 places.'>MAX</a>(<a href='../S/255.html#L4' title='Defined at 4 in ext/gd/libgd/mathmake.c.'>scale</a>,<a href='../D/4788.html' title='Multiple defined in 19 places.'>MAX</a>(<a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a>,<a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a>)));
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290   <em class='comment'>/* Do the multiply */</em>
+<a id='L291' name='L291'></a> 291   <a href='../S/22.html#L182' title='Defined at 182 in ext/bcmath/libbcmath/src/recmul.c.'>_bc_rec_mul</a> (<a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>, <a href='../Y/24984.html' title='Multiple used in 67 places.'>len1</a>, <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>, <a href='../Y/24985.html' title='Multiple used in 107 places.'>len2</a>, &amp;<a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>, <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>);
+<a id='L292' name='L292'></a> 292 
+<a id='L293' name='L293'></a> 293   <em class='comment'>/* Assign to prod and clean up the number. */</em>
+<a id='L294' name='L294'></a> 294   <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> = ( <a href='../Y/27432.html' title='Multiple used in 128 places.'>n1</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> == <a href='../Y/27437.html' title='Multiple used in 104 places.'>n2</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> ? <a href='../S/4.html#L35' title='Defined at 35 in ext/bcmath/libbcmath/src/bcmath.h.'>PLUS</a> : <a href='../S/4.html#L35' title='Defined at 35 in ext/bcmath/libbcmath/src/bcmath.h.'>MINUS</a> );
+<a id='L295' name='L295'></a> 295   <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27917.html' title='Multiple used in 51 places.'>n_value</a> = <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27906.html' title='Multiple used in 9 places.'>n_ptr</a>;
+<a id='L296' name='L296'></a> 296   <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27901.html' title='Multiple used in 51 places.'>n_len</a> = <a href='../Y/24985.html' title='Multiple used in 107 places.'>len2</a> + <a href='../Y/24984.html' title='Multiple used in 67 places.'>len1</a> + 1 - <a href='../Y/18523.html' title='Multiple used in 8 places.'>full_scale</a>;
+<a id='L297' name='L297'></a> 297   <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27910.html' title='Multiple used in 74 places.'>n_scale</a> = <a href='../Y/33437.html' title='Multiple used in 3 places.'>prod_scale</a>;
+<a id='L298' name='L298'></a> 298   <a href='../S/23.html#L46' title='Defined at 46 in ext/bcmath/libbcmath/src/rmzero.c.'>_bc_rm_leading_zeros</a> (<a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>);
+<a id='L299' name='L299'></a> 299   <strong class='reserved'>if</strong> (<a href='../S/28.html#L44' title='Defined at 44 in ext/bcmath/libbcmath/src/zero.c.'>bc_is_zero</a> (<a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>))
+<a id='L300' name='L300'></a> 300     <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>-&gt;<a href='../Y/27913.html' title='Multiple used in 34 places.'>n_sign</a> = <a href='../S/4.html#L35' title='Defined at 35 in ext/bcmath/libbcmath/src/bcmath.h.'>PLUS</a>;
+<a id='L301' name='L301'></a> 301   <a href='../S/4.html#L160' title='Defined at 160 in ext/bcmath/libbcmath/src/bcmath.h.'>bc_free_num</a> (<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a>);
+<a id='L302' name='L302'></a> 302   *<a href='../Y/33436.html' title='Multiple used in 15 places.'>prod</a> = <a href='../Y/33772.html' title='Multiple used in 10 places.'>pval</a>;
+<a id='L303' name='L303'></a> 303 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L278'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

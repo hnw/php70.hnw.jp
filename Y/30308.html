@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pBlob</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L77576'>pBlob</a>            77576 ext/sqlite3/libsqlite/sqlite3.c   Incrblob *pBlob = 0;</span>
+<span class='curline'><a href='../S/1054.html#L77593'>pBlob</a>            77593 ext/sqlite3/libsqlite/sqlite3.c   pBlob = (Incrblob *)sqlite3DbMallocZero(db, sizeof(Incrblob));</span>
+<span class='curline'><a href='../S/1054.html#L77594'>pBlob</a>            77594 ext/sqlite3/libsqlite/sqlite3.c   if( !pBlob ) goto blob_open_out;</span>
+<span class='curline'><a href='../S/1054.html#L77686'>pBlob</a>            77686 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;pStmt = (sqlite3_stmt *)sqlite3VdbeCreate(pParse);</span>
+<span class='curline'><a href='../S/1054.html#L77687'>pBlob</a>            77687 ext/sqlite3/libsqlite/sqlite3.c     assert( pBlob-&gt;pStmt || db-&gt;mallocFailed );</span>
+<span class='curline'><a href='../S/1054.html#L77688'>pBlob</a>            77688 ext/sqlite3/libsqlite/sqlite3.c     if( pBlob-&gt;pStmt ){</span>
+<span class='curline'><a href='../S/1054.html#L77689'>pBlob</a>            77689 ext/sqlite3/libsqlite/sqlite3.c       Vdbe *v = (Vdbe *)pBlob-&gt;pStmt;</span>
+<span class='curline'><a href='../S/1054.html#L77735'>pBlob</a>            77735 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;flags = flags;</span>
+<span class='curline'><a href='../S/1054.html#L77736'>pBlob</a>            77736 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;iCol = iCol;</span>
+<span class='curline'><a href='../S/1054.html#L77737'>pBlob</a>            77737 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;db = db;</span>
+<span class='curline'><a href='../S/1054.html#L77742'>pBlob</a>            77742 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pBlob-&gt;pStmt, 1, iRow);</span>
+<span class='curline'><a href='../S/1054.html#L77743'>pBlob</a>            77743 ext/sqlite3/libsqlite/sqlite3.c     rc = blobSeekToRow(pBlob, iRow, &amp;zErr);</span>
+<span class='curline'><a href='../S/1054.html#L77748'>pBlob</a>            77748 ext/sqlite3/libsqlite/sqlite3.c     *ppBlob = (sqlite3_blob *)pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L77750'>pBlob</a>            77750 ext/sqlite3/libsqlite/sqlite3.c     if( pBlob &amp;&amp; pBlob-&gt;pStmt ) sqlite3VdbeFinalize((Vdbe *)pBlob-&gt;pStmt);</span>
+<span class='curline'><a href='../S/1054.html#L77751'>pBlob</a>            77751 ext/sqlite3/libsqlite/sqlite3.c     sqlite3DbFree(db, pBlob);</span>
+<span class='curline'><a href='../S/1054.html#L77766'>pBlob</a>            77766 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_blob_close(sqlite3_blob *pBlob){</span>
+<span class='curline'><a href='../S/1054.html#L77767'>pBlob</a>            77767 ext/sqlite3/libsqlite/sqlite3.c   Incrblob *p = (Incrblob *)pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L77787'>pBlob</a>            77787 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_blob *pBlob, </span>
+<span class='curline'><a href='../S/1054.html#L77794'>pBlob</a>            77794 ext/sqlite3/libsqlite/sqlite3.c   Incrblob *p = (Incrblob *)pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L77835'>pBlob</a>            77835 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_blob_read(sqlite3_blob *pBlob, void *z, int n, int iOffset){</span>
+<span class='curline'><a href='../S/1054.html#L77836'>pBlob</a>            77836 ext/sqlite3/libsqlite/sqlite3.c   return blobReadWrite(pBlob, z, n, iOffset, sqlite3BtreeData);</span>
+<span class='curline'><a href='../S/1054.html#L77842'>pBlob</a>            77842 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_blob_write(sqlite3_blob *pBlob, const void *z, int n, int iOffset){</span>
+<span class='curline'><a href='../S/1054.html#L77843'>pBlob</a>            77843 ext/sqlite3/libsqlite/sqlite3.c   return blobReadWrite(pBlob, (void *)z, n, iOffset, sqlite3BtreePutData);</span>
+<span class='curline'><a href='../S/1054.html#L77852'>pBlob</a>            77852 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_blob_bytes(sqlite3_blob *pBlob){</span>
+<span class='curline'><a href='../S/1054.html#L77853'>pBlob</a>            77853 ext/sqlite3/libsqlite/sqlite3.c   Incrblob *p = (Incrblob *)pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L77867'>pBlob</a>            77867 ext/sqlite3/libsqlite/sqlite3.c SQLITE_API int SQLITE_STDCALL sqlite3_blob_reopen(sqlite3_blob *pBlob, sqlite3_int64 iRow){</span>
+<span class='curline'><a href='../S/1054.html#L77869'>pBlob</a>            77869 ext/sqlite3/libsqlite/sqlite3.c   Incrblob *p = (Incrblob *)pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L97524'>pBlob</a>            97524 ext/sqlite3/libsqlite/sqlite3.c   const unsigned char *pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L97528'>pBlob</a>            97528 ext/sqlite3/libsqlite/sqlite3.c   pBlob = sqlite3_value_blob(argv[0]);</span>
+<span class='curline'><a href='../S/1054.html#L97530'>pBlob</a>            97530 ext/sqlite3/libsqlite/sqlite3.c   assert( pBlob==sqlite3_value_blob(argv[0]) );  /* No encoding change */</span>
+<span class='curline'><a href='../S/1054.html#L97533'>pBlob</a>            97533 ext/sqlite3/libsqlite/sqlite3.c     for(i=0; i&lt;n; i++, pBlob++){</span>
+<span class='curline'><a href='../S/1054.html#L97534'>pBlob</a>            97534 ext/sqlite3/libsqlite/sqlite3.c       unsigned char c = *pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L143109'>pBlob</a>            143109 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_blob *pBlob;            /* If not NULL, blob handle to read node */</span>
+<span class='curline'><a href='../S/1054.html#L144211'>pBlob</a>            144211 ext/sqlite3/libsqlite/sqlite3.c       pReader-&gt;pBlob, </span>
+<span class='curline'><a href='../S/1054.html#L144221'>pBlob</a>            144221 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_blob_close(pReader-&gt;pBlob);</span>
+<span class='curline'><a href='../S/1054.html#L144222'>pBlob</a>            144222 ext/sqlite3/libsqlite/sqlite3.c       pReader-&gt;pBlob = 0;</span>
+<span class='curline'><a href='../S/1054.html#L144231'>pBlob</a>            144231 ext/sqlite3/libsqlite/sqlite3.c   assert( !pReader-&gt;pBlob </span>
+<span class='curline'><a href='../S/1054.html#L144234'>pBlob</a>            144234 ext/sqlite3/libsqlite/sqlite3.c   while( pReader-&gt;pBlob &amp;&amp; rc==SQLITE_OK </span>
+<span class='curline'><a href='../S/1054.html#L144248'>pBlob</a>            144248 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_blob_close(pSeg-&gt;pBlob);</span>
+<span class='curline'><a href='../S/1054.html#L144249'>pBlob</a>            144249 ext/sqlite3/libsqlite/sqlite3.c     pSeg-&gt;pBlob = 0;</span>
+<span class='curline'><a href='../S/1054.html#L144307'>pBlob</a>            144307 ext/sqlite3/libsqlite/sqlite3.c     assert( pReader-&gt;pBlob==0 );</span>
+<span class='curline'><a href='../S/1054.html#L144309'>pBlob</a>            144309 ext/sqlite3/libsqlite/sqlite3.c       pReader-&gt;pBlob = p-&gt;pSegments;</span>
+<span class='curline'><a href='../S/1054.html#L144445'>pBlob</a>            144445 ext/sqlite3/libsqlite/sqlite3.c       if( pReader-&gt;pBlob==0 || p&lt;&amp;pReader-&gt;aNode[pReader-&gt;nPopulate] ) break;</span>
+<span class='curline'><a href='../S/1054.html#L144530'>pBlob</a>            144530 ext/sqlite3/libsqlite/sqlite3.c       sqlite3_blob_close(pReader-&gt;pBlob);</span>
+<span class='curline'><a href='../S/1054.html#L146284'>pBlob</a>            146284 ext/sqlite3/libsqlite/sqlite3.c   char *pBlob;             /* The BLOB encoding of the document size */</span>
+<span class='curline'><a href='../S/1054.html#L146290'>pBlob</a>            146290 ext/sqlite3/libsqlite/sqlite3.c   pBlob = sqlite3_malloc( 10*p-&gt;nColumn );</span>
+<span class='curline'><a href='../S/1054.html#L146291'>pBlob</a>            146291 ext/sqlite3/libsqlite/sqlite3.c   if( pBlob==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L146295'>pBlob</a>            146295 ext/sqlite3/libsqlite/sqlite3.c   fts3EncodeIntArray(p-&gt;nColumn, aSz, pBlob, &amp;nBlob);</span>
+<span class='curline'><a href='../S/1054.html#L146298'>pBlob</a>            146298 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_free(pBlob);</span>
+<span class='curline'><a href='../S/1054.html#L146303'>pBlob</a>            146303 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_blob(pStmt, 2, pBlob, nBlob, sqlite3_free);</span>
+<span class='curline'><a href='../S/1054.html#L146330'>pBlob</a>            146330 ext/sqlite3/libsqlite/sqlite3.c   char *pBlob;             /* Storage for BLOB written into %_stat */</span>
+<span class='curline'><a href='../S/1054.html#L146345'>pBlob</a>            146345 ext/sqlite3/libsqlite/sqlite3.c   pBlob = (char*)&amp;a[nStat];</span>
+<span class='curline'><a href='../S/1054.html#L146380'>pBlob</a>            146380 ext/sqlite3/libsqlite/sqlite3.c   fts3EncodeIntArray(nStat, a, pBlob, &amp;nBlob);</span>
+<span class='curline'><a href='../S/1054.html#L146388'>pBlob</a>            146388 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_blob(pStmt, 2, pBlob, nBlob, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L146635'>pBlob</a>            146635 ext/sqlite3/libsqlite/sqlite3.c static void blobGrowBuffer(Blob *pBlob, int nMin, int *pRc){</span>
+<span class='curline'><a href='../S/1054.html#L146636'>pBlob</a>            146636 ext/sqlite3/libsqlite/sqlite3.c   if( *pRc==SQLITE_OK &amp;&amp; nMin&gt;pBlob-&gt;nAlloc ){</span>
+<span class='curline'><a href='../S/1054.html#L146638'>pBlob</a>            146638 ext/sqlite3/libsqlite/sqlite3.c     char *a = (char *)sqlite3_realloc(pBlob-&gt;a, nAlloc);</span>
+<span class='curline'><a href='../S/1054.html#L146640'>pBlob</a>            146640 ext/sqlite3/libsqlite/sqlite3.c       pBlob-&gt;nAlloc = nAlloc;</span>
+<span class='curline'><a href='../S/1054.html#L146641'>pBlob</a>            146641 ext/sqlite3/libsqlite/sqlite3.c       pBlob-&gt;a = a;</span>
+<span class='curline'><a href='../S/1054.html#L152445'>pBlob</a>            152445 ext/sqlite3/libsqlite/sqlite3.c   RtreeMatchArg *pBlob;              /* BLOB returned by geometry function */</span>
+<span class='curline'><a href='../S/1054.html#L152464'>pBlob</a>            152464 ext/sqlite3/libsqlite/sqlite3.c   pBlob = (RtreeMatchArg*)&amp;pInfo[1];</span>
+<span class='curline'><a href='../S/1054.html#L152466'>pBlob</a>            152466 ext/sqlite3/libsqlite/sqlite3.c   memcpy(pBlob, sqlite3_value_blob(pValue), nBlob);</span>
+<span class='curline'><a href='../S/1054.html#L152468'>pBlob</a>            152468 ext/sqlite3/libsqlite/sqlite3.c                     (pBlob-&gt;nParam-1)*sizeof(RtreeDValue));</span>
+<span class='curline'><a href='../S/1054.html#L152469'>pBlob</a>            152469 ext/sqlite3/libsqlite/sqlite3.c   if( pBlob-&gt;magic!=RTREE_GEOMETRY_MAGIC || nBlob!=nExpected ){</span>
+<span class='curline'><a href='../S/1054.html#L152473'>pBlob</a>            152473 ext/sqlite3/libsqlite/sqlite3.c   pInfo-&gt;pContext = pBlob-&gt;cb.pContext;</span>
+<span class='curline'><a href='../S/1054.html#L152474'>pBlob</a>            152474 ext/sqlite3/libsqlite/sqlite3.c   pInfo-&gt;nParam = pBlob-&gt;nParam;</span>
+<span class='curline'><a href='../S/1054.html#L152475'>pBlob</a>            152475 ext/sqlite3/libsqlite/sqlite3.c   pInfo-&gt;aParam = pBlob-&gt;aParam;</span>
+<span class='curline'><a href='../S/1054.html#L152477'>pBlob</a>            152477 ext/sqlite3/libsqlite/sqlite3.c   if( pBlob-&gt;cb.xGeom ){</span>
+<span class='curline'><a href='../S/1054.html#L152478'>pBlob</a>            152478 ext/sqlite3/libsqlite/sqlite3.c     pCons-&gt;u.xGeom = pBlob-&gt;cb.xGeom;</span>
+<span class='curline'><a href='../S/1054.html#L152481'>pBlob</a>            152481 ext/sqlite3/libsqlite/sqlite3.c     pCons-&gt;u.xQueryFunc = pBlob-&gt;cb.xQueryFunc;</span>
+<span class='curline'><a href='../S/1054.html#L154361'>pBlob</a>            154361 ext/sqlite3/libsqlite/sqlite3.c   RtreeMatchArg *pBlob;</span>
+<span class='curline'><a href='../S/1054.html#L154365'>pBlob</a>            154365 ext/sqlite3/libsqlite/sqlite3.c   pBlob = (RtreeMatchArg *)sqlite3_malloc(nBlob);</span>
+<span class='curline'><a href='../S/1054.html#L154366'>pBlob</a>            154366 ext/sqlite3/libsqlite/sqlite3.c   if( !pBlob ){</span>
+<span class='curline'><a href='../S/1054.html#L154370'>pBlob</a>            154370 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;magic = RTREE_GEOMETRY_MAGIC;</span>
+<span class='curline'><a href='../S/1054.html#L154371'>pBlob</a>            154371 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;cb = pGeomCtx[0];</span>
+<span class='curline'><a href='../S/1054.html#L154372'>pBlob</a>            154372 ext/sqlite3/libsqlite/sqlite3.c     pBlob-&gt;nParam = nArg;</span>
+<span class='curline'><a href='../S/1054.html#L154375'>pBlob</a>            154375 ext/sqlite3/libsqlite/sqlite3.c       pBlob-&gt;aParam[i] = sqlite3_value_int64(aArg[i]);</span>
+<span class='curline'><a href='../S/1054.html#L154377'>pBlob</a>            154377 ext/sqlite3/libsqlite/sqlite3.c       pBlob-&gt;aParam[i] = sqlite3_value_double(aArg[i]);</span>
+<span class='curline'><a href='../S/1054.html#L154380'>pBlob</a>            154380 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_result_blob(ctx, pBlob, nBlob, sqlite3_free);</span>
+</pre>
+</body>
+</html>

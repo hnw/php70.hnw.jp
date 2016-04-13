@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/fileinfo/libmagic/is_tar.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1761.html'>fileinfo</a>/<a href='../files/1762.html'>libmagic</a>/is_tar.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L133'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L63' title='Defined at 63.'>file_is_tar</a></li>
+<li><a href='#L93' title='Defined at 93.'>is_tar</a></li>
+<li><a href='#L133' title='Defined at 133.'>from_oct</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * Copyright (c) Ian F. Darwin 1986-1995.</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * Software written by Ian F. Darwin and others;</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * maintained 1995-present by Christos Zoulas and others.</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> *</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * Redistribution and use in source and binary forms, with or without</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * modification, are permitted provided that the following conditions</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * are met:</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * 1. Redistributions of source code must retain the above copyright</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> *    notice immediately at the beginning of the file, without modification,</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> *    this list of conditions, and the following disclaimer.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * 2. Redistributions in binary form must reproduce the above copyright</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> *    notice, this list of conditions and the following disclaimer in the</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> *    documentation and/or other materials provided with the distribution.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> *</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * SUCH DAMAGE.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> */</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>/*</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * is_tar() -- figure out whether file is a tar archive.</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> *</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * Stolen (by the author!) from the public domain tar program:</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * Public Domain version written 26 Aug 1985 John Gilmore (ihnp4!hoptoad!gnu).</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> *</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * @(#)list.c 1.18 9/23/86 Public Domain - gnu</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * Comments changed and some code/comments reformatted</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * for file command by Ian Darwin.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> */</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#include</em> "<a href='../I/296.html'>file.h</a>"
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#ifndef</em> <a href='../Y/25150.html' title='Multiple used in 19 places.'>lint</a>
+<a id='L43' name='L43'></a>  43 <a href='../D/2578.html' title='Multiple defined in 3 places.'>FILE_RCSID</a>("@(#)$File: is_tar.c,v 1.36 2009/02/03 20:27:51 christos Exp $")
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#include</em> "<a href='175.html'>magic.h</a>"
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#include</em> &lt;ctype.h&gt;
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#include</em> "<a href='../I/307.html'>tar.h</a>"
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#define</em> <a href='../S/173.html#L143' title='Referred from 143 in ext/fileinfo/libmagic/is_tar.c.'>isodigit</a>(<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>)     ( ((<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>) &gt;= '0') &amp;&amp; ((<a href='../Y/13122.html' title='Multiple used in 7739 places.'>c</a>) &lt;= '7') )
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <a href='../S/170.html#L92' title='Defined at 92 in ext/fileinfo/libmagic/file.h.'>private</a> <strong class='reserved'>int</strong> <a href='../S/173.html#L93' title='Defined at 93 in ext/fileinfo/libmagic/is_tar.c.'>is_tar</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>);
+<a id='L54' name='L54'></a>  54 <a href='../S/170.html#L92' title='Defined at 92 in ext/fileinfo/libmagic/file.h.'>private</a> <strong class='reserved'>int</strong> <a href='../S/173.html#L133' title='Defined at 133 in ext/fileinfo/libmagic/is_tar.c.'>from_oct</a>(<strong class='reserved'>int</strong>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *);        <em class='comment'>/* Decode octal number */</em>
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> <a href='../Y/38156.html' title='Multiple used in 2 places.'>tartype</a>[][32] = <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57         "tar archive",
+<a id='L58' name='L58'></a>  58         "POSIX tar archive",
+<a id='L59' name='L59'></a>  59         "POSIX tar archive (GNU)",
+<a id='L60' name='L60'></a>  60 <em class='brace'>}</em>;
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62 <a href='../D/28871.html' title='Multiple defined in 2 places.'>protected</a> <strong class='reserved'>int</strong>
+<a id='L63' name='L63'></a>  63 <a href='../R/18921.html' title='Multiple referred from 2 places.'>file_is_tar</a>(<strong class='reserved'>struct</strong> <a href='../S/170.html#L380' title='Defined at 380 in ext/fileinfo/libmagic/file.h.'>magic_set</a> *<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/28008.html' title='Multiple used in 136 places.'>nbytes</a>)
+<a id='L64' name='L64'></a>  64 <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65         <em class='comment'>/*</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>         * Do the tar test first, because if the first file in the tar</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>         * archive starts with a dot, we can confuse it with an nroff file.</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>         */</em>
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>int</strong> <a href='../Y/38130.html' title='Multiple used in 4 places.'>tar</a>;
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>int</strong> <a href='../Y/26580.html' title='Multiple used in 50 places.'>mime</a> = <a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/175.html#L44' title='Defined at 44 in ext/fileinfo/libmagic/magic.h.'>MAGIC_MIME</a>;
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>if</strong> ((<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>-&gt;<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/175.html#L45' title='Defined at 45 in ext/fileinfo/libmagic/magic.h.'>MAGIC_APPLE</a>) != 0)
+<a id='L73' name='L73'></a>  73                 <strong class='reserved'>return</strong> 0;
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75         <a href='../Y/38130.html' title='Multiple used in 4 places.'>tar</a> = <a href='../S/173.html#L93' title='Defined at 93 in ext/fileinfo/libmagic/is_tar.c.'>is_tar</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/28008.html' title='Multiple used in 136 places.'>nbytes</a>);
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>if</strong> (<a href='../Y/38130.html' title='Multiple used in 4 places.'>tar</a> &lt; 1 || <a href='../Y/38130.html' title='Multiple used in 4 places.'>tar</a> &gt; 3)
+<a id='L77' name='L77'></a>  77                 <strong class='reserved'>return</strong> 0;
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "%s", <a href='../Y/26580.html' title='Multiple used in 50 places.'>mime</a> ? "application/x-tar" :
+<a id='L80' name='L80'></a>  80             <a href='../Y/38156.html' title='Multiple used in 2 places.'>tartype</a>[<a href='../Y/38130.html' title='Multiple used in 4 places.'>tar</a> - 1]) == -1)
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>return</strong> -1;
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>return</strong> 1;
+<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <em class='comment'>/*</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> * Return</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> *      0 if the checksum is bad (i.e., probably not a tar archive),</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> *      1 for old UNIX tar file,</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> *      2 for Unix Std (POSIX) tar file,</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> *      3 for GNU tar file.</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'> */</em>
+<a id='L92' name='L92'></a>  92 <a href='../S/170.html#L92' title='Defined at 92 in ext/fileinfo/libmagic/file.h.'>private</a> <strong class='reserved'>int</strong>
+<a id='L93' name='L93'></a>  93 <a href='../R/20775.html' title='Multiple referred from 54 places.'>is_tar</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/28008.html' title='Multiple used in 136 places.'>nbytes</a>)
+<a id='L94' name='L94'></a>  94 <em class='brace'>{</em>
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>const</strong> <strong class='reserved'>union</strong> <a href='../S/181.html#L51' title='Defined at 51 in ext/fileinfo/libmagic/tar.h.'>record</a> *<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a> = (<strong class='reserved'>const</strong> <strong class='reserved'>union</strong> <a href='../S/181.html#L51' title='Defined at 51 in ext/fileinfo/libmagic/tar.h.'>record</a> *)(<strong class='reserved'>const</strong> <strong class='reserved'>void</strong> *)<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>;
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>int</strong>     <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>int</strong>     <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a>, <a href='../Y/34196.html' title='Multiple used in 3 places.'>recsum</a>;
+<a id='L98' name='L98'></a>  98         <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>     *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <strong class='reserved'>if</strong> (<a href='../Y/28008.html' title='Multiple used in 136 places.'>nbytes</a> &lt; <strong class='reserved'>sizeof</strong>(<strong class='reserved'>union</strong> <a href='../S/181.html#L51' title='Defined at 51 in ext/fileinfo/libmagic/tar.h.'>record</a>))
+<a id='L101' name='L101'></a> 101                 <strong class='reserved'>return</strong> 0;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <a href='../Y/34196.html' title='Multiple used in 3 places.'>recsum</a> = <a href='../S/173.html#L133' title='Defined at 133 in ext/fileinfo/libmagic/is_tar.c.'>from_oct</a>(8,  <a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../Y/13659.html' title='Multiple used in 5 places.'>chksum</a>);
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> = 0;
+<a id='L106' name='L106'></a> 106         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/20200.html' title='Multiple defined in 2 places.'>charptr</a>;
+<a id='L107' name='L107'></a> 107         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <strong class='reserved'>sizeof</strong>(<strong class='reserved'>union</strong> <a href='../S/181.html#L51' title='Defined at 51 in ext/fileinfo/libmagic/tar.h.'>record</a>); --<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &gt;= 0;)
+<a id='L108' name='L108'></a> 108                 <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> += *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>++;
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110         <em class='comment'>/* Adjust checksum to count the "chksum" field as blanks. */</em>
+<a id='L111' name='L111'></a> 111         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = <strong class='reserved'>sizeof</strong>(<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../Y/13659.html' title='Multiple used in 5 places.'>chksum</a>); --<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &gt;= 0;)
+<a id='L112' name='L112'></a> 112                 <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> -= <a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../Y/13659.html' title='Multiple used in 5 places.'>chksum</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>];
+<a id='L113' name='L113'></a> 113         <a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> += ' ' * <strong class='reserved'>sizeof</strong> <a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../Y/13659.html' title='Multiple used in 5 places.'>chksum</a>;
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>if</strong> (<a href='../Y/37875.html' title='Multiple used in 51 places.'>sum</a> != <a href='../Y/34196.html' title='Multiple used in 3 places.'>recsum</a>)
+<a id='L116' name='L116'></a> 116                 <strong class='reserved'>return</strong> 0;       <em class='comment'>/* Not a tar archive */</em>
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>if</strong> (<a href='../Y/37561.html' title='Multiple used in 563 places.'>strcmp</a>(<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../S/170.html#L160' title='Defined at 160 in ext/fileinfo/libmagic/file.h.'>magic</a>, <a href='../S/181.html#L73' title='Defined at 73 in ext/fileinfo/libmagic/tar.h.'>GNUTMAGIC</a>) == 0)
+<a id='L119' name='L119'></a> 119                 <strong class='reserved'>return</strong> 3;               <em class='comment'>/* GNU Unix Standard tar archive */</em>
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>if</strong> (<a href='../Y/37561.html' title='Multiple used in 563 places.'>strcmp</a>(<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>-&gt;<a href='../D/23380.html' title='Multiple defined in 2 places.'>header</a>.<a href='../S/170.html#L160' title='Defined at 160 in ext/fileinfo/libmagic/file.h.'>magic</a>, <a href='../S/181.html#L72' title='Defined at 72 in ext/fileinfo/libmagic/tar.h.'>TMAGIC</a>) == 0)
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>return</strong> 2;               <em class='comment'>/* Unix Standard tar archive */</em>
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>return</strong> 1;                       <em class='comment'>/* Old fashioned tar archive */</em>
+<a id='L124' name='L124'></a> 124 <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <em class='comment'>/*</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'> * Quick and dirty octal conversion.</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'> *</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'> * Result is -1 if the field is invalid (all blank, or non-octal).</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'> */</em>
+<a id='L132' name='L132'></a> 132 <a href='../S/170.html#L92' title='Defined at 92 in ext/fileinfo/libmagic/file.h.'>private</a> <strong class='reserved'>int</strong>
+<a id='L133' name='L133'></a> 133 <a href='../R/19393.html' title='Multiple referred from 2 places.'>from_oct</a>(<strong class='reserved'>int</strong> <a href='../Y/15709.html' title='Multiple used in 5 places.'>digs</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)
+<a id='L134' name='L134'></a> 134 <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>int</strong>     <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>;
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>while</strong> (<a href='../Y/24190.html' title='Multiple used in 78 places.'>isspace</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)*<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)) <em class='brace'>{</em>        <em class='comment'>/* Skip spaces */</em>
+<a id='L138' name='L138'></a> 138                 <a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>++;
+<a id='L139' name='L139'></a> 139                 <strong class='reserved'>if</strong> (--<a href='../Y/15709.html' title='Multiple used in 5 places.'>digs</a> &lt;= 0)
+<a id='L140' name='L140'></a> 140                         <strong class='reserved'>return</strong> -1;              <em class='comment'>/* All blank field */</em>
+<a id='L141' name='L141'></a> 141         <em class='brace'>}</em>
+<a id='L142' name='L142'></a> 142         <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = 0;
+<a id='L143' name='L143'></a> 143         <strong class='reserved'>while</strong> (<a href='../Y/15709.html' title='Multiple used in 5 places.'>digs</a> &gt; 0 &amp;&amp; <a href='../S/173.html#L51' title='Defined at 51 in ext/fileinfo/libmagic/is_tar.c.'>isodigit</a>(*<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>)) <em class='brace'>{</em>  <em class='comment'>/* Scan til non-octal */</em>
+<a id='L144' name='L144'></a> 144                 <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = (<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> &lt;&lt; 3) | (*<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>++ - '0');
+<a id='L145' name='L145'></a> 145                 --<a href='../Y/15709.html' title='Multiple used in 5 places.'>digs</a>;
+<a id='L146' name='L146'></a> 146         <em class='brace'>}</em>
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <strong class='reserved'>if</strong> (<a href='../Y/15709.html' title='Multiple used in 5 places.'>digs</a> &gt; 0 &amp;&amp; *<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a> &amp;&amp; !<a href='../Y/24190.html' title='Multiple used in 78 places.'>isspace</a>((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>)*<a href='../Y/40699.html' title='Multiple used in 94 places.'>where</a>))
+<a id='L149' name='L149'></a> 149                 <strong class='reserved'>return</strong> -1;                      <em class='comment'>/* Ended on non-(space/NUL) */</em>
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>return</strong> <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>;
+<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L133'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

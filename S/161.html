@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/fileinfo/libmagic/apptype.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1761.html'>fileinfo</a>/<a href='../files/1762.html'>libmagic</a>/apptype.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L45' title='Defined at 45.'>file_os2_apptype</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * Adapted from: apptype.c, Written by Eberhard Mattes and put into the</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * public domain</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * </em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * Notes: 1. Qualify the filename so that DosQueryAppType does not do extraneous</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * searches.</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * </em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> * 2. DosQueryAppType will return FAPPTYP_DOS on a file ending with ".com"</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> * (other than an OS/2 exe or Win exe with this name). Eberhard Mattes</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> * remarks Tue, 6 Apr 93: Moreover, it reports the type of the (new and very</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * bug ridden) Win Emacs as "OS/2 executable".</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * </em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * 3. apptype() uses the filename if given, otherwise a tmp file is created with</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * the contents of buf. If buf is not the complete file, apptype can</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> * incorrectly identify the exe type. The "-z" option of "file" is the reason</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * for this ugly code.</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='comment'>/*</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * amai: Darrel Hankerson did the changes described here.</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * </em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * It remains to check the validity of comments (2.) since it's referred to an</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * "old" OS/2 version.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * </em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> */</em>
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='../I/296.html'>file.h</a>"
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#ifndef</em> <a href='../Y/25150.html' title='Multiple used in 19 places.'>lint</a>
+<a id='L30' name='L30'></a>  30 <a href='../D/2578.html' title='Multiple defined in 3 places.'>FILE_RCSID</a>("@(#)$File: apptype.c,v 1.12 2011/08/28 07:03:27 christos Exp $")
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#endif</em> <em class='comment'>/* lint */</em>
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> &lt;stdlib.h&gt;
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;string.h&gt;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#ifdef</em> <a href='../Y/7866.html' title='Multiple used in 4 places.'>__EMX__</a>
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> &lt;io.h&gt;
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#define</em> INCL_DOSSESMGR
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#define</em> INCL_DOSERRORS
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#define</em> INCL_DOSFILEMGR
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#include</em> &lt;os2.h&gt;
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>typedef</strong> <a href='../Y/6773.html' title='Multiple used in 30 places.'>ULONG</a>   <a href='../S/161.html#L48' title='Referred from 48 in ext/fileinfo/libmagic/apptype.c.'>APPTYPE</a>;
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <a href='../D/28871.html' title='Multiple defined in 2 places.'>protected</a> <strong class='reserved'>int</strong>
+<a id='L45' name='L45'></a>  45 <a href='../R/18930.html' title='Multiple referred from 2 places.'>file_os2_apptype</a>(<strong class='reserved'>struct</strong> <a href='../S/170.html#L380' title='Defined at 380 in ext/fileinfo/libmagic/file.h.'>magic_set</a> *<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a>, <strong class='reserved'>const</strong> <strong class='reserved'>void</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>,
+<a id='L46' name='L46'></a>  46     <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/27997.html' title='Multiple used in 33 places.'>nb</a>)
+<a id='L47' name='L47'></a>  47 <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48         <a href='../S/161.html#L42' title='Defined at 42 in ext/fileinfo/libmagic/apptype.c.'>APPTYPE</a>         <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>;
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>char</strong>            <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/7786.html' title='Multiple used in 5 places.'>_MAX_PATH</a>], <a href='../Y/16184.html' title='Multiple used in 7 places.'>drive</a>[_MAX_DRIVE], <a href='../Y/15720.html' title='Multiple used in 301 places.'>dir</a>[_MAX_DIR],
+<a id='L50' name='L50'></a>  50                         <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>[<a href='../Y/7785.html' title='Multiple used in 5 places.'>_MAX_FNAME</a>], <a href='../Y/17359.html' title='Multiple used in 169 places.'>ext</a>[_MAX_EXT];
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>char</strong>           *<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a>;
+<a id='L52' name='L52'></a>  52         <a href='../Y/2301.html' title='Multiple used in 249 places.'>FILE</a>           *<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>if</strong> (<a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a>)
+<a id='L55' name='L55'></a>  55                 <a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a> = <a href='../D/31688.html' title='Multiple defined in 3 places.'>strdup</a>(<a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a>);
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ((<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a> = <a href='../Y/38236.html' title='Multiple used in 4 places.'>tempnam</a>("./", "tmp")) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57                 <a href='../S/172.html#L123' title='Defined at 123 in ext/fileinfo/libmagic/funcs.c.'>file_error</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, <a href='../D/21460.html' title='Multiple defined in 2 places.'>errno</a>, "cannot create tempnam");
+<a id='L58' name='L58'></a>  58                 <strong class='reserved'>return</strong> -1;
+<a id='L59' name='L59'></a>  59         <em class='brace'>}</em>
+<a id='L60' name='L60'></a>  60         <em class='comment'>/* qualify the filename to prevent extraneous searches */</em>
+<a id='L61' name='L61'></a>  61         _splitpath(<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a>, <a href='../Y/16184.html' title='Multiple used in 7 places.'>drive</a>, <a href='../Y/15720.html' title='Multiple used in 301 places.'>dir</a>, <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>, <a href='../Y/17359.html' title='Multiple used in 169 places.'>ext</a>);
+<a id='L62' name='L62'></a>  62         (<strong class='reserved'>void</strong>)<a href='../D/30283.html' title='Multiple defined in 5 places.'>sprintf</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, "%s%s%s%s", <a href='../Y/16184.html' title='Multiple used in 7 places.'>drive</a>,
+<a id='L63' name='L63'></a>  63                 (*<a href='../Y/15720.html' title='Multiple used in 301 places.'>dir</a> == '\0') ? "./" : <a href='../Y/15720.html' title='Multiple used in 301 places.'>dir</a>,
+<a id='L64' name='L64'></a>  64                 <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>,
+<a id='L65' name='L65'></a>  65                 (*<a href='../Y/17359.html' title='Multiple used in 169 places.'>ext</a> == '\0') ? "." : <a href='../Y/17359.html' title='Multiple used in 169 places.'>ext</a>);
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>if</strong> (<a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>if</strong> ((<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> = <a href='../Y/18163.html' title='Multiple used in 78 places.'>fopen</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, "wb")) == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69                         <a href='../S/172.html#L123' title='Defined at 123 in ext/fileinfo/libmagic/funcs.c.'>file_error</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, <a href='../D/21460.html' title='Multiple defined in 2 places.'>errno</a>, "cannot open tmp file `%s'", <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>);
+<a id='L70' name='L70'></a>  70                         <strong class='reserved'>return</strong> -1;
+<a id='L71' name='L71'></a>  71                 <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>if</strong> (<a href='../Y/18801.html' title='Multiple used in 56 places.'>fwrite</a>(<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, 1, <a href='../Y/27997.html' title='Multiple used in 33 places.'>nb</a>, <a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>) != <a href='../Y/27997.html' title='Multiple used in 33 places.'>nb</a>) <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                         <a href='../S/172.html#L123' title='Defined at 123 in ext/fileinfo/libmagic/funcs.c.'>file_error</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, <a href='../D/21460.html' title='Multiple defined in 2 places.'>errno</a>, "cannot write tmp file `%s'",
+<a id='L74' name='L74'></a>  74                             <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>);
+<a id='L75' name='L75'></a>  75                         (<strong class='reserved'>void</strong>)<a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>);
+<a id='L76' name='L76'></a>  76                         <strong class='reserved'>return</strong> -1;
+<a id='L77' name='L77'></a>  77                 <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78                 (<strong class='reserved'>void</strong>)<a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>);
+<a id='L79' name='L79'></a>  79         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80         <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> = DosQueryAppType((<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong> *)<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, &amp;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>);
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>if</strong> (<a href='../Y/18122.html' title='Multiple used in 243 places.'>fn</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83                 <a href='../S/250.html#L5' title='Defined at 5 in ext/gd/libgd/gdtest.c.'>unlink</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>);
+<a id='L84' name='L84'></a>  84                 <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/17890.html' title='Multiple used in 1490 places.'>filename</a>);
+<a id='L85' name='L85'></a>  85         <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 <em class='sharp'>#if</em> 0
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> == ERROR_INVALID_EXE_SIGNATURE)
+<a id='L88' name='L88'></a>  88                 <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("%s: not an executable file\n", <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>);
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> == <a href='../Y/1826.html' title='Multiple used in 8 places.'>ERROR_FILE_NOT_FOUND</a>)
+<a id='L90' name='L90'></a>  90                 <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("%s: not found\n", <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>);
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> == <a href='../Y/1820.html' title='Multiple used in 3 places.'>ERROR_ACCESS_DENIED</a>)
+<a id='L92' name='L92'></a>  92                 <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("%s: access denied\n", <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>);
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a> != 0)
+<a id='L94' name='L94'></a>  94                 <a href='../Y/33370.html' title='Multiple used in 350 places.'>printf</a>("%s: error code = %lu\n", <a href='../Y/18130.html' title='Multiple used in 858 places.'>fname</a>, <a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>);
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>else</strong>
+<a id='L96' name='L96'></a>  96 <em class='sharp'>#else</em>
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98         <em class='comment'>/*</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         * for our purpose here it's sufficient to just ignore the error and</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>         * return w/o success (=0)</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>         */</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>if</strong> (<a href='../Y/34012.html' title='Multiple used in 5655 places.'>rc</a>)
+<a id='L104' name='L104'></a> 104                 <strong class='reserved'>return</strong> (0);
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 <em class='sharp'>#endif</em>
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108         <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_32BIT)
+<a id='L109' name='L109'></a> 109                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "32-bit ") == -1)
+<a id='L110' name='L110'></a> 110                         <strong class='reserved'>return</strong> -1;
+<a id='L111' name='L111'></a> 111         <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_PHYSDRV) <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "physical device driver") == -1)
+<a id='L113' name='L113'></a> 113                         <strong class='reserved'>return</strong> -1;
+<a id='L114' name='L114'></a> 114         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_VIRTDRV) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "virtual device driver") == -1)
+<a id='L116' name='L116'></a> 116                         <strong class='reserved'>return</strong> -1;
+<a id='L117' name='L117'></a> 117         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_DLL) <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118                 <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_PROTDLL)
+<a id='L119' name='L119'></a> 119                         <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "protected ") == -1)
+<a id='L120' name='L120'></a> 120                                 <strong class='reserved'>return</strong> -1;
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "DLL") == -1)
+<a id='L122' name='L122'></a> 122                         <strong class='reserved'>return</strong> -1;
+<a id='L123' name='L123'></a> 123         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; (FAPPTYP_WINDOWSREAL | FAPPTYP_WINDOWSPROT)) <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "Windows executable") == -1)
+<a id='L125' name='L125'></a> 125                         <strong class='reserved'>return</strong> -1;
+<a id='L126' name='L126'></a> 126         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_DOS) <em class='brace'>{</em>
+<a id='L127' name='L127'></a> 127                 <em class='comment'>/*</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>                 * The API routine is partially broken on filenames ending</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'>                 * ".com".</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'>                 */</em>
+<a id='L131' name='L131'></a> 131                 <strong class='reserved'>if</strong> (<a href='../S/1015.html#L43' title='Defined at 43 in ext/soap/php_soap.h.'>stricmp</a>(<a href='../Y/17359.html' title='Multiple used in 169 places.'>ext</a>, ".com") == 0)
+<a id='L132' name='L132'></a> 132                         <strong class='reserved'>if</strong> (<a href='../S/868.html#L370' title='Defined at 370 in ext/pcre/pcrelib/pcre_internal.h.'>strncmp</a>((<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *)<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, "MZ", 2))
+<a id='L133' name='L133'></a> 133                                 <strong class='reserved'>return</strong> (0);
+<a id='L134' name='L134'></a> 134                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "DOS executable") == -1)
+<a id='L135' name='L135'></a> 135                         <strong class='reserved'>return</strong> -1;
+<a id='L136' name='L136'></a> 136                 <em class='comment'>/* ---------------------------------------- */</em>
+<a id='L137' name='L137'></a> 137                 <em class='comment'>/* Might learn more from the magic(4) entry */</em>
+<a id='L138' name='L138'></a> 138                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, ", magic(4)-&gt; ") == -1)
+<a id='L139' name='L139'></a> 139                         <strong class='reserved'>return</strong> -1;
+<a id='L140' name='L140'></a> 140                 <strong class='reserved'>return</strong> (0);
+<a id='L141' name='L141'></a> 141                 <em class='comment'>/* ---------------------------------------- */</em>
+<a id='L142' name='L142'></a> 142         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; FAPPTYP_BOUND) <em class='brace'>{</em>
+<a id='L143' name='L143'></a> 143                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "bound executable") == -1)
+<a id='L144' name='L144'></a> 144                         <strong class='reserved'>return</strong> -1;
+<a id='L145' name='L145'></a> 145         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> ((<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; 7) == <a href='../Y/2282.html' title='Multiple used in 3 places.'>FAPPTYP_WINDOWAPI</a>) <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "PM executable") == -1)
+<a id='L147' name='L147'></a> 147                         <strong class='reserved'>return</strong> -1;
+<a id='L148' name='L148'></a> 148         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, "OS/2 executable") == -1)
+<a id='L149' name='L149'></a> 149                 <strong class='reserved'>return</strong> -1;
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>switch</strong> (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> &amp; (<a href='../Y/2278.html' title='Multiple used in 2 places.'>FAPPTYP_NOTWINDOWCOMPAT</a> |
+<a id='L152' name='L152'></a> 152                         <a href='../Y/2283.html' title='Multiple used in 2 places.'>FAPPTYP_WINDOWCOMPAT</a> |
+<a id='L153' name='L153'></a> 153                         <a href='../Y/2282.html' title='Multiple used in 3 places.'>FAPPTYP_WINDOWAPI</a>)) <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154         <strong class='reserved'>case</strong> <a href='../Y/2278.html' title='Multiple used in 2 places.'>FAPPTYP_NOTWINDOWCOMPAT</a>:
+<a id='L155' name='L155'></a> 155                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, " [NOTWINDOWCOMPAT]") == -1)
+<a id='L156' name='L156'></a> 156                         <strong class='reserved'>return</strong> -1;
+<a id='L157' name='L157'></a> 157                 <strong class='reserved'>break</strong>;
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>case</strong> <a href='../Y/2283.html' title='Multiple used in 2 places.'>FAPPTYP_WINDOWCOMPAT</a>:
+<a id='L159' name='L159'></a> 159                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, " [WINDOWCOMPAT]") == -1)
+<a id='L160' name='L160'></a> 160                         <strong class='reserved'>return</strong> -1;
+<a id='L161' name='L161'></a> 161                 <strong class='reserved'>break</strong>;
+<a id='L162' name='L162'></a> 162         <strong class='reserved'>case</strong> <a href='../Y/2282.html' title='Multiple used in 3 places.'>FAPPTYP_WINDOWAPI</a>:
+<a id='L163' name='L163'></a> 163                 <strong class='reserved'>if</strong> (<a href='../S/172.html#L62' title='Defined at 62 in ext/fileinfo/libmagic/funcs.c.'>file_printf</a>(<a href='../Y/26909.html' title='Multiple used in 853 places.'>ms</a>, " [WINDOWAPI]") == -1)
+<a id='L164' name='L164'></a> 164                         <strong class='reserved'>return</strong> -1;
+<a id='L165' name='L165'></a> 165                 <strong class='reserved'>break</strong>;
+<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167         <strong class='reserved'>return</strong> 1;
+<a id='L168' name='L168'></a> 168 <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169 <em class='sharp'>#endif</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L45'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

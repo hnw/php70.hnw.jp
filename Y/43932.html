@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>zf</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1643.html#L892'>zf</a>                892 Zend/zend_compile.h static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)</span>
+<span class='curline'><a href='../S/1643.html#L895'>zf</a>                895 Zend/zend_compile.h 	if (UNEXPECTED(arg_num &gt;= zf-&gt;common.num_args)) {</span>
+<span class='curline'><a href='../S/1643.html#L896'>zf</a>                896 Zend/zend_compile.h 		if (EXPECTED((zf-&gt;common.fn_flags &amp; ZEND_ACC_VARIADIC) == 0)) {</span>
+<span class='curline'><a href='../S/1643.html#L899'>zf</a>                899 Zend/zend_compile.h 		arg_num = zf-&gt;common.num_args;</span>
+<span class='curline'><a href='../S/1643.html#L901'>zf</a>                901 Zend/zend_compile.h 	return UNEXPECTED((zf-&gt;common.arg_info[arg_num].pass_by_reference &amp; mask) != 0);</span>
+<span class='curline'><a href='../S/1643.html#L904'>zf</a>                904 Zend/zend_compile.h #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L905'>zf</a>                905 Zend/zend_compile.h 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF)</span>
+<span class='curline'><a href='../S/1643.html#L907'>zf</a>                907 Zend/zend_compile.h #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L908'>zf</a>                908 Zend/zend_compile.h 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)</span>
+<span class='curline'><a href='../S/1643.html#L910'>zf</a>                910 Zend/zend_compile.h #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L911'>zf</a>                911 Zend/zend_compile.h 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)</span>
+<span class='curline'><a href='../S/1643.html#L917'>zf</a>                917 Zend/zend_compile.h # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \</span>
+<span class='curline'><a href='../S/1643.html#L918'>zf</a>                918 Zend/zend_compile.h 		*(uint32_t*)&amp;(zf)-&gt;type |= ((mask) &lt;&lt; ((arg_num) - 1) * 2); \</span>
+<span class='curline'><a href='../S/1643.html#L920'>zf</a>                920 Zend/zend_compile.h # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \</span>
+<span class='curline'><a href='../S/1643.html#L921'>zf</a>                921 Zend/zend_compile.h 	(((*((uint32_t*)&amp;((zf)-&gt;type))) &gt;&gt; (((arg_num) - 1) * 2)) &amp; (mask))</span>
+<span class='curline'><a href='../S/1643.html#L923'>zf</a>                923 Zend/zend_compile.h # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \</span>
+<span class='curline'><a href='../S/1643.html#L924'>zf</a>                924 Zend/zend_compile.h 		*(uint32_t*)&amp;(zf)-&gt;type |= (((mask) &lt;&lt; 6) &lt;&lt; (arg_num) * 2); \</span>
+<span class='curline'><a href='../S/1643.html#L926'>zf</a>                926 Zend/zend_compile.h # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \</span>
+<span class='curline'><a href='../S/1643.html#L927'>zf</a>                927 Zend/zend_compile.h 	(((*(uint32_t*)&amp;(zf)-&gt;type) &gt;&gt; (((arg_num) + 3) * 2)) &amp; (mask))</span>
+<span class='curline'><a href='../S/1643.html#L930'>zf</a>                930 Zend/zend_compile.h #define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L931'>zf</a>                931 Zend/zend_compile.h 	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF)</span>
+<span class='curline'><a href='../S/1643.html#L933'>zf</a>                933 Zend/zend_compile.h #define QUICK_ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L934'>zf</a>                934 Zend/zend_compile.h 	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)</span>
+<span class='curline'><a href='../S/1643.html#L936'>zf</a>                936 Zend/zend_compile.h #define QUICK_ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \</span>
+<span class='curline'><a href='../S/1643.html#L937'>zf</a>                937 Zend/zend_compile.h 	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_PREFER_REF)</span>
+<span class='curline'><a href='../S/1654.html#L630'>zf</a>                630 Zend/zend_execute.c static ZEND_COLD void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)</span>
+<span class='curline'><a href='../S/1654.html#L633'>zf</a>                633 Zend/zend_execute.c 	const char *fname = ZSTR_VAL(zf-&gt;common.function_name);</span>
+<span class='curline'><a href='../S/1654.html#L637'>zf</a>                637 Zend/zend_execute.c 	if (zf-&gt;common.scope) {</span>
+<span class='curline'><a href='../S/1654.html#L639'>zf</a>                639 Zend/zend_execute.c 		fclass = ZSTR_VAL(zf-&gt;common.scope-&gt;name);</span>
+<span class='curline'><a href='../S/1654.html#L645'>zf</a>                645 Zend/zend_execute.c 	if (zf-&gt;common.type == ZEND_USER_FUNCTION) {</span>
+<span class='curline'><a href='../S/1654.html#L736'>zf</a>                736 Zend/zend_execute.c static int zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)</span>
+<span class='curline'><a href='../S/1654.html#L742'>zf</a>                742 Zend/zend_execute.c 	if (EXPECTED(arg_num &lt;= zf-&gt;internal_function.num_args)) {</span>
+<span class='curline'><a href='../S/1654.html#L743'>zf</a>                743 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;internal_function.arg_info[arg_num-1];</span>
+<span class='curline'><a href='../S/1654.html#L744'>zf</a>                744 Zend/zend_execute.c 	} else if (zf-&gt;internal_function.fn_flags &amp; ZEND_ACC_VARIADIC) {</span>
+<span class='curline'><a href='../S/1654.html#L745'>zf</a>                745 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;internal_function.arg_info[zf-&gt;internal_function.num_args];</span>
+<span class='curline'><a href='../S/1654.html#L756'>zf</a>                756 Zend/zend_execute.c 					zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)-&gt;name), arg);</span>
+<span class='curline'><a href='../S/1654.html#L763'>zf</a>                763 Zend/zend_execute.c 				zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L767'>zf</a>                767 Zend/zend_execute.c 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L774'>zf</a>                774 Zend/zend_execute.c 				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info-&gt;type_hint), zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L782'>zf</a>                782 Zend/zend_execute.c static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)</span>
+<span class='curline'><a href='../S/1654.html#L788'>zf</a>                788 Zend/zend_execute.c 	if (EXPECTED(arg_num &lt;= zf-&gt;common.num_args)) {</span>
+<span class='curline'><a href='../S/1654.html#L789'>zf</a>                789 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;common.arg_info[arg_num-1];</span>
+<span class='curline'><a href='../S/1654.html#L790'>zf</a>                790 Zend/zend_execute.c 	} else if (UNEXPECTED(zf-&gt;common.fn_flags &amp; ZEND_ACC_VARIADIC)) {</span>
+<span class='curline'><a href='../S/1654.html#L791'>zf</a>                791 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;common.arg_info[zf-&gt;common.num_args];</span>
+<span class='curline'><a href='../S/1654.html#L805'>zf</a>                805 Zend/zend_execute.c 						zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info-&gt;class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)-&gt;name), arg);</span>
+<span class='curline'><a href='../S/1654.html#L814'>zf</a>                814 Zend/zend_execute.c 					zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce-&gt;name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)-&gt;name), arg);</span>
+<span class='curline'><a href='../S/1654.html#L826'>zf</a>                826 Zend/zend_execute.c 							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info-&gt;class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(arg)-&gt;name), arg);</span>
+<span class='curline'><a href='../S/1654.html#L828'>zf</a>                828 Zend/zend_execute.c 							zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info-&gt;class_name), "", zend_zval_type_name(arg), arg);</span>
+<span class='curline'><a href='../S/1654.html#L837'>zf</a>                837 Zend/zend_execute.c 				zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce-&gt;name), zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L841'>zf</a>                841 Zend/zend_execute.c 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L848'>zf</a>                848 Zend/zend_execute.c 				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info-&gt;type_hint), zend_zval_type_name(arg), "", arg);</span>
+<span class='curline'><a href='../S/1654.html#L856'>zf</a>                856 Zend/zend_execute.c static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_num, void **cache_slot)</span>
+<span class='curline'><a href='../S/1654.html#L862'>zf</a>                862 Zend/zend_execute.c 	if (EXPECTED(arg_num &lt;= zf-&gt;common.num_args)) {</span>
+<span class='curline'><a href='../S/1654.html#L863'>zf</a>                863 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;common.arg_info[arg_num-1];</span>
+<span class='curline'><a href='../S/1654.html#L864'>zf</a>                864 Zend/zend_execute.c 	} else if (UNEXPECTED(zf-&gt;common.fn_flags &amp; ZEND_ACC_VARIADIC)) {</span>
+<span class='curline'><a href='../S/1654.html#L865'>zf</a>                865 Zend/zend_execute.c 		cur_arg_info = &amp;zf-&gt;common.arg_info[zf-&gt;common.num_args];</span>
+<span class='curline'><a href='../S/1654.html#L877'>zf</a>                877 Zend/zend_execute.c 					zend_verify_arg_error(zf, arg_num, "be an instance of ", ZSTR_VAL(cur_arg_info-&gt;class_name), "none", "", NULL);</span>
+<span class='curline'><a href='../S/1654.html#L885'>zf</a>                885 Zend/zend_execute.c 			zend_verify_arg_error(zf, arg_num, need_msg, ZSTR_VAL(ce-&gt;name), "none", "", NULL);</span>
+<span class='curline'><a href='../S/1654.html#L887'>zf</a>                887 Zend/zend_execute.c 			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "", NULL);</span>
+<span class='curline'><a href='../S/1654.html#L889'>zf</a>                889 Zend/zend_execute.c 			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info-&gt;type_hint), "none", "", NULL);</span>
+<span class='curline'><a href='../S/1654.html#L913'>zf</a>                913 Zend/zend_execute.c static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)</span>
+<span class='curline'><a href='../S/1654.html#L915'>zf</a>                915 Zend/zend_execute.c 	const char *fname = ZSTR_VAL(zf-&gt;common.function_name);</span>
+<span class='curline'><a href='../S/1654.html#L919'>zf</a>                919 Zend/zend_execute.c 	if (zf-&gt;common.scope) {</span>
+<span class='curline'><a href='../S/1654.html#L921'>zf</a>                921 Zend/zend_execute.c 		fclass = ZSTR_VAL(zf-&gt;common.scope-&gt;name);</span>
+<span class='curline'><a href='../S/1654.html#L931'>zf</a>                931 Zend/zend_execute.c static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)</span>
+<span class='curline'><a href='../S/1654.html#L933'>zf</a>                933 Zend/zend_execute.c 	const char *fname = ZSTR_VAL(zf-&gt;common.function_name);</span>
+<span class='curline'><a href='../S/1654.html#L937'>zf</a>                937 Zend/zend_execute.c 	if (zf-&gt;common.scope) {</span>
+<span class='curline'><a href='../S/1654.html#L939'>zf</a>                939 Zend/zend_execute.c 		fclass = ZSTR_VAL(zf-&gt;common.scope-&gt;name);</span>
+<span class='curline'><a href='../S/1654.html#L950'>zf</a>                950 Zend/zend_execute.c static int zend_verify_internal_return_type(zend_function *zf, zval *ret)</span>
+<span class='curline'><a href='../S/1654.html#L952'>zf</a>                952 Zend/zend_execute.c 	zend_arg_info *ret_info = zf-&gt;common.arg_info - 1;</span>
+<span class='curline'><a href='../S/1654.html#L962'>zf</a>                962 Zend/zend_execute.c 					zend_verify_internal_return_error(zf, need_msg, class_name, "instance of ", ZSTR_VAL(Z_OBJCE_P(ret)-&gt;name));</span>
+<span class='curline'><a href='../S/1654.html#L969'>zf</a>                969 Zend/zend_execute.c 				zend_verify_internal_return_error(zf, need_msg, class_name, zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L972'>zf</a>                972 Zend/zend_execute.c 					zend_verify_internal_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L980'>zf</a>                980 Zend/zend_execute.c 				zend_verify_internal_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info-&gt;type_hint), zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L989'>zf</a>                989 Zend/zend_execute.c static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *ret, void **cache_slot)</span>
+<span class='curline'><a href='../S/1654.html#L991'>zf</a>                991 Zend/zend_execute.c 	zend_arg_info *ret_info = zf-&gt;common.arg_info - 1;</span>
+<span class='curline'><a href='../S/1654.html#L1003'>zf</a>               1003 Zend/zend_execute.c 						zend_verify_return_error(zf, "be an instance of ", ZSTR_VAL(ret_info-&gt;class_name), "instance of ", ZSTR_VAL(Z_OBJCE_P(ret)-&gt;name));</span>
+<span class='curline'><a href='../S/1654.html#L1012'>zf</a>               1012 Zend/zend_execute.c 					zend_verify_return_error(zf, need_msg, ZSTR_VAL(ce-&gt;name), "instance of ", ZSTR_VAL(Z_OBJCE_P(ret)-&gt;name));</span>
+<span class='curline'><a href='../S/1654.html#L1022'>zf</a>               1022 Zend/zend_execute.c 						zend_verify_return_error(zf, "be an instance of ", ZSTR_VAL(ret_info-&gt;class_name), zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L1030'>zf</a>               1030 Zend/zend_execute.c 				zend_verify_return_error(zf, need_msg, ZSTR_VAL(ce-&gt;name), zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L1033'>zf</a>               1033 Zend/zend_execute.c 					zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L1039'>zf</a>               1039 Zend/zend_execute.c 				zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info-&gt;type_hint), zend_zval_type_name(ret), "");</span>
+<span class='curline'><a href='../S/1654.html#L1045'>zf</a>               1045 Zend/zend_execute.c static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **cache_slot)</span>
+<span class='curline'><a href='../S/1654.html#L1047'>zf</a>               1047 Zend/zend_execute.c 	zend_arg_info *ret_info = zf-&gt;common.arg_info - 1;</span>
+<span class='curline'><a href='../S/1654.html#L1058'>zf</a>               1058 Zend/zend_execute.c 					zend_verify_return_error(zf, "be an instance of ", ZSTR_VAL(ret_info-&gt;class_name), "none", "");</span>
+<span class='curline'><a href='../S/1654.html#L1066'>zf</a>               1066 Zend/zend_execute.c 			zend_verify_return_error(zf, need_msg, ZSTR_VAL(ce-&gt;name), "none", "");</span>
+<span class='curline'><a href='../S/1654.html#L1069'>zf</a>               1069 Zend/zend_execute.c 			zend_verify_return_error(zf, "be callable", "", "none", "");</span>
+<span class='curline'><a href='../S/1654.html#L1071'>zf</a>               1071 Zend/zend_execute.c 			zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info-&gt;type_hint), "none", "");</span>
+<span class='curline'><a href='../S/1654.html#L2743'>zf</a>               2743 Zend/zend_execute.c ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)</span>
+<span class='curline'><a href='../S/1654.html#L2745'>zf</a>               2745 Zend/zend_execute.c 	zend_verify_internal_arg_type(zf, arg_num, arg);</span>
+<span class='curline'><a href='../S/1654.html#L2748'>zf</a>               2748 Zend/zend_execute.c ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)</span>
+<span class='curline'><a href='../S/1654.html#L2750'>zf</a>               2750 Zend/zend_execute.c 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);</span>
+<span class='curline'><a href='../S/1655.html#L53'>zf</a>                 53 Zend/zend_execute.h ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);</span>
+<span class='curline'><a href='../S/1655.html#L54'>zf</a>                 54 Zend/zend_execute.h ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);</span>
+<span class='curline'><a href='../S/1018.html#L1600'>zf</a>               1600 ext/soap/soap.c 			php_stream_filter *zf = NULL;</span>
+<span class='curline'><a href='../S/1018.html#L1618'>zf</a>               1618 ext/soap/soap.c 					zf = php_stream_filter_create("zlib.inflate", &amp;filter_params, 0);</span>
+<span class='curline'><a href='../S/1018.html#L1621'>zf</a>               1621 ext/soap/soap.c 					if (zf) {</span>
+<span class='curline'><a href='../S/1018.html#L1622'>zf</a>               1622 ext/soap/soap.c 						php_stream_filter_append(&amp;SG(request_info).request_body-&gt;readfilters, zf);</span>
+<span class='curline'><a href='../S/1018.html#L1638'>zf</a>               1638 ext/soap/soap.c 			if (zf) {</span>
+<span class='curline'><a href='../S/1018.html#L1639'>zf</a>               1639 ext/soap/soap.c 				php_stream_filter_remove(zf, 1);</span>
+<span class='curline'><a href='../S/1270.html#L41'>zf</a>                 41 ext/zip/lib/zip_fclose.c zip_fclose(zip_file_t *zf)</span>
+<span class='curline'><a href='../S/1270.html#L45'>zf</a>                 45 ext/zip/lib/zip_fclose.c     if (zf-&gt;src)</span>
+<span class='curline'><a href='../S/1270.html#L46'>zf</a>                 46 ext/zip/lib/zip_fclose.c 	zip_source_free(zf-&gt;src);</span>
+<span class='curline'><a href='../S/1270.html#L49'>zf</a>                 49 ext/zip/lib/zip_fclose.c     if (zf-&gt;error.zip_err)</span>
+<span class='curline'><a href='../S/1270.html#L50'>zf</a>                 50 ext/zip/lib/zip_fclose.c 	ret = zf-&gt;error.zip_err;</span>
+<span class='curline'><a href='../S/1270.html#L52'>zf</a>                 52 ext/zip/lib/zip_fclose.c     zip_error_fini(&amp;zf-&gt;error);</span>
+<span class='curline'><a href='../S/1270.html#L53'>zf</a>                 53 ext/zip/lib/zip_fclose.c     free(zf);</span>
+<span class='curline'><a href='../S/1273.html#L39'>zf</a>                 39 ext/zip/lib/zip_file_error_clear.c zip_file_error_clear(zip_file_t *zf)</span>
+<span class='curline'><a href='../S/1273.html#L41'>zf</a>                 41 ext/zip/lib/zip_file_error_clear.c     if (zf == NULL)</span>
+<span class='curline'><a href='../S/1273.html#L44'>zf</a>                 44 ext/zip/lib/zip_file_error_clear.c     _zip_error_clear(&amp;zf-&gt;error);</span>
+<span class='curline'><a href='../S/1274.html#L39'>zf</a>                 39 ext/zip/lib/zip_file_error_get.c zip_file_error_get(zip_file_t *zf, int *zep, int *sep)</span>
+<span class='curline'><a href='../S/1274.html#L41'>zf</a>                 41 ext/zip/lib/zip_file_error_get.c     _zip_error_get(&amp;zf-&gt;error, zep, sep);</span>
+<span class='curline'><a href='../S/1283.html#L39'>zf</a>                 39 ext/zip/lib/zip_file_strerror.c zip_file_strerror(zip_file_t *zf)</span>
+<span class='curline'><a href='../S/1283.html#L41'>zf</a>                 41 ext/zip/lib/zip_file_strerror.c     return zip_error_strerror(&amp;zf-&gt;error);</span>
+<span class='curline'><a href='../S/1288.html#L47'>zf</a>                 47 ext/zip/lib/zip_fopen_index_encrypted.c     zip_file_t *zf;</span>
+<span class='curline'><a href='../S/1288.html#L59'>zf</a>                 59 ext/zip/lib/zip_fopen_index_encrypted.c     if ((zf=_zip_file_new(za)) == NULL) {</span>
+<span class='curline'><a href='../S/1288.html#L64'>zf</a>                 64 ext/zip/lib/zip_fopen_index_encrypted.c     zf-&gt;src = src;</span>
+<span class='curline'><a href='../S/1288.html#L66'>zf</a>                 66 ext/zip/lib/zip_fopen_index_encrypted.c     return zf;</span>
+<span class='curline'><a href='../S/1288.html#L73'>zf</a>                 73 ext/zip/lib/zip_fopen_index_encrypted.c     zip_file_t *zf;</span>
+<span class='curline'><a href='../S/1288.html#L75'>zf</a>                 75 ext/zip/lib/zip_fopen_index_encrypted.c     if ((zf=(zip_file_t *)malloc(sizeof(struct zip_file))) == NULL) {</span>
+<span class='curline'><a href='../S/1288.html#L80'>zf</a>                 80 ext/zip/lib/zip_fopen_index_encrypted.c     zf-&gt;za = za;</span>
+<span class='curline'><a href='../S/1288.html#L81'>zf</a>                 81 ext/zip/lib/zip_fopen_index_encrypted.c     zip_error_init(&amp;zf-&gt;error);</span>
+<span class='curline'><a href='../S/1288.html#L82'>zf</a>                 82 ext/zip/lib/zip_fopen_index_encrypted.c     zf-&gt;eof = 0;</span>
+<span class='curline'><a href='../S/1288.html#L83'>zf</a>                 83 ext/zip/lib/zip_fopen_index_encrypted.c     zf-&gt;src = NULL;</span>
+<span class='curline'><a href='../S/1288.html#L85'>zf</a>                 85 ext/zip/lib/zip_fopen_index_encrypted.c     return zf;</span>
+<span class='curline'><a href='../S/1289.html#L39'>zf</a>                 39 ext/zip/lib/zip_fread.c zip_fread(zip_file_t *zf, void *outbuf, zip_uint64_t toread)</span>
+<span class='curline'><a href='../S/1289.html#L43'>zf</a>                 43 ext/zip/lib/zip_fread.c     if (!zf)</span>
+<span class='curline'><a href='../S/1289.html#L46'>zf</a>                 46 ext/zip/lib/zip_fread.c     if (zf-&gt;error.zip_err != 0)</span>
+<span class='curline'><a href='../S/1289.html#L50'>zf</a>                 50 ext/zip/lib/zip_fread.c 	zip_error_set(&amp;zf-&gt;error, ZIP_ER_INVAL, 0);</span>
+<span class='curline'><a href='../S/1289.html#L54'>zf</a>                 54 ext/zip/lib/zip_fread.c     if ((zf-&gt;eof) || (toread == 0))</span>
+<span class='curline'><a href='../S/1289.html#L57'>zf</a>                 57 ext/zip/lib/zip_fread.c     if ((n=zip_source_read(zf-&gt;src, outbuf, toread)) &lt; 0) {</span>
+<span class='curline'><a href='../S/1289.html#L58'>zf</a>                 58 ext/zip/lib/zip_fread.c 	_zip_error_set_from_source(&amp;zf-&gt;error, zf-&gt;src);</span>
+<span class='curline'><a href='../S/1358.html#L138'>zf</a>                138 ext/zip/php_zip.c 	struct zip_file *zf;</span>
+<span class='curline'><a href='../S/1358.html#L248'>zf</a>                248 ext/zip/php_zip.c 	zf = zip_fopen(za, file, 0);</span>
+<span class='curline'><a href='../S/1358.html#L249'>zf</a>                249 ext/zip/php_zip.c 	if (zf == NULL) {</span>
+<span class='curline'><a href='../S/1358.html#L257'>zf</a>                257 ext/zip/php_zip.c 	while ((n=zip_fread(zf, b, sizeof(b))) &gt; 0) {</span>
+<span class='curline'><a href='../S/1358.html#L262'>zf</a>                262 ext/zip/php_zip.c 	n = zip_fclose(zf);</span>
+<span class='curline'><a href='../S/1358.html#L1062'>zf</a>               1062 ext/zip/php_zip.c 		if (zr_rsrc-&gt;zf) {</span>
+<span class='curline'><a href='../S/1358.html#L1063'>zf</a>               1063 ext/zip/php_zip.c 			zip_fclose(zr_rsrc-&gt;zf);</span>
+<span class='curline'><a href='../S/1358.html#L1064'>zf</a>               1064 ext/zip/php_zip.c 			zr_rsrc-&gt;zf = NULL;</span>
+<span class='curline'><a href='../S/1358.html#L1195'>zf</a>               1195 ext/zip/php_zip.c 		zr_rsrc-&gt;zf = zip_fopen_index(rsrc_int-&gt;za, rsrc_int-&gt;index_current, 0);</span>
+<span class='curline'><a href='../S/1358.html#L1196'>zf</a>               1196 ext/zip/php_zip.c 		if (zr_rsrc-&gt;zf) {</span>
+<span class='curline'><a href='../S/1358.html#L1234'>zf</a>               1234 ext/zip/php_zip.c 	if (zr_rsrc-&gt;zf != NULL) {</span>
+<span class='curline'><a href='../S/1358.html#L1283'>zf</a>               1283 ext/zip/php_zip.c 	if (zr_rsrc-&gt;zf) {</span>
+<span class='curline'><a href='../S/1358.html#L1285'>zf</a>               1285 ext/zip/php_zip.c 		n = zip_fread(zr_rsrc-&gt;zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));</span>
+<span class='curline'><a href='../S/1358.html#L1313'>zf</a>               1313 ext/zip/php_zip.c 	if (!zr_rsrc-&gt;zf) {</span>
+<span class='curline'><a href='../S/1358.html#L2685'>zf</a>               2685 ext/zip/php_zip.c 	struct zip_file *zf;</span>
+<span class='curline'><a href='../S/1358.html#L2722'>zf</a>               2722 ext/zip/php_zip.c 		zf = zip_fopen_index(intern, index, flags);</span>
+<span class='curline'><a href='../S/1358.html#L2724'>zf</a>               2724 ext/zip/php_zip.c 		zf = zip_fopen(intern, ZSTR_VAL(filename), flags);</span>
+<span class='curline'><a href='../S/1358.html#L2727'>zf</a>               2727 ext/zip/php_zip.c 	if (zf == NULL) {</span>
+<span class='curline'><a href='../S/1358.html#L2732'>zf</a>               2732 ext/zip/php_zip.c 	n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));</span>
+<span class='curline'><a href='../S/1358.html#L2738'>zf</a>               2738 ext/zip/php_zip.c 	zip_fclose(zf);</span>
+<span class='curline'><a href='../S/1359.html#L68'>zf</a>                 68 ext/zip/php_zip.h 	struct zip_file *zf;</span>
+<span class='curline'><a href='../S/1360.html#L36'>zf</a>                 36 ext/zip/zip_stream.c 	struct zip_file *zf;</span>
+<span class='curline'><a href='../S/1360.html#L51'>zf</a>                 51 ext/zip/zip_stream.c 	if (self-&gt;za &amp;&amp; self-&gt;zf) {</span>
+<span class='curline'><a href='../S/1360.html#L52'>zf</a>                 52 ext/zip/zip_stream.c 		n = zip_fread(self-&gt;zf, buf, count);</span>
+<span class='curline'><a href='../S/1360.html#L56'>zf</a>                 56 ext/zip/zip_stream.c 			zip_file_error_get(self-&gt;zf, &amp;ze, &amp;se);</span>
+<span class='curline'><a href='../S/1360.html#L58'>zf</a>                 58 ext/zip/zip_stream.c 			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_file_strerror(self-&gt;zf));</span>
+<span class='curline'><a href='../S/1360.html#L61'>zf</a>                 61 ext/zip/zip_stream.c 			err = zip_file_get_error(self-&gt;zf);</span>
+<span class='curline'><a href='../S/1360.html#L96'>zf</a>                 96 ext/zip/zip_stream.c 		if (self-&gt;zf) {</span>
+<span class='curline'><a href='../S/1360.html#L97'>zf</a>                 97 ext/zip/zip_stream.c 			zip_fclose(self-&gt;zf);</span>
+<span class='curline'><a href='../S/1360.html#L98'>zf</a>                 98 ext/zip/zip_stream.c 			self-&gt;zf = NULL;</span>
+<span class='curline'><a href='../S/1360.html#L213'>zf</a>                213 ext/zip/zip_stream.c 	struct zip_file *zf = NULL;</span>
+<span class='curline'><a href='../S/1360.html#L235'>zf</a>                235 ext/zip/zip_stream.c 		zf = zip_fopen(stream_za, path, 0);</span>
+<span class='curline'><a href='../S/1360.html#L236'>zf</a>                236 ext/zip/zip_stream.c 		if (zf) {</span>
+<span class='curline'><a href='../S/1360.html#L240'>zf</a>                240 ext/zip/zip_stream.c 			self-&gt;zf = zf;</span>
+<span class='curline'><a href='../S/1360.html#L273'>zf</a>                273 ext/zip/zip_stream.c 	struct zip_file *zf = NULL;</span>
+<span class='curline'><a href='../S/1360.html#L313'>zf</a>                313 ext/zip/zip_stream.c 		zf = zip_fopen(za, fragment, 0);</span>
+<span class='curline'><a href='../S/1360.html#L314'>zf</a>                314 ext/zip/zip_stream.c 		if (zf) {</span>
+<span class='curline'><a href='../S/1360.html#L318'>zf</a>                318 ext/zip/zip_stream.c 			self-&gt;zf = zf;</span>
+<span class='curline'><a href='../S/1542.html#L432'>zf</a>                432 sapi/phpdbg/phpdbg_info.c 	zend_function *zf;</span>
+<span class='curline'><a href='../S/1542.html#L438'>zf</a>                438 sapi/phpdbg/phpdbg_info.c 		ZEND_HASH_FOREACH_PTR(EG(function_table), zf) {</span>
+<span class='curline'><a href='../S/1542.html#L439'>zf</a>                439 sapi/phpdbg/phpdbg_info.c 			if (zf-&gt;type == ZEND_USER_FUNCTION) {</span>
+<span class='curline'><a href='../S/1542.html#L440'>zf</a>                440 sapi/phpdbg/phpdbg_info.c 				zend_hash_next_index_insert_ptr(&amp;functions, zf);</span>
+<span class='curline'><a href='../S/1542.html#L449'>zf</a>                449 sapi/phpdbg/phpdbg_info.c 	ZEND_HASH_FOREACH_PTR(&amp;functions, zf) {</span>
+<span class='curline'><a href='../S/1542.html#L450'>zf</a>                450 sapi/phpdbg/phpdbg_info.c 		zend_op_array *op_array = &amp;zf-&gt;op_array;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/pdo_mysql/pdo_mysql.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1820.html'>pdo_mysql</a>/pdo_mysql.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L65'>[^]</a><a href='#L210'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L65' title='Defined at 65.'>pdo_mysql_convert_zv_to_mysqlnd</a></li>
+<li><a href='#L94' title='Defined at 94.'>PHP_INI_BEGIN</a></li>
+<li><a href='#L144' title='Defined at 144.'>PHP_MSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L157' title='Defined at 157.'>PHP_MINFO_FUNCTION</a></li>
+<li><a href='#L176' title='Defined at 176.'>PHP_RINIT_FUNCTION</a></li>
+<li><a href='#L193' title='Defined at 193.'>PHP_RSHUTDOWN_FUNCTION</a></li>
+<li><a href='#L210' title='Defined at 210.'>PHP_GINIT_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>  | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: George Schlossnagle &lt;george@omniti.com&gt;                      |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  |         Johannes Schlueter &lt;johannes@mysql.com&gt;                      |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>*/</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='comment'>/* $Id$ */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#endif</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='1114.html'>ext/standard/info.h</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='914.html'>pdo/php_pdo.h</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='915.html'>pdo/php_pdo_driver.h</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='931.html'>php_pdo_mysql.h</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='932.html'>php_pdo_mysql_int.h</a>"
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#ifdef</em> <a href='../Y/515.html' title='Multiple used in 3 places.'>COMPILE_DL_PDO_MYSQL</a>
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#ifdef</em> <a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>
+<a id='L36' name='L36'></a>  36 <a href='../D/17344.html' title='Multiple defined in 18 places.'>ZEND_TSRMLS_CACHE_DEFINE</a>()
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#endif</em>
+<a id='L38' name='L38'></a>  38 <a href='../D/16546.html' title='Multiple defined in 30 places.'>ZEND_GET_MODULE</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#endif</em>
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <a href='../D/16157.html' title='Multiple defined in 12 places.'>ZEND_DECLARE_MODULE_GLOBALS</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='comment'>/*</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> The default socket location is sometimes defined by configure.</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> and the user can use --with-mysql-sock=SOCKET which will fill</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> /tmp/mysql.sock as default on *nix and NULL for Windows (default</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> named pipe name is set in mysqlnd).</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'>*/</em>
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#ifndef</em> <a href='../D/7372.html' title='Multiple defined in 3 places.'>PDO_MYSQL_UNIX_ADDR</a>
+<a id='L52' name='L52'></a>  52 <em class='sharp'># ifdef</em> <a href='../Y/5026.html' title='Multiple used in 5 places.'>PHP_MYSQL_UNIX_SOCK_ADDR</a>
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#  define</em> <a href='../R/6484.html' title='Multiple referred from 2 places.'>PDO_MYSQL_UNIX_ADDR</a> <a href='../Y/5026.html' title='Multiple used in 5 places.'>PHP_MYSQL_UNIX_SOCK_ADDR</a>
+<a id='L54' name='L54'></a>  54 <em class='sharp'># else</em>
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#  if</em> !<a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L56' name='L56'></a>  56 <em class='sharp'>#   define</em> <a href='../R/6484.html' title='Multiple referred from 2 places.'>PDO_MYSQL_UNIX_ADDR</a> "/tmp/mysql.sock"
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#  else</em>
+<a id='L58' name='L58'></a>  58 <em class='sharp'>#   define</em> <a href='../R/6484.html' title='Multiple referred from 2 places.'>PDO_MYSQL_UNIX_ADDR</a> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>
+<a id='L59' name='L59'></a>  59 <em class='sharp'>#  endif</em>
+<a id='L60' name='L60'></a>  60 <em class='sharp'># endif</em>
+<a id='L61' name='L61'></a>  61 <em class='sharp'>#endif</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 <em class='sharp'>#ifdef</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>
+<a id='L64' name='L64'></a>  64 <em class='sharp'>#include</em> "<a href='797.html'>ext/mysqlnd/mysqlnd_reverse_api.h</a>"
+<a id='L65' name='L65'></a>  65 <strong class='reserved'>static</strong> <a href='../S/800.html#L228' title='Defined at 228 in ext/mysqlnd/mysqlnd_structs.h.'>MYSQLND</a> * <a href='../S/930.html#L87' title='Referred from 87 in ext/pdo_mysql/pdo_mysql.c.'>pdo_mysql_convert_zv_to_mysqlnd</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> * <a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>)
+<a id='L66' name='L66'></a>  66 <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>) == <a href='../S/1731.html#L310' title='Defined at 310 in Zend/zend_types.h.'>IS_OBJECT</a> &amp;&amp; <a href='../S/1706.html#L2129' title='Defined at 2129 in Zend/zend_operators.c.'>instanceof_function</a>(<a href='../S/1731.html#L543' title='Defined at 543 in Zend/zend_types.h.'>Z_OBJCE_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>), <a href='../S/909.html#L60' title='Defined at 60 in ext/pdo/pdo.c.'>php_pdo_get_dbh_ce</a>())) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                 <a href='../S/915.html#L27' title='Defined at 27 in ext/pdo/php_pdo_driver.h.'>pdo_dbh_t</a> * <a href='../Y/15251.html' title='Multiple used in 824 places.'>dbh</a> = <a href='../S/915.html#L523' title='Defined at 523 in ext/pdo/php_pdo_driver.h.'>Z_PDO_DBH_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>);
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>if</strong> (!<a href='../Y/15251.html' title='Multiple used in 824 places.'>dbh</a>) <em class='brace'>{</em>
+<a id='L71' name='L71'></a>  71                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Failed to retrieve handle from object store");
+<a id='L72' name='L72'></a>  72                         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L73' name='L73'></a>  73                 <em class='brace'>}</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75                 <strong class='reserved'>if</strong> (<a href='../Y/15251.html' title='Multiple used in 824 places.'>dbh</a>-&gt;<a href='../Y/16186.html' title='Multiple used in 18 places.'>driver</a> != &amp;<a href='../Y/31550.html' title='Multiple used in 5 places.'>pdo_mysql_driver</a>) <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Provided PDO instance is not using MySQL but %s", <a href='../Y/15251.html' title='Multiple used in 824 places.'>dbh</a>-&gt;<a href='../Y/16186.html' title='Multiple used in 18 places.'>driver</a>-&gt;<a href='../Y/16188.html' title='Multiple used in 9 places.'>driver_name</a>);
+<a id='L77' name='L77'></a>  77                         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L78' name='L78'></a>  78                 <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>return</strong> ((<a href='../S/932.html#L117' title='Defined at 117 in ext/pdo_mysql/php_pdo_mysql_int.h.'>pdo_mysql_db_handle</a> *)<a href='../Y/15251.html' title='Multiple used in 824 places.'>dbh</a>-&gt;<a href='../Y/16187.html' title='Multiple used in 206 places.'>driver_data</a>)-&gt;<a href='../Y/35741.html' title='Multiple used in 401 places.'>server</a>;
+<a id='L81' name='L81'></a>  81         <em class='brace'>}</em>
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>static</strong> <a href='../S/797.html#L28' title='Defined at 28 in ext/mysqlnd/mysqlnd_reverse_api.h.'>MYSQLND_REVERSE_API</a> <a href='../Y/31555.html' title='Multiple used in 2 places.'>pdo_mysql_reverse_api</a> = <em class='brace'>{</em>
+<a id='L86' name='L86'></a>  86         &amp;<a href='../Y/31554.html' title='Multiple used in 4 places.'>pdo_mysql_module_entry</a>,
+<a id='L87' name='L87'></a>  87         <a href='../S/930.html#L65' title='Defined at 65 in ext/pdo_mysql/pdo_mysql.c.'>pdo_mysql_convert_zv_to_mysqlnd</a>
+<a id='L88' name='L88'></a>  88 <em class='brace'>}</em>;
+<a id='L89' name='L89'></a>  89 <em class='sharp'>#endif</em>
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <em class='comment'>/* {{{ PHP_INI_BEGIN</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'>*/</em>
+<a id='L94' name='L94'></a>  94 <a href='../R/7194.html' title='Multiple referred from 8 places.'>PHP_INI_BEGIN</a>()
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#ifndef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L96' name='L96'></a>  96         <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("pdo_mysql.default_socket", <a href='../D/7372.html' title='Multiple defined in 3 places.'>PDO_MYSQL_UNIX_ADDR</a>, <a href='../S/1385.html#L47' title='Defined at 47 in main/php_ini.h.'>PHP_INI_SYSTEM</a>, <a href='../Y/4759.html' title='Multiple used in 16 places.'>OnUpdateStringUnempty</a>, <a href='../Y/15463.html' title='Multiple used in 9 places.'>default_socket</a>, <a href='../Y/43842.html' title='Multiple used in 2 places.'>zend_pdo_mysql_globals</a>, <a href='../Y/31553.html' title='Multiple used in 5 places.'>pdo_mysql_globals</a>)
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#endif</em>
+<a id='L98' name='L98'></a>  98 <em class='sharp'>#if</em> <a href='../D/7294.html' title='Multiple defined in 2 places.'>PDO_DBG_ENABLED</a>
+<a id='L99' name='L99'></a>  99         <a href='../S/1385.html#L68' title='Defined at 68 in main/php_ini.h.'>STD_PHP_INI_ENTRY</a>("pdo_mysql.debug",    <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1385.html#L47' title='Defined at 47 in main/php_ini.h.'>PHP_INI_SYSTEM</a>, <a href='../Y/4758.html' title='Multiple used in 72 places.'>OnUpdateString</a>, <a href='../S/247.html#L59' title='Defined at 59 in ext/gd/libgd/gdkanji.c.'>debug</a>, <a href='../Y/43842.html' title='Multiple used in 2 places.'>zend_pdo_mysql_globals</a>, <a href='../Y/31553.html' title='Multiple used in 5 places.'>pdo_mysql_globals</a>)
+<a id='L100' name='L100'></a> 100 <em class='sharp'>#endif</em>
+<a id='L101' name='L101'></a> 101 <a href='../S/1385.html#L57' title='Defined at 57 in main/php_ini.h.'>PHP_INI_END</a>()
+<a id='L102' name='L102'></a> 102 <em class='comment'>/* }}} */</em>
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104 <em class='comment'>/* true global environment */</em>
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 <em class='comment'>/* {{{ PHP_MINIT_FUNCTION</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'> */</em>
+<a id='L108' name='L108'></a> 108 <strong class='reserved'>static</strong> <a href='../D/8309.html' title='Multiple defined in 96 places.'>PHP_MINIT_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L109' name='L109'></a> 109 <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110         <a href='../S/1674.html#L149' title='Defined at 149 in Zend/zend_ini.h.'>REGISTER_INI_ENTRIES</a>();
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_USE_BUFFERED_QUERY", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L161' title='Defined at 161 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_USE_BUFFERED_QUERY</a>);
+<a id='L113' name='L113'></a> 113         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_LOCAL_INFILE", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L162' title='Defined at 162 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_LOCAL_INFILE</a>);
+<a id='L114' name='L114'></a> 114         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_INIT_COMMAND", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L163' title='Defined at 163 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_INIT_COMMAND</a>);
+<a id='L115' name='L115'></a> 115 <em class='sharp'>#ifndef</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>
+<a id='L116' name='L116'></a> 116         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_MAX_BUFFER_SIZE", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L167' title='Defined at 167 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_MAX_BUFFER_SIZE</a>);
+<a id='L117' name='L117'></a> 117         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_READ_DEFAULT_FILE", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L165' title='Defined at 165 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_READ_DEFAULT_FILE</a>);
+<a id='L118' name='L118'></a> 118         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_READ_DEFAULT_GROUP", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L166' title='Defined at 166 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_READ_DEFAULT_GROUP</a>);
+<a id='L119' name='L119'></a> 119 <em class='sharp'>#endif</em>
+<a id='L120' name='L120'></a> 120         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_COMPRESS", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L169' title='Defined at 169 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_COMPRESS</a>);
+<a id='L121' name='L121'></a> 121         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_DIRECT_QUERY", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L170' title='Defined at 170 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_DIRECT_QUERY</a>);
+<a id='L122' name='L122'></a> 122         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_FOUND_ROWS", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L171' title='Defined at 171 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_FOUND_ROWS</a>);
+<a id='L123' name='L123'></a> 123         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_IGNORE_SPACE", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L172' title='Defined at 172 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_IGNORE_SPACE</a>);
+<a id='L124' name='L124'></a> 124         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SSL_KEY", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L173' title='Defined at 173 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SSL_KEY</a>);
+<a id='L125' name='L125'></a> 125         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SSL_CERT", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L174' title='Defined at 174 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SSL_CERT</a>);
+<a id='L126' name='L126'></a> 126         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SSL_CA", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L175' title='Defined at 175 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SSL_CA</a>);
+<a id='L127' name='L127'></a> 127         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SSL_CAPATH", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L176' title='Defined at 176 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SSL_CAPATH</a>);
+<a id='L128' name='L128'></a> 128         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SSL_CIPHER", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L177' title='Defined at 177 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SSL_CIPHER</a>);
+<a id='L129' name='L129'></a> 129 <em class='sharp'>#if</em> <a href='../S/783.html#L36' title='Defined at 36 in ext/mysqlnd/mysqlnd_libmysql_compat.h.'>MYSQL_VERSION_ID</a> &gt; 50605 || <strong class='reserved'>defined</strong>(<a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>)
+<a id='L130' name='L130'></a> 130          <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_SERVER_PUBLIC_KEY", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L179' title='Defined at 179 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY</a>);
+<a id='L131' name='L131'></a> 131 <em class='sharp'>#endif</em>
+<a id='L132' name='L132'></a> 132         <a href='../S/914.html#L64' title='Defined at 64 in ext/pdo/php_pdo.h.'>REGISTER_PDO_CLASS_CONST_LONG</a>("MYSQL_ATTR_MULTI_STATEMENTS", (<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../S/932.html#L181' title='Defined at 181 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_ATTR_MULTI_STATEMENTS</a>);
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 <em class='sharp'>#ifdef</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>
+<a id='L135' name='L135'></a> 135         <a href='../S/796.html#L61' title='Defined at 61 in ext/mysqlnd/mysqlnd_reverse_api.c.'>mysqlnd_reverse_api_register_api</a>(&amp;<a href='../Y/31555.html' title='Multiple used in 2 places.'>pdo_mysql_reverse_api</a>);
+<a id='L136' name='L136'></a> 136 <em class='sharp'>#endif</em>
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>return</strong> <a href='../S/909.html#L175' title='Defined at 175 in ext/pdo/pdo.c.'>php_pdo_register_driver</a>(&amp;<a href='../Y/31550.html' title='Multiple used in 5 places.'>pdo_mysql_driver</a>);
+<a id='L139' name='L139'></a> 139 <em class='brace'>}</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>/* }}} */</em>
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 <em class='comment'>/* {{{ PHP_MSHUTDOWN_FUNCTION</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'> */</em>
+<a id='L144' name='L144'></a> 144 <strong class='reserved'>static</strong> <a href='../R/7364.html' title='Multiple referred from 56 places.'>PHP_MSHUTDOWN_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L145' name='L145'></a> 145 <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146         <a href='../S/909.html#L191' title='Defined at 191 in ext/pdo/pdo.c.'>php_pdo_unregister_driver</a>(&amp;<a href='../Y/31550.html' title='Multiple used in 5 places.'>pdo_mysql_driver</a>);
+<a id='L147' name='L147'></a> 147 <em class='sharp'>#if</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>
+<a id='L148' name='L148'></a> 148         <a href='../S/1674.html#L150' title='Defined at 150 in Zend/zend_ini.h.'>UNREGISTER_INI_ENTRIES</a>();
+<a id='L149' name='L149'></a> 149 <em class='sharp'>#endif</em>
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'>/* }}} */</em>
+<a id='L154' name='L154'></a> 154 
+<a id='L155' name='L155'></a> 155 <em class='comment'>/* {{{ PHP_MINFO_FUNCTION</em>
+<a id='L156' name='L156'></a> 156 <em class='comment'> */</em>
+<a id='L157' name='L157'></a> 157 <strong class='reserved'>static</strong> <a href='../R/7343.html' title='Multiple referred from 70 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L158' name='L158'></a> 158 <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159         <a href='../S/1113.html#L1097' title='Defined at 1097 in ext/standard/info.c.'>php_info_print_table_start</a>();
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161         <a href='../S/1113.html#L1167' title='Defined at 1167 in ext/standard/info.c.'>php_info_print_table_header</a>(2, "PDO Driver for MySQL", "enabled");
+<a id='L162' name='L162'></a> 162         <a href='../S/1113.html#L1251' title='Defined at 1251 in ext/standard/info.c.'>php_info_print_table_row</a>(2, "Client API version", <a href='../S/783.html#L117' title='Defined at 117 in ext/mysqlnd/mysqlnd_libmysql_compat.h.'>mysql_get_client_info</a>());
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <a href='../S/1113.html#L1107' title='Defined at 1107 in ext/standard/info.c.'>php_info_print_table_end</a>();
+<a id='L165' name='L165'></a> 165 
+<a id='L166' name='L166'></a> 166 <em class='sharp'>#ifndef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L167' name='L167'></a> 167         <a href='../S/1674.html#L151' title='Defined at 151 in Zend/zend_ini.h.'>DISPLAY_INI_ENTRIES</a>();
+<a id='L168' name='L168'></a> 168 <em class='sharp'>#endif</em>
+<a id='L169' name='L169'></a> 169 <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>/* }}} */</em>
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173 <em class='sharp'>#if</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a> &amp;&amp; <a href='../D/7294.html' title='Multiple defined in 2 places.'>PDO_DBG_ENABLED</a>
+<a id='L174' name='L174'></a> 174 <em class='comment'>/* {{{ PHP_RINIT_FUNCTION</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'> */</em>
+<a id='L176' name='L176'></a> 176 <strong class='reserved'>static</strong> <a href='../R/7594.html' title='Multiple referred from 31 places.'>PHP_RINIT_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L177' name='L177'></a> 177 <em class='brace'>{</em>
+<a id='L178' name='L178'></a> 178         <strong class='reserved'>if</strong> (<a href='../S/932.html#L89' title='Defined at 89 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_G</a>(<a href='../S/247.html#L59' title='Defined at 59 in ext/gd/libgd/gdkanji.c.'>debug</a>)) <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179                 <a href='../S/800.html#L249' title='Defined at 249 in ext/mysqlnd/mysqlnd_structs.h.'>MYSQLND_DEBUG</a> *<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a> = <a href='../Y/27353.html' title='Multiple used in 4 places.'>mysqlnd_debug_init</a>(<a href='../Y/27354.html' title='Multiple used in 5 places.'>mysqlnd_debug_std_no_trace_funcs</a>);
+<a id='L180' name='L180'></a> 180                 <strong class='reserved'>if</strong> (!<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>) <em class='brace'>{</em>
+<a id='L181' name='L181'></a> 181                         <strong class='reserved'>return</strong> <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>;
+<a id='L182' name='L182'></a> 182                 <em class='brace'>}</em>
+<a id='L183' name='L183'></a> 183                 <a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>-&gt;<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>-&gt;<a href='../Y/35921.html' title='Multiple used in 7 places.'>set_mode</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>, <a href='../S/932.html#L89' title='Defined at 89 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_G</a>(<a href='../S/247.html#L59' title='Defined at 59 in ext/gd/libgd/gdkanji.c.'>debug</a>));
+<a id='L184' name='L184'></a> 184                 <a href='../S/932.html#L89' title='Defined at 89 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_G</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>) = <a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>;
+<a id='L185' name='L185'></a> 185         <em class='brace'>}</em>
+<a id='L186' name='L186'></a> 186 
+<a id='L187' name='L187'></a> 187         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L188' name='L188'></a> 188 <em class='brace'>}</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'>/* }}} */</em>
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191 <em class='comment'>/* {{{ PHP_RSHUTDOWN_FUNCTION</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'> */</em>
+<a id='L193' name='L193'></a> 193 <strong class='reserved'>static</strong> <a href='../R/7616.html' title='Multiple referred from 32 places.'>PHP_RSHUTDOWN_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L194' name='L194'></a> 194 <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195         <a href='../S/800.html#L249' title='Defined at 249 in ext/mysqlnd/mysqlnd_structs.h.'>MYSQLND_DEBUG</a> *<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a> = <a href='../S/932.html#L89' title='Defined at 89 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_G</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>);
+<a id='L196' name='L196'></a> 196         <a href='../D/7295.html' title='Multiple defined in 2 places.'>PDO_DBG_ENTER</a>("RSHUTDOWN");
+<a id='L197' name='L197'></a> 197         <strong class='reserved'>if</strong> (<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>) <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198                 <a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>-&gt;<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>-&gt;<a href='../D/20341.html' title='Multiple defined in 3 places.'>close</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>);
+<a id='L199' name='L199'></a> 199                 <a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>-&gt;<a href='../D/23929.html' title='Multiple defined in 10 places.'>m</a>-&gt;<a href='../Y/18352.html' title='Multiple used in 4 places.'>free_handle</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>);
+<a id='L200' name='L200'></a> 200                 <a href='../S/932.html#L89' title='Defined at 89 in ext/pdo_mysql/php_pdo_mysql_int.h.'>PDO_MYSQL_G</a>(<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a>) = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L201' name='L201'></a> 201         <em class='brace'>}</em>
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L204' name='L204'></a> 204 <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>/* }}} */</em>
+<a id='L206' name='L206'></a> 206 <em class='sharp'>#endif</em>
+<a id='L207' name='L207'></a> 207 
+<a id='L208' name='L208'></a> 208 <em class='comment'>/* {{{ PHP_GINIT_FUNCTION</em>
+<a id='L209' name='L209'></a> 209 <em class='comment'> */</em>
+<a id='L210' name='L210'></a> 210 <strong class='reserved'>static</strong> <a href='../R/7072.html' title='Multiple referred from 40 places.'>PHP_GINIT_FUNCTION</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>)
+<a id='L211' name='L211'></a> 211 <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/515.html' title='Multiple used in 3 places.'>COMPILE_DL_PDO_MYSQL</a>) &amp;&amp; <strong class='reserved'>defined</strong>(<a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>)
+<a id='L213' name='L213'></a> 213 <a href='../D/17346.html' title='Multiple defined in 2 places.'>ZEND_TSRMLS_CACHE_UPDATE</a>();
+<a id='L214' name='L214'></a> 214 <em class='sharp'>#endif</em>
+<a id='L215' name='L215'></a> 215 <em class='sharp'>#ifndef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L216' name='L216'></a> 216         <a href='../Y/31553.html' title='Multiple used in 5 places.'>pdo_mysql_globals</a>-&gt;<a href='../Y/15463.html' title='Multiple used in 9 places.'>default_socket</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L217' name='L217'></a> 217 <em class='sharp'>#endif</em>
+<a id='L218' name='L218'></a> 218 <em class='sharp'>#if</em> <a href='../D/7294.html' title='Multiple defined in 2 places.'>PDO_DBG_ENABLED</a>
+<a id='L219' name='L219'></a> 219         <a href='../Y/31553.html' title='Multiple used in 5 places.'>pdo_mysql_globals</a>-&gt;<a href='../S/247.html#L59' title='Defined at 59 in ext/gd/libgd/gdkanji.c.'>debug</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;        <em class='comment'>/* The actual string */</em>
+<a id='L220' name='L220'></a> 220         <a href='../Y/31553.html' title='Multiple used in 5 places.'>pdo_mysql_globals</a>-&gt;<a href='../Y/15244.html' title='Multiple used in 146 places.'>dbg</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;  <em class='comment'>/* The DBG object*/</em>
+<a id='L221' name='L221'></a> 221 <em class='sharp'>#endif</em>
+<a id='L222' name='L222'></a> 222 <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223 <em class='comment'>/* }}} */</em>
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225 <em class='comment'>/* {{{ pdo_mysql_functions[] */</em>
+<a id='L226' name='L226'></a> 226 <strong class='reserved'>const</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/31552.html' title='Multiple used in 2 places.'>pdo_mysql_functions</a>[] = <em class='brace'>{</em>
+<a id='L227' name='L227'></a> 227         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L228' name='L228'></a> 228 <em class='brace'>}</em>;
+<a id='L229' name='L229'></a> 229 <em class='comment'>/* }}} */</em>
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231 <em class='comment'>/* {{{ pdo_mysql_deps[] */</em>
+<a id='L232' name='L232'></a> 232 <em class='sharp'>#if</em> <a href='../S/1695.html#L36' title='Defined at 36 in Zend/zend_modules.h.'>ZEND_MODULE_API_NO</a> &gt;= 20050922
+<a id='L233' name='L233'></a> 233 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../S/1695.html#L71' title='Defined at 71 in Zend/zend_modules.h.'>zend_module_dep</a> <a href='../Y/31549.html' title='Multiple used in 2 places.'>pdo_mysql_deps</a>[] = <em class='brace'>{</em>
+<a id='L234' name='L234'></a> 234         <a href='../S/1695.html#L112' title='Defined at 112 in Zend/zend_modules.h.'>ZEND_MOD_REQUIRED</a>("pdo")
+<a id='L235' name='L235'></a> 235 <em class='sharp'>#ifdef</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a>
+<a id='L236' name='L236'></a> 236         <a href='../S/1695.html#L112' title='Defined at 112 in Zend/zend_modules.h.'>ZEND_MOD_REQUIRED</a>("mysqlnd")
+<a id='L237' name='L237'></a> 237 <em class='sharp'>#endif</em>
+<a id='L238' name='L238'></a> 238         <a href='../S/1695.html#L116' title='Defined at 116 in Zend/zend_modules.h.'>ZEND_MOD_END</a>
+<a id='L239' name='L239'></a> 239 <em class='brace'>}</em>;
+<a id='L240' name='L240'></a> 240 <em class='sharp'>#endif</em>
+<a id='L241' name='L241'></a> 241 <em class='comment'>/* }}} */</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 <em class='comment'>/* {{{ pdo_mysql_module_entry */</em>
+<a id='L244' name='L244'></a> 244 <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/31554.html' title='Multiple used in 4 places.'>pdo_mysql_module_entry</a> = <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245         <a href='../S/1695.html#L43' title='Defined at 43 in Zend/zend_modules.h.'>STANDARD_MODULE_HEADER_EX</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L246' name='L246'></a> 246         <a href='../Y/31549.html' title='Multiple used in 2 places.'>pdo_mysql_deps</a>,
+<a id='L247' name='L247'></a> 247         "pdo_mysql",
+<a id='L248' name='L248'></a> 248         <a href='../Y/31552.html' title='Multiple used in 2 places.'>pdo_mysql_functions</a>,
+<a id='L249' name='L249'></a> 249         <a href='../S/1378.html#L365' title='Defined at 365 in main/php.h.'>PHP_MINIT</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L250' name='L250'></a> 250         <a href='../S/1378.html#L366' title='Defined at 366 in main/php.h.'>PHP_MSHUTDOWN</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L251' name='L251'></a> 251 <em class='sharp'>#if</em> <a href='../Y/4920.html' title='Multiple used in 54 places.'>PDO_USE_MYSQLND</a> &amp;&amp; <a href='../D/7294.html' title='Multiple defined in 2 places.'>PDO_DBG_ENABLED</a>
+<a id='L252' name='L252'></a> 252         <a href='../S/1378.html#L367' title='Defined at 367 in main/php.h.'>PHP_RINIT</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L253' name='L253'></a> 253         <a href='../S/1378.html#L368' title='Defined at 368 in main/php.h.'>PHP_RSHUTDOWN</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L254' name='L254'></a> 254 <em class='sharp'>#else</em>
+<a id='L255' name='L255'></a> 255         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L256' name='L256'></a> 256         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L257' name='L257'></a> 257 <em class='sharp'>#endif</em>
+<a id='L258' name='L258'></a> 258         <a href='../S/1378.html#L369' title='Defined at 369 in main/php.h.'>PHP_MINFO</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L259' name='L259'></a> 259         <a href='../S/931.html#L28' title='Defined at 28 in ext/pdo_mysql/php_pdo_mysql.h.'>PHP_PDO_MYSQL_VERSION</a>,
+<a id='L260' name='L260'></a> 260         <a href='../S/1378.html#L381' title='Defined at 381 in main/php.h.'>PHP_MODULE_GLOBALS</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L261' name='L261'></a> 261         <a href='../S/1378.html#L370' title='Defined at 370 in main/php.h.'>PHP_GINIT</a>(<a href='../Y/31548.html' title='Multiple used in 19 places.'>pdo_mysql</a>),
+<a id='L262' name='L262'></a> 262         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L263' name='L263'></a> 263         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L264' name='L264'></a> 264         <a href='../S/1695.html#L51' title='Defined at 51 in Zend/zend_modules.h.'>STANDARD_MODULE_PROPERTIES_EX</a>
+<a id='L265' name='L265'></a> 265 <em class='brace'>}</em>;
+<a id='L266' name='L266'></a> 266 <em class='comment'>/* }}} */</em>
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268 
+<a id='L269' name='L269'></a> 269 <em class='comment'>/*</em>
+<a id='L270' name='L270'></a> 270 <em class='comment'> * Local variables:</em>
+<a id='L271' name='L271'></a> 271 <em class='comment'> * tab-width: 4</em>
+<a id='L272' name='L272'></a> 272 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L273' name='L273'></a> 273 <em class='comment'> * End:</em>
+<a id='L274' name='L274'></a> 274 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L275' name='L275'></a> 275 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L276' name='L276'></a> 276 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L65'>[^]</a><a href='#L210'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>g_prefork_server</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1524.html#L2491'>g_prefork_server</a> 2491 sapi/litespeed/lsapilib.c static lsapi_prefork_server * g_prefork_server = NULL;</span>
+<span class='curline'><a href='../S/1524.html#L2496'>g_prefork_server</a> 2496 sapi/litespeed/lsapilib.c     if ( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L2504'>g_prefork_server</a> 2504 sapi/litespeed/lsapilib.c     g_prefork_server = (lsapi_prefork_server *)malloc( sizeof( lsapi_prefork_server ) );</span>
+<span class='curline'><a href='../S/1524.html#L2505'>g_prefork_server</a> 2505 sapi/litespeed/lsapilib.c     if ( !g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L2507'>g_prefork_server</a> 2507 sapi/litespeed/lsapilib.c     memset( g_prefork_server, 0, sizeof( lsapi_prefork_server ) );</span>
+<span class='curline'><a href='../S/1524.html#L2515'>g_prefork_server</a> 2515 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iAvoidFork = avoidFork;</span>
+<span class='curline'><a href='../S/1524.html#L2516'>g_prefork_server</a> 2516 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iMaxChildren = max_children;</span>
+<span class='curline'><a href='../S/1524.html#L2518'>g_prefork_server</a> 2518 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iExtraChildren = ( avoidFork ) ? 0 : (max_children / 3) ;</span>
+<span class='curline'><a href='../S/1524.html#L2519'>g_prefork_server</a> 2519 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iMaxIdleChildren = ( avoidFork ) ? (max_children + 1) : (max_children / 3);</span>
+<span class='curline'><a href='../S/1524.html#L2520'>g_prefork_server</a> 2520 sapi/litespeed/lsapilib.c     if ( g_prefork_server-&gt;m_iMaxIdleChildren == 0 )</span>
+<span class='curline'><a href='../S/1524.html#L2521'>g_prefork_server</a> 2521 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iMaxIdleChildren = 1;</span>
+<span class='curline'><a href='../S/1524.html#L2522'>g_prefork_server</a> 2522 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iChildrenMaxIdleTime = 300;</span>
+<span class='curline'><a href='../S/1524.html#L2523'>g_prefork_server</a> 2523 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iMaxReqProcessTime = 3600;</span>
+<span class='curline'><a href='../S/1524.html#L2529'>g_prefork_server</a> 2529 sapi/litespeed/lsapilib.c     if( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L2530'>g_prefork_server</a> 2530 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_fd = fd;</span>
+<span class='curline'><a href='../S/1524.html#L2575'>g_prefork_server</a> 2575 sapi/litespeed/lsapilib.c     lsapi_child_status * pStatus = g_prefork_server-&gt;m_pChildrenStatus;</span>
+<span class='curline'><a href='../S/1524.html#L2576'>g_prefork_server</a> 2576 sapi/litespeed/lsapilib.c     lsapi_child_status * pEnd = g_prefork_server-&gt;m_pChildrenStatusEnd;</span>
+<span class='curline'><a href='../S/1524.html#L2581'>g_prefork_server</a> 2581 sapi/litespeed/lsapilib.c             if ( pStatus + 1 &gt; g_prefork_server-&gt;m_pChildrenStatusCur )</span>
+<span class='curline'><a href='../S/1524.html#L2582'>g_prefork_server</a> 2582 sapi/litespeed/lsapilib.c                 g_prefork_server-&gt;m_pChildrenStatusCur = pStatus + 1;</span>
+<span class='curline'><a href='../S/1524.html#L2618'>g_prefork_server</a> 2618 sapi/litespeed/lsapilib.c             --g_prefork_server-&gt;m_iCurChildren;</span>
+<span class='curline'><a href='../S/1524.html#L2622'>g_prefork_server</a> 2622 sapi/litespeed/lsapilib.c     while(( g_prefork_server-&gt;m_pChildrenStatusCur &gt; g_prefork_server-&gt;m_pChildrenStatus )</span>
+<span class='curline'><a href='../S/1524.html#L2623'>g_prefork_server</a> 2623 sapi/litespeed/lsapilib.c             &amp;&amp;( g_prefork_server-&gt;m_pChildrenStatusCur[-1].m_pid == 0 ))</span>
+<span class='curline'><a href='../S/1524.html#L2624'>g_prefork_server</a> 2624 sapi/litespeed/lsapilib.c         --g_prefork_server-&gt;m_pChildrenStatusCur;</span>
+<span class='curline'><a href='../S/1524.html#L2633'>g_prefork_server</a> 2633 sapi/litespeed/lsapilib.c     size = (g_prefork_server-&gt;m_iMaxChildren + g_prefork_server-&gt;m_iExtraChildren ) * sizeof( lsapi_child_status ) * 2;</span>
+<span class='curline'><a href='../S/1524.html#L2643'>g_prefork_server</a> 2643 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_pChildrenStatus = (lsapi_child_status *)pBuf;</span>
+<span class='curline'><a href='../S/1524.html#L2644'>g_prefork_server</a> 2644 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_pChildrenStatusCur = (lsapi_child_status *)pBuf;</span>
+<span class='curline'><a href='../S/1524.html#L2645'>g_prefork_server</a> 2645 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_pChildrenStatusEnd = (lsapi_child_status *)pBuf + size / sizeof( lsapi_child_status );</span>
+<span class='curline'><a href='../S/1524.html#L2674'>g_prefork_server</a> 2674 sapi/litespeed/lsapilib.c     lsapi_child_status * pStatus = g_prefork_server-&gt;m_pChildrenStatus;</span>
+<span class='curline'><a href='../S/1524.html#L2675'>g_prefork_server</a> 2675 sapi/litespeed/lsapilib.c     lsapi_child_status * pEnd = g_prefork_server-&gt;m_pChildrenStatusCur;</span>
+<span class='curline'><a href='../S/1524.html#L2685'>g_prefork_server</a> 2685 sapi/litespeed/lsapilib.c                 if (( g_prefork_server-&gt;m_iCurChildren - dying &gt; g_prefork_server-&gt;m_iMaxChildren)||</span>
+<span class='curline'><a href='../S/1524.html#L2686'>g_prefork_server</a> 2686 sapi/litespeed/lsapilib.c                     ( idle &gt; g_prefork_server-&gt;m_iMaxIdleChildren ))</span>
+<span class='curline'><a href='../S/1524.html#L2705'>g_prefork_server</a> 2705 sapi/litespeed/lsapilib.c                         g_prefork_server-&gt;m_iMaxReqProcessTime )</span>
+<span class='curline'><a href='../S/1524.html#L2737'>g_prefork_server</a> 2737 sapi/litespeed/lsapilib.c     if ( abs( g_prefork_server-&gt;m_iCurChildren - count ) &gt; 1 )</span>
+<span class='curline'><a href='../S/1524.html#L2740'>g_prefork_server</a> 2740 sapi/litespeed/lsapilib.c                 g_prefork_server-&gt;m_iCurChildren, count, idle, dying );</span>
+<span class='curline'><a href='../S/1524.html#L2749'>g_prefork_server</a> 2749 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iMaxReqProcessTime = 10;</span>
+<span class='curline'><a href='../S/1524.html#L2750'>g_prefork_server</a> 2750 sapi/litespeed/lsapilib.c     g_prefork_server-&gt;m_iMaxIdleChildren = -1;</span>
+<span class='curline'><a href='../S/1524.html#L2753'>g_prefork_server</a> 2753 sapi/litespeed/lsapilib.c     while( g_prefork_server-&gt;m_iCurChildren &amp;&amp; (sec &lt; maxWait) )</span>
+<span class='curline'><a href='../S/1524.html#L2759'>g_prefork_server</a> 2759 sapi/litespeed/lsapilib.c     if ( g_prefork_server-&gt;m_iCurChildren != 0 )</span>
+<span class='curline'><a href='../S/1524.html#L2885'>g_prefork_server</a> 2885 sapi/litespeed/lsapilib.c                 g_prefork_server = NULL;</span>
+<span class='curline'><a href='../S/1524.html#L2960'>g_prefork_server</a> 2960 sapi/litespeed/lsapilib.c     if ( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L2962'>g_prefork_server</a> 2962 sapi/litespeed/lsapilib.c         if ( g_prefork_server-&gt;m_fd != -1 )</span>
+<span class='curline'><a href='../S/1524.html#L2963'>g_prefork_server</a> 2963 sapi/litespeed/lsapilib.c             if ( lsapi_prefork_server_accept( g_prefork_server, pReq ) == -1 )</span>
+<span class='curline'><a href='../S/1524.html#L3080'>g_prefork_server</a> 3080 sapi/litespeed/lsapilib.c     if ( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L3081'>g_prefork_server</a> 3081 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iMaxChildren = maxChildren;</span>
+<span class='curline'><a href='../S/1524.html#L3086'>g_prefork_server</a> 3086 sapi/litespeed/lsapilib.c     if (( g_prefork_server )&amp;&amp;( extraChildren &gt;= 0 ))</span>
+<span class='curline'><a href='../S/1524.html#L3087'>g_prefork_server</a> 3087 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iExtraChildren = extraChildren;</span>
+<span class='curline'><a href='../S/1524.html#L3092'>g_prefork_server</a> 3092 sapi/litespeed/lsapilib.c     if (( g_prefork_server )&amp;&amp;( secs &gt; 0 ))</span>
+<span class='curline'><a href='../S/1524.html#L3093'>g_prefork_server</a> 3093 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iMaxReqProcessTime = secs;</span>
+<span class='curline'><a href='../S/1524.html#L3099'>g_prefork_server</a> 3099 sapi/litespeed/lsapilib.c     if (( g_prefork_server )&amp;&amp;( maxIdleChld &gt; 0 ))</span>
+<span class='curline'><a href='../S/1524.html#L3100'>g_prefork_server</a> 3100 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iMaxIdleChildren = maxIdleChld;</span>
+<span class='curline'><a href='../S/1524.html#L3105'>g_prefork_server</a> 3105 sapi/litespeed/lsapilib.c     if ( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L3106'>g_prefork_server</a> 3106 sapi/litespeed/lsapilib.c         g_prefork_server-&gt;m_iServerMaxIdle = serverMaxIdle;</span>
+<span class='curline'><a href='../S/1524.html#L3178'>g_prefork_server</a> 3178 sapi/litespeed/lsapilib.c         if ( g_prefork_server )</span>
+<span class='curline'><a href='../S/1524.html#L3180'>g_prefork_server</a> 3180 sapi/litespeed/lsapilib.c             if ( g_prefork_server-&gt;m_iMaxChildren &lt; 100 )</span>
+<span class='curline'><a href='../S/1524.html#L3181'>g_prefork_server</a> 3181 sapi/litespeed/lsapilib.c                 g_prefork_server-&gt;m_iMaxChildren = 100;</span>
+<span class='curline'><a href='../S/1524.html#L3182'>g_prefork_server</a> 3182 sapi/litespeed/lsapilib.c             if ( g_prefork_server-&gt;m_iExtraChildren &lt; 1000 )</span>
+<span class='curline'><a href='../S/1524.html#L3183'>g_prefork_server</a> 3183 sapi/litespeed/lsapilib.c                 g_prefork_server-&gt;m_iExtraChildren = 1000;</span>
+</pre>
+</body>
+</html>

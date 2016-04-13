@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>accel_hash</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/836.html#L32'>accel_hash</a>         32 ext/opcache/zend_accelerator_hash.c void zend_accel_hash_clean(zend_accel_hash *accel_hash)</span>
+<span class='curline'><a href='../S/836.html#L34'>accel_hash</a>         34 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;num_entries = 0;</span>
+<span class='curline'><a href='../S/836.html#L35'>accel_hash</a>         35 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;num_direct_entries = 0;</span>
+<span class='curline'><a href='../S/836.html#L36'>accel_hash</a>         36 ext/opcache/zend_accelerator_hash.c 	memset(accel_hash-&gt;hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash-&gt;max_num_entries);</span>
+<span class='curline'><a href='../S/836.html#L39'>accel_hash</a>         39 ext/opcache/zend_accelerator_hash.c void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)</span>
+<span class='curline'><a href='../S/836.html#L50'>accel_hash</a>         50 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;num_entries = 0;</span>
+<span class='curline'><a href='../S/836.html#L51'>accel_hash</a>         51 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;num_direct_entries = 0;</span>
+<span class='curline'><a href='../S/836.html#L52'>accel_hash</a>         52 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;max_num_entries = hash_size;</span>
+<span class='curline'><a href='../S/836.html#L55'>accel_hash</a>         55 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;hash_table = zend_shared_alloc(sizeof(zend_accel_hash_entry *)*accel_hash-&gt;max_num_entries);</span>
+<span class='curline'><a href='../S/836.html#L56'>accel_hash</a>         56 ext/opcache/zend_accelerator_hash.c 	if (!accel_hash-&gt;hash_table) {</span>
+<span class='curline'><a href='../S/836.html#L62'>accel_hash</a>         62 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;hash_entries = zend_shared_alloc(sizeof(zend_accel_hash_entry)*accel_hash-&gt;max_num_entries);</span>
+<span class='curline'><a href='../S/836.html#L63'>accel_hash</a>         63 ext/opcache/zend_accelerator_hash.c 	if (!accel_hash-&gt;hash_entries) {</span>
+<span class='curline'><a href='../S/836.html#L67'>accel_hash</a>         67 ext/opcache/zend_accelerator_hash.c 	memset(accel_hash-&gt;hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash-&gt;max_num_entries);</span>
+<span class='curline'><a href='../S/836.html#L74'>accel_hash</a>         74 ext/opcache/zend_accelerator_hash.c zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_bool indirect, void *data)</span>
+<span class='curline'><a href='../S/836.html#L89'>accel_hash</a>         89 ext/opcache/zend_accelerator_hash.c 	index = hash_value % accel_hash-&gt;max_num_entries;</span>
+<span class='curline'><a href='../S/836.html#L92'>accel_hash</a>         92 ext/opcache/zend_accelerator_hash.c 	entry = accel_hash-&gt;hash_table[index];</span>
+<span class='curline'><a href='../S/836.html#L106'>accel_hash</a>        106 ext/opcache/zend_accelerator_hash.c 					accel_hash-&gt;num_direct_entries--;</span>
+<span class='curline'><a href='../S/836.html#L119'>accel_hash</a>        119 ext/opcache/zend_accelerator_hash.c 	if (accel_hash-&gt;num_entries == accel_hash-&gt;max_num_entries) {</span>
+<span class='curline'><a href='../S/836.html#L123'>accel_hash</a>        123 ext/opcache/zend_accelerator_hash.c 	entry = &amp;accel_hash-&gt;hash_entries[accel_hash-&gt;num_entries++];</span>
+<span class='curline'><a href='../S/836.html#L128'>accel_hash</a>        128 ext/opcache/zend_accelerator_hash.c 		accel_hash-&gt;num_direct_entries++;</span>
+<span class='curline'><a href='../S/836.html#L135'>accel_hash</a>        135 ext/opcache/zend_accelerator_hash.c 	entry-&gt;next = accel_hash-&gt;hash_table[index];</span>
+<span class='curline'><a href='../S/836.html#L136'>accel_hash</a>        136 ext/opcache/zend_accelerator_hash.c 	accel_hash-&gt;hash_table[index] = entry;</span>
+<span class='curline'><a href='../S/836.html#L140'>accel_hash</a>        140 ext/opcache/zend_accelerator_hash.c static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_ulong hash_value, int data)</span>
+<span class='curline'><a href='../S/836.html#L142'>accel_hash</a>        142 ext/opcache/zend_accelerator_hash.c 	zend_ulong index = hash_value % accel_hash-&gt;max_num_entries;</span>
+<span class='curline'><a href='../S/836.html#L143'>accel_hash</a>        143 ext/opcache/zend_accelerator_hash.c 	zend_accel_hash_entry *entry = accel_hash-&gt;hash_table[index];</span>
+<span class='curline'><a href='../S/836.html#L171'>accel_hash</a>        171 ext/opcache/zend_accelerator_hash.c void* zend_accel_hash_find(zend_accel_hash *accel_hash, zend_string *key)</span>
+<span class='curline'><a href='../S/836.html#L174'>accel_hash</a>        174 ext/opcache/zend_accelerator_hash.c 		accel_hash,</span>
+<span class='curline'><a href='../S/836.html#L184'>accel_hash</a>        184 ext/opcache/zend_accelerator_hash.c zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, zend_string *key)</span>
+<span class='curline'><a href='../S/836.html#L187'>accel_hash</a>        187 ext/opcache/zend_accelerator_hash.c 		accel_hash,</span>
+<span class='curline'><a href='../S/836.html#L197'>accel_hash</a>        197 ext/opcache/zend_accelerator_hash.c void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, char *key, uint32_t key_length)</span>
+<span class='curline'><a href='../S/836.html#L200'>accel_hash</a>        200 ext/opcache/zend_accelerator_hash.c 		accel_hash,</span>
+<span class='curline'><a href='../S/836.html#L210'>accel_hash</a>        210 ext/opcache/zend_accelerator_hash.c zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_hash, char *key, uint32_t key_length)</span>
+<span class='curline'><a href='../S/836.html#L213'>accel_hash</a>        213 ext/opcache/zend_accelerator_hash.c 		accel_hash,</span>
+<span class='curline'><a href='../S/836.html#L220'>accel_hash</a>        220 ext/opcache/zend_accelerator_hash.c int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, uint32_t key_length)</span>
+<span class='curline'><a href='../S/836.html#L227'>accel_hash</a>        227 ext/opcache/zend_accelerator_hash.c 	index = hash_value % accel_hash-&gt;max_num_entries;</span>
+<span class='curline'><a href='../S/836.html#L229'>accel_hash</a>        229 ext/opcache/zend_accelerator_hash.c 	entry = accel_hash-&gt;hash_table[index];</span>
+<span class='curline'><a href='../S/836.html#L235'>accel_hash</a>        235 ext/opcache/zend_accelerator_hash.c 				accel_hash-&gt;num_direct_entries--;</span>
+<span class='curline'><a href='../S/836.html#L240'>accel_hash</a>        240 ext/opcache/zend_accelerator_hash.c 				accel_hash-&gt;hash_table[index] = entry-&gt;next;</span>
+<span class='curline'><a href='../S/837.html#L64'>accel_hash</a>         64 ext/opcache/zend_accelerator_hash.h void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size);</span>
+<span class='curline'><a href='../S/837.html#L65'>accel_hash</a>         65 ext/opcache/zend_accelerator_hash.h void zend_accel_hash_clean(zend_accel_hash *accel_hash);</span>
+<span class='curline'><a href='../S/837.html#L68'>accel_hash</a>         68 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L75'>accel_hash</a>         75 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L79'>accel_hash</a>         79 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L83'>accel_hash</a>         83 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L88'>accel_hash</a>         88 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L93'>accel_hash</a>         93 ext/opcache/zend_accelerator_hash.h 		zend_accel_hash        *accel_hash,</span>
+<span class='curline'><a href='../S/837.html#L97'>accel_hash</a>         97 ext/opcache/zend_accelerator_hash.h static inline zend_bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)</span>
+<span class='curline'><a href='../S/837.html#L99'>accel_hash</a>         99 ext/opcache/zend_accelerator_hash.h 	if (accel_hash-&gt;num_entries == accel_hash-&gt;max_num_entries) {</span>
+</pre>
+</body>
+</html>

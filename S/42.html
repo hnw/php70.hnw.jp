@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/calendar/sdncal.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1748.html'>calendar</a>/sdncal.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/168.html' title='Multiple included from 8 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='sharp'>#ifndef</em> <a href='../S/42.html#L2' title='Defined at 2 in ext/calendar/sdncal.h.'>SDNCAL_H</a>
+<a id='L2' name='L2'></a>   2 <em class='sharp'>#define</em> <a href='../S/42.html#L1' title='Referred from 1 in ext/calendar/sdncal.h.'>SDNCAL_H</a>
+<a id='L3' name='L3'></a>   3 <em class='comment'>/*</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * This code has been modified for use with PHP</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * by Shane Caraveo shane@caraveo.com</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * see below for more details</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> *</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> */</em>
+<a id='L9' name='L9'></a>   9 
+<a id='L10' name='L10'></a>  10 <em class='comment'>/* $selId: sdncal.h,v 2.0 1995/10/24 01:13:06 lees Exp $</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'> * Copyright 1993-1995, Scott E. Lee, all rights reserved.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> * Permission granted to use, copy, modify, distribute and sell so long as</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> * the above copyright and this permission statement are retained in all</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * copies.  THERE IS NO WARRANTY - USE AT YOUR OWN RISK.</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='comment'>/**************************************************************************</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * This package defines a set of routines that convert calendar dates to</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * and from a serial day number (SDN).  The SDN is a serial numbering of</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * days where SDN 1 is November 25, 4714 BC in the Gregorian calendar and</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * SDN 2447893 is January 1, 1990.  This system of day numbering is</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * sometimes referred to as Julian days, but to avoid confusion with the</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * Julian calendar, it is referred to as serial day numbers here.  The term</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * Julian days is also used to mean the number of days since the beginning</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * of the current year.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * The SDN can be used as an intermediate step in converting from one</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * calendar system to another (such as Gregorian to Jewish).  It can also</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * be used for date computations such as easily comparing two dates,</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * determining the day of the week, finding the date of yesterday or</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * calculating the number of days between two dates.</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> *</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * When using this software on 16 bit systems, be careful to store SDNs in</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * a long int, because it will not fit in the 16 bits that some systems</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * allocate to an int.</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> *</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * For each calendar, there are two routines provided.  One converts dates</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * in that calendar to SDN and the other converts SDN to calendar dates.</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * The routines are named SdnTo&lt;CALENDAR&gt;() and &lt;CALENDAR&gt;ToSdn(), where</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * &lt;CALENDAR&gt; is the name of the calendar system.</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> *</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * SDN values less than one are not supported.  If a conversion routine</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> * returns an SDN of zero, this means that the date given is either invalid</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * or is outside the supported range for that calendar.</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> *</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * At least some validity checks are performed on input dates.  For</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * example, a negative month number will result in the return of zero for</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> * the SDN.  A returned SDN greater than one does not necessarily mean that</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * the input date was valid.  To determine if the date is valid, convert it</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * to SDN, and if the SDN is greater than zero, convert it back to a date</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * and compare to the original.  For example:</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> *</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> *    int y1, m1, d1;</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> *    int y2, m2, d2;</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> *    zend_long sdn;</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> *    ...</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> *    sdn = GregorianToSdn(y1, m1, d1);</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> *    if (sdn &gt; 0) {</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> *        SdnToGregorian(sdn, &amp;y2, &amp;m2, &amp;d2);</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> *        if (y1 == y2 &amp;&amp; m1 == m2 &amp;&amp; d1 == d2) {</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> *            ... date is valid ...</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> *        }</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> *    }</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> *</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> **************************************************************************/</em>
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <em class='comment'>/* Gregorian calendar conversions. */</em>
+<a id='L71' name='L71'></a>  71 <strong class='reserved'>void</strong> <a href='../S/38.html#L137' title='Defined at 137 in ext/calendar/gregor.c.'>SdnToGregorian</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/35539.html' title='Multiple used in 37 places.'>sdn</a>, <strong class='reserved'>int</strong> *<a href='../Y/31007.html' title='Multiple used in 18 places.'>pYear</a>, <strong class='reserved'>int</strong> *<a href='../Y/30631.html' title='Multiple used in 32 places.'>pMonth</a>, <strong class='reserved'>int</strong> *<a href='../Y/30385.html' title='Multiple used in 37 places.'>pDay</a>);
+<a id='L72' name='L72'></a>  72 <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../S/38.html#L193' title='Defined at 193 in ext/calendar/gregor.c.'>GregorianToSdn</a>(<strong class='reserved'>int</strong> <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>, <strong class='reserved'>int</strong> <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>, <strong class='reserved'>int</strong> <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a>);
+<a id='L73' name='L73'></a>  73 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/4171.html' title='Multiple used in 6 places.'>MonthNameShort</a>[13];
+<a id='L74' name='L74'></a>  74 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/4170.html' title='Multiple used in 6 places.'>MonthNameLong</a>[13];
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76 <em class='comment'>/* Julian calendar conversions. */</em>
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>void</strong> <a href='../S/40.html#L155' title='Defined at 155 in ext/calendar/julian.c.'>SdnToJulian</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/35539.html' title='Multiple used in 37 places.'>sdn</a>, <strong class='reserved'>int</strong> *<a href='../Y/31007.html' title='Multiple used in 18 places.'>pYear</a>, <strong class='reserved'>int</strong> *<a href='../Y/30631.html' title='Multiple used in 32 places.'>pMonth</a>, <strong class='reserved'>int</strong> *<a href='../Y/30385.html' title='Multiple used in 37 places.'>pDay</a>);
+<a id='L78' name='L78'></a>  78 <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../S/40.html#L215' title='Defined at 215 in ext/calendar/julian.c.'>JulianToSdn</a>(<strong class='reserved'>int</strong> <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>, <strong class='reserved'>int</strong> <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>, <strong class='reserved'>int</strong> <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a>);
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80 <em class='comment'>/* Jewish calendar conversions. */</em>
+<a id='L81' name='L81'></a>  81 <strong class='reserved'>void</strong> <a href='../S/39.html#L548' title='Defined at 548 in ext/calendar/jewish.c.'>SdnToJewish</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/35539.html' title='Multiple used in 37 places.'>sdn</a>, <strong class='reserved'>int</strong> *<a href='../Y/31007.html' title='Multiple used in 18 places.'>pYear</a>, <strong class='reserved'>int</strong> *<a href='../Y/30631.html' title='Multiple used in 32 places.'>pMonth</a>, <strong class='reserved'>int</strong> *<a href='../Y/30385.html' title='Multiple used in 37 places.'>pDay</a>);
+<a id='L82' name='L82'></a>  82 <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../S/39.html#L687' title='Defined at 687 in ext/calendar/jewish.c.'>JewishToSdn</a>(<strong class='reserved'>int</strong> <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>, <strong class='reserved'>int</strong> <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>, <strong class='reserved'>int</strong> <a href='../Y/15137.html' title='Multiple used in 136 places.'>day</a>);
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/3645.html' title='Multiple used in 3 places.'>JewishMonthName</a>[14];
+<a id='L84' name='L84'></a>  84 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/3646.html' title='Multiple used in 4 places.'>JewishMonthNameLeap</a>[14];
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/3643.html' title='Multiple used in 3 places.'>JewishMonthHebName</a>[14];
+<a id='L86' name='L86'></a>  86 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/3644.html' title='Multiple used in 3 places.'>JewishMonthHebNameLeap</a>[14];
+<a id='L87' name='L87'></a>  87 <strong class='reserved'>extern</strong> <strong class='reserved'>int</strong> <a href='../Y/26794.html' title='Multiple used in 9 places.'>monthsPerYear</a>[19];
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 <em class='comment'>/* French republic calendar conversions. */</em>
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>void</strong> <a href='../S/37.html#L95' title='Defined at 95 in ext/calendar/french.c.'>SdnToFrench</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/35539.html' title='Multiple used in 37 places.'>sdn</a>, <strong class='reserved'>int</strong> *<a href='../Y/31007.html' title='Multiple used in 18 places.'>pYear</a>, <strong class='reserved'>int</strong> *<a href='../Y/30631.html' title='Multiple used in 32 places.'>pMonth</a>, <strong class='reserved'>int</strong> *<a href='../Y/30385.html' title='Multiple used in 37 places.'>pDay</a>);
+<a id='L91' name='L91'></a>  91 <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../S/37.html#L117' title='Defined at 117 in ext/calendar/french.c.'>FrenchToSdn</a>(<strong class='reserved'>int</strong> <a href='../Y/23286.html' title='Multiple used in 13 places.'>inputYear</a>, <strong class='reserved'>int</strong> <a href='../Y/23285.html' title='Multiple used in 14 places.'>inputMonth</a>, <strong class='reserved'>int</strong> <a href='../Y/23282.html' title='Multiple used in 36 places.'>inputDay</a>);
+<a id='L92' name='L92'></a>  92 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/2472.html' title='Multiple used in 4 places.'>FrenchMonthName</a>[14];
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94 <em class='comment'>/* Islamic calendar conversions. */</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>/* Not implemented yet. */</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97 <em class='comment'>/* Day of week conversion.  0=Sunday, 6=Saturday */</em>
+<a id='L98' name='L98'></a>  98 <strong class='reserved'>int</strong> <a href='../S/35.html#L34' title='Defined at 34 in ext/calendar/dow.c.'>DayOfWeek</a>(<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../Y/35539.html' title='Multiple used in 37 places.'>sdn</a>);
+<a id='L99' name='L99'></a>  99 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/1633.html' title='Multiple used in 4 places.'>DayNameShort</a>[7];
+<a id='L100' name='L100'></a> 100 <strong class='reserved'>extern</strong> <strong class='reserved'>char</strong> *<a href='../Y/1632.html' title='Multiple used in 4 places.'>DayNameLong</a>[7];
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <em class='sharp'>#endif</em> <em class='comment'>/* SDNCAL_H */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

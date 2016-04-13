@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>sapi/phpdbg/phpdbg_sigsafe.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1861.html'>sapi</a>/<a href='../files/1870.html'>phpdbg</a>/phpdbg_sigsafe.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L9'>[^]</a><a href='#L56'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L9' title='Defined at 9.'>zend_mm_mem_alloc</a></li>
+<li><a href='#L27' title='Defined at 27.'>zend_mm_mem_free</a></li>
+<li><a href='#L30' title='Defined at 30.'>phpdbg_set_sigsafe_mem</a></li>
+<li><a href='#L47' title='Defined at 47.'>phpdbg_original_heap_sigsafe_mem</a></li>
+<li><a href='#L51' title='Defined at 51.'>phpdbg_clear_sigsafe_mem</a></li>
+<li><a href='#L56' title='Defined at 56.'>phpdbg_active_sigsafe_mem</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='sharp'>#include</em> "<a href='1567.html'>phpdbg_sigsafe.h</a>"
+<a id='L2' name='L2'></a>   2 <em class='sharp'>#include</em> "<a href='1527.html'>phpdbg.h</a>"
+<a id='L3' name='L3'></a>   3 
+<a id='L4' name='L4'></a>   4 <a href='../D/16228.html' title='Multiple defined in 14 places.'>ZEND_EXTERN_MODULE_GLOBALS</a>(<a href='../Y/32648.html' title='Multiple used in 47 places.'>phpdbg</a>)
+<a id='L5' name='L5'></a>   5 
+<a id='L6' name='L6'></a>   6 <em class='sharp'>#define</em> <a href='../S/1566.html#L7' title='Referred from 7 in sapi/phpdbg/phpdbg_sigsafe.c.'>STR</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>) #<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>
+<a id='L7' name='L7'></a>   7 <em class='sharp'>#define</em> <a href='../S/1566.html#L16' title='Referred from 16 in sapi/phpdbg/phpdbg_sigsafe.c.'>EXP_STR</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>) <a href='../S/1566.html#L6' title='Defined at 6 in sapi/phpdbg/phpdbg_sigsafe.c.'>STR</a>(<a href='../Y/40872.html' title='Multiple used in 2430 places.'>x</a>)
+<a id='L8' name='L8'></a>   8 
+<a id='L9' name='L9'></a>   9 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong>* <a href='../S/1566.html#L33' title='Referred from 33 in sapi/phpdbg/phpdbg_sigsafe.c.'>zend_mm_mem_alloc</a>(<a href='../S/1629.html#L288' title='Defined at 288 in Zend/zend_alloc.h.'>zend_mm_storage</a> *<a href='../Y/37485.html' title='Multiple used in 117 places.'>storage</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/9077.html' title='Multiple used in 62 places.'>alignment</a>) <em class='brace'>{</em>
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11         <strong class='reserved'>if</strong> (<a href='../D/2235.html' title='Multiple defined in 2 places.'>EXPECTED</a>(<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> &lt;= <a href='../S/1567.html#L4' title='Defined at 4 in sapi/phpdbg/phpdbg_sigsafe.h.'>PHPDBG_SIGSAFE_MEM_SIZE</a> &amp;&amp; !<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a>)) <em class='brace'>{</em>
+<a id='L12' name='L12'></a>  12                 <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = 1;
+<a id='L13' name='L13'></a>  13                 <strong class='reserved'>return</strong> (<strong class='reserved'>void</strong> *) (((<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>) <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a> &amp; ~(<a href='../Y/9077.html' title='Multiple used in 62 places.'>alignment</a> - 1)) + <a href='../Y/9077.html' title='Multiple used in 62 places.'>alignment</a>);
+<a id='L14' name='L14'></a>  14         <em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16         <a href='../S/1527.html#L116' title='Defined at 116 in sapi/phpdbg/phpdbg.h.'>quiet_write</a>(<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/23553.html' title='Multiple used in 56 places.'>io</a>)[<a href='../S/1527.html#L216' title='Defined at 216 in sapi/phpdbg/phpdbg.h.'>PHPDBG_STDERR</a>].<a href='../Y/17691.html' title='Multiple used in 1083 places.'>fd</a>, <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("Tried to allocate more than " <a href='../S/1566.html#L7' title='Defined at 7 in sapi/phpdbg/phpdbg_sigsafe.c.'>EXP_STR</a>(<a href='../S/1567.html#L4' title='Defined at 4 in sapi/phpdbg/phpdbg_sigsafe.h.'>PHPDBG_SIGSAFE_MEM_SIZE</a>) " bytes from stack memory in signal handler ... bailing out of signal handler\n"));
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18         <strong class='reserved'>if</strong> (*<a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/12435.html' title='Multiple used in 15 places.'>bailout</a>)) <em class='brace'>{</em>
+<a id='L19' name='L19'></a>  19                 <a href='../D/4527.html' title='Multiple defined in 2 places.'>LONGJMP</a>(*<a href='../D/1826.html' title='Multiple defined in 2 places.'>EG</a>(<a href='../Y/12435.html' title='Multiple used in 15 places.'>bailout</a>), <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>);
+<a id='L20' name='L20'></a>  20         <em class='brace'>}</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22         <a href='../S/1527.html#L116' title='Defined at 116 in sapi/phpdbg/phpdbg.h.'>quiet_write</a>(<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/23553.html' title='Multiple used in 56 places.'>io</a>)[<a href='../S/1527.html#L216' title='Defined at 216 in sapi/phpdbg/phpdbg.h.'>PHPDBG_STDERR</a>].<a href='../Y/17691.html' title='Multiple used in 1083 places.'>fd</a>, <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("Bailed out without a bailout address in signal handler!\n"));
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L25' name='L25'></a>  25 <em class='brace'>}</em>
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1566.html#L34' title='Referred from 34 in sapi/phpdbg/phpdbg_sigsafe.c.'>zend_mm_mem_free</a>(<a href='../S/1629.html#L288' title='Defined at 288 in Zend/zend_alloc.h.'>zend_mm_storage</a> *<a href='../Y/37485.html' title='Multiple used in 117 places.'>storage</a>, <strong class='reserved'>void</strong> *<a href='../Y/33697.html' title='Multiple used in 2885 places.'>ptr</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>) <em class='brace'>{</em>
+<a id='L28' name='L28'></a>  28 <em class='brace'>}</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>void</strong> <a href='../R/25459.html' title='Multiple referred from 4 places.'>phpdbg_set_sigsafe_mem</a>(<strong class='reserved'>char</strong> *<a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>) <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31         <a href='../S/1567.html#L13' title='Defined at 13 in sapi/phpdbg/phpdbg_sigsafe.h.'>phpdbg_signal_safe_mem</a> *<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a> = &amp;<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>);
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>const</strong> <a href='../S/1629.html#L300' title='Defined at 300 in Zend/zend_alloc.h.'>zend_mm_handlers</a> <a href='../Y/32683.html' title='Multiple used in 2 places.'>phpdbg_handlers</a> = <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33                 <a href='../S/1566.html#L9' title='Defined at 9 in sapi/phpdbg/phpdbg_sigsafe.c.'>zend_mm_mem_alloc</a>,
+<a id='L34' name='L34'></a>  34                 <a href='../S/1566.html#L27' title='Defined at 27 in sapi/phpdbg/phpdbg_sigsafe.c.'>zend_mm_mem_free</a>,
+<a id='L35' name='L35'></a>  35                 <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L36' name='L36'></a>  36                 <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L37' name='L37'></a>  37         <em class='brace'>}</em>;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39         <a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>-&gt;<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a> = <a href='../S/1313.html#L43' title='Defined at 43 in ext/zip/lib/zip_source_buffer.c.'>buffer</a>;
+<a id='L40' name='L40'></a>  40         <a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>-&gt;<a href='../Y/9105.html' title='Multiple used in 38 places.'>allocated</a> = 0;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42         <a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>-&gt;<a href='../Y/19937.html' title='Multiple used in 488 places.'>heap</a> = <a href='../S/1628.html#L2781' title='Defined at 2781 in Zend/zend_alloc.c.'>zend_mm_startup_ex</a>(&amp;<a href='../Y/32683.html' title='Multiple used in 2 places.'>phpdbg_handlers</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, 0);
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>-&gt;<a href='../Y/29424.html' title='Multiple used in 9 places.'>old_heap</a> = <a href='../S/1628.html#L2688' title='Defined at 2688 in Zend/zend_alloc.c.'>zend_mm_set_heap</a>(<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>-&gt;<a href='../Y/19937.html' title='Multiple used in 488 places.'>heap</a>);
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <a href='../S/1629.html#L240' title='Defined at 240 in Zend/zend_alloc.h.'>zend_mm_heap</a> *<a href='../R/25391.html' title='Multiple referred from 3 places.'>phpdbg_original_heap_sigsafe_mem</a>(<strong class='reserved'>void</strong>) <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>return</strong> <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/29424.html' title='Multiple used in 9 places.'>old_heap</a>;
+<a id='L49' name='L49'></a>  49 <em class='brace'>}</em>
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 <strong class='reserved'>void</strong> <a href='../R/25261.html' title='Multiple referred from 4 places.'>phpdbg_clear_sigsafe_mem</a>(<strong class='reserved'>void</strong>) <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52         <a href='../S/1628.html#L2688' title='Defined at 2688 in Zend/zend_alloc.c.'>zend_mm_set_heap</a>(<a href='../S/1566.html#L47' title='Defined at 47 in sapi/phpdbg/phpdbg_sigsafe.c.'>phpdbg_original_heap_sigsafe_mem</a>());
+<a id='L53' name='L53'></a>  53         <a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L54' name='L54'></a>  54 <em class='brace'>}</em>
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <a href='../S/1731.html#L46' title='Defined at 46 in Zend/zend_types.h.'>zend_bool</a> <a href='../R/25220.html' title='Multiple referred from 3 places.'>phpdbg_active_sigsafe_mem</a>(<strong class='reserved'>void</strong>) <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>return</strong> !!<a href='../D/7637.html' title='Multiple defined in 2 places.'>PHPDBG_G</a>(<a href='../Y/36184.html' title='Multiple used in 9 places.'>sigsafe_mem</a>).<a href='../Y/26428.html' title='Multiple used in 420 places.'>mem</a>;
+<a id='L58' name='L58'></a>  58 <em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L9'>[^]</a><a href='#L56'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

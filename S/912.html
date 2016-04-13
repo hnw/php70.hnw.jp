@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/pdo/pdo_sqlstate.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1817.html'>pdo</a>/pdo_sqlstate.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L307'>[^]</a><a href='#L328'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L307' title='Defined at 307.'>pdo_sqlstate_fini_error_table</a></li>
+<li><a href='#L312' title='Defined at 312.'>pdo_sqlstate_init_error_table</a></li>
+<li><a href='#L328' title='Defined at 328.'>pdo_sqlstate_state_to_description</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>  | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: Wez Furlong &lt;wez@php.net&gt;                                    |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>*/</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='comment'>/* $Id$ */</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#endif</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='1114.html'>ext/standard/info.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='914.html'>php_pdo.h</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='915.html'>php_pdo_driver.h</a>"
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>struct</strong> <a href='../R/22955.html' title='Multiple referred from 3 places.'>pdo_sqlstate_info</a> <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>[5];
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/15561.html' title='Multiple used in 102 places.'>desc</a>;
+<a id='L34' name='L34'></a>  34 <em class='brace'>}</em>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>static</strong> <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> <a href='../Y/16993.html' title='Multiple used in 5 places.'>err_hash</a>;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>struct</strong> <a href='../S/912.html#L31' title='Defined at 31 in ext/pdo/pdo_sqlstate.c.'>pdo_sqlstate_info</a> <a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>[] = <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39         <em class='brace'>{</em> "00000",      "No error" <em class='brace'>}</em>,
+<a id='L40' name='L40'></a>  40         <em class='brace'>{</em> "01000",      "Warning" <em class='brace'>}</em>,
+<a id='L41' name='L41'></a>  41         <em class='brace'>{</em> "01001",      "Cursor operation conflict" <em class='brace'>}</em>,
+<a id='L42' name='L42'></a>  42         <em class='brace'>{</em> "01002",      "Disconnect error" <em class='brace'>}</em>,
+<a id='L43' name='L43'></a>  43         <em class='brace'>{</em> "01003",      "NULL value eliminated in set function" <em class='brace'>}</em>,
+<a id='L44' name='L44'></a>  44         <em class='brace'>{</em> "01004",      "String data, right truncated" <em class='brace'>}</em>,
+<a id='L45' name='L45'></a>  45         <em class='brace'>{</em> "01006",      "Privilege not revoked" <em class='brace'>}</em>,
+<a id='L46' name='L46'></a>  46         <em class='brace'>{</em> "01007",      "Privilege not granted" <em class='brace'>}</em>,
+<a id='L47' name='L47'></a>  47         <em class='brace'>{</em> "01008",      "Implicit zero bit padding" <em class='brace'>}</em>,
+<a id='L48' name='L48'></a>  48         <em class='brace'>{</em> "0100C",      "Dynamic result sets returned" <em class='brace'>}</em>,
+<a id='L49' name='L49'></a>  49         <em class='brace'>{</em> "01P01",      "Deprecated feature" <em class='brace'>}</em>,
+<a id='L50' name='L50'></a>  50         <em class='brace'>{</em> "01S00",      "Invalid connection string attribute" <em class='brace'>}</em>,
+<a id='L51' name='L51'></a>  51         <em class='brace'>{</em> "01S01",      "Error in row" <em class='brace'>}</em>,
+<a id='L52' name='L52'></a>  52         <em class='brace'>{</em> "01S02",      "Option value changed" <em class='brace'>}</em>,
+<a id='L53' name='L53'></a>  53         <em class='brace'>{</em> "01S06",      "Attempt to fetch before the result set returned the first rowset" <em class='brace'>}</em>,
+<a id='L54' name='L54'></a>  54         <em class='brace'>{</em> "01S07",      "Fractional truncation" <em class='brace'>}</em>,
+<a id='L55' name='L55'></a>  55         <em class='brace'>{</em> "01S08",      "Error saving File DSN" <em class='brace'>}</em>,
+<a id='L56' name='L56'></a>  56         <em class='brace'>{</em> "01S09",      "Invalid keyword" <em class='brace'>}</em>,
+<a id='L57' name='L57'></a>  57         <em class='brace'>{</em> "02000",      "No data" <em class='brace'>}</em>,
+<a id='L58' name='L58'></a>  58         <em class='brace'>{</em> "02001",      "No additional dynamic result sets returned" <em class='brace'>}</em>,
+<a id='L59' name='L59'></a>  59         <em class='brace'>{</em> "03000",      "Sql statement not yet complete" <em class='brace'>}</em>,
+<a id='L60' name='L60'></a>  60         <em class='brace'>{</em> "07002",      "COUNT field incorrect" <em class='brace'>}</em>,
+<a id='L61' name='L61'></a>  61         <em class='brace'>{</em> "07005",      "Prepared statement not a cursor-specification" <em class='brace'>}</em>,
+<a id='L62' name='L62'></a>  62         <em class='brace'>{</em> "07006",      "Restricted data type attribute violation" <em class='brace'>}</em>,
+<a id='L63' name='L63'></a>  63         <em class='brace'>{</em> "07009",      "Invalid descriptor index" <em class='brace'>}</em>,
+<a id='L64' name='L64'></a>  64         <em class='brace'>{</em> "07S01",      "Invalid use of default parameter" <em class='brace'>}</em>,
+<a id='L65' name='L65'></a>  65         <em class='brace'>{</em> "08000",      "Connection exception" <em class='brace'>}</em>,
+<a id='L66' name='L66'></a>  66         <em class='brace'>{</em> "08001",      "Client unable to establish connection" <em class='brace'>}</em>,
+<a id='L67' name='L67'></a>  67         <em class='brace'>{</em> "08002",      "Connection name in use" <em class='brace'>}</em>,
+<a id='L68' name='L68'></a>  68         <em class='brace'>{</em> "08003",      "Connection does not exist" <em class='brace'>}</em>,
+<a id='L69' name='L69'></a>  69         <em class='brace'>{</em> "08004",      "Server rejected the connection" <em class='brace'>}</em>,
+<a id='L70' name='L70'></a>  70         <em class='brace'>{</em> "08006",      "Connection failure" <em class='brace'>}</em>,
+<a id='L71' name='L71'></a>  71         <em class='brace'>{</em> "08007",      "Connection failure during transaction" <em class='brace'>}</em>,
+<a id='L72' name='L72'></a>  72         <em class='brace'>{</em> "08S01",      "Communication link failure" <em class='brace'>}</em>,
+<a id='L73' name='L73'></a>  73         <em class='brace'>{</em> "09000",      "Triggered action exception" <em class='brace'>}</em>,
+<a id='L74' name='L74'></a>  74         <em class='brace'>{</em> "0A000",      "Feature not supported" <em class='brace'>}</em>,
+<a id='L75' name='L75'></a>  75         <em class='brace'>{</em> "0B000",      "Invalid transaction initiation" <em class='brace'>}</em>,
+<a id='L76' name='L76'></a>  76         <em class='brace'>{</em> "0F000",      "Locator exception" <em class='brace'>}</em>,
+<a id='L77' name='L77'></a>  77         <em class='brace'>{</em> "0F001",      "Invalid locator specification" <em class='brace'>}</em>,
+<a id='L78' name='L78'></a>  78         <em class='brace'>{</em> "0L000",      "Invalid grantor" <em class='brace'>}</em>,
+<a id='L79' name='L79'></a>  79         <em class='brace'>{</em> "0LP01",      "Invalid grant operation" <em class='brace'>}</em>,
+<a id='L80' name='L80'></a>  80         <em class='brace'>{</em> "0P000",      "Invalid role specification" <em class='brace'>}</em>,
+<a id='L81' name='L81'></a>  81         <em class='brace'>{</em> "21000",      "Cardinality violation" <em class='brace'>}</em>,
+<a id='L82' name='L82'></a>  82         <em class='brace'>{</em> "21S01",      "Insert value list does not match column list" <em class='brace'>}</em>,
+<a id='L83' name='L83'></a>  83         <em class='brace'>{</em> "21S02",      "Degree of derived table does not match column list" <em class='brace'>}</em>,
+<a id='L84' name='L84'></a>  84         <em class='brace'>{</em> "22000",      "Data exception" <em class='brace'>}</em>,
+<a id='L85' name='L85'></a>  85         <em class='brace'>{</em> "22001",      "String data, right truncated" <em class='brace'>}</em>,
+<a id='L86' name='L86'></a>  86         <em class='brace'>{</em> "22002",      "Indicator variable required but not supplied" <em class='brace'>}</em>,
+<a id='L87' name='L87'></a>  87         <em class='brace'>{</em> "22003",      "Numeric value out of range" <em class='brace'>}</em>,
+<a id='L88' name='L88'></a>  88         <em class='brace'>{</em> "22004",      "Null value not allowed" <em class='brace'>}</em>,
+<a id='L89' name='L89'></a>  89         <em class='brace'>{</em> "22005",      "Error in assignment" <em class='brace'>}</em>,
+<a id='L90' name='L90'></a>  90         <em class='brace'>{</em> "22007",      "Invalid datetime format" <em class='brace'>}</em>,
+<a id='L91' name='L91'></a>  91         <em class='brace'>{</em> "22008",      "Datetime field overflow" <em class='brace'>}</em>,
+<a id='L92' name='L92'></a>  92         <em class='brace'>{</em> "22009",      "Invalid time zone displacement value" <em class='brace'>}</em>,
+<a id='L93' name='L93'></a>  93         <em class='brace'>{</em> "2200B",      "Escape character conflict" <em class='brace'>}</em>,
+<a id='L94' name='L94'></a>  94         <em class='brace'>{</em> "2200C",      "Invalid use of escape character" <em class='brace'>}</em>,
+<a id='L95' name='L95'></a>  95         <em class='brace'>{</em> "2200D",      "Invalid escape octet" <em class='brace'>}</em>,
+<a id='L96' name='L96'></a>  96         <em class='brace'>{</em> "2200F",      "Zero length character string" <em class='brace'>}</em>,
+<a id='L97' name='L97'></a>  97         <em class='brace'>{</em> "2200G",      "Most specific type mismatch" <em class='brace'>}</em>,
+<a id='L98' name='L98'></a>  98         <em class='brace'>{</em> "22010",      "Invalid indicator parameter value" <em class='brace'>}</em>,
+<a id='L99' name='L99'></a>  99         <em class='brace'>{</em> "22011",      "Substring error" <em class='brace'>}</em>,
+<a id='L100' name='L100'></a> 100         <em class='brace'>{</em> "22012",      "Division by zero" <em class='brace'>}</em>,
+<a id='L101' name='L101'></a> 101         <em class='brace'>{</em> "22015",      "Interval field overflow" <em class='brace'>}</em>,
+<a id='L102' name='L102'></a> 102         <em class='brace'>{</em> "22018",      "Invalid character value for cast specification" <em class='brace'>}</em>,
+<a id='L103' name='L103'></a> 103         <em class='brace'>{</em> "22019",      "Invalid escape character" <em class='brace'>}</em>,
+<a id='L104' name='L104'></a> 104         <em class='brace'>{</em> "2201B",      "Invalid regular expression" <em class='brace'>}</em>,
+<a id='L105' name='L105'></a> 105         <em class='brace'>{</em> "2201E",      "Invalid argument for logarithm" <em class='brace'>}</em>,
+<a id='L106' name='L106'></a> 106         <em class='brace'>{</em> "2201F",      "Invalid argument for power function" <em class='brace'>}</em>,
+<a id='L107' name='L107'></a> 107         <em class='brace'>{</em> "2201G",      "Invalid argument for width bucket function" <em class='brace'>}</em>,
+<a id='L108' name='L108'></a> 108         <em class='brace'>{</em> "22020",      "Invalid limit value" <em class='brace'>}</em>,
+<a id='L109' name='L109'></a> 109         <em class='brace'>{</em> "22021",      "Character not in repertoire" <em class='brace'>}</em>,
+<a id='L110' name='L110'></a> 110         <em class='brace'>{</em> "22022",      "Indicator overflow" <em class='brace'>}</em>,
+<a id='L111' name='L111'></a> 111         <em class='brace'>{</em> "22023",      "Invalid parameter value" <em class='brace'>}</em>,
+<a id='L112' name='L112'></a> 112         <em class='brace'>{</em> "22024",      "Unterminated c string" <em class='brace'>}</em>,
+<a id='L113' name='L113'></a> 113         <em class='brace'>{</em> "22025",      "Invalid escape sequence" <em class='brace'>}</em>,
+<a id='L114' name='L114'></a> 114         <em class='brace'>{</em> "22026",      "String data, length mismatch" <em class='brace'>}</em>,
+<a id='L115' name='L115'></a> 115         <em class='brace'>{</em> "22027",      "Trim error" <em class='brace'>}</em>,
+<a id='L116' name='L116'></a> 116         <em class='brace'>{</em> "2202E",      "Array subscript error" <em class='brace'>}</em>,
+<a id='L117' name='L117'></a> 117         <em class='brace'>{</em> "22P01",      "Floating point exception" <em class='brace'>}</em>,
+<a id='L118' name='L118'></a> 118         <em class='brace'>{</em> "22P02",      "Invalid text representation" <em class='brace'>}</em>,
+<a id='L119' name='L119'></a> 119         <em class='brace'>{</em> "22P03",      "Invalid binary representation" <em class='brace'>}</em>,
+<a id='L120' name='L120'></a> 120         <em class='brace'>{</em> "22P04",      "Bad copy file format" <em class='brace'>}</em>,
+<a id='L121' name='L121'></a> 121         <em class='brace'>{</em> "22P05",      "Untranslatable character" <em class='brace'>}</em>,
+<a id='L122' name='L122'></a> 122         <em class='brace'>{</em> "23000",      "Integrity constraint violation" <em class='brace'>}</em>,
+<a id='L123' name='L123'></a> 123         <em class='brace'>{</em> "23001",      "Restrict violation" <em class='brace'>}</em>,
+<a id='L124' name='L124'></a> 124         <em class='brace'>{</em> "23502",      "Not null violation" <em class='brace'>}</em>,
+<a id='L125' name='L125'></a> 125         <em class='brace'>{</em> "23503",      "Foreign key violation" <em class='brace'>}</em>,
+<a id='L126' name='L126'></a> 126         <em class='brace'>{</em> "23505",      "Unique violation" <em class='brace'>}</em>,
+<a id='L127' name='L127'></a> 127         <em class='brace'>{</em> "23514",      "Check violation" <em class='brace'>}</em>,
+<a id='L128' name='L128'></a> 128         <em class='brace'>{</em> "24000",      "Invalid cursor state" <em class='brace'>}</em>,
+<a id='L129' name='L129'></a> 129         <em class='brace'>{</em> "25000",      "Invalid transaction state" <em class='brace'>}</em>,
+<a id='L130' name='L130'></a> 130         <em class='brace'>{</em> "25001",      "Active sql transaction" <em class='brace'>}</em>,
+<a id='L131' name='L131'></a> 131         <em class='brace'>{</em> "25002",      "Branch transaction already active" <em class='brace'>}</em>,
+<a id='L132' name='L132'></a> 132         <em class='brace'>{</em> "25003",      "Inappropriate access mode for branch transaction" <em class='brace'>}</em>,
+<a id='L133' name='L133'></a> 133         <em class='brace'>{</em> "25004",      "Inappropriate isolation level for branch transaction" <em class='brace'>}</em>,
+<a id='L134' name='L134'></a> 134         <em class='brace'>{</em> "25005",      "No active sql transaction for branch transaction" <em class='brace'>}</em>,
+<a id='L135' name='L135'></a> 135         <em class='brace'>{</em> "25006",      "Read only sql transaction" <em class='brace'>}</em>,
+<a id='L136' name='L136'></a> 136         <em class='brace'>{</em> "25007",      "Schema and data statement mixing not supported" <em class='brace'>}</em>,
+<a id='L137' name='L137'></a> 137         <em class='brace'>{</em> "25008",      "Held cursor requires same isolation level" <em class='brace'>}</em>,
+<a id='L138' name='L138'></a> 138         <em class='brace'>{</em> "25P01",      "No active sql transaction" <em class='brace'>}</em>,
+<a id='L139' name='L139'></a> 139         <em class='brace'>{</em> "25P02",      "In failed sql transaction" <em class='brace'>}</em>,
+<a id='L140' name='L140'></a> 140         <em class='brace'>{</em> "25S01",      "Transaction state" <em class='brace'>}</em>,
+<a id='L141' name='L141'></a> 141         <em class='brace'>{</em> "25S02",      "Transaction is still active" <em class='brace'>}</em>,
+<a id='L142' name='L142'></a> 142         <em class='brace'>{</em> "25S03",      "Transaction is rolled back" <em class='brace'>}</em>,
+<a id='L143' name='L143'></a> 143         <em class='brace'>{</em> "26000",      "Invalid sql statement name" <em class='brace'>}</em>,
+<a id='L144' name='L144'></a> 144         <em class='brace'>{</em> "27000",      "Triggered data change violation" <em class='brace'>}</em>,
+<a id='L145' name='L145'></a> 145         <em class='brace'>{</em> "28000",      "Invalid authorization specification" <em class='brace'>}</em>,
+<a id='L146' name='L146'></a> 146         <em class='brace'>{</em> "2B000",      "Dependent privilege descriptors still exist" <em class='brace'>}</em>,
+<a id='L147' name='L147'></a> 147         <em class='brace'>{</em> "2BP01",      "Dependent objects still exist" <em class='brace'>}</em>,
+<a id='L148' name='L148'></a> 148         <em class='brace'>{</em> "2D000",      "Invalid transaction termination" <em class='brace'>}</em>,
+<a id='L149' name='L149'></a> 149         <em class='brace'>{</em> "2F000",      "Sql routine exception" <em class='brace'>}</em>,
+<a id='L150' name='L150'></a> 150         <em class='brace'>{</em> "2F002",      "Modifying sql data not permitted" <em class='brace'>}</em>,
+<a id='L151' name='L151'></a> 151         <em class='brace'>{</em> "2F003",      "Prohibited sql statement attempted" <em class='brace'>}</em>,
+<a id='L152' name='L152'></a> 152         <em class='brace'>{</em> "2F004",      "Reading sql data not permitted" <em class='brace'>}</em>,
+<a id='L153' name='L153'></a> 153         <em class='brace'>{</em> "2F005",      "Function executed no return statement" <em class='brace'>}</em>,
+<a id='L154' name='L154'></a> 154         <em class='brace'>{</em> "34000",      "Invalid cursor name" <em class='brace'>}</em>,
+<a id='L155' name='L155'></a> 155         <em class='brace'>{</em> "38000",      "External routine exception" <em class='brace'>}</em>,
+<a id='L156' name='L156'></a> 156         <em class='brace'>{</em> "38001",      "Containing sql not permitted" <em class='brace'>}</em>,
+<a id='L157' name='L157'></a> 157         <em class='brace'>{</em> "38002",      "Modifying sql data not permitted" <em class='brace'>}</em>,
+<a id='L158' name='L158'></a> 158         <em class='brace'>{</em> "38003",      "Prohibited sql statement attempted" <em class='brace'>}</em>,
+<a id='L159' name='L159'></a> 159         <em class='brace'>{</em> "38004",      "Reading sql data not permitted" <em class='brace'>}</em>,
+<a id='L160' name='L160'></a> 160         <em class='brace'>{</em> "39000",      "External routine invocation exception" <em class='brace'>}</em>,
+<a id='L161' name='L161'></a> 161         <em class='brace'>{</em> "39001",      "Invalid sqlstate returned" <em class='brace'>}</em>,
+<a id='L162' name='L162'></a> 162         <em class='brace'>{</em> "39004",      "Null value not allowed" <em class='brace'>}</em>,
+<a id='L163' name='L163'></a> 163         <em class='brace'>{</em> "39P01",      "Trigger protocol violated" <em class='brace'>}</em>,
+<a id='L164' name='L164'></a> 164         <em class='brace'>{</em> "39P02",      "Srf protocol violated" <em class='brace'>}</em>,
+<a id='L165' name='L165'></a> 165         <em class='brace'>{</em> "3B000",      "Savepoint exception" <em class='brace'>}</em>,
+<a id='L166' name='L166'></a> 166         <em class='brace'>{</em> "3B001",      "Invalid savepoint specification" <em class='brace'>}</em>,
+<a id='L167' name='L167'></a> 167         <em class='brace'>{</em> "3C000",      "Duplicate cursor name" <em class='brace'>}</em>,
+<a id='L168' name='L168'></a> 168         <em class='brace'>{</em> "3D000",      "Invalid catalog name" <em class='brace'>}</em>,
+<a id='L169' name='L169'></a> 169         <em class='brace'>{</em> "3F000",      "Invalid schema name" <em class='brace'>}</em>,
+<a id='L170' name='L170'></a> 170         <em class='brace'>{</em> "40000",      "Transaction rollback" <em class='brace'>}</em>,
+<a id='L171' name='L171'></a> 171         <em class='brace'>{</em> "40001",      "Serialization failure" <em class='brace'>}</em>,
+<a id='L172' name='L172'></a> 172         <em class='brace'>{</em> "40002",      "Transaction integrity constraint violation" <em class='brace'>}</em>,
+<a id='L173' name='L173'></a> 173         <em class='brace'>{</em> "40003",      "Statement completion unknown" <em class='brace'>}</em>,
+<a id='L174' name='L174'></a> 174         <em class='brace'>{</em> "40P01",      "Deadlock detected" <em class='brace'>}</em>,
+<a id='L175' name='L175'></a> 175         <em class='brace'>{</em> "42000",      "Syntax error or access violation" <em class='brace'>}</em>,
+<a id='L176' name='L176'></a> 176         <em class='brace'>{</em> "42501",      "Insufficient privilege" <em class='brace'>}</em>,
+<a id='L177' name='L177'></a> 177         <em class='brace'>{</em> "42601",      "Syntax error" <em class='brace'>}</em>,
+<a id='L178' name='L178'></a> 178         <em class='brace'>{</em> "42602",      "Invalid name" <em class='brace'>}</em>,
+<a id='L179' name='L179'></a> 179         <em class='brace'>{</em> "42611",      "Invalid column definition" <em class='brace'>}</em>,
+<a id='L180' name='L180'></a> 180         <em class='brace'>{</em> "42622",      "Name too long" <em class='brace'>}</em>,
+<a id='L181' name='L181'></a> 181         <em class='brace'>{</em> "42701",      "Duplicate column" <em class='brace'>}</em>,
+<a id='L182' name='L182'></a> 182         <em class='brace'>{</em> "42702",      "Ambiguous column" <em class='brace'>}</em>,
+<a id='L183' name='L183'></a> 183         <em class='brace'>{</em> "42703",      "Undefined column" <em class='brace'>}</em>,
+<a id='L184' name='L184'></a> 184         <em class='brace'>{</em> "42704",      "Undefined object" <em class='brace'>}</em>,
+<a id='L185' name='L185'></a> 185         <em class='brace'>{</em> "42710",      "Duplicate object" <em class='brace'>}</em>,
+<a id='L186' name='L186'></a> 186         <em class='brace'>{</em> "42712",      "Duplicate alias" <em class='brace'>}</em>,
+<a id='L187' name='L187'></a> 187         <em class='brace'>{</em> "42723",      "Duplicate function" <em class='brace'>}</em>,
+<a id='L188' name='L188'></a> 188         <em class='brace'>{</em> "42725",      "Ambiguous function" <em class='brace'>}</em>,
+<a id='L189' name='L189'></a> 189         <em class='brace'>{</em> "42803",      "Grouping error" <em class='brace'>}</em>,
+<a id='L190' name='L190'></a> 190         <em class='brace'>{</em> "42804",      "Datatype mismatch" <em class='brace'>}</em>,
+<a id='L191' name='L191'></a> 191         <em class='brace'>{</em> "42809",      "Wrong object type" <em class='brace'>}</em>,
+<a id='L192' name='L192'></a> 192         <em class='brace'>{</em> "42830",      "Invalid foreign key" <em class='brace'>}</em>,
+<a id='L193' name='L193'></a> 193         <em class='brace'>{</em> "42846",      "Cannot coerce" <em class='brace'>}</em>,
+<a id='L194' name='L194'></a> 194         <em class='brace'>{</em> "42883",      "Undefined function" <em class='brace'>}</em>,
+<a id='L195' name='L195'></a> 195         <em class='brace'>{</em> "42939",      "Reserved name" <em class='brace'>}</em>,
+<a id='L196' name='L196'></a> 196         <em class='brace'>{</em> "42P01",      "Undefined table" <em class='brace'>}</em>,
+<a id='L197' name='L197'></a> 197         <em class='brace'>{</em> "42P02",      "Undefined parameter" <em class='brace'>}</em>,
+<a id='L198' name='L198'></a> 198         <em class='brace'>{</em> "42P03",      "Duplicate cursor" <em class='brace'>}</em>,
+<a id='L199' name='L199'></a> 199         <em class='brace'>{</em> "42P04",      "Duplicate database" <em class='brace'>}</em>,
+<a id='L200' name='L200'></a> 200         <em class='brace'>{</em> "42P05",      "Duplicate prepared statement" <em class='brace'>}</em>,
+<a id='L201' name='L201'></a> 201         <em class='brace'>{</em> "42P06",      "Duplicate schema" <em class='brace'>}</em>,
+<a id='L202' name='L202'></a> 202         <em class='brace'>{</em> "42P07",      "Duplicate table" <em class='brace'>}</em>,
+<a id='L203' name='L203'></a> 203         <em class='brace'>{</em> "42P08",      "Ambiguous parameter" <em class='brace'>}</em>,
+<a id='L204' name='L204'></a> 204         <em class='brace'>{</em> "42P09",      "Ambiguous alias" <em class='brace'>}</em>,
+<a id='L205' name='L205'></a> 205         <em class='brace'>{</em> "42P10",      "Invalid column reference" <em class='brace'>}</em>,
+<a id='L206' name='L206'></a> 206         <em class='brace'>{</em> "42P11",      "Invalid cursor definition" <em class='brace'>}</em>,
+<a id='L207' name='L207'></a> 207         <em class='brace'>{</em> "42P12",      "Invalid database definition" <em class='brace'>}</em>,
+<a id='L208' name='L208'></a> 208         <em class='brace'>{</em> "42P13",      "Invalid function definition" <em class='brace'>}</em>,
+<a id='L209' name='L209'></a> 209         <em class='brace'>{</em> "42P14",      "Invalid prepared statement definition" <em class='brace'>}</em>,
+<a id='L210' name='L210'></a> 210         <em class='brace'>{</em> "42P15",      "Invalid schema definition" <em class='brace'>}</em>,
+<a id='L211' name='L211'></a> 211         <em class='brace'>{</em> "42P16",      "Invalid table definition" <em class='brace'>}</em>,
+<a id='L212' name='L212'></a> 212         <em class='brace'>{</em> "42P17",      "Invalid object definition" <em class='brace'>}</em>,
+<a id='L213' name='L213'></a> 213         <em class='brace'>{</em> "42P18",      "Indeterminate datatype" <em class='brace'>}</em>,
+<a id='L214' name='L214'></a> 214         <em class='brace'>{</em> "42S01",      "Base table or view already exists" <em class='brace'>}</em>,
+<a id='L215' name='L215'></a> 215         <em class='brace'>{</em> "42S02",      "Base table or view not found" <em class='brace'>}</em>,
+<a id='L216' name='L216'></a> 216         <em class='brace'>{</em> "42S11",      "Index already exists" <em class='brace'>}</em>,
+<a id='L217' name='L217'></a> 217         <em class='brace'>{</em> "42S12",      "Index not found" <em class='brace'>}</em>,
+<a id='L218' name='L218'></a> 218         <em class='brace'>{</em> "42S21",      "Column already exists" <em class='brace'>}</em>,
+<a id='L219' name='L219'></a> 219         <em class='brace'>{</em> "42S22",      "Column not found" <em class='brace'>}</em>,
+<a id='L220' name='L220'></a> 220         <em class='brace'>{</em> "44000",      "WITH CHECK OPTION violation" <em class='brace'>}</em>,
+<a id='L221' name='L221'></a> 221         <em class='brace'>{</em> "53000",      "Insufficient resources" <em class='brace'>}</em>,
+<a id='L222' name='L222'></a> 222         <em class='brace'>{</em> "53100",      "Disk full" <em class='brace'>}</em>,
+<a id='L223' name='L223'></a> 223         <em class='brace'>{</em> "53200",      "Out of memory" <em class='brace'>}</em>,
+<a id='L224' name='L224'></a> 224         <em class='brace'>{</em> "53300",      "Too many connections" <em class='brace'>}</em>,
+<a id='L225' name='L225'></a> 225         <em class='brace'>{</em> "54000",      "Program limit exceeded" <em class='brace'>}</em>,
+<a id='L226' name='L226'></a> 226         <em class='brace'>{</em> "54001",      "Statement too complex" <em class='brace'>}</em>,
+<a id='L227' name='L227'></a> 227         <em class='brace'>{</em> "54011",      "Too many columns" <em class='brace'>}</em>,
+<a id='L228' name='L228'></a> 228         <em class='brace'>{</em> "54023",      "Too many arguments" <em class='brace'>}</em>,
+<a id='L229' name='L229'></a> 229         <em class='brace'>{</em> "55000",      "Object not in prerequisite state" <em class='brace'>}</em>,
+<a id='L230' name='L230'></a> 230         <em class='brace'>{</em> "55006",      "Object in use" <em class='brace'>}</em>,
+<a id='L231' name='L231'></a> 231         <em class='brace'>{</em> "55P02",      "Cant change runtime param" <em class='brace'>}</em>,
+<a id='L232' name='L232'></a> 232         <em class='brace'>{</em> "55P03",      "Lock not available" <em class='brace'>}</em>,
+<a id='L233' name='L233'></a> 233         <em class='brace'>{</em> "57000",      "Operator intervention" <em class='brace'>}</em>,
+<a id='L234' name='L234'></a> 234         <em class='brace'>{</em> "57014",      "Query canceled" <em class='brace'>}</em>,
+<a id='L235' name='L235'></a> 235         <em class='brace'>{</em> "57P01",      "Admin shutdown" <em class='brace'>}</em>,
+<a id='L236' name='L236'></a> 236         <em class='brace'>{</em> "57P02",      "Crash shutdown" <em class='brace'>}</em>,
+<a id='L237' name='L237'></a> 237         <em class='brace'>{</em> "57P03",      "Cannot connect now" <em class='brace'>}</em>,
+<a id='L238' name='L238'></a> 238         <em class='brace'>{</em> "58030",      "Io error" <em class='brace'>}</em>,
+<a id='L239' name='L239'></a> 239         <em class='brace'>{</em> "58P01",      "Undefined file" <em class='brace'>}</em>,
+<a id='L240' name='L240'></a> 240         <em class='brace'>{</em> "58P02",      "Duplicate file" <em class='brace'>}</em>,
+<a id='L241' name='L241'></a> 241         <em class='brace'>{</em> "F0000",      "Config file error" <em class='brace'>}</em>,
+<a id='L242' name='L242'></a> 242         <em class='brace'>{</em> "F0001",      "Lock file exists" <em class='brace'>}</em>,
+<a id='L243' name='L243'></a> 243         <em class='brace'>{</em> "HY000",      "General error" <em class='brace'>}</em>,
+<a id='L244' name='L244'></a> 244         <em class='brace'>{</em> "HY001",      "Memory allocation error" <em class='brace'>}</em>,
+<a id='L245' name='L245'></a> 245         <em class='brace'>{</em> "HY003",      "Invalid application buffer type" <em class='brace'>}</em>,
+<a id='L246' name='L246'></a> 246         <em class='brace'>{</em> "HY004",      "Invalid SQL data type" <em class='brace'>}</em>,
+<a id='L247' name='L247'></a> 247         <em class='brace'>{</em> "HY007",      "Associated statement is not prepared" <em class='brace'>}</em>,
+<a id='L248' name='L248'></a> 248         <em class='brace'>{</em> "HY008",      "Operation canceled" <em class='brace'>}</em>,
+<a id='L249' name='L249'></a> 249         <em class='brace'>{</em> "HY009",      "Invalid use of null pointer" <em class='brace'>}</em>,
+<a id='L250' name='L250'></a> 250         <em class='brace'>{</em> "HY010",      "Function sequence error" <em class='brace'>}</em>,
+<a id='L251' name='L251'></a> 251         <em class='brace'>{</em> "HY011",      "Attribute cannot be set now" <em class='brace'>}</em>,
+<a id='L252' name='L252'></a> 252         <em class='brace'>{</em> "HY012",      "Invalid transaction operation code" <em class='brace'>}</em>,
+<a id='L253' name='L253'></a> 253         <em class='brace'>{</em> "HY013",      "Memory management error" <em class='brace'>}</em>,
+<a id='L254' name='L254'></a> 254         <em class='brace'>{</em> "HY014",      "Limit on the number of handles exceeded" <em class='brace'>}</em>,
+<a id='L255' name='L255'></a> 255         <em class='brace'>{</em> "HY015",      "No cursor name available" <em class='brace'>}</em>,
+<a id='L256' name='L256'></a> 256         <em class='brace'>{</em> "HY016",      "Cannot modify an implementation row descriptor" <em class='brace'>}</em>,
+<a id='L257' name='L257'></a> 257         <em class='brace'>{</em> "HY017",      "Invalid use of an automatically allocated descriptor handle" <em class='brace'>}</em>,
+<a id='L258' name='L258'></a> 258         <em class='brace'>{</em> "HY018",      "Server declined cancel request" <em class='brace'>}</em>,
+<a id='L259' name='L259'></a> 259         <em class='brace'>{</em> "HY019",      "Non-character and non-binary data sent in pieces" <em class='brace'>}</em>,
+<a id='L260' name='L260'></a> 260         <em class='brace'>{</em> "HY020",      "Attempt to concatenate a null value" <em class='brace'>}</em>,
+<a id='L261' name='L261'></a> 261         <em class='brace'>{</em> "HY021",      "Inconsistent descriptor information" <em class='brace'>}</em>,
+<a id='L262' name='L262'></a> 262         <em class='brace'>{</em> "HY024",      "Invalid attribute value" <em class='brace'>}</em>,
+<a id='L263' name='L263'></a> 263         <em class='brace'>{</em> "HY090",      "Invalid string or buffer length" <em class='brace'>}</em>,
+<a id='L264' name='L264'></a> 264         <em class='brace'>{</em> "HY091",      "Invalid descriptor field identifier" <em class='brace'>}</em>,
+<a id='L265' name='L265'></a> 265         <em class='brace'>{</em> "HY092",      "Invalid attribute/option identifier" <em class='brace'>}</em>,
+<a id='L266' name='L266'></a> 266         <em class='brace'>{</em> "HY093",      "Invalid parameter number" <em class='brace'>}</em>,
+<a id='L267' name='L267'></a> 267         <em class='brace'>{</em> "HY095",      "Function type out of range" <em class='brace'>}</em>,
+<a id='L268' name='L268'></a> 268         <em class='brace'>{</em> "HY096",      "Invalid information type" <em class='brace'>}</em>,
+<a id='L269' name='L269'></a> 269         <em class='brace'>{</em> "HY097",      "Column type out of range" <em class='brace'>}</em>,
+<a id='L270' name='L270'></a> 270         <em class='brace'>{</em> "HY098",      "Scope type out of range" <em class='brace'>}</em>,
+<a id='L271' name='L271'></a> 271         <em class='brace'>{</em> "HY099",      "Nullable type out of range" <em class='brace'>}</em>,
+<a id='L272' name='L272'></a> 272         <em class='brace'>{</em> "HY100",      "Uniqueness option type out of range" <em class='brace'>}</em>,
+<a id='L273' name='L273'></a> 273         <em class='brace'>{</em> "HY101",      "Accuracy option type out of range" <em class='brace'>}</em>,
+<a id='L274' name='L274'></a> 274         <em class='brace'>{</em> "HY103",      "Invalid retrieval code" <em class='brace'>}</em>,
+<a id='L275' name='L275'></a> 275         <em class='brace'>{</em> "HY104",      "Invalid precision or scale value" <em class='brace'>}</em>,
+<a id='L276' name='L276'></a> 276         <em class='brace'>{</em> "HY105",      "Invalid parameter type" <em class='brace'>}</em>,
+<a id='L277' name='L277'></a> 277         <em class='brace'>{</em> "HY106",      "Fetch type out of range" <em class='brace'>}</em>,
+<a id='L278' name='L278'></a> 278         <em class='brace'>{</em> "HY107",      "Row value out of range" <em class='brace'>}</em>,
+<a id='L279' name='L279'></a> 279         <em class='brace'>{</em> "HY109",      "Invalid cursor position" <em class='brace'>}</em>,
+<a id='L280' name='L280'></a> 280         <em class='brace'>{</em> "HY110",      "Invalid driver completion" <em class='brace'>}</em>,
+<a id='L281' name='L281'></a> 281         <em class='brace'>{</em> "HY111",      "Invalid bookmark value" <em class='brace'>}</em>,
+<a id='L282' name='L282'></a> 282         <em class='brace'>{</em> "HYC00",      "Optional feature not implemented" <em class='brace'>}</em>,
+<a id='L283' name='L283'></a> 283         <em class='brace'>{</em> "HYT00",      "Timeout expired" <em class='brace'>}</em>,
+<a id='L284' name='L284'></a> 284         <em class='brace'>{</em> "HYT01",      "Connection timeout expired" <em class='brace'>}</em>,
+<a id='L285' name='L285'></a> 285         <em class='brace'>{</em> "IM001",      "Driver does not support this function" <em class='brace'>}</em>,
+<a id='L286' name='L286'></a> 286         <em class='brace'>{</em> "IM002",      "Data source name not found and no default driver specified" <em class='brace'>}</em>,
+<a id='L287' name='L287'></a> 287         <em class='brace'>{</em> "IM003",      "Specified driver could not be loaded" <em class='brace'>}</em>,
+<a id='L288' name='L288'></a> 288         <em class='brace'>{</em> "IM004",      "Driver's SQLAllocHandle on SQL_HANDLE_ENV failed" <em class='brace'>}</em>,
+<a id='L289' name='L289'></a> 289         <em class='brace'>{</em> "IM005",      "Driver's SQLAllocHandle on SQL_HANDLE_DBC failed" <em class='brace'>}</em>,
+<a id='L290' name='L290'></a> 290         <em class='brace'>{</em> "IM006",      "Driver's SQLSetConnectAttr failed" <em class='brace'>}</em>,
+<a id='L291' name='L291'></a> 291         <em class='brace'>{</em> "IM007",      "No data source or driver specified; dialog prohibited" <em class='brace'>}</em>,
+<a id='L292' name='L292'></a> 292         <em class='brace'>{</em> "IM008",      "Dialog failed" <em class='brace'>}</em>,
+<a id='L293' name='L293'></a> 293         <em class='brace'>{</em> "IM009",      "Unable to load translation DLL" <em class='brace'>}</em>,
+<a id='L294' name='L294'></a> 294         <em class='brace'>{</em> "IM010",      "Data source name too long" <em class='brace'>}</em>,
+<a id='L295' name='L295'></a> 295         <em class='brace'>{</em> "IM011",      "Driver name too long" <em class='brace'>}</em>,
+<a id='L296' name='L296'></a> 296         <em class='brace'>{</em> "IM012",      "DRIVER keyword syntax error" <em class='brace'>}</em>,
+<a id='L297' name='L297'></a> 297         <em class='brace'>{</em> "IM013",      "Trace file error" <em class='brace'>}</em>,
+<a id='L298' name='L298'></a> 298         <em class='brace'>{</em> "IM014",      "Invalid name of File DSN" <em class='brace'>}</em>,
+<a id='L299' name='L299'></a> 299         <em class='brace'>{</em> "IM015",      "Corrupt file data source" <em class='brace'>}</em>,
+<a id='L300' name='L300'></a> 300         <em class='brace'>{</em> "P0000",      "Plpgsql error" <em class='brace'>}</em>,
+<a id='L301' name='L301'></a> 301         <em class='brace'>{</em> "P0001",      "Raise exception" <em class='brace'>}</em>,
+<a id='L302' name='L302'></a> 302         <em class='brace'>{</em> "XX000",      "Internal error" <em class='brace'>}</em>,
+<a id='L303' name='L303'></a> 303         <em class='brace'>{</em> "XX001",      "Data corrupted" <em class='brace'>}</em>,
+<a id='L304' name='L304'></a> 304         <em class='brace'>{</em> "XX002",      "Index corrupted" <em class='brace'>}</em>
+<a id='L305' name='L305'></a> 305 <em class='brace'>}</em>;
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307 <strong class='reserved'>void</strong> <a href='../R/22954.html' title='Multiple referred from 2 places.'>pdo_sqlstate_fini_error_table</a>(<strong class='reserved'>void</strong>)
+<a id='L308' name='L308'></a> 308 <em class='brace'>{</em>
+<a id='L309' name='L309'></a> 309         <a href='../S/1667.html#L1249' title='Defined at 1249 in Zend/zend_hash.c.'>zend_hash_destroy</a>(&amp;<a href='../Y/16993.html' title='Multiple used in 5 places.'>err_hash</a>);
+<a id='L310' name='L310'></a> 310 <em class='brace'>}</em>
+<a id='L311' name='L311'></a> 311 
+<a id='L312' name='L312'></a> 312 <strong class='reserved'>int</strong> <a href='../R/22956.html' title='Multiple referred from 2 places.'>pdo_sqlstate_init_error_table</a>(<strong class='reserved'>void</strong>)
+<a id='L313' name='L313'></a> 313 <em class='brace'>{</em>
+<a id='L314' name='L314'></a> 314         <strong class='reserved'>int</strong> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L315' name='L315'></a> 315         <strong class='reserved'>const</strong> <strong class='reserved'>struct</strong> <a href='../S/912.html#L31' title='Defined at 31 in ext/pdo/pdo_sqlstate.c.'>pdo_sqlstate_info</a> *<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>;
+<a id='L316' name='L316'></a> 316 
+<a id='L317' name='L317'></a> 317         <a href='../S/1668.html#L61' title='Defined at 61 in Zend/zend_hash.h.'>zend_hash_init</a>(&amp;<a href='../Y/16993.html' title='Multiple used in 5 places.'>err_hash</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>)/<strong class='reserved'>sizeof</strong>(<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>[0]), <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, 1);
+<a id='L318' name='L318'></a> 318 
+<a id='L319' name='L319'></a> 319         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <strong class='reserved'>sizeof</strong>(<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>)/<strong class='reserved'>sizeof</strong>(<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>[0]); <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L320' name='L320'></a> 320                 <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a> = &amp;<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>[<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>];
+<a id='L321' name='L321'></a> 321 
+<a id='L322' name='L322'></a> 322                 <a href='../S/1668.html#L499' title='Defined at 499 in Zend/zend_hash.h.'>zend_hash_str_add_ptr</a>(&amp;<a href='../Y/16993.html' title='Multiple used in 5 places.'>err_hash</a>, <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>-&gt;<a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>-&gt;<a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>), (<strong class='reserved'>void</strong> *)<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>);
+<a id='L323' name='L323'></a> 323         <em class='brace'>}</em>
+<a id='L324' name='L324'></a> 324 
+<a id='L325' name='L325'></a> 325         <strong class='reserved'>return</strong> <a href='../D/12761.html' title='Multiple defined in 2 places.'>SUCCESS</a>;
+<a id='L326' name='L326'></a> 326 <em class='brace'>}</em>
+<a id='L327' name='L327'></a> 327 
+<a id='L328' name='L328'></a> 328 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../R/22957.html' title='Multiple referred from 3 places.'>pdo_sqlstate_state_to_description</a>(<strong class='reserved'>char</strong> *<a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>)
+<a id='L329' name='L329'></a> 329 <em class='brace'>{</em>
+<a id='L330' name='L330'></a> 330         <strong class='reserved'>const</strong> <strong class='reserved'>struct</strong> <a href='../S/912.html#L31' title='Defined at 31 in ext/pdo/pdo_sqlstate.c.'>pdo_sqlstate_info</a> *<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>;
+<a id='L331' name='L331'></a> 331         <strong class='reserved'>if</strong> ((<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a> = <a href='../S/1668.html#L693' title='Defined at 693 in Zend/zend_hash.h.'>zend_hash_str_find_ptr</a>(&amp;<a href='../Y/16993.html' title='Multiple used in 5 places.'>err_hash</a>, <a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/16995.html' title='Multiple used in 5 places.'>err_initializer</a>[0].<a href='../D/31638.html' title='Multiple defined in 4 places.'>state</a>))) != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L332' name='L332'></a> 332                 <strong class='reserved'>return</strong> <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>-&gt;<a href='../Y/15561.html' title='Multiple used in 102 places.'>desc</a>;
+<a id='L333' name='L333'></a> 333         <em class='brace'>}</em>
+<a id='L334' name='L334'></a> 334         <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L335' name='L335'></a> 335 <em class='brace'>}</em>
+<a id='L336' name='L336'></a> 336 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L307'>[^]</a><a href='#L328'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

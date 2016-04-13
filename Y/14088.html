@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>column</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/805.html#L1576'>column</a>           1576 ext/oci8/oci8.c 	php_oci_out_column *column = (php_oci_out_column *) Z_PTR_P(data);</span>
+<span class='curline'><a href='../S/805.html#L1578'>column</a>           1578 ext/oci8/oci8.c 	if (column-&gt;stmtid) {</span>
+<span class='curline'><a href='../S/805.html#L1579'>column</a>           1579 ext/oci8/oci8.c 		zend_list_close(column-&gt;stmtid);</span>
+<span class='curline'><a href='../S/805.html#L1582'>column</a>           1582 ext/oci8/oci8.c 	if (column-&gt;descid) {</span>
+<span class='curline'><a href='../S/805.html#L1583'>column</a>           1583 ext/oci8/oci8.c 		if (GC_REFCOUNT(column-&gt;descid) == 1)</span>
+<span class='curline'><a href='../S/805.html#L1584'>column</a>           1584 ext/oci8/oci8.c 			zend_list_close(column-&gt;descid);</span>
+<span class='curline'><a href='../S/805.html#L1586'>column</a>           1586 ext/oci8/oci8.c 			GC_REFCOUNT(column-&gt;descid)--;</span>
+<span class='curline'><a href='../S/805.html#L1589'>column</a>           1589 ext/oci8/oci8.c 	if (column-&gt;data) {</span>
+<span class='curline'><a href='../S/805.html#L1590'>column</a>           1590 ext/oci8/oci8.c 		efree(column-&gt;data);</span>
+<span class='curline'><a href='../S/805.html#L1593'>column</a>           1593 ext/oci8/oci8.c 	if (column-&gt;name) {</span>
+<span class='curline'><a href='../S/805.html#L1594'>column</a>           1594 ext/oci8/oci8.c 		efree(column-&gt;name);</span>
+<span class='curline'><a href='../S/805.html#L1597'>column</a>           1597 ext/oci8/oci8.c 	efree(column);</span>
+<span class='curline'><a href='../S/805.html#L2558'>column</a>           2558 ext/oci8/oci8.c int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)</span>
+<span class='curline'><a href='../S/805.html#L2566'>column</a>           2566 ext/oci8/oci8.c 	if (column-&gt;indicator == -1) { /* column is NULL */</span>
+<span class='curline'><a href='../S/805.html#L2571'>column</a>           2571 ext/oci8/oci8.c 	if (column-&gt;is_cursor) { /* REFCURSOR -&gt; simply return the statement id */</span>
+<span class='curline'><a href='../S/805.html#L2572'>column</a>           2572 ext/oci8/oci8.c 		ZVAL_RES(value, column-&gt;stmtid);</span>
+<span class='curline'><a href='../S/805.html#L2573'>column</a>           2573 ext/oci8/oci8.c 		++GC_REFCOUNT(column-&gt;stmtid);</span>
+<span class='curline'><a href='../S/805.html#L2574'>column</a>           2574 ext/oci8/oci8.c 	} else if (column-&gt;is_descr) {</span>
+<span class='curline'><a href='../S/805.html#L2576'>column</a>           2576 ext/oci8/oci8.c 		if (column-&gt;data_type != SQLT_RDD) {</span>
+<span class='curline'><a href='../S/805.html#L2579'>column</a>           2579 ext/oci8/oci8.c 			descriptor = (php_oci_descriptor *) column-&gt;descid-&gt;ptr;</span>
+<span class='curline'><a href='../S/805.html#L2582'>column</a>           2582 ext/oci8/oci8.c 				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column-&gt;descid);</span>
+<span class='curline'><a href='../S/805.html#L2591'>column</a>           2591 ext/oci8/oci8.c 		if (column-&gt;data_type != SQLT_RDD &amp;&amp; (mode &amp; PHP_OCI_RETURN_LOBS)) {</span>
+<span class='curline'><a href='../S/805.html#L2594'>column</a>           2594 ext/oci8/oci8.c 			if (column-&gt;chunk_size)</span>
+<span class='curline'><a href='../S/805.html#L2595'>column</a>           2595 ext/oci8/oci8.c 				descriptor-&gt;chunk_size = column-&gt;chunk_size;</span>
+<span class='curline'><a href='../S/805.html#L2598'>column</a>           2598 ext/oci8/oci8.c 				column-&gt;chunk_size = descriptor-&gt;chunk_size;</span>
+<span class='curline'><a href='../S/805.html#L2616'>column</a>           2616 ext/oci8/oci8.c 			add_property_resource(value, "descriptor", column-&gt;descid);</span>
+<span class='curline'><a href='../S/805.html#L2617'>column</a>           2617 ext/oci8/oci8.c 			++GC_REFCOUNT(column-&gt;descid);</span>
+<span class='curline'><a href='../S/805.html#L2620'>column</a>           2620 ext/oci8/oci8.c 		switch (column-&gt;retcode) {</span>
+<span class='curline'><a href='../S/805.html#L2623'>column</a>           2623 ext/oci8/oci8.c 				if (column-&gt;piecewise) {</span>
+<span class='curline'><a href='../S/805.html#L2624'>column</a>           2624 ext/oci8/oci8.c 					column_size = column-&gt;retlen4;</span>
+<span class='curline'><a href='../S/805.html#L2626'>column</a>           2626 ext/oci8/oci8.c 					column_size = column-&gt;retlen;</span>
+<span class='curline'><a href='../S/805.html#L2635'>column</a>           2635 ext/oci8/oci8.c 		ZVAL_STRINGL(value, column-&gt;data, column_size);</span>
+<span class='curline'><a href='../S/805.html#L2656'>column</a>           2656 ext/oci8/oci8.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/805.html#L2775'>column</a>           2775 ext/oci8/oci8.c 		column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/805.html#L2777'>column</a>           2777 ext/oci8/oci8.c 		if (column == NULL) {</span>
+<span class='curline'><a href='../S/805.html#L2780'>column</a>           2780 ext/oci8/oci8.c 		if ((column-&gt;indicator == -1) &amp;&amp; ((fetch_mode &amp; PHP_OCI_RETURN_NULLS) == 0)) {</span>
+<span class='curline'><a href='../S/805.html#L2784'>column</a>           2784 ext/oci8/oci8.c 		if (!(column-&gt;indicator == -1)) {</span>
+<span class='curline'><a href='../S/805.html#L2787'>column</a>           2787 ext/oci8/oci8.c 			php_oci_column_to_zval(column, &amp;element, (int) fetch_mode);</span>
+<span class='curline'><a href='../S/805.html#L2796'>column</a>           2796 ext/oci8/oci8.c 				add_assoc_zval(placeholder, column-&gt;name, &amp;element);</span>
+<span class='curline'><a href='../S/805.html#L2804'>column</a>           2804 ext/oci8/oci8.c 				add_assoc_null(placeholder, column-&gt;name);</span>
+<span class='curline'><a href='../S/807.html#L1167'>column</a>           1167 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1169'>column</a>           1169 ext/oci8/oci8_interface.c 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {</span>
+<span class='curline'><a href='../S/807.html#L1170'>column</a>           1170 ext/oci8/oci8_interface.c 		RETURN_STRINGL(column-&gt;name, column-&gt;name_len);</span>
+<span class='curline'><a href='../S/807.html#L1180'>column</a>           1180 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1182'>column</a>           1182 ext/oci8/oci8_interface.c 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {</span>
+<span class='curline'><a href='../S/807.html#L1184'>column</a>           1184 ext/oci8/oci8_interface.c 		if (column-&gt;data_type == SQLT_LNG){</span>
+<span class='curline'><a href='../S/807.html#L1185'>column</a>           1185 ext/oci8/oci8_interface.c 			RETURN_LONG(column-&gt;storage_size4);</span>
+<span class='curline'><a href='../S/807.html#L1187'>column</a>           1187 ext/oci8/oci8_interface.c 		RETURN_LONG(column-&gt;data_size);</span>
+<span class='curline'><a href='../S/807.html#L1197'>column</a>           1197 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1199'>column</a>           1199 ext/oci8/oci8_interface.c 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {</span>
+<span class='curline'><a href='../S/807.html#L1200'>column</a>           1200 ext/oci8/oci8_interface.c 		RETURN_LONG(column-&gt;scale);</span>
+<span class='curline'><a href='../S/807.html#L1210'>column</a>           1210 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1212'>column</a>           1212 ext/oci8/oci8_interface.c 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {</span>
+<span class='curline'><a href='../S/807.html#L1213'>column</a>           1213 ext/oci8/oci8_interface.c 		RETURN_LONG(column-&gt;precision);</span>
+<span class='curline'><a href='../S/807.html#L1223'>column</a>           1223 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1225'>column</a>           1225 ext/oci8/oci8_interface.c 	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);</span>
+<span class='curline'><a href='../S/807.html#L1227'>column</a>           1227 ext/oci8/oci8_interface.c 	if (!column) {</span>
+<span class='curline'><a href='../S/807.html#L1231'>column</a>           1231 ext/oci8/oci8_interface.c 	switch (column-&gt;data_type) {</span>
+<span class='curline'><a href='../S/807.html#L1294'>column</a>           1294 ext/oci8/oci8_interface.c 			RETVAL_LONG(column-&gt;data_type);</span>
+<span class='curline'><a href='../S/807.html#L1303'>column</a>           1303 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1305'>column</a>           1305 ext/oci8/oci8_interface.c 	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);</span>
+<span class='curline'><a href='../S/807.html#L1306'>column</a>           1306 ext/oci8/oci8_interface.c 	if (column) {</span>
+<span class='curline'><a href='../S/807.html#L1307'>column</a>           1307 ext/oci8/oci8_interface.c 		RETURN_LONG(column-&gt;data_type);</span>
+<span class='curline'><a href='../S/807.html#L1317'>column</a>           1317 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L1319'>column</a>           1319 ext/oci8/oci8_interface.c 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {</span>
+<span class='curline'><a href='../S/807.html#L1320'>column</a>           1320 ext/oci8/oci8_interface.c 		if (column-&gt;indicator == -1) {</span>
+<span class='curline'><a href='../S/807.html#L2068'>column</a>           2068 ext/oci8/oci8_interface.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/807.html#L2070'>column</a>           2070 ext/oci8/oci8_interface.c 	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);</span>
+<span class='curline'><a href='../S/807.html#L2071'>column</a>           2071 ext/oci8/oci8_interface.c 	if(column) {</span>
+<span class='curline'><a href='../S/807.html#L2072'>column</a>           2072 ext/oci8/oci8_interface.c 		php_oci_column_to_zval(column, return_value, 0);</span>
+<span class='curline'><a href='../S/809.html#L252'>column</a>            252 ext/oci8/oci8_statement.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/809.html#L286'>column</a>            286 ext/oci8/oci8_statement.c 		column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L287'>column</a>            287 ext/oci8/oci8_statement.c 		if (column &amp;&amp; column-&gt;piecewise) {</span>
+<span class='curline'><a href='../S/809.html#L288'>column</a>            288 ext/oci8/oci8_statement.c 			column-&gt;retlen4 = 0;</span>
+<span class='curline'><a href='../S/809.html#L311'>column</a>            311 ext/oci8/oci8_statement.c 				column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L312'>column</a>            312 ext/oci8/oci8_statement.c 				if (column &amp;&amp; column-&gt;piecewise &amp;&amp; handlepp == column-&gt;oci_define)   {</span>
+<span class='curline'><a href='../S/809.html#L313'>column</a>            313 ext/oci8/oci8_statement.c 					if (!column-&gt;data) {</span>
+<span class='curline'><a href='../S/809.html#L314'>column</a>            314 ext/oci8/oci8_statement.c 						column-&gt;data = (text *) ecalloc(1, PHP_OCI_PIECE_SIZE + 1);</span>
+<span class='curline'><a href='../S/809.html#L316'>column</a>            316 ext/oci8/oci8_statement.c 						column-&gt;data = erealloc(column-&gt;data, column-&gt;retlen4 + PHP_OCI_PIECE_SIZE + 1);</span>
+<span class='curline'><a href='../S/809.html#L318'>column</a>            318 ext/oci8/oci8_statement.c 					column-&gt;cb_retlen = PHP_OCI_PIECE_SIZE;</span>
+<span class='curline'><a href='../S/809.html#L323'>column</a>            323 ext/oci8/oci8_statement.c 							(void *) column-&gt;oci_define,</span>
+<span class='curline'><a href='../S/809.html#L326'>column</a>            326 ext/oci8/oci8_statement.c 							((char*)column-&gt;data) + column-&gt;retlen4,</span>
+<span class='curline'><a href='../S/809.html#L327'>column</a>            327 ext/oci8/oci8_statement.c 							&amp;(column-&gt;cb_retlen),</span>
+<span class='curline'><a href='../S/809.html#L329'>column</a>            329 ext/oci8/oci8_statement.c 							&amp;column-&gt;indicator,</span>
+<span class='curline'><a href='../S/809.html#L330'>column</a>            330 ext/oci8/oci8_statement.c 							&amp;column-&gt;retcode</span>
+<span class='curline'><a href='../S/809.html#L341'>column</a>            341 ext/oci8/oci8_statement.c 				column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L342'>column</a>            342 ext/oci8/oci8_statement.c 				if (column &amp;&amp; column-&gt;piecewise &amp;&amp; handlepp == column-&gt;oci_define)	{</span>
+<span class='curline'><a href='../S/809.html#L343'>column</a>            343 ext/oci8/oci8_statement.c 					column-&gt;retlen4 += column-&gt;cb_retlen;</span>
+<span class='curline'><a href='../S/809.html#L354'>column</a>            354 ext/oci8/oci8_statement.c 			column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L355'>column</a>            355 ext/oci8/oci8_statement.c 			if (column == NULL) {</span>
+<span class='curline'><a href='../S/809.html#L359'>column</a>            359 ext/oci8/oci8_statement.c 			if (!column-&gt;define) {</span>
+<span class='curline'><a href='../S/809.html#L363'>column</a>            363 ext/oci8/oci8_statement.c 			zval_dtor(column-&gt;define-&gt;zval);</span>
+<span class='curline'><a href='../S/809.html#L364'>column</a>            364 ext/oci8/oci8_statement.c 			php_oci_column_to_zval(column, column-&gt;define-&gt;zval, 0);</span>
+<span class='curline'><a href='../S/809.html#L383'>column</a>            383 ext/oci8/oci8_statement.c 	php_oci_out_column *column = NULL;</span>
+<span class='curline'><a href='../S/809.html#L392'>column</a>            392 ext/oci8/oci8_statement.c 			column = php_oci_statement_get_column(statement, i + 1, NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L393'>column</a>            393 ext/oci8/oci8_statement.c 			if (column == NULL) {</span>
+<span class='curline'><a href='../S/809.html#L395'>column</a>            395 ext/oci8/oci8_statement.c 			} else if (((int) column-&gt;name_len == column_name_len) &amp;&amp; (!strncmp(column-&gt;name, column_name, column_name_len))) {</span>
+<span class='curline'><a href='../S/809.html#L396'>column</a>            396 ext/oci8/oci8_statement.c 				return column;</span>
+<span class='curline'><a href='../S/809.html#L400'>column</a>            400 ext/oci8/oci8_statement.c 		if ((column = zend_hash_index_find_ptr(statement-&gt;columns, column_index)) == NULL) {</span>
+<span class='curline'><a href='../S/809.html#L403'>column</a>            403 ext/oci8/oci8_statement.c 		return column;</span>
+<span class='curline'><a href='../S/809.html#L1479'>column</a>           1479 ext/oci8/oci8_statement.c 	php_oci_out_column *column;</span>
+<span class='curline'><a href='../S/809.html#L1496'>column</a>           1496 ext/oci8/oci8_statement.c 		column = php_oci_statement_get_column(statement, -1, Z_STRVAL_P(column_index), (int) Z_STRLEN_P(column_index));</span>
+<span class='curline'><a href='../S/809.html#L1497'>column</a>           1497 ext/oci8/oci8_statement.c 		if (!column) {</span>
+<span class='curline'><a href='../S/809.html#L1507'>column</a>           1507 ext/oci8/oci8_statement.c 		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0);</span>
+<span class='curline'><a href='../S/809.html#L1508'>column</a>           1508 ext/oci8/oci8_statement.c 		if (!column) {</span>
+<span class='curline'><a href='../S/809.html#L1515'>column</a>           1515 ext/oci8/oci8_statement.c 	return column;</span>
+<span class='curline'><a href='../S/811.html#L433'>column</a>            433 ext/oci8/php_oci8_int.h int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode);</span>
+<span class='curline'><a href='../S/814.html#L267'>column</a>            267 ext/odbc/php_odbc.c 	ZEND_ARG_INFO(0, column)</span>
+<span class='curline'><a href='../S/814.html#L321'>column</a>            321 ext/odbc/php_odbc.c 	ZEND_ARG_INFO(0, column)</span>
+<span class='curline'><a href='../S/814.html#L3232'>column</a>           3232 ext/odbc/php_odbc.c 	char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;</span>
+<span class='curline'><a href='../S/814.html#L3237'>column</a>           3237 ext/odbc/php_odbc.c 		&amp;table, &amp;table_len, &amp;column, &amp;column_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/814.html#L3271'>column</a>           3271 ext/odbc/php_odbc.c 			column, (SQLSMALLINT) column_len);</span>
+<span class='curline'><a href='../S/814.html#L3304'>column</a>           3304 ext/odbc/php_odbc.c 	char *cat = NULL, *schema, *table, *column;</span>
+<span class='curline'><a href='../S/814.html#L3309'>column</a>           3309 ext/odbc/php_odbc.c 		&amp;table, &amp;table_len, &amp;column, &amp;column_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/814.html#L3336'>column</a>           3336 ext/odbc/php_odbc.c 			column, SAFE_SQL_NTS(column));</span>
+<span class='curline'><a href='../S/913.html#L84'>column</a>             84 ext/pdo/pdo_stmt.c 	ZEND_ARG_INFO(0, column)</span>
+<span class='curline'><a href='../S/913.html#L101'>column</a>            101 ext/pdo/pdo_stmt.c 	ZEND_ARG_INFO(0, column)</span>
+<span class='curline'><a href='../S/913.html#L856'>column</a>            856 ext/pdo/pdo_stmt.c 	if (flags &amp; PDO_FETCH_GROUP &amp;&amp; stmt-&gt;fetch.column == -1) {</span>
+<span class='curline'><a href='../S/913.html#L859'>column</a>            859 ext/pdo/pdo_stmt.c 		colno = stmt-&gt;fetch.column;</span>
+<span class='curline'><a href='../S/913.html#L898'>column</a>            898 ext/pdo/pdo_stmt.c 					if (flags == PDO_FETCH_GROUP &amp;&amp; stmt-&gt;fetch.column == -1) {</span>
+<span class='curline'><a href='../S/913.html#L1007'>column</a>           1007 ext/pdo/pdo_stmt.c 			if (flags == PDO_FETCH_GROUP &amp;&amp; how == PDO_FETCH_COLUMN &amp;&amp; stmt-&gt;fetch.column &gt; 0) {</span>
+<span class='curline'><a href='../S/913.html#L1468'>column</a>           1468 ext/pdo/pdo_stmt.c 			stmt-&gt;fetch.column = how &amp; PDO_FETCH_GROUP ? -1 : 0;</span>
+<span class='curline'><a href='../S/913.html#L1472'>column</a>           1472 ext/pdo/pdo_stmt.c 			stmt-&gt;fetch.column = Z_LVAL_P(arg2);</span>
+<span class='curline'><a href='../S/913.html#L1908'>column</a>           1908 ext/pdo/pdo_stmt.c 				stmt-&gt;fetch.column = Z_LVAL(args[skip+1]);</span>
+<span class='curline'><a href='../S/915.html#L615'>column</a>            615 ext/pdo/php_pdo_driver.h 		int column;</span>
+<span class='curline'><a href='../S/1059.html#L579'>column</a>            579 ext/sqlite3/sqlite3.c static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* {{{ */</span>
+<span class='curline'><a href='../S/1059.html#L581'>column</a>            581 ext/sqlite3/sqlite3.c 	switch (sqlite3_column_type(stmt, column)) {</span>
+<span class='curline'><a href='../S/1059.html#L583'>column</a>            583 ext/sqlite3/sqlite3.c 			if ((sqlite3_column_int64(stmt, column)) &gt;= INT_MAX || sqlite3_column_int64(stmt, column) &lt;= INT_MIN) {</span>
+<span class='curline'><a href='../S/1059.html#L584'>column</a>            584 ext/sqlite3/sqlite3.c 				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L586'>column</a>            586 ext/sqlite3/sqlite3.c 				ZVAL_LONG(data, sqlite3_column_int64(stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L591'>column</a>            591 ext/sqlite3/sqlite3.c 			ZVAL_DOUBLE(data, sqlite3_column_double(stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L599'>column</a>            599 ext/sqlite3/sqlite3.c 			ZVAL_STRING(data, (char*)sqlite3_column_text(stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L604'>column</a>            604 ext/sqlite3/sqlite3.c 			ZVAL_STRINGL(data, (char*)sqlite3_column_blob(stmt, column), sqlite3_column_bytes(stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L1197'>column</a>           1197 ext/sqlite3/sqlite3.c 	char *table, *column, *dbname = "main";</span>
+<span class='curline'><a href='../S/1059.html#L1208'>column</a>           1208 ext/sqlite3/sqlite3.c 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|s", &amp;table, &amp;table_len, &amp;column, &amp;column_len, &amp;rowid, &amp;dbname, &amp;dbname_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/1059.html#L1212'>column</a>           1212 ext/sqlite3/sqlite3.c 	if (sqlite3_blob_open(db_obj-&gt;db, dbname, table, column, rowid, flags, &amp;blob) != SQLITE_OK) {</span>
+<span class='curline'><a href='../S/1059.html#L1671'>column</a>           1671 ext/sqlite3/sqlite3.c 	zend_long column = 0;</span>
+<span class='curline'><a href='../S/1059.html#L1677'>column</a>           1677 ext/sqlite3/sqlite3.c 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &amp;column) == FAILURE) {</span>
+<span class='curline'><a href='../S/1059.html#L1680'>column</a>           1680 ext/sqlite3/sqlite3.c 	column_name = (char*) sqlite3_column_name(result_obj-&gt;stmt_obj-&gt;stmt, column);</span>
+<span class='curline'><a href='../S/1059.html#L1696'>column</a>           1696 ext/sqlite3/sqlite3.c 	zend_long column = 0;</span>
+<span class='curline'><a href='../S/1059.html#L1701'>column</a>           1701 ext/sqlite3/sqlite3.c 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &amp;column) == FAILURE) {</span>
+<span class='curline'><a href='../S/1059.html#L1709'>column</a>           1709 ext/sqlite3/sqlite3.c 	RETURN_LONG(sqlite3_column_type(result_obj-&gt;stmt_obj-&gt;stmt, column));</span>
+<span class='curline'><a href='../S/1059.html#L1878'>column</a>           1878 ext/sqlite3/sqlite3.c 	ZEND_ARG_INFO(0, column)</span>
+<span class='curline'><a href='../S/1201.html#L859'>column</a>            859 ext/tidy/tidy.c 			ADD_PROPERTY_LONG(obj-&gt;std.properties, column, tidyNodeColumn(obj-&gt;node));</span>
+<span class='curline'><a href='../S/1224.html#L748'>column</a>            748 ext/xmlrpc/libxmlrpc/xml_element.c               error-&gt;column = col_num;</span>
+<span class='curline'><a href='../S/1225.html#L119'>column</a>            119 ext/xmlrpc/libxmlrpc/xml_element.h   long column;</span>
+<span class='curline'><a href='../S/1232.html#L766'>column</a>            766 ext/xmlrpc/libxmlrpc/xmlrpc.c 					 error-&gt;line, error-&gt;column, error-&gt;byte_index);</span>
+<span class='curline'><a href='../S/1240.html#L940'>column</a>            940 ext/xmlrpc/xmlrpc-epi-php.c 								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, ZSTR_VAL(php_function_name));</span>
+<span class='curline'><a href='../S/1240.html#L1174'>column</a>           1174 ext/xmlrpc/xmlrpc-epi-php.c 						err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error);</span>
+</pre>
+</body>
+</html>

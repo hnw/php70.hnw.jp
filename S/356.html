@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/intl/dateformat/dateformat_format.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1773.html'>intl</a>/<a href='../files/1779.html'>dateformat</a>/dateformat_format.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L35'>[^]</a><a href='#L152'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L35' title='Defined at 35.'>internal_format</a></li>
+<li><a href='#L62' title='Defined at 62.'>internal_get_arr_ele</a></li>
+<li><a href='#L100' title='Defined at 100.'>internal_get_timestamp</a></li>
+<li><a href='#L152' title='Defined at 152.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | Authors: Kirti Velankar &lt;kirtig@yahoo-inc.com&gt;                       |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>*/</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#endif</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;unicode/ustring.h&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;unicode/ucal.h&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='416.html'>../php_intl.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='384.html'>../intl_convert.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='340.html'>../common/common_date.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='347.html'>dateformat.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='352.html'>dateformat_class.h</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='357.html'>dateformat_format.h</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='355.html'>dateformat_data.h</a>"
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='comment'>/* {{{</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * Internal function which calls the udat_format</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>*/</em>
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/356.html#L186' title='Referred from 186 in ext/intl/dateformat/dateformat_format.c.'>internal_format</a>(<a href='../S/352.html#L33' title='Defined at 33 in ext/intl/dateformat/dateformat_class.h.'>IntlDateFormatter_object</a> *<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, <a href='../Y/6734.html' title='Multiple used in 5 places.'>UDate</a> <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>)
+<a id='L36' name='L36'></a>  36 <em class='brace'>{</em>
+<a id='L37' name='L37'></a>  37         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>*  <a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a> =  <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L38' name='L38'></a>  38         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a> =0 ;
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40         <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a>=<a href='../Y/39419.html' title='Multiple used in 2 places.'>udat_format</a>( <a href='../S/352.html#L55' title='Defined at 55 in ext/intl/dateformat/dateformat_class.h.'>DATE_FORMAT_OBJECT</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>), <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>));
+<a id='L41' name='L41'></a>  41         <strong class='reserved'>if</strong>(<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>)==<a href='../Y/6931.html' title='Multiple used in 22 places.'>U_BUFFER_OVERFLOW_ERROR</a>)
+<a id='L42' name='L42'></a>  42         <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43                 <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>)=<a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>;
+<a id='L44' name='L44'></a>  44                 <a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a>=(<a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<strong class='reserved'>sizeof</strong>(<a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>) * <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a>);
+<a id='L45' name='L45'></a>  45                 <a href='../Y/39419.html' title='Multiple used in 2 places.'>udat_format</a>( <a href='../S/352.html#L55' title='Defined at 55 in ext/intl/dateformat/dateformat_class.h.'>DATE_FORMAT_OBJECT</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>), <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>, <a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a>, <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>));
+<a id='L46' name='L46'></a>  46         <em class='brace'>}</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>if</strong> (<a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a> &amp;&amp; <a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>( <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>) ) ) <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a>);
+<a id='L50' name='L50'></a>  50         <em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, "Date formatting failed" );
+<a id='L53' name='L53'></a>  53         <a href='../S/387.html#L85' title='Defined at 85 in ext/intl/intl_data.h.'>INTL_METHOD_RETVAL_UTF8</a>( <a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, <a href='../Y/18222.html' title='Multiple used in 33 places.'>formatted</a>, <a href='../Y/34767.html' title='Multiple used in 5 places.'>resultlengthneeded</a>, 1 );
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>/* }}} */</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59 <em class='comment'>/* {{{</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * Internal function which fetches an element from the passed array for the key_name passed</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>*/</em>
+<a id='L62' name='L62'></a>  62 <strong class='reserved'>static</strong> <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../S/356.html#L114' title='Referred from 114 in ext/intl/dateformat/dateformat_format.c.'>internal_get_arr_ele</a>(<a href='../S/352.html#L33' title='Defined at 33 in ext/intl/dateformat/dateformat_class.h.'>IntlDateFormatter_object</a> *<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>,
+<a id='L63' name='L63'></a>  63                 <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>* <a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>, <strong class='reserved'>char</strong>* <a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>, <a href='../S/389.html#L32' title='Defined at 32 in ext/intl/intl_error.h.'>intl_error</a> *<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>)
+<a id='L64' name='L64'></a>  64 <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a>    *<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>      = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L66' name='L66'></a>  66         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>          = 0;
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>char</strong>    *<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>;
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>if</strong> (<a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>-&gt;<a href='../Y/13972.html' title='Multiple used in 1696 places.'>code</a>)) <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>return</strong> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L71' name='L71'></a>  71         <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73         <strong class='reserved'>if</strong> ((<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a> = <a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>, <a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>, <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>))) != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74                 <strong class='reserved'>if</strong>(<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>) != <a href='../S/1731.html#L306' title='Defined at 306 in Zend/zend_types.h.'>IS_LONG</a>) <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>(&amp;<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, 0, "datefmt_format: parameter array contains "
+<a id='L76' name='L76'></a>  76                                         "a non-integer element for key '%s'", <a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>);
+<a id='L77' name='L77'></a>  77                         <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>, <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, 1);
+<a id='L78' name='L78'></a>  78                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>);
+<a id='L79' name='L79'></a>  79                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L80' name='L80'></a>  80                         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>(<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>) &gt; <a href='../D/3799.html' title='Multiple defined in 2 places.'>INT32_MAX</a> ||
+<a id='L81' name='L81'></a>  81                                         <a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>(<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>) &lt; <a href='../D/3800.html' title='Multiple defined in 2 places.'>INT32_MIN</a>) <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82                                 <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>(&amp;<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, 0, "datefmt_format: value %pd is out of "
+<a id='L83' name='L83'></a>  83                                                 "bounds for a 32-bit integer in key '%s'",
+<a id='L84' name='L84'></a>  84                                                 <a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>(<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>), <a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>);
+<a id='L85' name='L85'></a>  85                                 <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>, <a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>, 1);
+<a id='L86' name='L86'></a>  86                                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/26498.html' title='Multiple used in 386 places.'>message</a>);
+<a id='L87' name='L87'></a>  87                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L88' name='L88'></a>  88                                 <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> = <a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>(<a href='../Y/16528.html' title='Multiple used in 26 places.'>ele_value</a>);
+<a id='L89' name='L89'></a>  89                         <em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91         <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>return</strong> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L94' name='L94'></a>  94 <em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>/* }}} */</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97 <em class='comment'>/* {{{</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'> * Internal function which sets UCalendar  from the passed array and retrieves timestamp</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>*/</em>
+<a id='L100' name='L100'></a> 100 <strong class='reserved'>static</strong> <a href='../Y/6734.html' title='Multiple used in 5 places.'>UDate</a> <a href='../S/356.html#L176' title='Referred from 176 in ext/intl/dateformat/dateformat_format.c.'>internal_get_timestamp</a>(<a href='../S/352.html#L33' title='Defined at 33 in ext/intl/dateformat/dateformat_class.h.'>IntlDateFormatter_object</a> *<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>,
+<a id='L101' name='L101'></a> 101                 <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>)
+<a id='L102' name='L102'></a> 102 <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>         <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>,
+<a id='L104' name='L104'></a> 104                                 <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>,
+<a id='L105' name='L105'></a> 105                                 <a href='../Y/20040.html' title='Multiple used in 26 places.'>hour</a>,
+<a id='L106' name='L106'></a> 106                                 <a href='../Y/26641.html' title='Multiple used in 18 places.'>minute</a>,
+<a id='L107' name='L107'></a> 107                                 <a href='../Y/35576.html' title='Multiple used in 108 places.'>second</a>,
+<a id='L108' name='L108'></a> 108                                 <a href='../Y/26416.html' title='Multiple used in 3 places.'>mday</a>;
+<a id='L109' name='L109'></a> 109         <a href='../Y/6717.html' title='Multiple used in 4 places.'>UCalendar</a>       *<a href='../Y/31357.html' title='Multiple used in 5 places.'>pcal</a>;
+<a id='L110' name='L110'></a> 110         <a href='../Y/6734.html' title='Multiple used in 5 places.'>UDate</a>           <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L111' name='L111'></a> 111         <a href='../S/389.html#L32' title='Defined at 32 in ext/intl/intl_error.h.'>intl_error</a>      *<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = &amp;<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>-&gt;<a href='../Y/15100.html' title='Multiple used in 23 places.'>datef_data</a>.<a href='../S/247.html#L73' title='Defined at 73 in ext/gd/libgd/gdkanji.c.'>error</a>;
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113 <em class='sharp'>#define</em> <a href='../R/3369.html' title='Multiple referred from 6 places.'>INTL_GET_ELEM</a>(<a href='../Y/16529.html' title='Multiple used in 361 places.'>elem</a>) \
+<a id='L114' name='L114'></a> 114         <a href='../S/356.html#L62' title='Defined at 62 in ext/intl/dateformat/dateformat_format.c.'>internal_get_arr_ele</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, <a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>, (<a href='../Y/16529.html' title='Multiple used in 361 places.'>elem</a>), <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>)
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <em class='comment'>/* Fetch  values from the incoming array */</em>
+<a id='L117' name='L117'></a> 117         <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>    = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L40' title='Defined at 40 in ext/intl/dateformat/dateformat.h.'>CALENDAR_YEAR</a>) + 1900; <em class='comment'>/* tm_year is years since 1900 */</em>
+<a id='L118' name='L118'></a> 118         <em class='comment'>/* Month in ICU and PHP starts from January =0 */</em>
+<a id='L119' name='L119'></a> 119         <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>   = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L39' title='Defined at 39 in ext/intl/dateformat/dateformat.h.'>CALENDAR_MON</a>);
+<a id='L120' name='L120'></a> 120         <a href='../Y/20040.html' title='Multiple used in 26 places.'>hour</a>    = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L37' title='Defined at 37 in ext/intl/dateformat/dateformat.h.'>CALENDAR_HOUR</a>);
+<a id='L121' name='L121'></a> 121         <a href='../Y/26641.html' title='Multiple used in 18 places.'>minute</a>  = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L36' title='Defined at 36 in ext/intl/dateformat/dateformat.h.'>CALENDAR_MIN</a>);
+<a id='L122' name='L122'></a> 122         <a href='../Y/35576.html' title='Multiple used in 108 places.'>second</a>  = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L35' title='Defined at 35 in ext/intl/dateformat/dateformat.h.'>CALENDAR_SEC</a>);
+<a id='L123' name='L123'></a> 123         <em class='comment'>/* For the ucal_setDateTime() function, this is the 'date'  value */</em>
+<a id='L124' name='L124'></a> 124         <a href='../Y/26416.html' title='Multiple used in 3 places.'>mday</a>    = <a href='../D/3851.html' title='Multiple defined in 2 places.'>INTL_GET_ELEM</a>(<a href='../S/347.html#L38' title='Defined at 38 in ext/intl/dateformat/dateformat.h.'>CALENDAR_MDAY</a>);
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 <em class='sharp'>#undef</em> <a href='../R/3369.html' title='Multiple referred from 6 places.'>INTL_GET_ELEM</a>
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128         <a href='../Y/31357.html' title='Multiple used in 5 places.'>pcal</a> = ucal_clone(<a href='../Y/39420.html' title='Multiple used in 2 places.'>udat_getCalendar</a>(<a href='../S/352.html#L55' title='Defined at 55 in ext/intl/dateformat/dateformat_class.h.'>DATE_FORMAT_OBJECT</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>)),
+<a id='L129' name='L129'></a> 129                         &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>));
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>if</strong> (<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>) != <a href='../Y/7071.html' title='Multiple used in 84 places.'>U_ZERO_ERROR</a>) <em class='brace'>{</em>
+<a id='L132' name='L132'></a> 132                 <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>, <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>), "datefmt_format: "
+<a id='L133' name='L133'></a> 133                                 "error cloning calendar", 0);
+<a id='L134' name='L134'></a> 134                 <strong class='reserved'>return</strong> 0;
+<a id='L135' name='L135'></a> 135         <em class='brace'>}</em>
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137         <em class='comment'>/* set the incoming values for the calendar */</em>
+<a id='L138' name='L138'></a> 138         ucal_setDateTime(<a href='../Y/31357.html' title='Multiple used in 5 places.'>pcal</a>, <a href='../Y/41675.html' title='Multiple used in 163 places.'>year</a>, <a href='../Y/26786.html' title='Multiple used in 125 places.'>month</a>, <a href='../Y/26416.html' title='Multiple used in 3 places.'>mday</a>, <a href='../Y/20040.html' title='Multiple used in 26 places.'>hour</a>, <a href='../Y/26641.html' title='Multiple used in 18 places.'>minute</a>, <a href='../Y/35576.html' title='Multiple used in 108 places.'>second</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>));
+<a id='L139' name='L139'></a> 139         <em class='comment'>/* actually, ucal_setDateTime cannot fail */</em>
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141         <em class='comment'>/* Fetch the timestamp from the UCalendar */</em>
+<a id='L142' name='L142'></a> 142         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> = ucal_getMillis(<a href='../Y/31357.html' title='Multiple used in 5 places.'>pcal</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>));
+<a id='L143' name='L143'></a> 143         ucal_close(<a href='../Y/31357.html' title='Multiple used in 5 places.'>pcal</a>);
+<a id='L144' name='L144'></a> 144         <strong class='reserved'>return</strong> <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L145' name='L145'></a> 145 <em class='brace'>}</em>
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148 <em class='comment'>/* {{{ proto string IntlDateFormatter::format( [mixed]int $args or array $args )</em>
+<a id='L149' name='L149'></a> 149 <em class='comment'> * Format the time value as a string. }}}*/</em>
+<a id='L150' name='L150'></a> 150 <em class='comment'>/* {{{ proto string datefmt_format( [mixed]int $args or array $args )</em>
+<a id='L151' name='L151'></a> 151 <em class='comment'> * Format the time value as a string. }}}*/</em>
+<a id='L152' name='L152'></a> 152 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>(<a href='../Y/15102.html' title='Multiple used in 4 places.'>datefmt_format</a>)
+<a id='L153' name='L153'></a> 153 <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154         <a href='../Y/6734.html' title='Multiple used in 5 places.'>UDate</a>           <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>       = 0;
+<a id='L155' name='L155'></a> 155         <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>       *<a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>       = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L156' name='L156'></a> 156         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a>            *<a href='../Y/43620.html' title='Multiple used in 5 places.'>zarg</a>           = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158         <a href='../S/352.html#L45' title='Defined at 45 in ext/intl/dateformat/dateformat_class.h.'>DATE_FORMAT_METHOD_INIT_VARS</a>;
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160         <em class='comment'>/* Parse parameters. */</em>
+<a id='L161' name='L161'></a> 161         <strong class='reserved'>if</strong> (<a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>(<a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "Oz",
+<a id='L162' name='L162'></a> 162                         &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/3494.html' title='Multiple used in 21 places.'>IntlDateFormatter_ce_ptr</a>, &amp;<a href='../Y/43620.html' title='Multiple used in 5 places.'>zarg</a>) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a>) <em class='brace'>{</em>
+<a id='L163' name='L163'></a> 163                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>, "datefmt_format: unable "
+<a id='L164' name='L164'></a> 164                                 "to parse input params", 0 );
+<a id='L165' name='L165'></a> 165                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168         <a href='../S/352.html#L47' title='Defined at 47 in ext/intl/dateformat/dateformat_class.h.'>DATE_FORMAT_METHOD_FETCH_OBJECT</a>;
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/43620.html' title='Multiple used in 5 places.'>zarg</a>) == <a href='../S/1731.html#L309' title='Defined at 309 in Zend/zend_types.h.'>IS_ARRAY</a>) <em class='brace'>{</em>
+<a id='L171' name='L171'></a> 171                 <a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a> = <a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/43620.html' title='Multiple used in 5 places.'>zarg</a>);
+<a id='L172' name='L172'></a> 172                 <strong class='reserved'>if</strong> (!<a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a> || <a href='../S/1668.html#L211' title='Defined at 211 in Zend/zend_hash.h.'>zend_hash_num_elements</a>(<a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>) == 0) <em class='brace'>{</em>
+<a id='L173' name='L173'></a> 173                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L174' name='L174'></a> 174                 <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176                 <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a> = <a href='../S/356.html#L100' title='Defined at 100 in ext/intl/dateformat/dateformat_format.c.'>internal_get_timestamp</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, <a href='../Y/19777.html' title='Multiple used in 34 places.'>hash_arr</a>);
+<a id='L177' name='L177'></a> 177                 <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, "datefmt_format: date formatting failed")
+<a id='L178' name='L178'></a> 178         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179                 <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a> = <a href='../Y/23445.html' title='Multiple used in 2 places.'>intl_zval_to_millis</a>(<a href='../Y/43620.html' title='Multiple used in 5 places.'>zarg</a>, <a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>),
+<a id='L180' name='L180'></a> 180                                 "datefmt_format");
+<a id='L181' name='L181'></a> 181                 <strong class='reserved'>if</strong> (<a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>))) <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182                         <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L183' name='L183'></a> 183                 <em class='brace'>}</em>
+<a id='L184' name='L184'></a> 184         <em class='brace'>}</em>
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186         <a href='../S/356.html#L35' title='Defined at 35 in ext/intl/dateformat/dateformat_format.c.'>internal_format</a>( <a href='../Y/15666.html' title='Multiple used in 88 places.'>dfo</a>, <a href='../Y/38517.html' title='Multiple used in 144 places.'>timestamp</a>, <a href='../D/29192.html' title='Multiple defined in 2 places.'>return_value</a>);
+<a id='L187' name='L187'></a> 187 <em class='brace'>}</em>
+<a id='L188' name='L188'></a> 188 
+<a id='L189' name='L189'></a> 189 <em class='comment'>/* }}} */</em>
+<a id='L190' name='L190'></a> 190 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L35'>[^]</a><a href='#L152'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

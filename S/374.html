@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/intl/formatter/formatter_parse.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1773.html'>intl</a>/<a href='../files/1780.html'>formatter</a>/formatter_parse.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L37'>[^]</a><a href='#L126'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L37' title='Defined at 37.'>PHP_FUNCTION</a></li>
+<li><a href='#L126' title='Defined at 126.'>PHP_FUNCTION</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | Authors: Stanislav Malyshev &lt;stas@zend.com&gt;                          |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#ifdef</em> <a href='../Y/2735.html' title='Multiple used in 331 places.'>HAVE_CONFIG_H</a>
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/132.html'>config.h</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#endif</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;unicode/ustring.h&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;<a href='391.html'>locale.h</a>&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='416.html'>php_intl.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='367.html'>formatter_class.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='371.html'>formatter_format.h</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='375.html'>formatter_parse.h</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='384.html'>intl_convert.h</a>"
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> <a href='../R/3195.html' title='Multiple referred from 2 places.'>ICU_LOCALE_BUG</a> 1
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='comment'>/* {{{ proto mixed NumberFormatter::parse( string $str[, int $type, int &amp;$position ])</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * Parse a number. }}} */</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>/* {{{ proto mixed numfmt_parse( NumberFormatter $nf, string $str[, int $type, int &amp;$position ])</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * Parse a number.</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> */</em>
+<a id='L37' name='L37'></a>  37 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>( <a href='../Y/28966.html' title='Multiple used in 4 places.'>numfmt_parse</a> )
+<a id='L38' name='L38'></a>  38 <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39         <a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> = <a href='../S/371.html#L28' title='Defined at 28 in ext/intl/formatter/formatter_format.h.'>FORMAT_TYPE_DOUBLE</a>;
+<a id='L40' name='L40'></a>  40         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>* <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L41' name='L41'></a>  41         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a> = 0;
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>char</strong>* <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L43' name='L43'></a>  43         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>;
+<a id='L44' name='L44'></a>  44         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../Y/40039.html' title='Multiple used in 3 places.'>val32</a>, <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a> = 0;
+<a id='L45' name='L45'></a>  45         <a href='../D/23588.html' title='Multiple defined in 6 places.'>int64_t</a> <a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a>;
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>double</strong> <a href='../Y/40043.html' title='Multiple used in 3 places.'>val_double</a>;
+<a id='L47' name='L47'></a>  47         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>* <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L48' name='L48'></a>  48         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>char</strong> *<a href='../Y/29517.html' title='Multiple used in 4 places.'>oldlocale</a>;
+<a id='L50' name='L50'></a>  50         <a href='../S/367.html#L42' title='Defined at 42 in ext/intl/formatter/formatter_class.h.'>FORMATTER_METHOD_INIT_VARS</a>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <em class='comment'>/* Parse parameters. */</em>
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "Os|lz/!",
+<a id='L54' name='L54'></a>  54                 &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a>,  &amp;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, &amp;<a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, &amp;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, &amp;<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L55' name='L55'></a>  55         <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L57' name='L57'></a>  57                         "number_parse: unable to parse input params", 0 );
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L60' name='L60'></a>  60         <em class='brace'>}</em>
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <em class='comment'>/* Fetch the object. */</em>
+<a id='L63' name='L63'></a>  63         <a href='../S/367.html#L45' title='Defined at 45 in ext/intl/formatter/formatter_class.h.'>FORMATTER_METHOD_FETCH_OBJECT</a>;
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65         <em class='comment'>/* Convert given string to UTF-16. */</em>
+<a id='L66' name='L66'></a>  66         <a href='../S/383.html#L50' title='Defined at 50 in ext/intl/intl_convert.c.'>intl_convert_utf8_to_utf16</a>(&amp;<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, &amp;<a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L67' name='L67'></a>  67         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, "String conversion to UTF-16 failed" );
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>if</strong>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>) <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                 <a href='../S/1731.html#L885' title='Defined at 885 in Zend/zend_types.h.'>ZVAL_DEREF</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L71' name='L71'></a>  71                 <a href='../S/1706.html#L282' title='Defined at 282 in Zend/zend_operators.c.'>convert_to_long</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L72' name='L72'></a>  72                 <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a> = (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>)<a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>( <a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> );
+<a id='L73' name='L73'></a>  73                 <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a> = &amp;<a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>;
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76 <em class='sharp'>#if</em> <a href='../S/374.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_parse.c.'>ICU_LOCALE_BUG</a> &amp;&amp; <strong class='reserved'>defined</strong>(<a href='../Y/3751.html' title='Multiple used in 6 places.'>LC_NUMERIC</a>)
+<a id='L77' name='L77'></a>  77         <em class='comment'>/* need to copy here since setlocale may change it later */</em>
+<a id='L78' name='L78'></a>  78         <a href='../Y/29517.html' title='Multiple used in 4 places.'>oldlocale</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../S/1178.html#L50' title='Defined at 50 in ext/standard/string.c.'>setlocale</a>(<a href='../Y/3751.html' title='Multiple used in 6 places.'>LC_NUMERIC</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>));
+<a id='L79' name='L79'></a>  79         <a href='../S/1178.html#L50' title='Defined at 50 in ext/standard/string.c.'>setlocale</a>(<a href='../Y/3751.html' title='Multiple used in 6 places.'>LC_NUMERIC</a>, "C");
+<a id='L80' name='L80'></a>  80 <em class='sharp'>#endif</em>
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>switch</strong>(<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>) <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83                 <strong class='reserved'>case</strong> <a href='../S/371.html#L26' title='Defined at 26 in ext/intl/formatter/formatter_format.h.'>FORMAT_TYPE_INT32</a>:
+<a id='L84' name='L84'></a>  84                         <a href='../Y/40039.html' title='Multiple used in 3 places.'>val32</a> = unum_parse(<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>), <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L85' name='L85'></a>  85                         <a href='../S/1632.html#L613' title='Defined at 613 in Zend/zend_API.h.'>RETVAL_LONG</a>(<a href='../Y/40039.html' title='Multiple used in 3 places.'>val32</a>);
+<a id='L86' name='L86'></a>  86                         <strong class='reserved'>break</strong>;
+<a id='L87' name='L87'></a>  87                 <strong class='reserved'>case</strong> <a href='../S/371.html#L27' title='Defined at 27 in ext/intl/formatter/formatter_format.h.'>FORMAT_TYPE_INT64</a>:
+<a id='L88' name='L88'></a>  88                         <a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a> = unum_parseInt64(<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>), <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>if</strong>(<a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a> &gt; <a href='../D/16876.html' title='Multiple defined in 2 places.'>ZEND_LONG_MAX</a> || <a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a> &lt; <a href='../D/16877.html' title='Multiple defined in 2 places.'>ZEND_LONG_MIN</a>) <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90                                 <a href='../S/1632.html#L614' title='Defined at 614 in Zend/zend_API.h.'>RETVAL_DOUBLE</a>(<a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a>);
+<a id='L91' name='L91'></a>  91                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92                                 <a href='../S/1632.html#L613' title='Defined at 613 in Zend/zend_API.h.'>RETVAL_LONG</a>((<a href='../D/34229.html' title='Multiple defined in 2 places.'>zend_long</a>)<a href='../Y/40040.html' title='Multiple used in 5 places.'>val64</a>);
+<a id='L93' name='L93'></a>  93                         <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94                         <strong class='reserved'>break</strong>;
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>case</strong> <a href='../S/371.html#L28' title='Defined at 28 in ext/intl/formatter/formatter_format.h.'>FORMAT_TYPE_DOUBLE</a>:
+<a id='L96' name='L96'></a>  96                         <a href='../Y/40043.html' title='Multiple used in 3 places.'>val_double</a> = unum_parseDouble(<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>), <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L97' name='L97'></a>  97                         <a href='../S/1632.html#L614' title='Defined at 614 in Zend/zend_API.h.'>RETVAL_DOUBLE</a>(<a href='../Y/40043.html' title='Multiple used in 3 places.'>val_double</a>);
+<a id='L98' name='L98'></a>  98                         <strong class='reserved'>break</strong>;
+<a id='L99' name='L99'></a>  99                 <strong class='reserved'>default</strong>:
+<a id='L100' name='L100'></a> 100                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Unsupported format type %pd", <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>);
+<a id='L101' name='L101'></a> 101                         <a href='../S/1632.html#L626' title='Defined at 626 in Zend/zend_API.h.'>RETVAL_FALSE</a>;
+<a id='L102' name='L102'></a> 102                         <strong class='reserved'>break</strong>;
+<a id='L103' name='L103'></a> 103         <em class='brace'>}</em>
+<a id='L104' name='L104'></a> 104 <em class='sharp'>#if</em> <a href='../S/374.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_parse.c.'>ICU_LOCALE_BUG</a> &amp;&amp; <strong class='reserved'>defined</strong>(<a href='../Y/3751.html' title='Multiple used in 6 places.'>LC_NUMERIC</a>)
+<a id='L105' name='L105'></a> 105         <a href='../S/1178.html#L50' title='Defined at 50 in ext/standard/string.c.'>setlocale</a>(<a href='../Y/3751.html' title='Multiple used in 6 places.'>LC_NUMERIC</a>, <a href='../Y/29517.html' title='Multiple used in 4 places.'>oldlocale</a>);
+<a id='L106' name='L106'></a> 106         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/29517.html' title='Multiple used in 4 places.'>oldlocale</a>);
+<a id='L107' name='L107'></a> 107 <em class='sharp'>#endif</em>
+<a id='L108' name='L108'></a> 108         <strong class='reserved'>if</strong>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>) <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109                 <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L110' name='L110'></a> 110                 <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>, <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>);
+<a id='L111' name='L111'></a> 111         <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>if</strong> (<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>) <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>);
+<a id='L115' name='L115'></a> 115         <em class='brace'>}</em>
+<a id='L116' name='L116'></a> 116 
+<a id='L117' name='L117'></a> 117         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, "Number parsing failed" );
+<a id='L118' name='L118'></a> 118 <em class='brace'>}</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'>/* }}} */</em>
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121 <em class='comment'>/* {{{ proto double NumberFormatter::parseCurrency( string $str, string $&amp;currency[, int $&amp;position] )</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'> * Parse a number as currency. }}} */</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'>/* {{{ proto double numfmt_parse_currency( NumberFormatter $nf, string $str, string $&amp;currency[, int $&amp;position] )</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'> * Parse a number as currency.</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'> */</em>
+<a id='L126' name='L126'></a> 126 <a href='../R/7042.html' title='Multiple referred from 2099 places.'>PHP_FUNCTION</a>( <a href='../Y/28968.html' title='Multiple used in 4 places.'>numfmt_parse_currency</a> )
+<a id='L127' name='L127'></a> 127 <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>double</strong> <a href='../D/25237.html' title='Multiple defined in 2 places.'>number</a>;
+<a id='L129' name='L129'></a> 129         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a> <a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>[5] = <em class='brace'>{</em>0<em class='brace'>}</em>;
+<a id='L130' name='L130'></a> 130         <a href='../D/14293.html' title='Multiple defined in 3 places.'>UChar</a>* <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L131' name='L131'></a> 131         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a> = 0;
+<a id='L132' name='L132'></a> 132         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a>;
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>char</strong> *<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>;
+<a id='L134' name='L134'></a> 134         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>;
+<a id='L135' name='L135'></a> 135         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>* <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L136' name='L136'></a> 136         <a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a> <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a> = 0;
+<a id='L137' name='L137'></a> 137         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/43651.html' title='Multiple used in 4 places.'>zcurrency</a>, *<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L138' name='L138'></a> 138         <a href='../S/367.html#L42' title='Defined at 42 in ext/intl/formatter/formatter_class.h.'>FORMATTER_METHOD_INIT_VARS</a>;
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140         <em class='comment'>/* Parse parameters. */</em>
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>if</strong>( <a href='../S/1631.html#L982' title='Defined at 982 in Zend/zend_API.c.'>zend_parse_method_parameters</a>( <a href='../S/1632.html#L367' title='Defined at 367 in Zend/zend_API.h.'>ZEND_NUM_ARGS</a>(), <a href='../S/1632.html#L361' title='Defined at 361 in Zend/zend_API.h.'>getThis</a>(), "Osz/|z/!",
+<a id='L142' name='L142'></a> 142                 &amp;<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>, <a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a>,  &amp;<a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, &amp;<a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, &amp;<a href='../Y/43651.html' title='Multiple used in 4 places.'>zcurrency</a>, &amp;<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> ) == <a href='../S/1731.html#L51' title='Defined at 51 in Zend/zend_types.h.'>FAILURE</a> )
+<a id='L143' name='L143'></a> 143         <em class='brace'>{</em>
+<a id='L144' name='L144'></a> 144                 <a href='../S/388.html#L183' title='Defined at 183 in ext/intl/intl_error.c.'>intl_error_set</a>( <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6964.html' title='Multiple used in 168 places.'>U_ILLEGAL_ARGUMENT_ERROR</a>,
+<a id='L145' name='L145'></a> 145                         "number_parse_currency: unable to parse input params", 0 );
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147                 <a href='../S/1632.html#L644' title='Defined at 644 in Zend/zend_API.h.'>RETURN_FALSE</a>;
+<a id='L148' name='L148'></a> 148         <em class='brace'>}</em>
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         <em class='comment'>/* Fetch the object. */</em>
+<a id='L151' name='L151'></a> 151         <a href='../S/367.html#L45' title='Defined at 45 in ext/intl/formatter/formatter_class.h.'>FORMATTER_METHOD_FETCH_OBJECT</a>;
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153         <em class='comment'>/* Convert given string to UTF-16. */</em>
+<a id='L154' name='L154'></a> 154         <a href='../S/383.html#L50' title='Defined at 50 in ext/intl/intl_convert.c.'>intl_convert_utf8_to_utf16</a>(&amp;<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, &amp;<a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/37491.html' title='Multiple used in 4206 places.'>str</a>, <a href='../Y/37527.html' title='Multiple used in 337 places.'>str_len</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L155' name='L155'></a> 155         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, "String conversion to UTF-16 failed" );
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>if</strong>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <a href='../S/1731.html#L885' title='Defined at 885 in Zend/zend_types.h.'>ZVAL_DEREF</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L159' name='L159'></a> 159                 <a href='../S/1706.html#L282' title='Defined at 282 in Zend/zend_operators.c.'>convert_to_long</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L160' name='L160'></a> 160                 <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a> = (<a href='../D/23584.html' title='Multiple defined in 10 places.'>int32_t</a>)<a href='../S/1731.html#L507' title='Defined at 507 in Zend/zend_types.h.'>Z_LVAL_P</a>( <a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a> );
+<a id='L161' name='L161'></a> 161                 <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a> = &amp;<a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>;
+<a id='L162' name='L162'></a> 162         <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <a href='../D/25237.html' title='Multiple defined in 2 places.'>number</a> = unum_parseDoubleCurrency(<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>), <a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>, <a href='../Y/37085.html' title='Multiple used in 8 places.'>sstr_len</a>, <a href='../Y/33043.html' title='Multiple used in 8 places.'>position_p</a>, <a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>, &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L165' name='L165'></a> 165         <strong class='reserved'>if</strong>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>) <em class='brace'>{</em>
+<a id='L166' name='L166'></a> 166                 <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>);
+<a id='L167' name='L167'></a> 167                 <a href='../S/1731.html#L608' title='Defined at 608 in Zend/zend_types.h.'>ZVAL_LONG</a>(<a href='../Y/44077.html' title='Multiple used in 18 places.'>zposition</a>, <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>);
+<a id='L168' name='L168'></a> 168         <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169         <strong class='reserved'>if</strong> (<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>) <em class='brace'>{</em>
+<a id='L170' name='L170'></a> 170                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/37084.html' title='Multiple used in 12 places.'>sstr</a>);
+<a id='L171' name='L171'></a> 171         <em class='brace'>}</em>
+<a id='L172' name='L172'></a> 172         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, "Number parsing failed" );
+<a id='L173' name='L173'></a> 173 
+<a id='L174' name='L174'></a> 174         <em class='comment'>/* Convert parsed currency to UTF-8 and pass it back to caller. */</em>
+<a id='L175' name='L175'></a> 175         <a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a> = <a href='../S/383.html#L118' title='Defined at 118 in ext/intl/intl_convert.c.'>intl_convert_utf16_to_utf8</a>(<a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>, u_strlen(<a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>), &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L176' name='L176'></a> 176         <a href='../S/387.html#L58' title='Defined at 58 in ext/intl/intl_data.h.'>INTL_METHOD_CHECK_STATUS</a>( <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, "Currency conversion to UTF-8 failed" );
+<a id='L177' name='L177'></a> 177         <a href='../S/1733.html#L121' title='Defined at 121 in Zend/zend_variables.h.'>zval_dtor</a>( <a href='../Y/43651.html' title='Multiple used in 4 places.'>zcurrency</a> );
+<a id='L178' name='L178'></a> 178         <a href='../S/1731.html#L637' title='Defined at 637 in Zend/zend_types.h.'>ZVAL_NEW_STR</a>(<a href='../Y/43651.html' title='Multiple used in 4 places.'>zcurrency</a>, <a href='../Y/39160.html' title='Multiple used in 43 places.'>u8str</a>);
+<a id='L179' name='L179'></a> 179 
+<a id='L180' name='L180'></a> 180         <a href='../S/1632.html#L614' title='Defined at 614 in Zend/zend_API.h.'>RETVAL_DOUBLE</a>( <a href='../D/25237.html' title='Multiple defined in 2 places.'>number</a> );
+<a id='L181' name='L181'></a> 181 <em class='brace'>}</em>
+<a id='L182' name='L182'></a> 182 <em class='comment'>/* }}} */</em>
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184 <em class='comment'>/*</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'> * Local variables:</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'> * tab-width: 4</em>
+<a id='L187' name='L187'></a> 187 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L188' name='L188'></a> 188 <em class='comment'> * End:</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L37'>[^]</a><a href='#L126'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

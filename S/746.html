@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/mcrypt/mcrypt_filter.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1805.html'>mcrypt</a>/mcrypt_filter.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L36'>[^]</a><a href='#L152'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L36' title='Defined at 36.'>php_mcrypt_filter</a></li>
+<li><a href='#L127' title='Defined at 127.'>php_mcrypt_filter_dtor</a></li>
+<li><a href='#L152' title='Defined at 152.'>php_mcrypt_filter_create</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: Sara Golemon &lt;pollita@php.net&gt;                               |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'></em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>  $Id$</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>*/</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='748.html'>php_mcrypt_filter.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;mcrypt.h&gt;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _php_mcrypt_filter_data <em class='brace'>{</em>
+<a id='L28' name='L28'></a>  28         <a href='../Y/4026.html' title='Multiple used in 11 places.'>MCRYPT</a> <a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>;
+<a id='L29' name='L29'></a>  29         <strong class='reserved'>char</strong> <a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a>;
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>int</strong> <a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>;
+<a id='L31' name='L31'></a>  31         <strong class='reserved'>char</strong> *<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>;
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>int</strong> <a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>;
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>char</strong> <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>;
+<a id='L34' name='L34'></a>  34 <em class='brace'>}</em> <a href='../R/24066.html' title='Multiple referred from 5 places.'>php_mcrypt_filter_data</a>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>static</strong> <a href='../S/1419.html#L66' title='Defined at 66 in main/streams/php_stream_filter_api.h.'>php_stream_filter_status_t</a> <a href='../S/746.html#L144' title='Referred from 144 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter</a>(
+<a id='L37' name='L37'></a>  37         <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>,
+<a id='L38' name='L38'></a>  38         <a href='../S/1397.html#L103' title='Defined at 103 in main/php_streams.h.'>php_stream_filter</a> *<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>,
+<a id='L39' name='L39'></a>  39         <a href='../S/1419.html#L42' title='Defined at 42 in main/streams/php_stream_filter_api.h.'>php_stream_bucket_brigade</a> *<a href='../Y/12973.html' title='Multiple used in 44 places.'>buckets_in</a>,
+<a id='L40' name='L40'></a>  40         <a href='../S/1419.html#L42' title='Defined at 42 in main/streams/php_stream_filter_api.h.'>php_stream_bucket_brigade</a> *<a href='../Y/12974.html' title='Multiple used in 51 places.'>buckets_out</a>,
+<a id='L41' name='L41'></a>  41         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> *<a href='../Y/13086.html' title='Multiple used in 51 places.'>bytes_consumed</a>,
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>)
+<a id='L43' name='L43'></a>  43 <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L45' name='L45'></a>  45         <a href='../S/1419.html#L41' title='Defined at 41 in main/streams/php_stream_filter_api.h.'>php_stream_bucket</a> *<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>;
+<a id='L46' name='L46'></a>  46         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/14339.html' title='Multiple used in 80 places.'>consumed</a> = 0;
+<a id='L47' name='L47'></a>  47         <a href='../S/1419.html#L66' title='Defined at 66 in main/streams/php_stream_filter_api.h.'>php_stream_filter_status_t</a> <a href='../Y/17295.html' title='Multiple used in 95 places.'>exit_status</a> = <a href='../S/1419.html#L64' title='Defined at 64 in main/streams/php_stream_filter_api.h.'>PSFS_FEED_ME</a>;
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>if</strong> (!<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a> || !<a href='../S/1731.html#L584' title='Defined at 584 in Zend/zend_types.h.'>Z_PTR</a>(<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>-&gt;<a href='../Y/8696.html' title='Multiple used in 184 places.'>abstract</a>)) <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50                 <em class='comment'>/* Should never happen */</em>
+<a id='L51' name='L51'></a>  51                 <strong class='reserved'>return</strong> <a href='../S/1419.html#L63' title='Defined at 63 in main/streams/php_stream_filter_api.h.'>PSFS_ERR_FATAL</a>;
+<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = (<a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a> *)(<a href='../S/1731.html#L584' title='Defined at 584 in Zend/zend_types.h.'>Z_PTR</a>(<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>-&gt;<a href='../Y/8696.html' title='Multiple used in 184 places.'>abstract</a>));
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>while</strong>(<a href='../Y/12973.html' title='Multiple used in 44 places.'>buckets_in</a>-&gt;<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>) <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56                 <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a> = <a href='../Y/12973.html' title='Multiple used in 44 places.'>buckets_in</a>-&gt;<a href='../Y/19890.html' title='Multiple used in 306 places.'>head</a>;
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58                 <a href='../Y/14339.html' title='Multiple used in 80 places.'>consumed</a> += <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60                 <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>) <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61                         <em class='comment'>/* Blockmode cipher */</em>
+<a id='L62' name='L62'></a>  62                         <strong class='reserved'>char</strong> *<a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a>;
+<a id='L63' name='L63'></a>  63                         <strong class='reserved'>int</strong> <a href='../Y/13697.html' title='Multiple used in 17 places.'>chunklen</a> = (<strong class='reserved'>int</strong>)(<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a> + <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>), <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L64' name='L64'></a>  64                         <a href='../S/1419.html#L41' title='Defined at 41 in main/streams/php_stream_filter_api.h.'>php_stream_bucket</a> *<a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a>;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66                         <a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a> = <a href='../S/1629.html#L195' title='Defined at 195 in Zend/zend_alloc.h.'>pemalloc</a>(<a href='../Y/13697.html' title='Multiple used in 17 places.'>chunklen</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L67' name='L67'></a>  67                         <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                                 <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>);
+<a id='L69' name='L69'></a>  69                         <em class='brace'>}</em>
+<a id='L70' name='L70'></a>  70                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a> + <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>, <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>);
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72                         <strong class='reserved'>for</strong>(<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>=0; (<a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> + <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>) &lt;= <a href='../Y/13697.html' title='Multiple used in 17 places.'>chunklen</a>; <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a> += <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>) <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74                                 <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a>) <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                                         <a href='../Y/26383.html' title='Multiple used in 8 places.'>mcrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a> + <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>);
+<a id='L76' name='L76'></a>  76                                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77                                         <a href='../Y/26418.html' title='Multiple used in 8 places.'>mdecrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a> + <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>);
+<a id='L78' name='L78'></a>  78                                 <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79                         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80                         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a> = <a href='../Y/13697.html' title='Multiple used in 17 places.'>chunklen</a> - <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>;
+<a id='L81' name='L81'></a>  81                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a> + <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>);
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83                         <a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a> = <a href='../S/1414.html#L71' title='Defined at 71 in main/streams/filter.c.'>php_stream_bucket_new</a>(<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <a href='../Y/30148.html' title='Multiple used in 8 places.'>outchunk</a>, <a href='../D/25111.html' title='Multiple defined in 3 places.'>n</a>, 1, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L84' name='L84'></a>  84                         <a href='../S/1414.html#L204' title='Defined at 204 in main/streams/filter.c.'>php_stream_bucket_append</a>(<a href='../Y/12974.html' title='Multiple used in 51 places.'>buckets_out</a>, <a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a>);
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86                         <a href='../Y/17295.html' title='Multiple used in 95 places.'>exit_status</a> = <a href='../S/1419.html#L65' title='Defined at 65 in main/streams/php_stream_filter_api.h.'>PSFS_PASS_ON</a>;
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88                         <a href='../S/1414.html#L222' title='Defined at 222 in main/streams/filter.c.'>php_stream_bucket_unlink</a>(<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>);
+<a id='L89' name='L89'></a>  89                         <a href='../S/1414.html#L180' title='Defined at 180 in main/streams/filter.c.'>php_stream_bucket_delref</a>(<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>);
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91                         <em class='comment'>/* Stream cipher */</em>
+<a id='L92' name='L92'></a>  92                         <a href='../S/1414.html#L115' title='Defined at 115 in main/streams/filter.c.'>php_stream_bucket_make_writeable</a>(<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>);
+<a id='L93' name='L93'></a>  93                         <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a>) <em class='brace'>{</em>
+<a id='L94' name='L94'></a>  94                                 <a href='../Y/26383.html' title='Multiple used in 8 places.'>mcrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, (<strong class='reserved'>int</strong>)<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>);
+<a id='L95' name='L95'></a>  95                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96                                 <a href='../Y/26418.html' title='Multiple used in 8 places.'>mdecrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, (<strong class='reserved'>int</strong>)<a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>-&gt;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>);
+<a id='L97' name='L97'></a>  97                         <em class='brace'>}</em>
+<a id='L98' name='L98'></a>  98                         <a href='../S/1414.html#L204' title='Defined at 204 in main/streams/filter.c.'>php_stream_bucket_append</a>(<a href='../Y/12974.html' title='Multiple used in 51 places.'>buckets_out</a>, <a href='../Y/12967.html' title='Multiple used in 349 places.'>bucket</a>);
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100                         <a href='../Y/17295.html' title='Multiple used in 95 places.'>exit_status</a> = <a href='../S/1419.html#L65' title='Defined at 65 in main/streams/php_stream_filter_api.h.'>PSFS_PASS_ON</a>;
+<a id='L101' name='L101'></a> 101                 <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102         <em class='brace'>}</em>
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>if</strong> ((<a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a> &amp; <a href='../S/1419.html#L82' title='Defined at 82 in main/streams/php_stream_filter_api.h.'>PSFS_FLAG_FLUSH_CLOSE</a>) &amp;&amp; <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a> &amp;&amp; <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>) <em class='brace'>{</em>
+<a id='L105' name='L105'></a> 105                 <a href='../S/1419.html#L41' title='Defined at 41 in main/streams/php_stream_filter_api.h.'>php_stream_bucket</a> *<a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a>;
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107                 <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a> + <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>, 0, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a> - <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a>);
+<a id='L108' name='L108'></a> 108                 <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a>) <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109                         <a href='../Y/26383.html' title='Multiple used in 8 places.'>mcrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>);
+<a id='L110' name='L110'></a> 110                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L111' name='L111'></a> 111                         <a href='../Y/26418.html' title='Multiple used in 8 places.'>mdecrypt_generic</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>);
+<a id='L112' name='L112'></a> 112                 <em class='brace'>}</em>
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114                 <a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a> = <a href='../S/1414.html#L71' title='Defined at 71 in main/streams/filter.c.'>php_stream_bucket_new</a>(<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>, 0, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L115' name='L115'></a> 115                 <a href='../S/1414.html#L204' title='Defined at 204 in main/streams/filter.c.'>php_stream_bucket_append</a>(<a href='../Y/12974.html' title='Multiple used in 51 places.'>buckets_out</a>, <a href='../Y/28371.html' title='Multiple used in 6 places.'>newbucket</a>);
+<a id='L116' name='L116'></a> 116 
+<a id='L117' name='L117'></a> 117                 <a href='../Y/17295.html' title='Multiple used in 95 places.'>exit_status</a> = <a href='../S/1419.html#L65' title='Defined at 65 in main/streams/php_stream_filter_api.h.'>PSFS_PASS_ON</a>;
+<a id='L118' name='L118'></a> 118         <em class='brace'>}</em>
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>if</strong> (<a href='../Y/13086.html' title='Multiple used in 51 places.'>bytes_consumed</a>) <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121                 *<a href='../Y/13086.html' title='Multiple used in 51 places.'>bytes_consumed</a> = <a href='../Y/14339.html' title='Multiple used in 80 places.'>consumed</a>;
+<a id='L122' name='L122'></a> 122         <em class='brace'>}</em>
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>return</strong> <a href='../Y/17295.html' title='Multiple used in 95 places.'>exit_status</a>;
+<a id='L125' name='L125'></a> 125 <em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/746.html#L145' title='Referred from 145 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_dtor</a>(<a href='../S/1397.html#L103' title='Defined at 103 in main/php_streams.h.'>php_stream_filter</a> *<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>)
+<a id='L128' name='L128'></a> 128 <em class='brace'>{</em>
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>if</strong> (<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a> &amp;&amp; <a href='../S/1731.html#L584' title='Defined at 584 in Zend/zend_types.h.'>Z_PTR</a>(<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>-&gt;<a href='../Y/8696.html' title='Multiple used in 184 places.'>abstract</a>)) <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                 <a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = (<a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a>*) <a href='../S/1731.html#L584' title='Defined at 584 in Zend/zend_types.h.'>Z_PTR</a>(<a href='../Y/38327.html' title='Multiple used in 63 places.'>thisfilter</a>-&gt;<a href='../Y/8696.html' title='Multiple used in 184 places.'>abstract</a>);
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132                 <strong class='reserved'>if</strong> (<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>) <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                         <a href='../S/1629.html#L197' title='Defined at 197 in Zend/zend_alloc.h.'>pefree</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L134' name='L134'></a> 134                 <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136                 <a href='../Y/26384.html' title='Multiple used in 7 places.'>mcrypt_generic_deinit</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>);
+<a id='L137' name='L137'></a> 137                 <a href='../Y/26395.html' title='Multiple used in 15 places.'>mcrypt_module_close</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a>);
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139                 <a href='../S/1629.html#L197' title='Defined at 197 in Zend/zend_alloc.h.'>pefree</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141 <em class='brace'>}</em>
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143 <strong class='reserved'>static</strong> <a href='../S/1419.html#L99' title='Defined at 99 in main/streams/php_stream_filter_api.h.'>php_stream_filter_ops</a> <a href='../Y/32448.html' title='Multiple used in 2 places.'>php_mcrypt_filter_ops</a> = <em class='brace'>{</em>
+<a id='L144' name='L144'></a> 144     <a href='../S/746.html#L36' title='Defined at 36 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter</a>,
+<a id='L145' name='L145'></a> 145     <a href='../S/746.html#L127' title='Defined at 127 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_dtor</a>,
+<a id='L146' name='L146'></a> 146     "mcrypt.*"
+<a id='L147' name='L147'></a> 147 <em class='brace'>}</em>;
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149 <em class='comment'>/* {{{ php_mcrypt_filter_create</em>
+<a id='L150' name='L150'></a> 150 <em class='comment'> * Instantiate mcrypt filter</em>
+<a id='L151' name='L151'></a> 151 <em class='comment'> */</em>
+<a id='L152' name='L152'></a> 152 <strong class='reserved'>static</strong> <a href='../S/1397.html#L103' title='Defined at 103 in main/php_streams.h.'>php_stream_filter</a> *<a href='../S/746.html#L273' title='Referred from 273 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_create</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/17953.html' title='Multiple used in 75 places.'>filtername</a>, <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>, <strong class='reserved'>int</strong> <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>)
+<a id='L153' name='L153'></a> 153 <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154         <strong class='reserved'>int</strong> <a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a> = 1, <a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a>, <a href='../Y/24456.html' title='Multiple used in 205 places.'>key_len</a>, <a href='../Y/24484.html' title='Multiple used in 4 places.'>keyl</a>, <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>;
+<a id='L155' name='L155'></a> 155         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/800.html#L488' title='Defined at 488 in ext/mysqlnd/mysqlnd_structs.h.'>cipher</a> = <a href='../Y/17953.html' title='Multiple used in 75 places.'>filtername</a> + <strong class='reserved'>sizeof</strong>("mcrypt.") - 1;
+<a id='L156' name='L156'></a> 156         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>;
+<a id='L157' name='L157'></a> 157         <a href='../Y/4026.html' title='Multiple used in 11 places.'>MCRYPT</a> <a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>;
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>char</strong> *<a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, *<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L159' name='L159'></a> 159         <strong class='reserved'>char</strong> *<a href='../Y/9054.html' title='Multiple used in 3 places.'>algo_dir</a> = <a href='../S/1674.html#L141' title='Defined at 141 in Zend/zend_ini.h.'>INI_STR</a>("mcrypt.algorithms_dir");
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>char</strong> *<a href='../Y/26718.html' title='Multiple used in 6 places.'>mode_dir</a> = <a href='../S/1674.html#L141' title='Defined at 141 in Zend/zend_ini.h.'>INI_STR</a>("mcrypt.modes_dir");
+<a id='L161' name='L161'></a> 161         <strong class='reserved'>char</strong> *<a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a> = "cbc";
+<a id='L162' name='L162'></a> 162         <a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <strong class='reserved'>if</strong> (<a href='../D/31744.html' title='Multiple defined in 5 places.'>strncasecmp</a>(<a href='../Y/17953.html' title='Multiple used in 75 places.'>filtername</a>, "mdecrypt.", <strong class='reserved'>sizeof</strong>("mdecrypt.") - 1) == 0) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                 <a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a> = 0;
+<a id='L166' name='L166'></a> 166                 <a href='../S/800.html#L488' title='Defined at 488 in ext/mysqlnd/mysqlnd_structs.h.'>cipher</a> += <strong class='reserved'>sizeof</strong>("de") - 1;
+<a id='L167' name='L167'></a> 167         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/31744.html' title='Multiple defined in 5 places.'>strncasecmp</a>(<a href='../Y/17953.html' title='Multiple used in 75 places.'>filtername</a>, "mcrypt.", <strong class='reserved'>sizeof</strong>("mcrypt.") - 1) != 0) <em class='brace'>{</em>
+<a id='L168' name='L168'></a> 168                 <em class='comment'>/* Should never happen */</em>
+<a id='L169' name='L169'></a> 169                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L170' name='L170'></a> 170         <em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172         <strong class='reserved'>if</strong> (!<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a> || <a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>) != <a href='../S/1731.html#L309' title='Defined at 309 in Zend/zend_types.h.'>IS_ARRAY</a>) <em class='brace'>{</em>
+<a id='L173' name='L173'></a> 173                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Filter parameters for %s must be an array", <a href='../Y/17953.html' title='Multiple used in 75 places.'>filtername</a>);
+<a id='L174' name='L174'></a> 174                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L175' name='L175'></a> 175         <em class='brace'>}</em>
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177         <strong class='reserved'>if</strong> ((<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a> = <a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>), <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("mode")))) <em class='brace'>{</em>
+<a id='L178' name='L178'></a> 178                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179                         <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>);
+<a id='L180' name='L180'></a> 180                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L181' name='L181'></a> 181                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "mode is not a string, ignoring");
+<a id='L182' name='L182'></a> 182                 <em class='brace'>}</em>
+<a id='L183' name='L183'></a> 183         <em class='brace'>}</em>
+<a id='L184' name='L184'></a> 184 
+<a id='L185' name='L185'></a> 185         <strong class='reserved'>if</strong> ((<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>=<a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>), <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("algorithms_dir")))) <em class='brace'>{</em>
+<a id='L186' name='L186'></a> 186                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187                         <a href='../Y/9054.html' title='Multiple used in 3 places.'>algo_dir</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>);
+<a id='L188' name='L188'></a> 188                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "algorithms_dir is not a string, ignoring");
+<a id='L190' name='L190'></a> 190                 <em class='brace'>}</em>
+<a id='L191' name='L191'></a> 191         <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193         <strong class='reserved'>if</strong> ((<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>=<a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>), <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("modes_dir")))) <em class='brace'>{</em>
+<a id='L194' name='L194'></a> 194                 <strong class='reserved'>if</strong> (<a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195                         <a href='../Y/26718.html' title='Multiple used in 6 places.'>mode_dir</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>);
+<a id='L196' name='L196'></a> 196                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L197' name='L197'></a> 197                         <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "modes_dir is not a string, ignoring");
+<a id='L198' name='L198'></a> 198                 <em class='brace'>}</em>
+<a id='L199' name='L199'></a> 199         <em class='brace'>}</em>
+<a id='L200' name='L200'></a> 200 
+<a id='L201' name='L201'></a> 201         <strong class='reserved'>if</strong> ((<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a> = <a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>), <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("key"))) &amp;&amp;
+<a id='L202' name='L202'></a> 202                 <a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>) == <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203                 <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a> = <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>);
+<a id='L204' name='L204'></a> 204                 <a href='../Y/24456.html' title='Multiple used in 205 places.'>key_len</a> = (<strong class='reserved'>int</strong>)<a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>);
+<a id='L205' name='L205'></a> 205         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "key not specified or is not a string");
+<a id='L207' name='L207'></a> 207                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L208' name='L208'></a> 208         <em class='brace'>}</em>
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210         <a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a> = <a href='../Y/26404.html' title='Multiple used in 11 places.'>mcrypt_module_open</a>((<strong class='reserved'>char</strong> *)<a href='../S/800.html#L488' title='Defined at 488 in ext/mysqlnd/mysqlnd_structs.h.'>cipher</a>, <a href='../Y/9054.html' title='Multiple used in 3 places.'>algo_dir</a>, <a href='../D/24613.html' title='Multiple defined in 3 places.'>mode</a>, <a href='../Y/26718.html' title='Multiple used in 6 places.'>mode_dir</a>);
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>if</strong> (<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a> == <a href='../Y/4029.html' title='Multiple used in 8 places.'>MCRYPT_FAILED</a>) <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Could not open encryption module");
+<a id='L213' name='L213'></a> 213                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L214' name='L214'></a> 214         <em class='brace'>}</em>
+<a id='L215' name='L215'></a> 215         <a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a> = <a href='../Y/26369.html' title='Multiple used in 8 places.'>mcrypt_enc_get_iv_size</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>);
+<a id='L216' name='L216'></a> 216         <a href='../Y/24484.html' title='Multiple used in 4 places.'>keyl</a> = <a href='../Y/26370.html' title='Multiple used in 8 places.'>mcrypt_enc_get_key_size</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>);
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>if</strong> (<a href='../Y/24484.html' title='Multiple used in 4 places.'>keyl</a> &lt; <a href='../Y/24456.html' title='Multiple used in 205 places.'>key_len</a>) <em class='brace'>{</em>
+<a id='L218' name='L218'></a> 218                 <a href='../Y/24456.html' title='Multiple used in 205 places.'>key_len</a> = <a href='../Y/24484.html' title='Multiple used in 4 places.'>keyl</a>;
+<a id='L219' name='L219'></a> 219         <em class='brace'>}</em>
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221         <strong class='reserved'>if</strong> (!(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a> = <a href='../S/1667.html#L1987' title='Defined at 1987 in Zend/zend_hash.c.'>zend_hash_str_find</a>(<a href='../S/1731.html#L528' title='Defined at 528 in Zend/zend_types.h.'>Z_ARRVAL_P</a>(<a href='../Y/17955.html' title='Multiple used in 73 places.'>filterparams</a>), <a href='../S/1708.html#L423' title='Defined at 423 in Zend/zend_portability.h.'>ZEND_STRL</a>("iv"))) ||
+<a id='L222' name='L222'></a> 222                 <a href='../S/1731.html#L337' title='Defined at 337 in Zend/zend_types.h.'>Z_TYPE_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>) != <a href='../S/1731.html#L308' title='Defined at 308 in Zend/zend_types.h.'>IS_STRING</a>) <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Filter parameter[iv] not provided or not of type: string");
+<a id='L224' name='L224'></a> 224                 <a href='../Y/26395.html' title='Multiple used in 15 places.'>mcrypt_module_close</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>);
+<a id='L225' name='L225'></a> 225                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L226' name='L226'></a> 226         <em class='brace'>}</em>
+<a id='L227' name='L227'></a> 227 
+<a id='L228' name='L228'></a> 228         <a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a> = <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a> + 1);
+<a id='L229' name='L229'></a> 229         <strong class='reserved'>if</strong> (<a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a> &lt;= <a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>)) <em class='brace'>{</em>
+<a id='L230' name='L230'></a> 230                 <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a>, <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>), <a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a>);
+<a id='L231' name='L231'></a> 231         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L232' name='L232'></a> 232                 <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a>, <a href='../S/1731.html#L516' title='Defined at 516 in Zend/zend_types.h.'>Z_STRVAL_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>), <a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>));
+<a id='L233' name='L233'></a> 233                 <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(<a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a> + <a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>), 0, <a href='../Y/24243.html' title='Multiple used in 37 places.'>iv_len</a> - <a href='../S/1731.html#L519' title='Defined at 519 in Zend/zend_types.h.'>Z_STRLEN_P</a>(<a href='../Y/38713.html' title='Multiple used in 128 places.'>tmpzval</a>));
+<a id='L234' name='L234'></a> 234         <em class='brace'>}</em>
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         <a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> = <a href='../Y/26386.html' title='Multiple used in 6 places.'>mcrypt_generic_init</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>, <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/24456.html' title='Multiple used in 205 places.'>key_len</a>, <a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a>);
+<a id='L237' name='L237'></a> 237         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/24240.html' title='Multiple used in 59 places.'>iv</a>);
+<a id='L238' name='L238'></a> 238         <strong class='reserved'>if</strong> (<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a> &lt; 0) <em class='brace'>{</em>
+<a id='L239' name='L239'></a> 239                 <strong class='reserved'>switch</strong> (<a href='../D/29182.html' title='Multiple defined in 34 places.'>result</a>) <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240                         <strong class='reserved'>case</strong> -3:
+<a id='L241' name='L241'></a> 241                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Key length incorrect");
+<a id='L242' name='L242'></a> 242                                 <strong class='reserved'>break</strong>;
+<a id='L243' name='L243'></a> 243                         <strong class='reserved'>case</strong> -4:
+<a id='L244' name='L244'></a> 244                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Memory allocation error");
+<a id='L245' name='L245'></a> 245                                 <strong class='reserved'>break</strong>;
+<a id='L246' name='L246'></a> 246                         <strong class='reserved'>case</strong> -1:
+<a id='L247' name='L247'></a> 247                         <strong class='reserved'>default</strong>:
+<a id='L248' name='L248'></a> 248                                 <a href='../S/1378.html#L312' title='Defined at 312 in main/php.h.'>php_error_docref</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1651.html#L26' title='Defined at 26 in Zend/zend_errors.h.'>E_WARNING</a>, "Unknown error");
+<a id='L249' name='L249'></a> 249                                 <strong class='reserved'>break</strong>;
+<a id='L250' name='L250'></a> 250                 <em class='brace'>}</em>
+<a id='L251' name='L251'></a> 251                 <a href='../Y/26395.html' title='Multiple used in 15 places.'>mcrypt_module_close</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>);
+<a id='L252' name='L252'></a> 252                 <strong class='reserved'>return</strong> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L253' name='L253'></a> 253         <em class='brace'>}</em>
+<a id='L254' name='L254'></a> 254 
+<a id='L255' name='L255'></a> 255         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = <a href='../S/1629.html#L195' title='Defined at 195 in Zend/zend_alloc.h.'>pemalloc</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/746.html#L34' title='Defined at 34 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_data</a>), <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L256' name='L256'></a> 256         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/26748.html' title='Multiple used in 353 places.'>module</a> = <a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>;
+<a id='L257' name='L257'></a> 257         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a> = <a href='../Y/16750.html' title='Multiple used in 7 places.'>encrypt</a>;
+<a id='L258' name='L258'></a> 258         <strong class='reserved'>if</strong> (<a href='../Y/26375.html' title='Multiple used in 8 places.'>mcrypt_enc_is_block_mode</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>)) <em class='brace'>{</em>
+<a id='L259' name='L259'></a> 259                 <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a> = <a href='../Y/26368.html' title='Multiple used in 9 places.'>mcrypt_enc_get_block_size</a>(<a href='../Y/26394.html' title='Multiple used in 11 places.'>mcrypt_module</a>);
+<a id='L260' name='L260'></a> 260                 <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a> = <a href='../S/1629.html#L195' title='Defined at 195 in Zend/zend_alloc.h.'>pemalloc</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a>, <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L261' name='L261'></a> 261         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L262' name='L262'></a> 262                 <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12772.html' title='Multiple used in 17 places.'>blocksize</a> = 0;
+<a id='L263' name='L263'></a> 263                 <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12758.html' title='Multiple used in 11 places.'>block_buffer</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L264' name='L264'></a> 264         <em class='brace'>}</em>
+<a id='L265' name='L265'></a> 265         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../Y/12767.html' title='Multiple used in 10 places.'>block_used</a> = 0;
+<a id='L266' name='L266'></a> 266         <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>-&gt;<a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a> = <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>;
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268         <strong class='reserved'>return</strong> <a href='../S/1419.html#L136' title='Defined at 136 in main/streams/php_stream_filter_api.h.'>php_stream_filter_alloc</a>(&amp;<a href='../Y/32448.html' title='Multiple used in 2 places.'>php_mcrypt_filter_ops</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../D/26037.html' title='Multiple defined in 29 places.'>persistent</a>);
+<a id='L269' name='L269'></a> 269 <em class='brace'>}</em>
+<a id='L270' name='L270'></a> 270 <em class='comment'>/* }}} */</em>
+<a id='L271' name='L271'></a> 271 
+<a id='L272' name='L272'></a> 272 <a href='../S/1419.html#L146' title='Defined at 146 in main/streams/php_stream_filter_api.h.'>php_stream_filter_factory</a> <a href='../Y/32447.html' title='Multiple used in 4 places.'>php_mcrypt_filter_factory</a> = <em class='brace'>{</em>
+<a id='L273' name='L273'></a> 273         <a href='../S/746.html#L152' title='Defined at 152 in ext/mcrypt/mcrypt_filter.c.'>php_mcrypt_filter_create</a>
+<a id='L274' name='L274'></a> 274 <em class='brace'>}</em>;
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276 <em class='comment'>/*</em>
+<a id='L277' name='L277'></a> 277 <em class='comment'> * Local variables:</em>
+<a id='L278' name='L278'></a> 278 <em class='comment'> * tab-width: 4</em>
+<a id='L279' name='L279'></a> 279 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L280' name='L280'></a> 280 <em class='comment'> * End:</em>
+<a id='L281' name='L281'></a> 281 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L282' name='L282'></a> 282 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L283' name='L283'></a> 283 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L36'>[^]</a><a href='#L152'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>zobj</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1638.html#L1162'>zobj</a>             1162 Zend/zend_builtin_functions.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1638.html#L1184'>zobj</a>             1184 Zend/zend_builtin_functions.c 	zobj = Z_OBJ_P(obj);</span>
+<span class='curline'><a href='../S/1638.html#L1186'>zobj</a>             1186 Zend/zend_builtin_functions.c 	if (!zobj-&gt;ce-&gt;default_properties_count &amp;&amp; properties == zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1638.html#L1188'>zobj</a>             1188 Zend/zend_builtin_functions.c 		if (EXPECTED(zobj-&gt;handlers == &amp;std_object_handlers)) {</span>
+<span class='curline'><a href='../S/1638.html#L1200'>zobj</a>             1200 Zend/zend_builtin_functions.c 				if (zend_check_property_access(zobj, key) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1654.html#L1132'>zobj</a>             1132 Zend/zend_execute.c 		zend_object *zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1654.html#L1136'>zobj</a>             1136 Zend/zend_execute.c 			property = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1654.html#L1146'>zobj</a>             1146 Zend/zend_execute.c 			if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1654.html#L1147'>zobj</a>             1147 Zend/zend_execute.c 				if (UNEXPECTED(GC_REFCOUNT(zobj-&gt;properties) &gt; 1)) {</span>
+<span class='curline'><a href='../S/1654.html#L1148'>zobj</a>             1148 Zend/zend_execute.c 					if (EXPECTED(!(GC_FLAGS(zobj-&gt;properties) &amp; IS_ARRAY_IMMUTABLE))) {</span>
+<span class='curline'><a href='../S/1654.html#L1149'>zobj</a>             1149 Zend/zend_execute.c 						GC_REFCOUNT(zobj-&gt;properties)--;</span>
+<span class='curline'><a href='../S/1654.html#L1151'>zobj</a>             1151 Zend/zend_execute.c 					zobj-&gt;properties = zend_array_dup(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1654.html#L1153'>zobj</a>             1153 Zend/zend_execute.c 				property = zend_hash_find(zobj-&gt;properties, Z_STR_P(property_name));</span>
+<span class='curline'><a href='../S/1654.html#L1159'>zobj</a>             1159 Zend/zend_execute.c 			if (!zobj-&gt;ce-&gt;__set) {</span>
+<span class='curline'><a href='../S/1654.html#L1161'>zobj</a>             1161 Zend/zend_execute.c 				if (EXPECTED(zobj-&gt;properties == NULL)) {</span>
+<span class='curline'><a href='../S/1654.html#L1162'>zobj</a>             1162 Zend/zend_execute.c 					rebuild_object_properties(zobj);</span>
+<span class='curline'><a href='../S/1654.html#L1195'>zobj</a>             1195 Zend/zend_execute.c 				zend_hash_add_new(zobj-&gt;properties, Z_STR_P(property_name), value);</span>
+<span class='curline'><a href='../S/1654.html#L1947'>zobj</a>             1947 Zend/zend_execute.c 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1654.html#L1951'>zobj</a>             1951 Zend/zend_execute.c 			retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1654.html#L1956'>zobj</a>             1956 Zend/zend_execute.c 		} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1654.html#L1957'>zobj</a>             1957 Zend/zend_execute.c 			if (UNEXPECTED(GC_REFCOUNT(zobj-&gt;properties) &gt; 1)) {</span>
+<span class='curline'><a href='../S/1654.html#L1958'>zobj</a>             1958 Zend/zend_execute.c 				if (EXPECTED(!(GC_FLAGS(zobj-&gt;properties) &amp; IS_ARRAY_IMMUTABLE))) {</span>
+<span class='curline'><a href='../S/1654.html#L1959'>zobj</a>             1959 Zend/zend_execute.c 					GC_REFCOUNT(zobj-&gt;properties)--;</span>
+<span class='curline'><a href='../S/1654.html#L1961'>zobj</a>             1961 Zend/zend_execute.c 				zobj-&gt;properties = zend_array_dup(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1654.html#L1963'>zobj</a>             1963 Zend/zend_execute.c 			retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(prop_ptr));</span>
+<span class='curline'><a href='../S/1699.html#L73'>zobj</a>               73 Zend/zend_object_handlers.c ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */</span>
+<span class='curline'><a href='../S/1699.html#L75'>zobj</a>               75 Zend/zend_object_handlers.c 	if (!zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1699.html#L77'>zobj</a>               77 Zend/zend_object_handlers.c 		zend_class_entry *ce = zobj-&gt;ce;</span>
+<span class='curline'><a href='../S/1699.html#L79'>zobj</a>               79 Zend/zend_object_handlers.c 		ALLOC_HASHTABLE(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1699.html#L80'>zobj</a>               80 Zend/zend_object_handlers.c 		zend_hash_init(zobj-&gt;properties, ce-&gt;default_properties_count, NULL, ZVAL_PTR_DTOR, 0);</span>
+<span class='curline'><a href='../S/1699.html#L82'>zobj</a>               82 Zend/zend_object_handlers.c 			zend_hash_real_init(zobj-&gt;properties, 0);</span>
+<span class='curline'><a href='../S/1699.html#L83'>zobj</a>               83 Zend/zend_object_handlers.c 			zobj-&gt;properties-&gt;nInternalPointer = 0;</span>
+<span class='curline'><a href='../S/1699.html#L88'>zobj</a>               88 Zend/zend_object_handlers.c 					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info-&gt;offset)) == IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1699.html#L89'>zobj</a>               89 Zend/zend_object_handlers.c 						zobj-&gt;properties-&gt;u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;</span>
+<span class='curline'><a href='../S/1699.html#L92'>zobj</a>               92 Zend/zend_object_handlers.c 					_zend_hash_append_ind(zobj-&gt;properties, prop_info-&gt;name, </span>
+<span class='curline'><a href='../S/1699.html#L93'>zobj</a>               93 Zend/zend_object_handlers.c 						OBJ_PROP(zobj, prop_info-&gt;offset));</span>
+<span class='curline'><a href='../S/1699.html#L104'>zobj</a>              104 Zend/zend_object_handlers.c 						if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info-&gt;offset)) == IS_UNDEF)) {</span>
+<span class='curline'><a href='../S/1699.html#L105'>zobj</a>              105 Zend/zend_object_handlers.c 							zobj-&gt;properties-&gt;u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;</span>
+<span class='curline'><a href='../S/1699.html#L108'>zobj</a>              108 Zend/zend_object_handlers.c 						ZVAL_INDIRECT(&amp;zv, OBJ_PROP(zobj, prop_info-&gt;offset));</span>
+<span class='curline'><a href='../S/1699.html#L109'>zobj</a>              109 Zend/zend_object_handlers.c 						zend_hash_add(zobj-&gt;properties, prop_info-&gt;name, &amp;zv);</span>
+<span class='curline'><a href='../S/1699.html#L120'>zobj</a>              120 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L121'>zobj</a>              121 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L122'>zobj</a>              122 Zend/zend_object_handlers.c 	if (!zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1699.html#L123'>zobj</a>              123 Zend/zend_object_handlers.c 		rebuild_object_properties(zobj);</span>
+<span class='curline'><a href='../S/1699.html#L125'>zobj</a>              125 Zend/zend_object_handlers.c 	return zobj-&gt;properties;</span>
+<span class='curline'><a href='../S/1699.html#L136'>zobj</a>              136 Zend/zend_object_handlers.c 		zend_object *zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L138'>zobj</a>              138 Zend/zend_object_handlers.c 		if (zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1699.html#L141'>zobj</a>              141 Zend/zend_object_handlers.c 			return zobj-&gt;properties;</span>
+<span class='curline'><a href='../S/1699.html#L143'>zobj</a>              143 Zend/zend_object_handlers.c 			*table = zobj-&gt;properties_table;</span>
+<span class='curline'><a href='../S/1699.html#L144'>zobj</a>              144 Zend/zend_object_handlers.c 			*n = zobj-&gt;ce-&gt;default_properties_count;</span>
+<span class='curline'><a href='../S/1699.html#L449'>zobj</a>              449 Zend/zend_object_handlers.c ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name) /* {{{ */</span>
+<span class='curline'><a href='../S/1699.html#L463'>zobj</a>              463 Zend/zend_object_handlers.c 	property_info = zend_get_property_info(zobj-&gt;ce, member, 1);</span>
+<span class='curline'><a href='../S/1699.html#L484'>zobj</a>              484 Zend/zend_object_handlers.c 	return zend_verify_property_access(property_info, zobj-&gt;ce) ? SUCCESS : FAILURE;</span>
+<span class='curline'><a href='../S/1699.html#L493'>zobj</a>              493 Zend/zend_object_handlers.c static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */</span>
+<span class='curline'><a href='../S/1699.html#L498'>zobj</a>              498 Zend/zend_object_handlers.c 	ZEND_ASSERT(GC_FLAGS(zobj) &amp; IS_OBJ_USE_GUARDS);</span>
+<span class='curline'><a href='../S/1699.html#L499'>zobj</a>              499 Zend/zend_object_handlers.c 	if (GC_FLAGS(zobj) &amp; IS_OBJ_HAS_GUARDS) {</span>
+<span class='curline'><a href='../S/1699.html#L500'>zobj</a>              500 Zend/zend_object_handlers.c 		guards = Z_PTR(zobj-&gt;properties_table[zobj-&gt;ce-&gt;default_properties_count]);</span>
+<span class='curline'><a href='../S/1699.html#L508'>zobj</a>              508 Zend/zend_object_handlers.c 		Z_PTR(zobj-&gt;properties_table[zobj-&gt;ce-&gt;default_properties_count]) = guards;</span>
+<span class='curline'><a href='../S/1699.html#L509'>zobj</a>              509 Zend/zend_object_handlers.c 		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;</span>
+<span class='curline'><a href='../S/1699.html#L519'>zobj</a>              519 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L524'>zobj</a>              524 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L538'>zobj</a>              538 Zend/zend_object_handlers.c 	property_offset = zend_get_property_offset(zobj-&gt;ce, Z_STR_P(member), (type == BP_VAR_IS) || (zobj-&gt;ce-&gt;__get != NULL), cache_slot);</span>
+<span class='curline'><a href='../S/1699.html#L542'>zobj</a>              542 Zend/zend_object_handlers.c 			retval = OBJ_PROP(zobj, property_offset);</span>
+<span class='curline'><a href='../S/1699.html#L546'>zobj</a>              546 Zend/zend_object_handlers.c 		} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1699.html#L547'>zobj</a>              547 Zend/zend_object_handlers.c 			retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L556'>zobj</a>              556 Zend/zend_object_handlers.c 	if (zobj-&gt;ce-&gt;__get) {</span>
+<span class='curline'><a href='../S/1699.html#L557'>zobj</a>              557 Zend/zend_object_handlers.c 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L573'>zobj</a>              573 Zend/zend_object_handlers.c 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", ZSTR_VAL(zobj-&gt;ce-&gt;name), Z_STRVAL_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L596'>zobj</a>              596 Zend/zend_object_handlers.c 		zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj-&gt;ce-&gt;name), Z_STRVAL_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L611'>zobj</a>              611 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L616'>zobj</a>              616 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L625'>zobj</a>              625 Zend/zend_object_handlers.c 	property_offset = zend_get_property_offset(zobj-&gt;ce, Z_STR_P(member), (zobj-&gt;ce-&gt;__set != NULL), cache_slot);</span>
+<span class='curline'><a href='../S/1699.html#L629'>zobj</a>              629 Zend/zend_object_handlers.c 			variable_ptr = OBJ_PROP(zobj, property_offset);</span>
+<span class='curline'><a href='../S/1699.html#L633'>zobj</a>              633 Zend/zend_object_handlers.c 		} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1699.html#L634'>zobj</a>              634 Zend/zend_object_handlers.c 			if (UNEXPECTED(GC_REFCOUNT(zobj-&gt;properties) &gt; 1)) {</span>
+<span class='curline'><a href='../S/1699.html#L635'>zobj</a>              635 Zend/zend_object_handlers.c 				if (EXPECTED(!(GC_FLAGS(zobj-&gt;properties) &amp; IS_ARRAY_IMMUTABLE))) {</span>
+<span class='curline'><a href='../S/1699.html#L636'>zobj</a>              636 Zend/zend_object_handlers.c 					GC_REFCOUNT(zobj-&gt;properties)--;</span>
+<span class='curline'><a href='../S/1699.html#L638'>zobj</a>              638 Zend/zend_object_handlers.c 				zobj-&gt;properties = zend_array_dup(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1699.html#L640'>zobj</a>              640 Zend/zend_object_handlers.c 			if ((variable_ptr = zend_hash_find(zobj-&gt;properties, Z_STR_P(member))) != NULL) {</span>
+<span class='curline'><a href='../S/1699.html#L651'>zobj</a>              651 Zend/zend_object_handlers.c 	if (zobj-&gt;ce-&gt;__set) {</span>
+<span class='curline'><a href='../S/1699.html#L652'>zobj</a>              652 Zend/zend_object_handlers.c 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L691'>zobj</a>              691 Zend/zend_object_handlers.c 			ZVAL_COPY_VALUE(OBJ_PROP(zobj, property_offset), value);</span>
+<span class='curline'><a href='../S/1699.html#L693'>zobj</a>              693 Zend/zend_object_handlers.c 			if (!zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1699.html#L694'>zobj</a>              694 Zend/zend_object_handlers.c 				rebuild_object_properties(zobj);</span>
+<span class='curline'><a href='../S/1699.html#L696'>zobj</a>              696 Zend/zend_object_handlers.c 			zend_hash_add_new(zobj-&gt;properties, Z_STR_P(member), value);</span>
+<span class='curline'><a href='../S/1699.html#L791'>zobj</a>              791 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L796'>zobj</a>              796 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L807'>zobj</a>              807 Zend/zend_object_handlers.c 	property_offset = zend_get_property_offset(zobj-&gt;ce, name, (zobj-&gt;ce-&gt;__get != NULL), cache_slot);</span>
+<span class='curline'><a href='../S/1699.html#L811'>zobj</a>              811 Zend/zend_object_handlers.c 			retval = OBJ_PROP(zobj, property_offset);</span>
+<span class='curline'><a href='../S/1699.html#L813'>zobj</a>              813 Zend/zend_object_handlers.c 				if (EXPECTED(!zobj-&gt;ce-&gt;__get) ||</span>
+<span class='curline'><a href='../S/1699.html#L814'>zobj</a>              814 Zend/zend_object_handlers.c 				    UNEXPECTED((*zend_get_property_guard(zobj, name)) &amp; IN_GET)) {</span>
+<span class='curline'><a href='../S/1699.html#L819'>zobj</a>              819 Zend/zend_object_handlers.c 						zend_error(E_NOTICE, "Undefined property: %s::$%s", ZSTR_VAL(zobj-&gt;ce-&gt;name), ZSTR_VAL(name));</span>
+<span class='curline'><a href='../S/1699.html#L827'>zobj</a>              827 Zend/zend_object_handlers.c 			if (EXPECTED(zobj-&gt;properties)) {</span>
+<span class='curline'><a href='../S/1699.html#L828'>zobj</a>              828 Zend/zend_object_handlers.c 				if (UNEXPECTED(GC_REFCOUNT(zobj-&gt;properties) &gt; 1)) {</span>
+<span class='curline'><a href='../S/1699.html#L829'>zobj</a>              829 Zend/zend_object_handlers.c 					if (EXPECTED(!(GC_FLAGS(zobj-&gt;properties) &amp; IS_ARRAY_IMMUTABLE))) {</span>
+<span class='curline'><a href='../S/1699.html#L830'>zobj</a>              830 Zend/zend_object_handlers.c 						GC_REFCOUNT(zobj-&gt;properties)--;</span>
+<span class='curline'><a href='../S/1699.html#L832'>zobj</a>              832 Zend/zend_object_handlers.c 					zobj-&gt;properties = zend_array_dup(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1699.html#L834'>zobj</a>              834 Zend/zend_object_handlers.c 			    if (EXPECTED((retval = zend_hash_find(zobj-&gt;properties, name)) != NULL)) {</span>
+<span class='curline'><a href='../S/1699.html#L841'>zobj</a>              841 Zend/zend_object_handlers.c 			if (EXPECTED(!zobj-&gt;ce-&gt;__get) ||</span>
+<span class='curline'><a href='../S/1699.html#L842'>zobj</a>              842 Zend/zend_object_handlers.c 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) &amp; IN_GET)) {</span>
+<span class='curline'><a href='../S/1699.html#L843'>zobj</a>              843 Zend/zend_object_handlers.c 				if (UNEXPECTED(!zobj-&gt;properties)) {</span>
+<span class='curline'><a href='../S/1699.html#L844'>zobj</a>              844 Zend/zend_object_handlers.c 					rebuild_object_properties(zobj);</span>
+<span class='curline'><a href='../S/1699.html#L846'>zobj</a>              846 Zend/zend_object_handlers.c 				retval = zend_hash_update(zobj-&gt;properties, name, &amp;EG(uninitialized_zval));</span>
+<span class='curline'><a href='../S/1699.html#L850'>zobj</a>              850 Zend/zend_object_handlers.c 					zend_error(E_NOTICE, "Undefined property: %s::$%s", ZSTR_VAL(zobj-&gt;ce-&gt;name), ZSTR_VAL(name));</span>
+<span class='curline'><a href='../S/1699.html#L865'>zobj</a>              865 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L869'>zobj</a>              869 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L878'>zobj</a>              878 Zend/zend_object_handlers.c 	property_offset = zend_get_property_offset(zobj-&gt;ce, Z_STR_P(member), (zobj-&gt;ce-&gt;__unset != NULL), cache_slot);</span>
+<span class='curline'><a href='../S/1699.html#L882'>zobj</a>              882 Zend/zend_object_handlers.c 			zval *slot = OBJ_PROP(zobj, property_offset);</span>
+<span class='curline'><a href='../S/1699.html#L887'>zobj</a>              887 Zend/zend_object_handlers.c 				if (zobj-&gt;properties) {</span>
+<span class='curline'><a href='../S/1699.html#L888'>zobj</a>              888 Zend/zend_object_handlers.c 					zobj-&gt;properties-&gt;u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;</span>
+<span class='curline'><a href='../S/1699.html#L892'>zobj</a>              892 Zend/zend_object_handlers.c 		} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1699.html#L893'>zobj</a>              893 Zend/zend_object_handlers.c 			if (UNEXPECTED(GC_REFCOUNT(zobj-&gt;properties) &gt; 1)) {</span>
+<span class='curline'><a href='../S/1699.html#L894'>zobj</a>              894 Zend/zend_object_handlers.c 				if (EXPECTED(!(GC_FLAGS(zobj-&gt;properties) &amp; IS_ARRAY_IMMUTABLE))) {</span>
+<span class='curline'><a href='../S/1699.html#L895'>zobj</a>              895 Zend/zend_object_handlers.c 					GC_REFCOUNT(zobj-&gt;properties)--;</span>
+<span class='curline'><a href='../S/1699.html#L897'>zobj</a>              897 Zend/zend_object_handlers.c 				zobj-&gt;properties = zend_array_dup(zobj-&gt;properties);</span>
+<span class='curline'><a href='../S/1699.html#L899'>zobj</a>              899 Zend/zend_object_handlers.c 			if (EXPECTED(zend_hash_del(zobj-&gt;properties, Z_STR_P(member)) != FAILURE)) {</span>
+<span class='curline'><a href='../S/1699.html#L908'>zobj</a>              908 Zend/zend_object_handlers.c 	if (zobj-&gt;ce-&gt;__unset) {</span>
+<span class='curline'><a href='../S/1699.html#L909'>zobj</a>              909 Zend/zend_object_handlers.c 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L1083'>zobj</a>             1083 Zend/zend_object_handlers.c 	zend_object *zobj = *obj_ptr;</span>
+<span class='curline'><a href='../S/1699.html#L1099'>zobj</a>             1099 Zend/zend_object_handlers.c 	if (UNEXPECTED((func = zend_hash_find(&amp;zobj-&gt;ce-&gt;function_table, lc_method_name)) == NULL)) {</span>
+<span class='curline'><a href='../S/1699.html#L1103'>zobj</a>             1103 Zend/zend_object_handlers.c 		if (zobj-&gt;ce-&gt;__call) {</span>
+<span class='curline'><a href='../S/1699.html#L1104'>zobj</a>             1104 Zend/zend_object_handlers.c 			return zend_get_user_call_function(zobj-&gt;ce, method_name);</span>
+<span class='curline'><a href='../S/1699.html#L1118'>zobj</a>             1118 Zend/zend_object_handlers.c 		updated_fbc = zend_check_private_int(fbc, zobj-&gt;ce, lc_method_name);</span>
+<span class='curline'><a href='../S/1699.html#L1122'>zobj</a>             1122 Zend/zend_object_handlers.c 			if (zobj-&gt;ce-&gt;__call) {</span>
+<span class='curline'><a href='../S/1699.html#L1123'>zobj</a>             1123 Zend/zend_object_handlers.c 				fbc = zend_get_user_call_function(zobj-&gt;ce, method_name);</span>
+<span class='curline'><a href='../S/1699.html#L1149'>zobj</a>             1149 Zend/zend_object_handlers.c 				if (zobj-&gt;ce-&gt;__call) {</span>
+<span class='curline'><a href='../S/1699.html#L1150'>zobj</a>             1150 Zend/zend_object_handlers.c 					fbc = zend_get_user_call_function(zobj-&gt;ce, method_name);</span>
+<span class='curline'><a href='../S/1699.html#L1317'>zobj</a>             1317 Zend/zend_object_handlers.c ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */</span>
+<span class='curline'><a href='../S/1699.html#L1319'>zobj</a>             1319 Zend/zend_object_handlers.c 	zend_function *constructor = zobj-&gt;ce-&gt;constructor;</span>
+<span class='curline'><a href='../S/1699.html#L1425'>zobj</a>             1425 Zend/zend_object_handlers.c 	zend_object *zobj;</span>
+<span class='curline'><a href='../S/1699.html#L1431'>zobj</a>             1431 Zend/zend_object_handlers.c 	zobj = Z_OBJ_P(object);</span>
+<span class='curline'><a href='../S/1699.html#L1440'>zobj</a>             1440 Zend/zend_object_handlers.c 	property_offset = zend_get_property_offset(zobj-&gt;ce, Z_STR_P(member), 1, cache_slot);</span>
+<span class='curline'><a href='../S/1699.html#L1444'>zobj</a>             1444 Zend/zend_object_handlers.c 			value = OBJ_PROP(zobj, property_offset);</span>
+<span class='curline'><a href='../S/1699.html#L1448'>zobj</a>             1448 Zend/zend_object_handlers.c 		} else if (EXPECTED(zobj-&gt;properties != NULL) &amp;&amp;</span>
+<span class='curline'><a href='../S/1699.html#L1449'>zobj</a>             1449 Zend/zend_object_handlers.c 		           (value = zend_hash_find(zobj-&gt;properties, Z_STR_P(member))) != NULL) {</span>
+<span class='curline'><a href='../S/1699.html#L1471'>zobj</a>             1471 Zend/zend_object_handlers.c 	if ((has_set_exists != 2) &amp;&amp; zobj-&gt;ce-&gt;__isset) {</span>
+<span class='curline'><a href='../S/1699.html#L1472'>zobj</a>             1472 Zend/zend_object_handlers.c 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));</span>
+<span class='curline'><a href='../S/1699.html#L1486'>zobj</a>             1486 Zend/zend_object_handlers.c 					if (EXPECTED(!EG(exception)) &amp;&amp; zobj-&gt;ce-&gt;__get &amp;&amp; !((*guard) &amp; IN_GET)) {</span>
+<span class='curline'><a href='../S/1699.html#L1514'>zobj</a>             1514 Zend/zend_object_handlers.c zend_string *zend_std_object_get_class_name(const zend_object *zobj) /* {{{ */</span>
+<span class='curline'><a href='../S/1699.html#L1516'>zobj</a>             1516 Zend/zend_object_handlers.c 	return zend_string_copy(zobj-&gt;ce-&gt;name);</span>
+<span class='curline'><a href='../S/1700.html#L173'>zobj</a>              173 Zend/zend_object_handlers.h ZEND_API void rebuild_object_properties(zend_object *zobj);</span>
+<span class='curline'><a href='../S/1700.html#L179'>zobj</a>              179 Zend/zend_object_handlers.h ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);</span>
+<span class='curline'><a href='../S/1737.html#L1829'>zobj</a>             1829 Zend/zend_vm_def.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1737.html#L1833'>zobj</a>             1833 Zend/zend_vm_def.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1737.html#L1837'>zobj</a>             1837 Zend/zend_vm_def.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1737.html#L1842'>zobj</a>             1842 Zend/zend_vm_def.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L1843'>zobj</a>             1843 Zend/zend_vm_def.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1737.html#L1851'>zobj</a>             1851 Zend/zend_vm_def.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L1856'>zobj</a>             1856 Zend/zend_vm_def.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1737.html#L1963'>zobj</a>             1963 Zend/zend_vm_def.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1737.html#L1967'>zobj</a>             1967 Zend/zend_vm_def.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1737.html#L1971'>zobj</a>             1971 Zend/zend_vm_def.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1737.html#L1976'>zobj</a>             1976 Zend/zend_vm_def.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L1977'>zobj</a>             1977 Zend/zend_vm_def.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1737.html#L1985'>zobj</a>             1985 Zend/zend_vm_def.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L1990'>zobj</a>             1990 Zend/zend_vm_def.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L5224'>zobj</a>             5224 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L5228'>zobj</a>             5228 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L5232'>zobj</a>             5232 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L5237'>zobj</a>             5237 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L5238'>zobj</a>             5238 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L5246'>zobj</a>             5246 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L5251'>zobj</a>             5251 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L5296'>zobj</a>             5296 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L5300'>zobj</a>             5300 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L5304'>zobj</a>             5304 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L5309'>zobj</a>             5309 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L5310'>zobj</a>             5310 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L5318'>zobj</a>             5318 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L5323'>zobj</a>             5323 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L9014'>zobj</a>             9014 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L9018'>zobj</a>             9018 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L9022'>zobj</a>             9022 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L9027'>zobj</a>             9027 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L9028'>zobj</a>             9028 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L9036'>zobj</a>             9036 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L9041'>zobj</a>             9041 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L9086'>zobj</a>             9086 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L9090'>zobj</a>             9090 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L9094'>zobj</a>             9094 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L9099'>zobj</a>             9099 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L9100'>zobj</a>             9100 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L9108'>zobj</a>             9108 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L9113'>zobj</a>             9113 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L10834'>zobj</a>             10834 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L10838'>zobj</a>             10838 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L10842'>zobj</a>             10842 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L10847'>zobj</a>             10847 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L10848'>zobj</a>             10848 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L10856'>zobj</a>             10856 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L10861'>zobj</a>             10861 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L10907'>zobj</a>             10907 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L10911'>zobj</a>             10911 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L10915'>zobj</a>             10915 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L10920'>zobj</a>             10920 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L10921'>zobj</a>             10921 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L10929'>zobj</a>             10929 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L10934'>zobj</a>             10934 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L12736'>zobj</a>             12736 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L12740'>zobj</a>             12740 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L12744'>zobj</a>             12744 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L12749'>zobj</a>             12749 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L12750'>zobj</a>             12750 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L12758'>zobj</a>             12758 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L12763'>zobj</a>             12763 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L14009'>zobj</a>             14009 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L14013'>zobj</a>             14013 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L14017'>zobj</a>             14017 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L14022'>zobj</a>             14022 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L14023'>zobj</a>             14023 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L14031'>zobj</a>             14031 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L14036'>zobj</a>             14036 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L14522'>zobj</a>             14522 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L14526'>zobj</a>             14526 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L14530'>zobj</a>             14530 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L14535'>zobj</a>             14535 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L14536'>zobj</a>             14536 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L14544'>zobj</a>             14544 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L14549'>zobj</a>             14549 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L17191'>zobj</a>             17191 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L17195'>zobj</a>             17195 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L17199'>zobj</a>             17199 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L17204'>zobj</a>             17204 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L17205'>zobj</a>             17205 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L17213'>zobj</a>             17213 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L17218'>zobj</a>             17218 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L20395'>zobj</a>             20395 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L20399'>zobj</a>             20399 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L20403'>zobj</a>             20403 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L20408'>zobj</a>             20408 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L20409'>zobj</a>             20409 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L20417'>zobj</a>             20417 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L20422'>zobj</a>             20422 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L22058'>zobj</a>             22058 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L22062'>zobj</a>             22062 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L22066'>zobj</a>             22066 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L22071'>zobj</a>             22071 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L22072'>zobj</a>             22072 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L22080'>zobj</a>             22080 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L22085'>zobj</a>             22085 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L23456'>zobj</a>             23456 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L23460'>zobj</a>             23460 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L23464'>zobj</a>             23464 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L23469'>zobj</a>             23469 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L23470'>zobj</a>             23470 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L23478'>zobj</a>             23478 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L23483'>zobj</a>             23483 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L23589'>zobj</a>             23589 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L23593'>zobj</a>             23593 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L23597'>zobj</a>             23597 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L23602'>zobj</a>             23602 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L23603'>zobj</a>             23603 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L23611'>zobj</a>             23611 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L23616'>zobj</a>             23616 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L25871'>zobj</a>             25871 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L25875'>zobj</a>             25875 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L25879'>zobj</a>             25879 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L25884'>zobj</a>             25884 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L25885'>zobj</a>             25885 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L25893'>zobj</a>             25893 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L25898'>zobj</a>             25898 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L26004'>zobj</a>             26004 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L26008'>zobj</a>             26008 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L26012'>zobj</a>             26012 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L26017'>zobj</a>             26017 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L26018'>zobj</a>             26018 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L26026'>zobj</a>             26026 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L26031'>zobj</a>             26031 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L27361'>zobj</a>             27361 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L27365'>zobj</a>             27365 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L27369'>zobj</a>             27369 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L27374'>zobj</a>             27374 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L27375'>zobj</a>             27375 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L27383'>zobj</a>             27383 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L27388'>zobj</a>             27388 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L27495'>zobj</a>             27495 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L27499'>zobj</a>             27499 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L27503'>zobj</a>             27503 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L27508'>zobj</a>             27508 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L27509'>zobj</a>             27509 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L27517'>zobj</a>             27517 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L27522'>zobj</a>             27522 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L31409'>zobj</a>             31409 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L31413'>zobj</a>             31413 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L31417'>zobj</a>             31417 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L31422'>zobj</a>             31422 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L31423'>zobj</a>             31423 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L31431'>zobj</a>             31431 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L31436'>zobj</a>             31436 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L31542'>zobj</a>             31542 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L31546'>zobj</a>             31546 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L31550'>zobj</a>             31550 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L31555'>zobj</a>             31555 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L31556'>zobj</a>             31556 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L31564'>zobj</a>             31564 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L31569'>zobj</a>             31569 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L36479'>zobj</a>             36479 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L36483'>zobj</a>             36483 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L36487'>zobj</a>             36487 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L36492'>zobj</a>             36492 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L36493'>zobj</a>             36493 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L36501'>zobj</a>             36501 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L36506'>zobj</a>             36506 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L36612'>zobj</a>             36612 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L36616'>zobj</a>             36616 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L36620'>zobj</a>             36620 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L36625'>zobj</a>             36625 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L36626'>zobj</a>             36626 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L36634'>zobj</a>             36634 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L36639'>zobj</a>             36639 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L39143'>zobj</a>             39143 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L39147'>zobj</a>             39147 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L39151'>zobj</a>             39151 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L39156'>zobj</a>             39156 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L39157'>zobj</a>             39157 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L39165'>zobj</a>             39165 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L39170'>zobj</a>             39170 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L39277'>zobj</a>             39277 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L39281'>zobj</a>             39281 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L39285'>zobj</a>             39285 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L39290'>zobj</a>             39290 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L39291'>zobj</a>             39291 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L39299'>zobj</a>             39299 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L39304'>zobj</a>             39304 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L41678'>zobj</a>             41678 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L41682'>zobj</a>             41682 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L41686'>zobj</a>             41686 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L41691'>zobj</a>             41691 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L41692'>zobj</a>             41692 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L41700'>zobj</a>             41700 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L41705'>zobj</a>             41705 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L43870'>zobj</a>             43870 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L43874'>zobj</a>             43874 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L43878'>zobj</a>             43878 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L43883'>zobj</a>             43883 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L43884'>zobj</a>             43884 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L43892'>zobj</a>             43892 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L43897'>zobj</a>             43897 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/1738.html#L45015'>zobj</a>             45015 Zend/zend_vm_execute.h 		zend_object *zobj = Z_OBJ_P(container);</span>
+<span class='curline'><a href='../S/1738.html#L45019'>zobj</a>             45019 Zend/zend_vm_execute.h 			EXPECTED(zobj-&gt;ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {</span>
+<span class='curline'><a href='../S/1738.html#L45023'>zobj</a>             45023 Zend/zend_vm_execute.h 				retval = OBJ_PROP(zobj, prop_offset);</span>
+<span class='curline'><a href='../S/1738.html#L45028'>zobj</a>             45028 Zend/zend_vm_execute.h 			} else if (EXPECTED(zobj-&gt;properties != NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L45029'>zobj</a>             45029 Zend/zend_vm_execute.h 				retval = zend_hash_find(zobj-&gt;properties, Z_STR_P(offset));</span>
+<span class='curline'><a href='../S/1738.html#L45037'>zobj</a>             45037 Zend/zend_vm_execute.h 		if (UNEXPECTED(zobj-&gt;handlers-&gt;read_property == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L45042'>zobj</a>             45042 Zend/zend_vm_execute.h 			retval = zobj-&gt;handlers-&gt;read_property(container, offset, BP_VAR_IS, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL), EX_VAR(opline-&gt;result.var));</span>
+<span class='curline'><a href='../S/50.html#L653'>zobj</a>              653 ext/com_dotnet/com_persist.c 	zval *zobj = NULL;</span>
+<span class='curline'><a href='../S/50.html#L657'>zobj</a>              657 ext/com_dotnet/com_persist.c 				&amp;zobj, php_com_variant_class_entry)) {</span>
+<span class='curline'><a href='../S/50.html#L662'>zobj</a>              662 ext/com_dotnet/com_persist.c 	if (!zobj) {</span>
+<span class='curline'><a href='../S/50.html#L666'>zobj</a>              666 ext/com_dotnet/com_persist.c 	obj = CDNO_FETCH(zobj);</span>
+<span class='curline'><a href='../S/51.html#L42'>zobj</a>               42 ext/com_dotnet/com_saproxy.c 	zval *zobj;</span>
+<span class='curline'><a href='../S/51.html#L379'>zobj</a>              379 ext/com_dotnet/com_saproxy.c 	zval_ptr_dtor(proxy-&gt;zobj);</span>
+<span class='curline'><a href='../S/51.html#L391'>zobj</a>              391 ext/com_dotnet/com_saproxy.c 	Z_ADDREF_P(cloneproxy-&gt;zobj);</span>
+<span class='curline'><a href='../S/51.html#L434'>zobj</a>              434 ext/com_dotnet/com_saproxy.c 		proxy-&gt;zobj = rel-&gt;zobj;</span>
+<span class='curline'><a href='../S/51.html#L438'>zobj</a>              438 ext/com_dotnet/com_saproxy.c 		proxy-&gt;zobj = com_object;</span>
+<span class='curline'><a href='../S/51.html#L441'>zobj</a>              441 ext/com_dotnet/com_saproxy.c 	Z_ADDREF_P(proxy-&gt;zobj);</span>
+<span class='curline'><a href='../S/53.html#L510'>zobj</a>              510 ext/com_dotnet/com_variant.c 	zval *zobj, *zvalue = NULL;</span>
+<span class='curline'><a href='../S/53.html#L514'>zobj</a>              514 ext/com_dotnet/com_variant.c 			"Oz!", &amp;zobj, php_com_variant_class_entry, &amp;zvalue)) {</span>
+<span class='curline'><a href='../S/53.html#L518'>zobj</a>              518 ext/com_dotnet/com_variant.c 	obj = CDNO_FETCH(zobj);</span>
+<span class='curline'><a href='../S/53.html#L1032'>zobj</a>             1032 ext/com_dotnet/com_variant.c 	zval *zobj;</span>
+<span class='curline'><a href='../S/53.html#L1036'>zobj</a>             1036 ext/com_dotnet/com_variant.c 		"O", &amp;zobj, php_com_variant_class_entry)) {</span>
+<span class='curline'><a href='../S/53.html#L1039'>zobj</a>             1039 ext/com_dotnet/com_variant.c 	obj = CDNO_FETCH(zobj);</span>
+<span class='curline'><a href='../S/53.html#L1049'>zobj</a>             1049 ext/com_dotnet/com_variant.c 	zval *zobj;</span>
+<span class='curline'><a href='../S/53.html#L1055'>zobj</a>             1055 ext/com_dotnet/com_variant.c 		"Ol", &amp;zobj, php_com_variant_class_entry, &amp;vt)) {</span>
+<span class='curline'><a href='../S/53.html#L1058'>zobj</a>             1058 ext/com_dotnet/com_variant.c 	obj = CDNO_FETCH(zobj);</span>
+<span class='curline'><a href='../S/53.html#L1084'>zobj</a>             1084 ext/com_dotnet/com_variant.c 	zval *zobj;</span>
+<span class='curline'><a href='../S/53.html#L1091'>zobj</a>             1091 ext/com_dotnet/com_variant.c 		"Ol", &amp;zobj, php_com_variant_class_entry, &amp;vt)) {</span>
+<span class='curline'><a href='../S/53.html#L1094'>zobj</a>             1094 ext/com_dotnet/com_variant.c 	obj = CDNO_FETCH(zobj);</span>
+<span class='curline'><a href='../S/344.html#L63'>zobj</a>               63 ext/intl/converter/converter.c static void php_converter_default_callback(zval *return_value, zval *zobj, zend_long reason, zval *error) {</span>
+<span class='curline'><a href='../S/344.html#L73'>zobj</a>               73 ext/intl/converter/converter.c 			php_converter_object *objval = (php_converter_object*)CONV_GET(zobj);</span>
+<span class='curline'><a href='../S/344.html#L526'>zobj</a>              526 ext/intl/converter/converter.c static void php_converter_resolve_callback(zval *zobj,</span>
+<span class='curline'><a href='../S/344.html#L535'>zobj</a>              535 ext/intl/converter/converter.c 	Z_ADDREF_P(zobj);</span>
+<span class='curline'><a href='../S/344.html#L536'>zobj</a>              536 ext/intl/converter/converter.c 	add_index_zval(&amp;caller, 0, zobj);</span>
+<span class='curline'><a href='../S/913.html#L2486'>zobj</a>             2486 ext/pdo/pdo_stmt.c 	zval zobj;</span>
+<span class='curline'><a href='../S/913.html#L2512'>zobj</a>             2512 ext/pdo/pdo_stmt.c 				ZVAL_OBJ(&amp;zobj, &amp;stmt-&gt;std);</span>
+<span class='curline'><a href='../S/913.html#L2514'>zobj</a>             2514 ext/pdo/pdo_stmt.c 				return std_object_handlers.read_property(&amp;zobj, member, type, cache_slot, rv);</span>
+<span class='curline'><a href='../S/962.html#L1130'>zobj</a>             1130 ext/phar/phar_object.c 	zval *zobj = getThis(), arg1, arg2;</span>
+<span class='curline'><a href='../S/962.html#L1132'>zobj</a>             1132 ext/phar/phar_object.c 	phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset);</span>
+<span class='curline'><a href='../S/962.html#L1134'>zobj</a>             1134 ext/phar/phar_object.c 	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data);</span>
+<span class='curline'><a href='../S/962.html#L1233'>zobj</a>             1233 ext/phar/phar_object.c 	zend_call_method_with_2_params(zobj, Z_OBJCE_P(zobj),</span>
+<span class='curline'><a href='../S/962.html#L1369'>zobj</a>             1369 ext/phar/phar_object.c 	zval *zobj = getThis(); \</span>
+<span class='curline'><a href='../S/962.html#L1370'>zobj</a>             1370 ext/phar/phar_object.c 	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset); \</span>
+<span class='curline'><a href='../S/962.html#L1382'>zobj</a>             1382 ext/phar/phar_object.c 	zval *zobj = getThis();</span>
+<span class='curline'><a href='../S/962.html#L1383'>zobj</a>             1383 ext/phar/phar_object.c 	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset);</span>
+<span class='curline'><a href='../S/962.html#L4397'>zobj</a>             4397 ext/phar/phar_object.c 	zval *zobj = getThis(), arg1;</span>
+<span class='curline'><a href='../S/962.html#L4403'>zobj</a>             4403 ext/phar/phar_object.c 	entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset);</span>
+<span class='curline'><a href='../S/962.html#L4445'>zobj</a>             4445 ext/phar/phar_object.c 	zend_call_method_with_1_params(zobj, Z_OBJCE_P(zobj),</span>
+<span class='curline'><a href='../S/962.html#L4453'>zobj</a>             4453 ext/phar/phar_object.c 	zval *zobj = getThis(); \</span>
+<span class='curline'><a href='../S/962.html#L4454'>zobj</a>             4454 ext/phar/phar_object.c 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset); \</span>
+<span class='curline'><a href='../S/962.html#L4466'>zobj</a>             4466 ext/phar/phar_object.c 	zval *zobj = getThis();</span>
+<span class='curline'><a href='../S/962.html#L4467'>zobj</a>             4467 ext/phar/phar_object.c 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)-&gt;handlers-&gt;offset);</span>
+<span class='curline'><a href='../S/1005.html#L1492'>zobj</a>             1492 ext/soap/php_encoding.c 					zend_object *zobj = Z_OBJ_P(ret);</span>
+<span class='curline'><a href='../S/1005.html#L1493'>zobj</a>             1493 ext/soap/php_encoding.c 					zobj-&gt;ce = ce;</span>
+<span class='curline'><a href='../S/1050.html#L888'>zobj</a>              888 ext/spl/spl_iterators.c 	zval                    *zobj;</span>
+<span class='curline'><a href='../S/1050.html#L893'>zobj</a>              893 ext/spl/spl_iterators.c 	zobj = &amp;object-&gt;iterators[level].zobject;</span>
+<span class='curline'><a href='../S/1050.html#L897'>zobj</a>              897 ext/spl/spl_iterators.c 		if ((function_handler = zend_hash_find_ptr(&amp;Z_OBJCE_P(zobj)-&gt;function_table, method)) == NULL) {</span>
+<span class='curline'><a href='../S/1050.html#L898'>zobj</a>              898 ext/spl/spl_iterators.c 			if (Z_OBJ_HT_P(zobj)-&gt;get_method) {</span>
+<span class='curline'><a href='../S/1050.html#L899'>zobj</a>              899 ext/spl/spl_iterators.c 				*zobject = Z_OBJ_P(zobj);</span>
+<span class='curline'><a href='../S/1050.html#L903'>zobj</a>              903 ext/spl/spl_iterators.c 			*zobject = Z_OBJ_P(zobj);</span>
+<span class='curline'><a href='../S/1109.html#L64'>zobj</a>               64 ext/standard/http.c 				zend_object *zobj = Z_OBJ_P(type);</span>
+<span class='curline'><a href='../S/1109.html#L65'>zobj</a>               65 ext/standard/http.c 				if (zend_check_property_access(zobj, key) != SUCCESS) {</span>
+</pre>
+</body>
+</html>

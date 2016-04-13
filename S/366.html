@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/intl/formatter/formatter_class.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1773.html'>intl</a>/<a href='../files/1780.html'>formatter</a>/formatter_class.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L37'>[^]</a><a href='#L185'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L37' title='Defined at 37.'>NumberFormatter_object_dtor</a></li>
+<li><a href='#L44' title='Defined at 44.'>NumberFormatter_object_free</a></li>
+<li><a href='#L55' title='Defined at 55.'>NumberFormatter_object_create</a></li>
+<li><a href='#L71' title='Defined at 71.'>NumberFormatter_object_clone</a></li>
+<li><a href='#L185' title='Defined at 185.'>formatter_register_class</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | Authors: Stanislav Malyshev &lt;stas@zend.com&gt;                          |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;unicode/unum.h&gt;
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='367.html'>formatter_class.h</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='416.html'>php_intl.h</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='369.html'>formatter_data.h</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='371.html'>formatter_format.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='375.html'>formatter_parse.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='373.html'>formatter_main.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='365.html'>formatter_attr.h</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;<a href='1653.html'>zend_exceptions.h</a>&gt;
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>static</strong> <a href='../S/1731.html#L79' title='Defined at 79 in Zend/zend_types.h.'>zend_object_handlers</a> <a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='comment'>/*</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * Auxiliary functions needed by objects of 'NumberFormatter' class</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> */</em>
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='comment'>/* {{{ NumberFormatter_objects_dtor */</em>
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/366.html#L198' title='Referred from 198 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_dtor</a>(<a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>)
+<a id='L38' name='L38'></a>  38 <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39         <a href='../S/1701.html#L82' title='Defined at 82 in Zend/zend_objects.c.'>zend_objects_destroy_object</a>( <a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> );
+<a id='L40' name='L40'></a>  40 <em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'>/* }}} */</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='comment'>/* {{{ NumberFormatter_objects_free */</em>
+<a id='L44' name='L44'></a>  44 <strong class='reserved'>void</strong> <a href='../S/366.html#L199' title='Referred from 199 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_free</a>( <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a> )
+<a id='L45' name='L45'></a>  45 <em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46         <a href='../S/367.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_class.h.'>NumberFormatter_object</a>* <a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a> = <a href='../S/367.html#L32' title='Defined at 32 in ext/intl/formatter/formatter_class.h.'>php_intl_number_format_fetch_object</a>(<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>);
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <a href='../S/1701.html#L54' title='Defined at 54 in Zend/zend_objects.c.'>zend_object_std_dtor</a>( &amp;<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a> );
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         <a href='../S/368.html#L39' title='Defined at 39 in ext/intl/formatter/formatter_data.c.'>formatter_data_free</a>( &amp;<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>-&gt;<a href='../Y/28519.html' title='Multiple used in 20 places.'>nf_data</a> );
+<a id='L51' name='L51'></a>  51 <em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>/* }}} */</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='comment'>/* {{{ NumberFormatter_object_create */</em>
+<a id='L55' name='L55'></a>  55 <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/366.html#L191' title='Referred from 191 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_create</a>(<a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> *<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>)
+<a id='L56' name='L56'></a>  56 <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57         <a href='../S/367.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_class.h.'>NumberFormatter_object</a>*     <a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>;
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59         <a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a> = <a href='../S/1629.html#L166' title='Defined at 166 in Zend/zend_alloc.h.'>ecalloc</a>( 1, <strong class='reserved'>sizeof</strong>(<a href='../S/367.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_class.h.'>NumberFormatter_object</a>) + <a href='../S/1704.html#L84' title='Defined at 84 in Zend/zend_objects_API.h.'>zend_object_properties_size</a>(<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>));
+<a id='L60' name='L60'></a>  60         <a href='../S/368.html#L26' title='Defined at 26 in ext/intl/formatter/formatter_data.c.'>formatter_data_init</a>( &amp;<a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>-&gt;<a href='../Y/28519.html' title='Multiple used in 20 places.'>nf_data</a> );
+<a id='L61' name='L61'></a>  61         <a href='../S/1701.html#L30' title='Defined at 30 in Zend/zend_objects.c.'>zend_object_std_init</a>( &amp;<a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>, <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a> );
+<a id='L62' name='L62'></a>  62         <a href='../S/1631.html#L1172' title='Defined at 1172 in Zend/zend_API.c.'>object_properties_init</a>(&amp;<a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>, <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>);
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>.<a href='../Y/19687.html' title='Multiple used in 446 places.'>handlers</a> = &amp;<a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>return</strong> &amp;<a href='../Y/23385.html' title='Multiple used in 3376 places.'>intern</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>;
+<a id='L67' name='L67'></a>  67 <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>/* }}} */</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <em class='comment'>/* {{{ NumberFormatter_object_clone */</em>
+<a id='L71' name='L71'></a>  71 <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../S/366.html#L197' title='Referred from 197 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_clone</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>)
+<a id='L72' name='L72'></a>  72 <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73         <a href='../S/367.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_class.h.'>NumberFormatter_object</a> *<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>, *<a href='../Y/28297.html' title='Multiple used in 4 places.'>new_nfo</a>;
+<a id='L74' name='L74'></a>  74         <a href='../S/1731.html#L89' title='Defined at 89 in Zend/zend_types.h.'>zend_object</a> *<a href='../Y/28299.html' title='Multiple used in 49 places.'>new_obj</a>;
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <a href='../S/367.html#L44' title='Defined at 44 in ext/intl/formatter/formatter_class.h.'>FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK</a>;
+<a id='L77' name='L77'></a>  77         <a href='../Y/28299.html' title='Multiple used in 49 places.'>new_obj</a> = <a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a>-&gt;<a href='../Y/14612.html' title='Multiple used in 78 places.'>create_object</a>(<a href='../S/1731.html#L543' title='Defined at 543 in Zend/zend_types.h.'>Z_OBJCE_P</a>(<a href='../S/1700.html#L96' title='Defined at 96 in Zend/zend_object_handlers.h.'>object</a>));
+<a id='L78' name='L78'></a>  78         <a href='../Y/28297.html' title='Multiple used in 4 places.'>new_nfo</a> = <a href='../S/367.html#L32' title='Defined at 32 in ext/intl/formatter/formatter_class.h.'>php_intl_number_format_fetch_object</a>(<a href='../Y/28299.html' title='Multiple used in 49 places.'>new_obj</a>);
+<a id='L79' name='L79'></a>  79         <em class='comment'>/* clone standard parts */</em>
+<a id='L80' name='L80'></a>  80         <a href='../S/1701.html#L169' title='Defined at 169 in Zend/zend_objects.c.'>zend_objects_clone_members</a>(&amp;<a href='../Y/28297.html' title='Multiple used in 4 places.'>new_nfo</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>, &amp;<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>-&gt;<a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>);
+<a id='L81' name='L81'></a>  81         <em class='comment'>/* clone formatter object. It may fail, the destruction code must handle this case */</em>
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>if</strong> (<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>) != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83                 <a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28297.html' title='Multiple used in 4 places.'>new_nfo</a>) = unum_clone(<a href='../S/367.html#L43' title='Defined at 43 in ext/intl/formatter/formatter_class.h.'>FORMATTER_OBJECT</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>),
+<a id='L84' name='L84'></a>  84                                 &amp;<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>));
+<a id='L85' name='L85'></a>  85                 <strong class='reserved'>if</strong> (<a href='../Y/6942.html' title='Multiple used in 90 places.'>U_FAILURE</a>(<a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>))) <em class='brace'>{</em>
+<a id='L86' name='L86'></a>  86                         <em class='comment'>/* set up error in case error handler is interested */</em>
+<a id='L87' name='L87'></a>  87                         <a href='../S/388.html#L193' title='Defined at 193 in ext/intl/intl_error.c.'>intl_errors_set</a>(<a href='../S/387.html#L41' title='Defined at 41 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_P</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>), <a href='../S/387.html#L42' title='Defined at 42 in ext/intl/intl_data.h.'>INTL_DATA_ERROR_CODE</a>(<a href='../Y/28529.html' title='Multiple used in 111 places.'>nfo</a>),
+<a id='L88' name='L88'></a>  88                                         "Failed to clone NumberFormatter object", 0);
+<a id='L89' name='L89'></a>  89                         <a href='../S/1652.html#L920' title='Defined at 920 in Zend/zend_exceptions.c.'>zend_throw_exception</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, "Failed to clone NumberFormatter object", 0);
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92                 <a href='../S/1652.html#L920' title='Defined at 920 in Zend/zend_exceptions.c.'>zend_throw_exception</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, "Cannot clone unconstructed NumberFormatter", 0);
+<a id='L93' name='L93'></a>  93         <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94         <strong class='reserved'>return</strong> <a href='../Y/28299.html' title='Multiple used in 49 places.'>new_obj</a>;
+<a id='L95' name='L95'></a>  95 <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>/* }}} */</em>
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98 <em class='comment'>/*</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'> * 'NumberFormatter' class registration structures &amp; functions</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'> */</em>
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <em class='comment'>/* {{{ arginfo */</em>
+<a id='L103' name='L103'></a> 103 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/28942.html' title='Multiple used in 2 places.'>number_parse_arginfo</a>, 0, 0, 1)
+<a id='L104' name='L104'></a> 104         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>)
+<a id='L105' name='L105'></a> 105         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>)
+<a id='L106' name='L106'></a> 106         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(1, <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>)
+<a id='L107' name='L107'></a> 107 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/28943.html' title='Multiple used in 2 places.'>number_parse_currency_arginfo</a>, 0, 0, 2)
+<a id='L110' name='L110'></a> 110         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../S/983.html#L124' title='Defined at 124 in ext/reflection/php_reflection.c.'>string</a>)
+<a id='L111' name='L111'></a> 111         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(1, <a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>)
+<a id='L112' name='L112'></a> 112         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(1, <a href='../Y/33042.html' title='Multiple used in 155 places.'>position</a>)
+<a id='L113' name='L113'></a> 113 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10780.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getattribute</a>, 0, 0, 1)
+<a id='L116' name='L116'></a> 116         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>)
+<a id='L117' name='L117'></a> 117 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10783.html' title='Multiple used in 3 places.'>arginfo_numberformatter_setattribute</a>, 0, 0, 2)
+<a id='L120' name='L120'></a> 120         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>)
+<a id='L121' name='L121'></a> 121         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>)
+<a id='L122' name='L122'></a> 122 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10785.html' title='Multiple used in 2 places.'>arginfo_numberformatter_setsymbol</a>, 0, 0, 2)
+<a id='L125' name='L125'></a> 125         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/12091.html' title='Multiple used in 636 places.'>attr</a>)
+<a id='L126' name='L126'></a> 126         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/37937.html' title='Multiple used in 26 places.'>symbol</a>)
+<a id='L127' name='L127'></a> 127 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <a href='../S/1632.html#L120' title='Defined at 120 in Zend/zend_API.h.'>ZEND_BEGIN_ARG_INFO</a>(<a href='../Y/10782.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getpattern</a>, 0)
+<a id='L130' name='L130'></a> 130 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10784.html' title='Multiple used in 2 places.'>arginfo_numberformatter_setpattern</a>, 0, 0, 1)
+<a id='L133' name='L133'></a> 133         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>)
+<a id='L134' name='L134'></a> 134 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10781.html' title='Multiple used in 2 places.'>arginfo_numberformatter_getlocale</a>, 0, 0, 0)
+<a id='L137' name='L137'></a> 137         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>)
+<a id='L138' name='L138'></a> 138 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10777.html' title='Multiple used in 3 places.'>arginfo_numberformatter___construct</a>, 0, 0, 2)
+<a id='L141' name='L141'></a> 141         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/25303.html' title='Multiple used in 53 places.'>locale</a>)
+<a id='L142' name='L142'></a> 142         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/37781.html' title='Multiple used in 249 places.'>style</a>)
+<a id='L143' name='L143'></a> 143         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/31315.html' title='Multiple used in 314 places.'>pattern</a>)
+<a id='L144' name='L144'></a> 144 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10779.html' title='Multiple used in 2 places.'>arginfo_numberformatter_formatcurrency</a>, 0, 0, 2)
+<a id='L147' name='L147'></a> 147         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>)
+<a id='L148' name='L148'></a> 148         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/14827.html' title='Multiple used in 10 places.'>currency</a>)
+<a id='L149' name='L149'></a> 149 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151 <a href='../D/15967.html' title='Multiple defined in 46 places.'>ZEND_BEGIN_ARG_INFO_EX</a>(<a href='../Y/10778.html' title='Multiple used in 2 places.'>arginfo_numberformatter_format</a>, 0, 0, 1)
+<a id='L152' name='L152'></a> 152         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>)
+<a id='L153' name='L153'></a> 153         <a href='../S/1632.html#L102' title='Defined at 102 in Zend/zend_API.h.'>ZEND_ARG_INFO</a>(0, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>)
+<a id='L154' name='L154'></a> 154 <a href='../S/1632.html#L122' title='Defined at 122 in Zend/zend_API.h.'>ZEND_END_ARG_INFO</a>()
+<a id='L155' name='L155'></a> 155 <em class='comment'>/* }}} */</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157 <em class='comment'>/* {{{ NumberFormatter_class_functions</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'> * Every 'NumberFormatter' class method has an entry in this table</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'> */</em>
+<a id='L160' name='L160'></a> 160 <strong class='reserved'>static</strong> <a href='../Y/43758.html' title='Multiple used in 300 places.'>zend_function_entry</a> <a href='../Y/4338.html' title='Multiple used in 2 places.'>NumberFormatter_class_functions</a>[] = <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161         <a href='../S/1378.html#L346' title='Defined at 346 in main/php.h.'>PHP_ME</a>( <a href='../Y/4336.html' title='Multiple used in 4 places.'>NumberFormatter</a>, <a href='../Y/7952.html' title='Multiple used in 180 places.'>__construct</a>, <a href='../Y/10777.html' title='Multiple used in 3 places.'>arginfo_numberformatter___construct</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a>|<a href='../S/1643.html#L215' title='Defined at 215 in Zend/zend_compile.h.'>ZEND_ACC_CTOR</a> )
+<a id='L162' name='L162'></a> 162         <a href='../S/1632.html#L72' title='Defined at 72 in Zend/zend_API.h.'>ZEND_FENTRY</a>( <a href='../Y/14577.html' title='Multiple used in 13 places.'>create</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28956.html' title='Multiple used in 4 places.'>numfmt_create</a> ), <a href='../Y/10777.html' title='Multiple used in 3 places.'>arginfo_numberformatter___construct</a>, <a href='../S/1643.html#L206' title='Defined at 206 in Zend/zend_compile.h.'>ZEND_ACC_PUBLIC</a>|<a href='../S/1643.html#L189' title='Defined at 189 in Zend/zend_compile.h.'>ZEND_ACC_STATIC</a> )
+<a id='L163' name='L163'></a> 163         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/18203.html' title='Multiple used in 612 places.'>format</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28957.html' title='Multiple used in 4 places.'>numfmt_format</a> ), <a href='../Y/10778.html' title='Multiple used in 2 places.'>arginfo_numberformatter_format</a> )
+<a id='L164' name='L164'></a> 164         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../S/160.html#L1699' title='Defined at 1699 in ext/fileinfo/libmagic/apprentice.c.'>parse</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28966.html' title='Multiple used in 4 places.'>numfmt_parse</a> ), <a href='../Y/28942.html' title='Multiple used in 2 places.'>number_parse_arginfo</a> )
+<a id='L165' name='L165'></a> 165         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( formatCurrency, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28958.html' title='Multiple used in 4 places.'>numfmt_format_currency</a> ), <a href='../Y/10779.html' title='Multiple used in 2 places.'>arginfo_numberformatter_formatcurrency</a> )
+<a id='L166' name='L166'></a> 166         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( parseCurrency, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28968.html' title='Multiple used in 4 places.'>numfmt_parse_currency</a> ), <a href='../Y/28943.html' title='Multiple used in 2 places.'>number_parse_currency_arginfo</a> )
+<a id='L167' name='L167'></a> 167         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/35819.html' title='Multiple used in 7 places.'>setAttribute</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28970.html' title='Multiple used in 4 places.'>numfmt_set_attribute</a> ), <a href='../Y/10783.html' title='Multiple used in 3 places.'>arginfo_numberformatter_setattribute</a> )
+<a id='L168' name='L168'></a> 168         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/18906.html' title='Multiple used in 9 places.'>getAttribute</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28959.html' title='Multiple used in 4 places.'>numfmt_get_attribute</a> ), <a href='../Y/10780.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getattribute</a> )
+<a id='L169' name='L169'></a> 169         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( setTextAttribute, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28973.html' title='Multiple used in 4 places.'>numfmt_set_text_attribute</a> ), <a href='../Y/10783.html' title='Multiple used in 3 places.'>arginfo_numberformatter_setattribute</a> )
+<a id='L170' name='L170'></a> 170         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( getTextAttribute, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28965.html' title='Multiple used in 4 places.'>numfmt_get_text_attribute</a> ), <a href='../Y/10780.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getattribute</a> )
+<a id='L171' name='L171'></a> 171         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( setSymbol, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28972.html' title='Multiple used in 4 places.'>numfmt_set_symbol</a> ), <a href='../Y/10785.html' title='Multiple used in 2 places.'>arginfo_numberformatter_setsymbol</a> )
+<a id='L172' name='L172'></a> 172         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( getSymbol, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28964.html' title='Multiple used in 4 places.'>numfmt_get_symbol</a> ), <a href='../Y/10780.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getattribute</a> )
+<a id='L173' name='L173'></a> 173         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/35867.html' title='Multiple used in 3 places.'>setPattern</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28971.html' title='Multiple used in 4 places.'>numfmt_set_pattern</a> ), <a href='../Y/10784.html' title='Multiple used in 2 places.'>arginfo_numberformatter_setpattern</a> )
+<a id='L174' name='L174'></a> 174         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/19065.html' title='Multiple used in 3 places.'>getPattern</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28963.html' title='Multiple used in 4 places.'>numfmt_get_pattern</a> ), <a href='../Y/10782.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getpattern</a> )
+<a id='L175' name='L175'></a> 175         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/19026.html' title='Multiple used in 4 places.'>getLocale</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28962.html' title='Multiple used in 4 places.'>numfmt_get_locale</a> ), <a href='../Y/10781.html' title='Multiple used in 2 places.'>arginfo_numberformatter_getlocale</a> )
+<a id='L176' name='L176'></a> 176         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/18978.html' title='Multiple used in 8 places.'>getErrorCode</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28960.html' title='Multiple used in 4 places.'>numfmt_get_error_code</a> ), <a href='../Y/10782.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getpattern</a> )
+<a id='L177' name='L177'></a> 177         <a href='../S/1378.html#L341' title='Defined at 341 in main/php.h.'>PHP_NAMED_FE</a>( <a href='../Y/18979.html' title='Multiple used in 8 places.'>getErrorMessage</a>, <a href='../S/1632.html#L66' title='Defined at 66 in Zend/zend_API.h.'>ZEND_FN</a>( <a href='../Y/28961.html' title='Multiple used in 4 places.'>numfmt_get_error_message</a> ), <a href='../Y/10782.html' title='Multiple used in 4 places.'>arginfo_numberformatter_getpattern</a> )
+<a id='L178' name='L178'></a> 178         <a href='../S/1378.html#L350' title='Defined at 350 in main/php.h.'>PHP_FE_END</a>
+<a id='L179' name='L179'></a> 179 <em class='brace'>}</em>;
+<a id='L180' name='L180'></a> 180 <em class='comment'>/* }}} */</em>
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 <em class='comment'>/* {{{ formatter_register_class</em>
+<a id='L183' name='L183'></a> 183 <em class='comment'> * Initialize 'NumberFormatter' class</em>
+<a id='L184' name='L184'></a> 184 <em class='comment'> */</em>
+<a id='L185' name='L185'></a> 185 <strong class='reserved'>void</strong> <a href='../R/19101.html' title='Multiple referred from 2 places.'>formatter_register_class</a>( <strong class='reserved'>void</strong> )
+<a id='L186' name='L186'></a> 186 <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187         <a href='../S/1731.html#L80' title='Defined at 80 in Zend/zend_types.h.'>zend_class_entry</a> <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>;
+<a id='L188' name='L188'></a> 188 
+<a id='L189' name='L189'></a> 189         <em class='comment'>/* Create and register 'NumberFormatter' class. */</em>
+<a id='L190' name='L190'></a> 190         <a href='../S/1632.html#L178' title='Defined at 178 in Zend/zend_API.h.'>INIT_CLASS_ENTRY</a>( <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>, "NumberFormatter", <a href='../Y/4338.html' title='Multiple used in 2 places.'>NumberFormatter_class_functions</a> );
+<a id='L191' name='L191'></a> 191         <a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a>.<a href='../Y/14612.html' title='Multiple used in 78 places.'>create_object</a> = <a href='../S/366.html#L55' title='Defined at 55 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_create</a>;
+<a id='L192' name='L192'></a> 192         <a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a> = <a href='../S/1631.html#L2705' title='Defined at 2705 in Zend/zend_API.c.'>zend_register_internal_class</a>( &amp;<a href='../Y/13432.html' title='Multiple used in 3703 places.'>ce</a> );
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(&amp;<a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>, <a href='../S/1703.html#L223' title='Defined at 223 in Zend/zend_objects_API.c.'>zend_get_std_object_handlers</a>(),
+<a id='L195' name='L195'></a> 195                 <strong class='reserved'>sizeof</strong>(<a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>));
+<a id='L196' name='L196'></a> 196         <a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>.<a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> = <a href='../D/15498.html' title='Multiple defined in 4 places.'>XtOffsetOf</a>(<a href='../S/367.html#L30' title='Defined at 30 in ext/intl/formatter/formatter_class.h.'>NumberFormatter_object</a>, <a href='../Y/44049.html' title='Multiple used in 174 places.'>zo</a>);
+<a id='L197' name='L197'></a> 197         <a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>.<a href='../Y/13874.html' title='Multiple used in 53 places.'>clone_obj</a> = <a href='../S/366.html#L71' title='Defined at 71 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_clone</a>;
+<a id='L198' name='L198'></a> 198         <a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>.<a href='../Y/16272.html' title='Multiple used in 31 places.'>dtor_obj</a> = <a href='../S/366.html#L37' title='Defined at 37 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_dtor</a>;
+<a id='L199' name='L199'></a> 199         <a href='../Y/4339.html' title='Multiple used in 8 places.'>NumberFormatter_handlers</a>.<a href='../Y/18367.html' title='Multiple used in 53 places.'>free_obj</a> = <a href='../S/366.html#L44' title='Defined at 44 in ext/intl/formatter/formatter_class.c.'>NumberFormatter_object_free</a>;
+<a id='L200' name='L200'></a> 200 
+<a id='L201' name='L201'></a> 201         <em class='comment'>/* Declare 'NumberFormatter' class properties. */</em>
+<a id='L202' name='L202'></a> 202         <strong class='reserved'>if</strong>( !<a href='../Y/4337.html' title='Multiple used in 24 places.'>NumberFormatter_ce_ptr</a> )
+<a id='L203' name='L203'></a> 203         <em class='brace'>{</em>
+<a id='L204' name='L204'></a> 204                 <a href='../D/33752.html' title='Multiple defined in 2 places.'>zend_error</a>(<a href='../S/1651.html#L25' title='Defined at 25 in Zend/zend_errors.h.'>E_ERROR</a>, "Failed to register NumberFormatter class");
+<a id='L205' name='L205'></a> 205                 <strong class='reserved'>return</strong>;
+<a id='L206' name='L206'></a> 206         <em class='brace'>}</em>
+<a id='L207' name='L207'></a> 207 <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'>/* }}} */</em>
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210 <em class='comment'>/*</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'> * Local variables:</em>
+<a id='L212' name='L212'></a> 212 <em class='comment'> * tab-width: 4</em>
+<a id='L213' name='L213'></a> 213 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L214' name='L214'></a> 214 <em class='comment'> * End:</em>
+<a id='L215' name='L215'></a> 215 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L216' name='L216'></a> 216 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L217' name='L217'></a> 217 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L37'>[^]</a><a href='#L185'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

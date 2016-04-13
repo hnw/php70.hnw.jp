@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>module</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1626.html#L613'>module</a>            613 Zend/zend.c    	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);</span>
+<span class='curline'><a href='../S/1626.html#L615'>module</a>            615 Zend/zend.c    	module_destructor(module);</span>
+<span class='curline'><a href='../S/1626.html#L616'>module</a>            616 Zend/zend.c    	free(module);</span>
+<span class='curline'><a href='../S/1627.html#L190'>module</a>            190 Zend/zend.h    			struct _zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1631.html#L1802'>module</a>           1802 Zend/zend_API.c ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L1807'>module</a>           1807 Zend/zend_API.c 	if (module-&gt;module_started) {</span>
+<span class='curline'><a href='../S/1631.html#L1810'>module</a>           1810 Zend/zend_API.c 	module-&gt;module_started = 1;</span>
+<span class='curline'><a href='../S/1631.html#L1813'>module</a>           1813 Zend/zend_API.c 	if (module-&gt;deps) {</span>
+<span class='curline'><a href='../S/1631.html#L1814'>module</a>           1814 Zend/zend_API.c 		const zend_module_dep *dep = module-&gt;deps;</span>
+<span class='curline'><a href='../S/1631.html#L1827'>module</a>           1827 Zend/zend_API.c 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module-&gt;name, dep-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L1828'>module</a>           1828 Zend/zend_API.c 					module-&gt;module_started = 0;</span>
+<span class='curline'><a href='../S/1631.html#L1838'>module</a>           1838 Zend/zend_API.c 	if (module-&gt;globals_size) {</span>
+<span class='curline'><a href='../S/1631.html#L1840'>module</a>           1840 Zend/zend_API.c 		ts_allocate_id(module-&gt;globals_id_ptr, module-&gt;globals_size, (ts_allocate_ctor) module-&gt;globals_ctor, (ts_allocate_dtor) module-&gt;globals_dtor);</span>
+<span class='curline'><a href='../S/1631.html#L1842'>module</a>           1842 Zend/zend_API.c 		if (module-&gt;globals_ctor) {</span>
+<span class='curline'><a href='../S/1631.html#L1843'>module</a>           1843 Zend/zend_API.c 			module-&gt;globals_ctor(module-&gt;globals_ptr);</span>
+<span class='curline'><a href='../S/1631.html#L1847'>module</a>           1847 Zend/zend_API.c 	if (module-&gt;module_startup_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1848'>module</a>           1848 Zend/zend_API.c 		EG(current_module) = module;</span>
+<span class='curline'><a href='../S/1631.html#L1849'>module</a>           1849 Zend/zend_API.c 		if (module-&gt;module_startup_func(module-&gt;type, module-&gt;module_number)==FAILURE) {</span>
+<span class='curline'><a href='../S/1631.html#L1850'>module</a>           1850 Zend/zend_API.c 			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L1862'>module</a>           1862 Zend/zend_API.c 	zend_module_entry *module = Z_PTR_P(zv);</span>
+<span class='curline'><a href='../S/1631.html#L1864'>module</a>           1864 Zend/zend_API.c 	return zend_startup_module_ex(module);</span>
+<span class='curline'><a href='../S/1631.html#L1905'>module</a>           1905 Zend/zend_API.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1631.html#L1913'>module</a>           1913 Zend/zend_API.c 	ZEND_HASH_FOREACH_PTR(&amp;module_registry, module) {</span>
+<span class='curline'><a href='../S/1631.html#L1914'>module</a>           1914 Zend/zend_API.c 		if (module-&gt;request_startup_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1917'>module</a>           1917 Zend/zend_API.c 		if (module-&gt;request_shutdown_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1920'>module</a>           1920 Zend/zend_API.c 		if (module-&gt;post_deactivate_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1936'>module</a>           1936 Zend/zend_API.c 	ZEND_HASH_FOREACH_PTR(&amp;module_registry, module) {</span>
+<span class='curline'><a href='../S/1631.html#L1937'>module</a>           1937 Zend/zend_API.c 		if (module-&gt;request_startup_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1938'>module</a>           1938 Zend/zend_API.c 			module_request_startup_handlers[startup_count++] = module;</span>
+<span class='curline'><a href='../S/1631.html#L1940'>module</a>           1940 Zend/zend_API.c 		if (module-&gt;request_shutdown_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1941'>module</a>           1941 Zend/zend_API.c 			module_request_shutdown_handlers[--shutdown_count] = module;</span>
+<span class='curline'><a href='../S/1631.html#L1943'>module</a>           1943 Zend/zend_API.c 		if (module-&gt;post_deactivate_func) {</span>
+<span class='curline'><a href='../S/1631.html#L1944'>module</a>           1944 Zend/zend_API.c 			module_post_deactivate_handlers[--post_deactivate_count] = module;</span>
+<span class='curline'><a href='../S/1631.html#L1988'>module</a>           1988 Zend/zend_API.c ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L1994'>module</a>           1994 Zend/zend_API.c 	if (!module) {</span>
+<span class='curline'><a href='../S/1631.html#L1999'>module</a>           1999 Zend/zend_API.c 	zend_printf("%s: Registering module %d\n", module-&gt;name, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2003'>module</a>           2003 Zend/zend_API.c 	if (module-&gt;deps) {</span>
+<span class='curline'><a href='../S/1631.html#L2004'>module</a>           2004 Zend/zend_API.c 		const zend_module_dep *dep = module-&gt;deps;</span>
+<span class='curline'><a href='../S/1631.html#L2015'>module</a>           2015 Zend/zend_API.c 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module-&gt;name, dep-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2024'>module</a>           2024 Zend/zend_API.c 	name_len = strlen(module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2026'>module</a>           2026 Zend/zend_API.c 	zend_str_tolower_copy(ZSTR_VAL(lcname), module-&gt;name, name_len);</span>
+<span class='curline'><a href='../S/1631.html#L2028'>module</a>           2028 Zend/zend_API.c 	if ((module_ptr = zend_hash_add_mem(&amp;module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {</span>
+<span class='curline'><a href='../S/1631.html#L2029'>module</a>           2029 Zend/zend_API.c 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2034'>module</a>           2034 Zend/zend_API.c 	module = module_ptr;</span>
+<span class='curline'><a href='../S/1631.html#L2035'>module</a>           2035 Zend/zend_API.c 	EG(current_module) = module;</span>
+<span class='curline'><a href='../S/1631.html#L2037'>module</a>           2037 Zend/zend_API.c 	if (module-&gt;functions &amp;&amp; zend_register_functions(NULL, module-&gt;functions, NULL, module-&gt;type)==FAILURE) {</span>
+<span class='curline'><a href='../S/1631.html#L2039'>module</a>           2039 Zend/zend_API.c 		zend_error(E_CORE_WARNING,"%s: Unable to register functions, unable to load", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2044'>module</a>           2044 Zend/zend_API.c 	return module;</span>
+<span class='curline'><a href='../S/1631.html#L2048'>module</a>           2048 Zend/zend_API.c ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L2050'>module</a>           2050 Zend/zend_API.c 	module-&gt;module_number = zend_next_free_module();</span>
+<span class='curline'><a href='../S/1631.html#L2051'>module</a>           2051 Zend/zend_API.c 	module-&gt;type = MODULE_PERSISTENT;</span>
+<span class='curline'><a href='../S/1631.html#L2052'>module</a>           2052 Zend/zend_API.c 	return zend_register_module_ex(module);</span>
+<span class='curline'><a href='../S/1631.html#L2145'>module</a>           2145 Zend/zend_API.c 	internal_function-&gt;module = EG(current_module);</span>
+<span class='curline'><a href='../S/1631.html#L2456'>module</a>           2456 Zend/zend_API.c ZEND_API int zend_startup_module(zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L2458'>module</a>           2458 Zend/zend_API.c 	if ((module = zend_register_internal_module(module)) != NULL &amp;&amp; zend_startup_module_ex(module) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1631.html#L2467'>module</a>           2467 Zend/zend_API.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1631.html#L2469'>module</a>           2469 Zend/zend_API.c 	module = zend_hash_str_find_ptr(&amp;module_registry, module_name, strlen(module_name));</span>
+<span class='curline'><a href='../S/1631.html#L2470'>module</a>           2470 Zend/zend_API.c 	return (module &amp;&amp; module-&gt;module_started) ? SUCCESS : FAILURE;</span>
+<span class='curline'><a href='../S/1631.html#L2478'>module</a>           2478 Zend/zend_API.c 	if (ce-&gt;type == ZEND_INTERNAL_CLASS &amp;&amp; ce-&gt;info.internal.module-&gt;module_number == module_number) {</span>
+<span class='curline'><a href='../S/1631.html#L2492'>module</a>           2492 Zend/zend_API.c void module_destructor(zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L2495'>module</a>           2495 Zend/zend_API.c 	if (module-&gt;type == MODULE_TEMPORARY) {</span>
+<span class='curline'><a href='../S/1631.html#L2496'>module</a>           2496 Zend/zend_API.c 		zend_clean_module_rsrc_dtors(module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2497'>module</a>           2497 Zend/zend_API.c 		clean_module_constants(module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2498'>module</a>           2498 Zend/zend_API.c 		clean_module_classes(module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2501'>module</a>           2501 Zend/zend_API.c 	if (module-&gt;module_started &amp;&amp; module-&gt;module_shutdown_func) {</span>
+<span class='curline'><a href='../S/1631.html#L2503'>module</a>           2503 Zend/zend_API.c 		zend_printf("%s: Module shutdown\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2505'>module</a>           2505 Zend/zend_API.c 		module-&gt;module_shutdown_func(module-&gt;type, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2509'>module</a>           2509 Zend/zend_API.c 	if (module-&gt;globals_size) {</span>
+<span class='curline'><a href='../S/1631.html#L2511'>module</a>           2511 Zend/zend_API.c 		if (*module-&gt;globals_id_ptr) {</span>
+<span class='curline'><a href='../S/1631.html#L2512'>module</a>           2512 Zend/zend_API.c 			ts_free_id(*module-&gt;globals_id_ptr);</span>
+<span class='curline'><a href='../S/1631.html#L2515'>module</a>           2515 Zend/zend_API.c 		if (module-&gt;globals_dtor) {</span>
+<span class='curline'><a href='../S/1631.html#L2516'>module</a>           2516 Zend/zend_API.c 			module-&gt;globals_dtor(module-&gt;globals_ptr);</span>
+<span class='curline'><a href='../S/1631.html#L2521'>module</a>           2521 Zend/zend_API.c 	module-&gt;module_started=0;</span>
+<span class='curline'><a href='../S/1631.html#L2522'>module</a>           2522 Zend/zend_API.c 	if (module-&gt;functions) {</span>
+<span class='curline'><a href='../S/1631.html#L2523'>module</a>           2523 Zend/zend_API.c 		zend_unregister_functions(module-&gt;functions, -1, NULL);</span>
+<span class='curline'><a href='../S/1631.html#L2528'>module</a>           2528 Zend/zend_API.c 	if (module-&gt;handle &amp;&amp; !getenv("ZEND_DONT_UNLOAD_MODULES")) {</span>
+<span class='curline'><a href='../S/1631.html#L2529'>module</a>           2529 Zend/zend_API.c 		DL_UNLOAD(module-&gt;handle);</span>
+<span class='curline'><a href='../S/1631.html#L2541'>module</a>           2541 Zend/zend_API.c 		zend_module_entry *module = *p;</span>
+<span class='curline'><a href='../S/1631.html#L2543'>module</a>           2543 Zend/zend_API.c 		if (module-&gt;request_startup_func(module-&gt;type, module-&gt;module_number)==FAILURE) {</span>
+<span class='curline'><a href='../S/1631.html#L2544'>module</a>           2544 Zend/zend_API.c 			zend_error(E_WARNING, "request_startup() for %s module failed", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2555'>module</a>           2555 Zend/zend_API.c 	zend_module_entry *module = Z_PTR_P(zv);</span>
+<span class='curline'><a href='../S/1631.html#L2557'>module</a>           2557 Zend/zend_API.c 	if (module-&gt;request_shutdown_func) {</span>
+<span class='curline'><a href='../S/1631.html#L2559'>module</a>           2559 Zend/zend_API.c 		zend_printf("%s: Request shutdown\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1631.html#L2561'>module</a>           2561 Zend/zend_API.c 		module-&gt;request_shutdown_func(module-&gt;type, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2578'>module</a>           2578 Zend/zend_API.c 				zend_module_entry *module = *p;</span>
+<span class='curline'><a href='../S/1631.html#L2580'>module</a>           2580 Zend/zend_API.c 				module-&gt;request_shutdown_func(module-&gt;type, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/1631.html#L2599'>module</a>           2599 Zend/zend_API.c int module_registry_unload_temp(const zend_module_entry *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1631.html#L2601'>module</a>           2601 Zend/zend_API.c 	return (module-&gt;type == MODULE_TEMPORARY) ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_STOP;</span>
+<span class='curline'><a href='../S/1631.html#L2607'>module</a>           2607 Zend/zend_API.c 	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);</span>
+<span class='curline'><a href='../S/1631.html#L2608'>module</a>           2608 Zend/zend_API.c 	return module_registry_unload_temp((const zend_module_entry *)module);</span>
+<span class='curline'><a href='../S/1631.html#L2614'>module</a>           2614 Zend/zend_API.c 	zend_module_entry *module = (zend_module_entry *)Z_PTR_P(el);</span>
+<span class='curline'><a href='../S/1631.html#L2615'>module</a>           2615 Zend/zend_API.c 	if (module-&gt;post_deactivate_func) {</span>
+<span class='curline'><a href='../S/1631.html#L2616'>module</a>           2616 Zend/zend_API.c 		module-&gt;post_deactivate_func();</span>
+<span class='curline'><a href='../S/1631.html#L2631'>module</a>           2631 Zend/zend_API.c 			zend_module_entry *module = *p;</span>
+<span class='curline'><a href='../S/1631.html#L2633'>module</a>           2633 Zend/zend_API.c 			module-&gt;post_deactivate_func();</span>
+<span class='curline'><a href='../S/1631.html#L2656'>module</a>           2656 Zend/zend_API.c 	class_entry-&gt;info.internal.module = EG(current_module);</span>
+<span class='curline'><a href='../S/1631.html#L3597'>module</a>           3597 Zend/zend_API.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1631.html#L3601'>module</a>           3601 Zend/zend_API.c 	module = zend_hash_find_ptr(&amp;module_registry, lname);</span>
+<span class='curline'><a href='../S/1631.html#L3603'>module</a>           3603 Zend/zend_API.c 	return module ? module-&gt;version : NULL;</span>
+<span class='curline'><a href='../S/1632.html#L125'>module</a>            125 Zend/zend_API.h #define ZEND_MODULE_STARTUP_N(module)       zm_startup_##module</span>
+<span class='curline'><a href='../S/1632.html#L126'>module</a>            126 Zend/zend_API.h #define ZEND_MODULE_SHUTDOWN_N(module)		zm_shutdown_##module</span>
+<span class='curline'><a href='../S/1632.html#L127'>module</a>            127 Zend/zend_API.h #define ZEND_MODULE_ACTIVATE_N(module)		zm_activate_##module</span>
+<span class='curline'><a href='../S/1632.html#L128'>module</a>            128 Zend/zend_API.h #define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module</span>
+<span class='curline'><a href='../S/1632.html#L129'>module</a>            129 Zend/zend_API.h #define ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)	zm_post_zend_deactivate_##module</span>
+<span class='curline'><a href='../S/1632.html#L130'>module</a>            130 Zend/zend_API.h #define ZEND_MODULE_INFO_N(module)			zm_info_##module</span>
+<span class='curline'><a href='../S/1632.html#L131'>module</a>            131 Zend/zend_API.h #define ZEND_MODULE_GLOBALS_CTOR_N(module)  zm_globals_ctor_##module</span>
+<span class='curline'><a href='../S/1632.html#L132'>module</a>            132 Zend/zend_API.h #define ZEND_MODULE_GLOBALS_DTOR_N(module)  zm_globals_dtor_##module</span>
+<span class='curline'><a href='../S/1632.html#L135'>module</a>            135 Zend/zend_API.h #define ZEND_MODULE_STARTUP_D(module)		int ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS)</span>
+<span class='curline'><a href='../S/1632.html#L136'>module</a>            136 Zend/zend_API.h #define ZEND_MODULE_SHUTDOWN_D(module)		int ZEND_MODULE_SHUTDOWN_N(module)(SHUTDOWN_FUNC_ARGS)</span>
+<span class='curline'><a href='../S/1632.html#L137'>module</a>            137 Zend/zend_API.h #define ZEND_MODULE_ACTIVATE_D(module)		int ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)</span>
+<span class='curline'><a href='../S/1632.html#L138'>module</a>            138 Zend/zend_API.h #define ZEND_MODULE_DEACTIVATE_D(module)	int ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)</span>
+<span class='curline'><a href='../S/1632.html#L139'>module</a>            139 Zend/zend_API.h #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	int ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)</span>
+<span class='curline'><a href='../S/1632.html#L140'>module</a>            140 Zend/zend_API.h #define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)</span>
+<span class='curline'><a href='../S/1632.html#L141'>module</a>            141 Zend/zend_API.h #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)</span>
+<span class='curline'><a href='../S/1632.html#L142'>module</a>            142 Zend/zend_API.h #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)</span>
+<span class='curline'><a href='../S/1632.html#L223'>module</a>            223 Zend/zend_API.h 		class_container.info.internal.module = NULL;			\</span>
+<span class='curline'><a href='../S/1632.html#L282'>module</a>            282 Zend/zend_API.h ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1632.html#L283'>module</a>            283 Zend/zend_API.h ZEND_API int zend_startup_module_ex(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1632.html#L656'>module</a>            656 Zend/zend_API.h #define ZEND_GINIT(module)		((void (*)(void*))(ZEND_MODULE_GLOBALS_CTOR_N(module)))</span>
+<span class='curline'><a href='../S/1632.html#L657'>module</a>            657 Zend/zend_API.h #define ZEND_GSHUTDOWN(module)	((void (*)(void*))(ZEND_MODULE_GLOBALS_DTOR_N(module)))</span>
+<span class='curline'><a href='../S/1638.html#L2129'>module</a>           2129 Zend/zend_builtin_functions.c 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(item);</span>
+<span class='curline'><a href='../S/1638.html#L2130'>module</a>           2130 Zend/zend_builtin_functions.c 	add_next_index_string(name_array, module-&gt;name);</span>
+<span class='curline'><a href='../S/1638.html#L2197'>module</a>           2197 Zend/zend_builtin_functions.c 		zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1638.html#L2204'>module</a>           2204 Zend/zend_builtin_functions.c 		ZEND_HASH_FOREACH_PTR(&amp;module_registry, module) {</span>
+<span class='curline'><a href='../S/1638.html#L2205'>module</a>           2205 Zend/zend_builtin_functions.c 			module_names[module-&gt;module_number] = (char *)module-&gt;name;</span>
+<span class='curline'><a href='../S/1638.html#L2738'>module</a>           2738 Zend/zend_builtin_functions.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1638.html#L2746'>module</a>           2746 Zend/zend_builtin_functions.c 		module = zend_hash_find_ptr(&amp;module_registry, lcname);</span>
+<span class='curline'><a href='../S/1638.html#L2749'>module</a>           2749 Zend/zend_builtin_functions.c 		module = zend_hash_str_find_ptr(&amp;module_registry, "core", sizeof("core") - 1);</span>
+<span class='curline'><a href='../S/1638.html#L2752'>module</a>           2752 Zend/zend_builtin_functions.c 	if (!module) {</span>
+<span class='curline'><a href='../S/1638.html#L2756'>module</a>           2756 Zend/zend_builtin_functions.c 	if (module-&gt;functions) {</span>
+<span class='curline'><a href='../S/1638.html#L2766'>module</a>           2766 Zend/zend_builtin_functions.c 			&amp;&amp; zif-&gt;internal_function.module == module) {</span>
+<span class='curline'><a href='../S/1640.html#L277'>module</a>            277 Zend/zend_closures.c 	invoke-&gt;internal_function.module = 0;</span>
+<span class='curline'><a href='../S/1642.html#L1672'>module</a>           1672 Zend/zend_compile.c 			ce-&gt;info.internal.module = NULL;</span>
+<span class='curline'><a href='../S/1643.html#L398'>module</a>            398 Zend/zend_compile.h 	struct _zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1674.html#L82'>module</a>             82 Zend/zend_ini.h ZEND_API void display_ini_entries(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1695.html#L127'>module</a>            127 Zend/zend_modules.h void module_destructor(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1695.html#L128'>module</a>            128 Zend/zend_modules.h int module_registry_request_startup(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1695.html#L129'>module</a>            129 Zend/zend_modules.h int module_registry_unload_temp(const zend_module_entry *module);</span>
+<span class='curline'><a href='../S/43.html#L294'>module</a>            294 ext/com_dotnet/com_com.c 	OLECHAR *module = NULL;</span>
+<span class='curline'><a href='../S/43.html#L303'>module</a>            303 ext/com_dotnet/com_com.c 	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page);</span>
+<span class='curline'><a href='../S/43.html#L305'>module</a>            305 ext/com_dotnet/com_com.c 	res = CLSIDFromString(module, &amp;clsid);</span>
+<span class='curline'><a href='../S/43.html#L332'>module</a>            332 ext/com_dotnet/com_com.c 	efree(module);</span>
+<span class='curline'><a href='../S/745.html#L170'>module</a>            170 ext/mcrypt/mcrypt.c 	ZEND_ARG_INFO(0, module)</span>
+<span class='curline'><a href='../S/745.html#L175'>module</a>            175 ext/mcrypt/mcrypt.c 	ZEND_ARG_INFO(0, module)</span>
+<span class='curline'><a href='../S/745.html#L180'>module</a>            180 ext/mcrypt/mcrypt.c 	ZEND_ARG_INFO(0, module)</span>
+<span class='curline'><a href='../S/745.html#L319'>module</a>            319 ext/mcrypt/mcrypt.c 	char *module;                                                       \</span>
+<span class='curline'><a href='../S/745.html#L322'>module</a>            322 ext/mcrypt/mcrypt.c 		"s|s", &amp;module, &amp;module_len, &amp;dir, &amp;dir_len) == FAILURE) {      \</span>
+<span class='curline'><a href='../S/745.html#L858'>module</a>            858 ext/mcrypt/mcrypt.c 	if (mcrypt_module_self_test(module, dir) == 0) {</span>
+<span class='curline'><a href='../S/745.html#L872'>module</a>            872 ext/mcrypt/mcrypt.c 	if (mcrypt_module_is_block_algorithm_mode(module, dir) == 1) {</span>
+<span class='curline'><a href='../S/745.html#L886'>module</a>            886 ext/mcrypt/mcrypt.c 	if (mcrypt_module_is_block_algorithm(module, dir) == 1) {</span>
+<span class='curline'><a href='../S/745.html#L900'>module</a>            900 ext/mcrypt/mcrypt.c 	if (mcrypt_module_is_block_mode(module, dir) == 1) {</span>
+<span class='curline'><a href='../S/745.html#L914'>module</a>            914 ext/mcrypt/mcrypt.c 	RETURN_LONG(mcrypt_module_get_algo_block_size(module, dir));</span>
+<span class='curline'><a href='../S/745.html#L924'>module</a>            924 ext/mcrypt/mcrypt.c 	RETURN_LONG(mcrypt_module_get_algo_key_size(module, dir));</span>
+<span class='curline'><a href='../S/745.html#L938'>module</a>            938 ext/mcrypt/mcrypt.c 	key_sizes = mcrypt_module_get_algo_supported_key_sizes(module, dir, &amp;count);</span>
+<span class='curline'><a href='../S/745.html#L1006'>module</a>           1006 ext/mcrypt/mcrypt.c 	char *module;</span>
+<span class='curline'><a href='../S/745.html#L1015'>module</a>           1015 ext/mcrypt/mcrypt.c 		&amp;cipher, &amp;cipher_len, &amp;module, &amp;module_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/745.html#L1019'>module</a>           1019 ext/mcrypt/mcrypt.c 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);</span>
+<span class='curline'><a href='../S/745.html#L1035'>module</a>           1035 ext/mcrypt/mcrypt.c 	char *module;</span>
+<span class='curline'><a href='../S/745.html#L1044'>module</a>           1044 ext/mcrypt/mcrypt.c 		&amp;cipher, &amp;cipher_len, &amp;module, &amp;module_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/745.html#L1048'>module</a>           1048 ext/mcrypt/mcrypt.c 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);</span>
+<span class='curline'><a href='../S/745.html#L1064'>module</a>           1064 ext/mcrypt/mcrypt.c 	char *module;</span>
+<span class='curline'><a href='../S/745.html#L1073'>module</a>           1073 ext/mcrypt/mcrypt.c 		&amp;cipher, &amp;cipher_len, &amp;module, &amp;module_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/745.html#L1077'>module</a>           1077 ext/mcrypt/mcrypt.c 	td = mcrypt_module_open(cipher, cipher_dir_string, module, module_dir_string);</span>
+<span class='curline'><a href='../S/746.html#L28'>module</a>             28 ext/mcrypt/mcrypt_filter.c 	MCRYPT module;</span>
+<span class='curline'><a href='../S/746.html#L75'>module</a>             75 ext/mcrypt/mcrypt_filter.c 					mcrypt_generic(data-&gt;module, outchunk + n, data-&gt;blocksize);</span>
+<span class='curline'><a href='../S/746.html#L77'>module</a>             77 ext/mcrypt/mcrypt_filter.c 					mdecrypt_generic(data-&gt;module, outchunk + n, data-&gt;blocksize);</span>
+<span class='curline'><a href='../S/746.html#L94'>module</a>             94 ext/mcrypt/mcrypt_filter.c 				mcrypt_generic(data-&gt;module, bucket-&gt;buf, (int)bucket-&gt;buflen);</span>
+<span class='curline'><a href='../S/746.html#L96'>module</a>             96 ext/mcrypt/mcrypt_filter.c 				mdecrypt_generic(data-&gt;module, bucket-&gt;buf, (int)bucket-&gt;buflen);</span>
+<span class='curline'><a href='../S/746.html#L109'>module</a>            109 ext/mcrypt/mcrypt_filter.c 			mcrypt_generic(data-&gt;module, data-&gt;block_buffer, data-&gt;blocksize);</span>
+<span class='curline'><a href='../S/746.html#L111'>module</a>            111 ext/mcrypt/mcrypt_filter.c 			mdecrypt_generic(data-&gt;module, data-&gt;block_buffer, data-&gt;blocksize);</span>
+<span class='curline'><a href='../S/746.html#L136'>module</a>            136 ext/mcrypt/mcrypt_filter.c 		mcrypt_generic_deinit(data-&gt;module);</span>
+<span class='curline'><a href='../S/746.html#L137'>module</a>            137 ext/mcrypt/mcrypt_filter.c 		mcrypt_module_close(data-&gt;module);</span>
+<span class='curline'><a href='../S/746.html#L256'>module</a>            256 ext/mcrypt/mcrypt_filter.c 	data-&gt;module = mcrypt_module;</span>
+<span class='curline'><a href='../S/796.html#L63'>module</a>             63 ext/mysqlnd/mysqlnd_reverse_api.c 	zend_hash_str_add_ptr(&amp;mysqlnd_api_ext_ht, apiext-&gt;module-&gt;name, strlen(apiext-&gt;module-&gt;name), apiext);</span>
+<span class='curline'><a href='../S/797.html#L26'>module</a>             26 ext/mysqlnd/mysqlnd_reverse_api.h 	zend_module_entry * module;</span>
+<span class='curline'><a href='../S/803.html#L108'>module</a>            108 ext/mysqlnd/php_mysqlnd.c 		smart_str_appends(buffer, ext-&gt;module-&gt;name);</span>
+<span class='curline'><a href='../S/807.html#L1858'>module</a>           1858 ext/oci8/oci8_interface.c 	char *module;</span>
+<span class='curline'><a href='../S/807.html#L1862'>module</a>           1862 ext/oci8/oci8_interface.c 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &amp;z_connection, &amp;module, &amp;module_len) == FAILURE) {</span>
+<span class='curline'><a href='../S/807.html#L1868'>module</a>           1868 ext/oci8/oci8_interface.c 	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) connection-&gt;session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, connection-&gt;err));</span>
+<span class='curline'><a href='../S/822.html#L307'>module</a>            307 ext/opcache/Optimizer/pass1_5.c 								 ce-&gt;info.internal.module-&gt;type != MODULE_PERSISTENT) ||</span>
+<span class='curline'><a href='../S/822.html#L451'>module</a>            451 ext/opcache/Optimizer/pass1_5.c 						 &amp;&amp; func-&gt;module-&gt;type == MODULE_PERSISTENT</span>
+<span class='curline'><a href='../S/822.html#L453'>module</a>            453 ext/opcache/Optimizer/pass1_5.c 						 &amp;&amp; func-&gt;module-&gt;handle == NULL</span>
+<span class='curline'><a href='../S/983.html#L372'>module</a>            372 ext/reflection/php_reflection.c static void _extension_string(string *str, zend_module_entry *module, char *indent);</span>
+<span class='curline'><a href='../S/983.html#L402'>module</a>            402 ext/reflection/php_reflection.c 	if (ce-&gt;type == ZEND_INTERNAL_CLASS &amp;&amp; ce-&gt;info.internal.module) {</span>
+<span class='curline'><a href='../S/983.html#L403'>module</a>            403 ext/reflection/php_reflection.c 		string_printf(str, ":%s", ce-&gt;info.internal.module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L803'>module</a>            803 ext/reflection/php_reflection.c 	if (fptr-&gt;type == ZEND_INTERNAL_FUNCTION &amp;&amp; ((zend_internal_function*)fptr)-&gt;module) {</span>
+<span class='curline'><a href='../S/983.html#L804'>module</a>            804 ext/reflection/php_reflection.c 		string_printf(str, ":%s", ((zend_internal_function*)fptr)-&gt;module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L988'>module</a>            988 ext/reflection/php_reflection.c 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);</span>
+<span class='curline'><a href='../S/983.html#L991'>module</a>            991 ext/reflection/php_reflection.c 	if ((ce-&gt;type == ZEND_INTERNAL_CLASS) &amp;&amp; ce-&gt;info.internal.module &amp;&amp; !strcasecmp(ce-&gt;info.internal.module-&gt;name, module-&gt;name)) {</span>
+<span class='curline'><a href='../S/983.html#L1008'>module</a>           1008 ext/reflection/php_reflection.c 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);</span>
+<span class='curline'><a href='../S/983.html#L1011'>module</a>           1011 ext/reflection/php_reflection.c 	if (constant-&gt;module_number  == module-&gt;module_number) {</span>
+<span class='curline'><a href='../S/983.html#L1019'>module</a>           1019 ext/reflection/php_reflection.c static void _extension_string(string *str, zend_module_entry *module, char *indent) /* {{{ */</span>
+<span class='curline'><a href='../S/983.html#L1022'>module</a>           1022 ext/reflection/php_reflection.c 	if (module-&gt;type == MODULE_PERSISTENT) {</span>
+<span class='curline'><a href='../S/983.html#L1025'>module</a>           1025 ext/reflection/php_reflection.c 	if (module-&gt;type == MODULE_TEMPORARY) {</span>
+<span class='curline'><a href='../S/983.html#L1029'>module</a>           1029 ext/reflection/php_reflection.c 					module-&gt;module_number, module-&gt;name,</span>
+<span class='curline'><a href='../S/983.html#L1030'>module</a>           1030 ext/reflection/php_reflection.c 					(module-&gt;version == NO_VERSION_YET) ? "&lt;no_version&gt;" : module-&gt;version);</span>
+<span class='curline'><a href='../S/983.html#L1032'>module</a>           1032 ext/reflection/php_reflection.c 	if (module-&gt;deps) {</span>
+<span class='curline'><a href='../S/983.html#L1033'>module</a>           1033 ext/reflection/php_reflection.c 		const zend_module_dep* dep = module-&gt;deps;</span>
+<span class='curline'><a href='../S/983.html#L1070'>module</a>           1070 ext/reflection/php_reflection.c 		zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _extension_ini_string, 3, &amp;str_ini, indent, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/983.html#L1084'>module</a>           1084 ext/reflection/php_reflection.c 		zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _extension_const_string, 4, &amp;str_constants, indent, module, &amp;num_constants);</span>
+<span class='curline'><a href='../S/983.html#L1099'>module</a>           1099 ext/reflection/php_reflection.c 				&amp;&amp; fptr-&gt;internal_function.module == module) {</span>
+<span class='curline'><a href='../S/983.html#L1120'>module</a>           1120 ext/reflection/php_reflection.c 		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &amp;str_classes, ZSTR_VAL(sub_indent.buf), module, &amp;num_classes);</span>
+<span class='curline'><a href='../S/983.html#L1192'>module</a>           1192 ext/reflection/php_reflection.c 	struct _zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L1196'>module</a>           1196 ext/reflection/php_reflection.c 	module = zend_hash_find_ptr(&amp;module_registry, lcname);</span>
+<span class='curline'><a href='../S/983.html#L1198'>module</a>           1198 ext/reflection/php_reflection.c 	if (!module) {</span>
+<span class='curline'><a href='../S/983.html#L1204'>module</a>           1204 ext/reflection/php_reflection.c 	ZVAL_STRINGL(&amp;name, module-&gt;name, name_len);</span>
+<span class='curline'><a href='../S/983.html#L1205'>module</a>           1205 ext/reflection/php_reflection.c 	intern-&gt;ptr = module;</span>
+<span class='curline'><a href='../S/983.html#L2116'>module</a>           2116 ext/reflection/php_reflection.c 	if (internal-&gt;module) {</span>
+<span class='curline'><a href='../S/983.html#L2117'>module</a>           2117 ext/reflection/php_reflection.c 		reflection_extension_factory(return_value, internal-&gt;module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L2140'>module</a>           2140 ext/reflection/php_reflection.c 	if (internal-&gt;module) {</span>
+<span class='curline'><a href='../S/983.html#L2141'>module</a>           2141 ext/reflection/php_reflection.c 		RETURN_STRING(internal-&gt;module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L5033'>module</a>           5033 ext/reflection/php_reflection.c 	if ((ce-&gt;type == ZEND_INTERNAL_CLASS) &amp;&amp; ce-&gt;info.internal.module) {</span>
+<span class='curline'><a href='../S/983.html#L5034'>module</a>           5034 ext/reflection/php_reflection.c 		reflection_extension_factory(return_value, ce-&gt;info.internal.module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L5053'>module</a>           5053 ext/reflection/php_reflection.c 	if ((ce-&gt;type == ZEND_INTERNAL_CLASS) &amp;&amp; ce-&gt;info.internal.module) {</span>
+<span class='curline'><a href='../S/983.html#L5054'>module</a>           5054 ext/reflection/php_reflection.c 		RETURN_STRING(ce-&gt;info.internal.module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L5543'>module</a>           5543 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5557'>module</a>           5557 ext/reflection/php_reflection.c 	if ((module = zend_hash_str_find_ptr(&amp;module_registry, lcname, name_len)) == NULL) {</span>
+<span class='curline'><a href='../S/983.html#L5564'>module</a>           5564 ext/reflection/php_reflection.c 	ZVAL_STRING(&amp;name, module-&gt;name);</span>
+<span class='curline'><a href='../S/983.html#L5566'>module</a>           5566 ext/reflection/php_reflection.c 	intern-&gt;ptr = module;</span>
+<span class='curline'><a href='../S/983.html#L5577'>module</a>           5577 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5583'>module</a>           5583 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5585'>module</a>           5585 ext/reflection/php_reflection.c 	_extension_string(&amp;str, module, "");</span>
+<span class='curline'><a href='../S/983.html#L5606'>module</a>           5606 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5611'>module</a>           5611 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5614'>module</a>           5614 ext/reflection/php_reflection.c 	if (module-&gt;version == NO_VERSION_YET) {</span>
+<span class='curline'><a href='../S/983.html#L5617'>module</a>           5617 ext/reflection/php_reflection.c 		RETURN_STRING(module-&gt;version);</span>
+<span class='curline'><a href='../S/983.html#L5627'>module</a>           5627 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5634'>module</a>           5634 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5639'>module</a>           5639 ext/reflection/php_reflection.c 			&amp;&amp; fptr-&gt;internal_function.module == module) {</span>
+<span class='curline'><a href='../S/983.html#L5667'>module</a>           5667 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5672'>module</a>           5672 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5675'>module</a>           5675 ext/reflection/php_reflection.c 	zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _addconstant, 2, return_value, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/983.html#L5705'>module</a>           5705 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5710'>module</a>           5710 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5713'>module</a>           5713 ext/reflection/php_reflection.c 	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _addinientry, 2, return_value, module-&gt;module_number);</span>
+<span class='curline'><a href='../S/983.html#L5722'>module</a>           5722 ext/reflection/php_reflection.c 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);</span>
+<span class='curline'><a href='../S/983.html#L5725'>module</a>           5725 ext/reflection/php_reflection.c 	if ((ce-&gt;type == ZEND_INTERNAL_CLASS) &amp;&amp; ce-&gt;info.internal.module &amp;&amp; !strcasecmp(ce-&gt;info.internal.module-&gt;name, module-&gt;name)) {</span>
+<span class='curline'><a href='../S/983.html#L5751'>module</a>           5751 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5756'>module</a>           5756 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5759'>module</a>           5759 ext/reflection/php_reflection.c 	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 1);</span>
+<span class='curline'><a href='../S/983.html#L5768'>module</a>           5768 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5773'>module</a>           5773 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5776'>module</a>           5776 ext/reflection/php_reflection.c 	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 0);</span>
+<span class='curline'><a href='../S/983.html#L5785'>module</a>           5785 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5791'>module</a>           5791 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5795'>module</a>           5795 ext/reflection/php_reflection.c 	dep = module-&gt;deps;</span>
+<span class='curline'><a href='../S/983.html#L5852'>module</a>           5852 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5857'>module</a>           5857 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5859'>module</a>           5859 ext/reflection/php_reflection.c 	php_info_print_module(module);</span>
+<span class='curline'><a href='../S/983.html#L5868'>module</a>           5868 ext/reflection/php_reflection.c     zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5873'>module</a>           5873 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5875'>module</a>           5875 ext/reflection/php_reflection.c 	RETURN_BOOL(module-&gt;type == MODULE_PERSISTENT);</span>
+<span class='curline'><a href='../S/983.html#L5884'>module</a>           5884 ext/reflection/php_reflection.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/983.html#L5889'>module</a>           5889 ext/reflection/php_reflection.c 	GET_REFLECTION_OBJECT_PTR(module);</span>
+<span class='curline'><a href='../S/983.html#L5891'>module</a>           5891 ext/reflection/php_reflection.c 	RETURN_BOOL(module-&gt;type == MODULE_TEMPORARY);</span>
+<span class='curline'><a href='../S/993.html#L2432'>module</a>           2432 ext/session/session.c 	ZEND_ARG_INFO(0, module)</span>
+<span class='curline'><a href='../S/1054.html#L150588'>module</a>           150588 ext/sqlite3/libsqlite/sqlite3.c   static const sqlite3_tokenizer_module module = {</span>
+<span class='curline'><a href='../S/1054.html#L150597'>module</a>           150597 ext/sqlite3/libsqlite/sqlite3.c   *ppModule = &amp;module;</span>
+<span class='curline'><a href='../S/1064.html#L3522'>module</a>           3522 ext/standard/basic_functions.c #define BASIC_MINIT_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3523'>module</a>           3523 ext/standard/basic_functions.c 	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\</span>
+<span class='curline'><a href='../S/1064.html#L3524'>module</a>           3524 ext/standard/basic_functions.c 		BASIC_ADD_SUBMODULE(module); \</span>
+<span class='curline'><a href='../S/1064.html#L3527'>module</a>           3527 ext/standard/basic_functions.c #define BASIC_ADD_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3528'>module</a>           3528 ext/standard/basic_functions.c 	zend_hash_str_add_empty_element(&amp;basic_submodules, #module, strlen(#module));</span>
+<span class='curline'><a href='../S/1064.html#L3530'>module</a>           3530 ext/standard/basic_functions.c #define BASIC_RINIT_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3531'>module</a>           3531 ext/standard/basic_functions.c 	if (zend_hash_str_exists(&amp;basic_submodules, #module, strlen(#module))) { \</span>
+<span class='curline'><a href='../S/1064.html#L3532'>module</a>           3532 ext/standard/basic_functions.c 		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \</span>
+<span class='curline'><a href='../S/1064.html#L3535'>module</a>           3535 ext/standard/basic_functions.c #define BASIC_MINFO_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3536'>module</a>           3536 ext/standard/basic_functions.c 	if (zend_hash_str_exists(&amp;basic_submodules, #module, strlen(#module))) { \</span>
+<span class='curline'><a href='../S/1064.html#L3537'>module</a>           3537 ext/standard/basic_functions.c 		PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU); \</span>
+<span class='curline'><a href='../S/1064.html#L3540'>module</a>           3540 ext/standard/basic_functions.c #define BASIC_RSHUTDOWN_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3541'>module</a>           3541 ext/standard/basic_functions.c 	if (zend_hash_str_exists(&amp;basic_submodules, #module, strlen(#module))) { \</span>
+<span class='curline'><a href='../S/1064.html#L3542'>module</a>           3542 ext/standard/basic_functions.c 		PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \</span>
+<span class='curline'><a href='../S/1064.html#L3545'>module</a>           3545 ext/standard/basic_functions.c #define BASIC_MSHUTDOWN_SUBMODULE(module) \</span>
+<span class='curline'><a href='../S/1064.html#L3546'>module</a>           3546 ext/standard/basic_functions.c 	if (zend_hash_str_exists(&amp;basic_submodules, #module, strlen(#module))) { \</span>
+<span class='curline'><a href='../S/1064.html#L3547'>module</a>           3547 ext/standard/basic_functions.c 		PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \</span>
+<span class='curline'><a href='../S/1064.html#L5319'>module</a>           5319 ext/standard/basic_functions.c 	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1064.html#L5329'>module</a>           5329 ext/standard/basic_functions.c 		if ((module = zend_hash_str_find_ptr(&amp;module_registry, extname, extname_len)) == NULL) {</span>
+<span class='curline'><a href='../S/1064.html#L5333'>module</a>           5333 ext/standard/basic_functions.c 		extnumber = module-&gt;module_number;</span>
+<span class='curline'><a href='../S/1069.html#L26'>module</a>             26 ext/standard/credits.c #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)</span>
+<span class='curline'><a href='../S/1113.html#L174'>module</a>            174 ext/standard/info.c 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);</span>
+<span class='curline'><a href='../S/1113.html#L175'>module</a>            175 ext/standard/info.c 	if (module-&gt;info_func || module-&gt;version) {</span>
+<span class='curline'><a href='../S/1113.html#L176'>module</a>            176 ext/standard/info.c 		php_info_print_module(module);</span>
+<span class='curline'><a href='../S/1113.html#L184'>module</a>            184 ext/standard/info.c 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);</span>
+<span class='curline'><a href='../S/1113.html#L185'>module</a>            185 ext/standard/info.c 	if (!module-&gt;info_func &amp;&amp; !module-&gt;version) {</span>
+<span class='curline'><a href='../S/1113.html#L186'>module</a>            186 ext/standard/info.c 		php_info_print_module(module);</span>
+<span class='curline'><a href='../S/1114.html#L81'>module</a>             81 ext/standard/info.h PHPAPI void php_info_print_module(zend_module_entry *module);</span>
+<span class='curline'><a href='../S/1374.html#L2010'>module</a>           2010 main/main.c    	zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1374.html#L2219'>module</a>           2219 main/main.c    		if ((module = zend_hash_str_find_ptr(&amp;module_registry, "standard", sizeof("standard")-1)) != NULL) {</span>
+<span class='curline'><a href='../S/1374.html#L2220'>module</a>           2220 main/main.c    			EG(current_module) = module;</span>
+<span class='curline'><a href='../S/1374.html#L2231'>module</a>           2231 main/main.c    	if ((module = zend_hash_str_find_ptr(&amp;module_registry, "core", sizeof("core")-1)) != NULL) {</span>
+<span class='curline'><a href='../S/1374.html#L2232'>module</a>           2232 main/main.c    		module-&gt;version = PHP_VERSION;</span>
+<span class='curline'><a href='../S/1374.html#L2233'>module</a>           2233 main/main.c    		module-&gt;info_func = PHP_MINFO(php_core);</span>
+<span class='curline'><a href='../S/1384.html#L167'>module</a>            167 main/php_ini.c PHPAPI void display_ini_entries(zend_module_entry *module)</span>
+<span class='curline'><a href='../S/1384.html#L171'>module</a>            171 main/php_ini.c 	if (module) {</span>
+<span class='curline'><a href='../S/1384.html#L172'>module</a>            172 main/php_ini.c 		module_number = module-&gt;module_number;</span>
+<span class='curline'><a href='../S/1437.html#L28'>module</a>             28 sapi/apache2handler/mod_php7.c AP_MODULE_DECLARE_DATA module php7_module = {</span>
+<span class='curline'><a href='../S/1438.html#L32'>module</a>             32 sapi/apache2handler/php_apache.h extern module AP_MODULE_DECLARE_DATA php7_module;</span>
+<span class='curline'><a href='../S/1441.html#L237'>module</a>            237 sapi/cgi/cgi_main.c 	zend_module_entry *module = Z_PTR_P(element);</span>
+<span class='curline'><a href='../S/1441.html#L238'>module</a>            238 sapi/cgi/cgi_main.c 	php_printf("%s\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1445.html#L184'>module</a>            184 sapi/cli/php_cli.c 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(element);</span>
+<span class='curline'><a href='../S/1445.html#L185'>module</a>            185 sapi/cli/php_cli.c 	php_printf("%s\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1445.html#L1111'>module</a>           1111 sapi/cli/php_cli.c 					zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1445.html#L1113'>module</a>           1113 sapi/cli/php_cli.c 					if ((module = zend_hash_str_find_ptr(&amp;module_registry, lcname, len)) == NULL) {</span>
+<span class='curline'><a href='../S/1445.html#L1121'>module</a>           1121 sapi/cli/php_cli.c 						php_info_print_module(module);</span>
+<span class='curline'><a href='../S/1483.html#L45'>module</a>             45 sapi/fpm/fpm/fpm_events.c static struct fpm_event_module_s *module;</span>
+<span class='curline'><a href='../S/1483.html#L170'>module</a>            170 sapi/fpm/fpm/fpm_events.c 	if (*queue == fpm_event_queue_fd &amp;&amp; module-&gt;add) {</span>
+<span class='curline'><a href='../S/1483.html#L171'>module</a>            171 sapi/fpm/fpm/fpm_events.c 		module-&gt;add(ev);</span>
+<span class='curline'><a href='../S/1483.html#L201'>module</a>            201 sapi/fpm/fpm/fpm_events.c 			if (*queue == fpm_event_queue_fd &amp;&amp; module-&gt;remove) {</span>
+<span class='curline'><a href='../S/1483.html#L202'>module</a>            202 sapi/fpm/fpm/fpm_events.c 				module-&gt;remove(ev);</span>
+<span class='curline'><a href='../S/1483.html#L222'>module</a>            222 sapi/fpm/fpm/fpm_events.c 	if (*queue == fpm_event_queue_fd &amp;&amp; module-&gt;clean) {</span>
+<span class='curline'><a href='../S/1483.html#L223'>module</a>            223 sapi/fpm/fpm/fpm_events.c 		module-&gt;clean();</span>
+<span class='curline'><a href='../S/1483.html#L240'>module</a>            240 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_kqueue_module();</span>
+<span class='curline'><a href='../S/1483.html#L241'>module</a>            241 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L242'>module</a>            242 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L248'>module</a>            248 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_port_module();</span>
+<span class='curline'><a href='../S/1483.html#L249'>module</a>            249 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L250'>module</a>            250 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L256'>module</a>            256 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_epoll_module();</span>
+<span class='curline'><a href='../S/1483.html#L257'>module</a>            257 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L258'>module</a>            258 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L264'>module</a>            264 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_devpoll_module();</span>
+<span class='curline'><a href='../S/1483.html#L265'>module</a>            265 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L266'>module</a>            266 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L272'>module</a>            272 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_poll_module();</span>
+<span class='curline'><a href='../S/1483.html#L273'>module</a>            273 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L274'>module</a>            274 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L280'>module</a>            280 sapi/fpm/fpm/fpm_events.c 	module = fpm_event_select_module();</span>
+<span class='curline'><a href='../S/1483.html#L281'>module</a>            281 sapi/fpm/fpm/fpm_events.c 	if (module) {</span>
+<span class='curline'><a href='../S/1483.html#L282'>module</a>            282 sapi/fpm/fpm/fpm_events.c 		if (!machanism || strcasecmp(module-&gt;name, machanism) == 0) {</span>
+<span class='curline'><a href='../S/1483.html#L298'>module</a>            298 sapi/fpm/fpm/fpm_events.c 	return module ? module-&gt;name : NULL;</span>
+<span class='curline'><a href='../S/1483.html#L304'>module</a>            304 sapi/fpm/fpm/fpm_events.c 	return module ? module-&gt;support_edge_trigger : 0;</span>
+<span class='curline'><a href='../S/1483.html#L313'>module</a>            313 sapi/fpm/fpm/fpm_events.c 	if (!module) {</span>
+<span class='curline'><a href='../S/1483.html#L318'>module</a>            318 sapi/fpm/fpm/fpm_events.c 	if (!module-&gt;wait) {</span>
+<span class='curline'><a href='../S/1483.html#L332'>module</a>            332 sapi/fpm/fpm/fpm_events.c 	if (module-&gt;init(max) &lt; 0) {</span>
+<span class='curline'><a href='../S/1483.html#L333'>module</a>            333 sapi/fpm/fpm/fpm_events.c 		zlog(ZLOG_ERROR, "Unable to initialize the event module %s", module-&gt;name);</span>
+<span class='curline'><a href='../S/1483.html#L337'>module</a>            337 sapi/fpm/fpm/fpm_events.c 	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module-&gt;name, max);</span>
+<span class='curline'><a href='../S/1483.html#L411'>module</a>            411 sapi/fpm/fpm/fpm_events.c 		ret = module-&gt;wait(fpm_event_queue_fd, timeout);</span>
+<span class='curline'><a href='../S/1487.html#L224'>module</a>            224 sapi/fpm/fpm/fpm_main.c 	zend_module_entry *module = Z_PTR_P(zv);</span>
+<span class='curline'><a href='../S/1487.html#L225'>module</a>            225 sapi/fpm/fpm/fpm_main.c 	php_printf("%s\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1526.html#L763'>module</a>            763 sapi/phpdbg/phpdbg.c static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */</span>
+<span class='curline'><a href='../S/1526.html#L765'>module</a>            765 sapi/phpdbg/phpdbg.c 	if (php_module_startup(module, &amp;sapi_phpdbg_module_entry, 1) == FAILURE) {</span>
+<span class='curline'><a href='../S/1558.html#L1010'>module</a>           1010 sapi/phpdbg/phpdbg_prompt.c static int add_module_info(zend_module_entry *module) /* {{{ */ {</span>
+<span class='curline'><a href='../S/1558.html#L1011'>module</a>           1011 sapi/phpdbg/phpdbg_prompt.c 	phpdbg_write("module", "name=\"%s\"", "%s\n", module-&gt;name);</span>
+<span class='curline'><a href='../S/1570.html#L208'>module</a>            208 sapi/phpdbg/phpdbg_wait.c 		zval *module;</span>
+<span class='curline'><a href='../S/1570.html#L225'>module</a>            225 sapi/phpdbg/phpdbg_wait.c 			int mode = phpdbg_array_intersect(&amp;pos, &amp;module);</span>
+<span class='curline'><a href='../S/1570.html#L228'>module</a>            228 sapi/phpdbg/phpdbg_wait.c 				if (strcmp(PHPDBG_NAME, Z_STRVAL_P(module))) {</span>
+<span class='curline'><a href='../S/1570.html#L229'>module</a>            229 sapi/phpdbg/phpdbg_wait.c 					zend_hash_del(&amp;module_registry, Z_STR_P(module));</span>
+<span class='curline'><a href='../S/1570.html#L233'>module</a>            233 sapi/phpdbg/phpdbg_wait.c 				if (!sapi_module.name || strcmp(sapi_module.name, Z_STRVAL_P(module))) {</span>
+<span class='curline'><a href='../S/1570.html#L234'>module</a>            234 sapi/phpdbg/phpdbg_wait.c 					phpdbg_notice("wait", "missingmodule=\"%.*s\"", "The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", (int) Z_STRLEN_P(module), Z_STRVAL_P(module), (int) Z_STRLEN_P(module), Z_STRVAL_P(module));</span>
+<span class='curline'><a href='../S/1570.html#L237'>module</a>            237 sapi/phpdbg/phpdbg_wait.c 		} while (module);</span>
+<span class='curline'><a href='../S/1574.html#L80'>module</a>             80 sapi/phpdbg/phpdbg_webdata_transfer.c 		zend_module_entry *module;</span>
+<span class='curline'><a href='../S/1574.html#L85'>module</a>             85 sapi/phpdbg/phpdbg_webdata_transfer.c 		ZEND_HASH_FOREACH_PTR(&amp;module_registry, module) {</span>
+<span class='curline'><a href='../S/1574.html#L87'>module</a>             87 sapi/phpdbg/phpdbg_webdata_transfer.c 			ZVAL_STRING(value, module-&gt;name);</span>
+</pre>
+</body>
+</html>

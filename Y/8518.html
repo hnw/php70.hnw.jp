@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>aFrame</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L49576'>aFrame</a>           49576 ext/sqlite3/libsqlite/sqlite3.c   u8 *aFrame                      /* OUT: Write encoded frame here */</span>
+<span class='curline'><a href='../S/1054.html#L49581'>aFrame</a>           49581 ext/sqlite3/libsqlite/sqlite3.c   sqlite3Put4byte(&amp;aFrame[0], iPage);</span>
+<span class='curline'><a href='../S/1054.html#L49582'>aFrame</a>           49582 ext/sqlite3/libsqlite/sqlite3.c   sqlite3Put4byte(&amp;aFrame[4], nTruncate);</span>
+<span class='curline'><a href='../S/1054.html#L49583'>aFrame</a>           49583 ext/sqlite3/libsqlite/sqlite3.c   memcpy(&amp;aFrame[8], pWal-&gt;hdr.aSalt, 8);</span>
+<span class='curline'><a href='../S/1054.html#L49586'>aFrame</a>           49586 ext/sqlite3/libsqlite/sqlite3.c   walChecksumBytes(nativeCksum, aFrame, 8, aCksum, aCksum);</span>
+<span class='curline'><a href='../S/1054.html#L49589'>aFrame</a>           49589 ext/sqlite3/libsqlite/sqlite3.c   sqlite3Put4byte(&amp;aFrame[16], aCksum[0]);</span>
+<span class='curline'><a href='../S/1054.html#L49590'>aFrame</a>           49590 ext/sqlite3/libsqlite/sqlite3.c   sqlite3Put4byte(&amp;aFrame[20], aCksum[1]);</span>
+<span class='curline'><a href='../S/1054.html#L49603'>aFrame</a>           49603 ext/sqlite3/libsqlite/sqlite3.c   u8 *aFrame                      /* Frame data */</span>
+<span class='curline'><a href='../S/1054.html#L49613'>aFrame</a>           49613 ext/sqlite3/libsqlite/sqlite3.c   if( memcmp(&amp;pWal-&gt;hdr.aSalt, &amp;aFrame[8], 8)!=0 ){</span>
+<span class='curline'><a href='../S/1054.html#L49619'>aFrame</a>           49619 ext/sqlite3/libsqlite/sqlite3.c   pgno = sqlite3Get4byte(&amp;aFrame[0]);</span>
+<span class='curline'><a href='../S/1054.html#L49630'>aFrame</a>           49630 ext/sqlite3/libsqlite/sqlite3.c   walChecksumBytes(nativeCksum, aFrame, 8, aCksum, aCksum);</span>
+<span class='curline'><a href='../S/1054.html#L49632'>aFrame</a>           49632 ext/sqlite3/libsqlite/sqlite3.c   if( aCksum[0]!=sqlite3Get4byte(&amp;aFrame[16]) </span>
+<span class='curline'><a href='../S/1054.html#L49633'>aFrame</a>           49633 ext/sqlite3/libsqlite/sqlite3.c    || aCksum[1]!=sqlite3Get4byte(&amp;aFrame[20]) </span>
+<span class='curline'><a href='../S/1054.html#L49643'>aFrame</a>           49643 ext/sqlite3/libsqlite/sqlite3.c   *pnTruncate = sqlite3Get4byte(&amp;aFrame[4]);</span>
+<span class='curline'><a href='../S/1054.html#L49997'>aFrame</a>           49997 ext/sqlite3/libsqlite/sqlite3.c     u8 *aFrame = 0;               /* Malloc'd buffer to load entire frame */</span>
+<span class='curline'><a href='../S/1054.html#L50052'>aFrame</a>           50052 ext/sqlite3/libsqlite/sqlite3.c     aFrame = (u8 *)sqlite3_malloc64(szFrame);</span>
+<span class='curline'><a href='../S/1054.html#L50053'>aFrame</a>           50053 ext/sqlite3/libsqlite/sqlite3.c     if( !aFrame ){</span>
+<span class='curline'><a href='../S/1054.html#L50057'>aFrame</a>           50057 ext/sqlite3/libsqlite/sqlite3.c     aData = &amp;aFrame[WAL_FRAME_HDRSIZE];</span>
+<span class='curline'><a href='../S/1054.html#L50067'>aFrame</a>           50067 ext/sqlite3/libsqlite/sqlite3.c       rc = sqlite3OsRead(pWal-&gt;pWalFd, aFrame, szFrame, iOffset);</span>
+<span class='curline'><a href='../S/1054.html#L50069'>aFrame</a>           50069 ext/sqlite3/libsqlite/sqlite3.c       isValid = walDecodeFrame(pWal, &amp;pgno, &amp;nTruncate, aData, aFrame);</span>
+<span class='curline'><a href='../S/1054.html#L50086'>aFrame</a>           50086 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_free(aFrame);</span>
+<span class='curline'><a href='../S/1054.html#L51650'>aFrame</a>           51650 ext/sqlite3/libsqlite/sqlite3.c   u8 aFrame[WAL_FRAME_HDRSIZE];   /* Buffer to assemble frame-header in */</span>
+<span class='curline'><a href='../S/1054.html#L51656'>aFrame</a>           51656 ext/sqlite3/libsqlite/sqlite3.c   walEncodeFrame(p-&gt;pWal, pPage-&gt;pgno, nTruncate, pData, aFrame);</span>
+<span class='curline'><a href='../S/1054.html#L51657'>aFrame</a>           51657 ext/sqlite3/libsqlite/sqlite3.c   rc = walWriteToLog(p, aFrame, sizeof(aFrame), iOffset);</span>
+<span class='curline'><a href='../S/1054.html#L51660'>aFrame</a>           51660 ext/sqlite3/libsqlite/sqlite3.c   rc = walWriteToLog(p, pData, p-&gt;szPage, iOffset+sizeof(aFrame));</span>
+</pre>
+</body>
+</html>

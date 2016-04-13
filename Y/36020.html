@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>shm</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1588.html#L49'>shm</a>                49 TSRM/tsrm_win32.c 	globals-&gt;shm	 = NULL;</span>
+<span class='curline'><a href='../S/1588.html#L73'>shm</a>                73 TSRM/tsrm_win32.c 	if (globals-&gt;shm) {</span>
+<span class='curline'><a href='../S/1588.html#L74'>shm</a>                74 TSRM/tsrm_win32.c 		for (ptr = globals-&gt;shm; ptr &lt; (globals-&gt;shm + globals-&gt;shm_size); ptr++) {</span>
+<span class='curline'><a href='../S/1588.html#L80'>shm</a>                80 TSRM/tsrm_win32.c 		free(globals-&gt;shm);</span>
+<span class='curline'><a href='../S/1588.html#L417'>shm</a>               417 TSRM/tsrm_win32.c 	for (ptr = TWG(shm); ptr &lt; (TWG(shm) + TWG(shm_size)); ptr++) {</span>
+<span class='curline'><a href='../S/1588.html#L428'>shm</a>               428 TSRM/tsrm_win32.c 	if (ptr &lt; (TWG(shm) + TWG(shm_size))) {</span>
+<span class='curline'><a href='../S/1588.html#L432'>shm</a>               432 TSRM/tsrm_win32.c 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));</span>
+<span class='curline'><a href='../S/1588.html#L437'>shm</a>               437 TSRM/tsrm_win32.c 	TWG(shm) = newptr;</span>
+<span class='curline'><a href='../S/1588.html#L593'>shm</a>               593 TSRM/tsrm_win32.c 	shm_pair *shm;</span>
+<span class='curline'><a href='../S/1588.html#L611'>shm</a>               611 TSRM/tsrm_win32.c 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm-&gt;descriptor), shm_info);</span>
+<span class='curline'><a href='../S/1588.html#L629'>shm</a>               629 TSRM/tsrm_win32.c 	shm = shm_get(key, NULL);</span>
+<span class='curline'><a href='../S/1588.html#L630'>shm</a>               630 TSRM/tsrm_win32.c 	if (!shm) {</span>
+<span class='curline'><a href='../S/1588.html#L635'>shm</a>               635 TSRM/tsrm_win32.c 	shm-&gt;segment = shm_handle;</span>
+<span class='curline'><a href='../S/1588.html#L636'>shm</a>               636 TSRM/tsrm_win32.c 	shm-&gt;info	 = info_handle;</span>
+<span class='curline'><a href='../S/1588.html#L637'>shm</a>               637 TSRM/tsrm_win32.c 	shm-&gt;descriptor = MapViewOfFileEx(shm-&gt;info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);</span>
+<span class='curline'><a href='../S/1588.html#L639'>shm</a>               639 TSRM/tsrm_win32.c 	if (NULL != shm-&gt;descriptor &amp;&amp; created) {</span>
+<span class='curline'><a href='../S/1588.html#L640'>shm</a>               640 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_perm.key	= key;</span>
+<span class='curline'><a href='../S/1588.html#L641'>shm</a>               641 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_segsz		= size;</span>
+<span class='curline'><a href='../S/1588.html#L642'>shm</a>               642 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_ctime		= time(NULL);</span>
+<span class='curline'><a href='../S/1588.html#L643'>shm</a>               643 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_cpid		= getpid();</span>
+<span class='curline'><a href='../S/1588.html#L644'>shm</a>               644 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_perm.mode	= flags;</span>
+<span class='curline'><a href='../S/1588.html#L646'>shm</a>               646 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_perm.cuid	= shm-&gt;descriptor-&gt;shm_perm.cgid= 0;</span>
+<span class='curline'><a href='../S/1588.html#L647'>shm</a>               647 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_perm.gid	= shm-&gt;descriptor-&gt;shm_perm.uid = 0;</span>
+<span class='curline'><a href='../S/1588.html#L648'>shm</a>               648 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_atime		= shm-&gt;descriptor-&gt;shm_dtime	= 0;</span>
+<span class='curline'><a href='../S/1588.html#L649'>shm</a>               649 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_lpid		= shm-&gt;descriptor-&gt;shm_nattch	= 0;</span>
+<span class='curline'><a href='../S/1588.html#L650'>shm</a>               650 TSRM/tsrm_win32.c 		shm-&gt;descriptor-&gt;shm_perm.mode	= shm-&gt;descriptor-&gt;shm_perm.seq	= 0;</span>
+<span class='curline'><a href='../S/1588.html#L653'>shm</a>               653 TSRM/tsrm_win32.c 	if (NULL != shm-&gt;descriptor &amp;&amp; (shm-&gt;descriptor-&gt;shm_perm.key != key || size &gt; shm-&gt;descriptor-&gt;shm_segsz)) {</span>
+<span class='curline'><a href='../S/1588.html#L654'>shm</a>               654 TSRM/tsrm_win32.c 		if (NULL != shm-&gt;segment) {</span>
+<span class='curline'><a href='../S/1588.html#L655'>shm</a>               655 TSRM/tsrm_win32.c 			CloseHandle(shm-&gt;segment);</span>
+<span class='curline'><a href='../S/1588.html#L657'>shm</a>               657 TSRM/tsrm_win32.c 		UnmapViewOfFile(shm-&gt;descriptor);</span>
+<span class='curline'><a href='../S/1588.html#L658'>shm</a>               658 TSRM/tsrm_win32.c 		CloseHandle(shm-&gt;info);</span>
+<span class='curline'><a href='../S/1588.html#L667'>shm</a>               667 TSRM/tsrm_win32.c 	shm_pair *shm = shm_get(key, NULL);</span>
+<span class='curline'><a href='../S/1588.html#L669'>shm</a>               669 TSRM/tsrm_win32.c 	if (!shm-&gt;segment) {</span>
+<span class='curline'><a href='../S/1588.html#L673'>shm</a>               673 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_atime = time(NULL);</span>
+<span class='curline'><a href='../S/1588.html#L674'>shm</a>               674 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_lpid  = getpid();</span>
+<span class='curline'><a href='../S/1588.html#L675'>shm</a>               675 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_nattch++;</span>
+<span class='curline'><a href='../S/1588.html#L677'>shm</a>               677 TSRM/tsrm_win32.c 	shm-&gt;addr = MapViewOfFileEx(shm-&gt;segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);</span>
+<span class='curline'><a href='../S/1588.html#L679'>shm</a>               679 TSRM/tsrm_win32.c 	return shm-&gt;addr;</span>
+<span class='curline'><a href='../S/1588.html#L684'>shm</a>               684 TSRM/tsrm_win32.c 	shm_pair *shm = shm_get(0, (void*)shmaddr);</span>
+<span class='curline'><a href='../S/1588.html#L686'>shm</a>               686 TSRM/tsrm_win32.c 	if (!shm-&gt;segment) {</span>
+<span class='curline'><a href='../S/1588.html#L690'>shm</a>               690 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_dtime = time(NULL);</span>
+<span class='curline'><a href='../S/1588.html#L691'>shm</a>               691 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_lpid  = getpid();</span>
+<span class='curline'><a href='../S/1588.html#L692'>shm</a>               692 TSRM/tsrm_win32.c 	shm-&gt;descriptor-&gt;shm_nattch--;</span>
+<span class='curline'><a href='../S/1588.html#L694'>shm</a>               694 TSRM/tsrm_win32.c 	return UnmapViewOfFile(shm-&gt;addr) ? 0 : -1;</span>
+<span class='curline'><a href='../S/1588.html#L698'>shm</a>               698 TSRM/tsrm_win32.c 	shm_pair *shm = shm_get(key, NULL);</span>
+<span class='curline'><a href='../S/1588.html#L700'>shm</a>               700 TSRM/tsrm_win32.c 	if (!shm-&gt;segment) {</span>
+<span class='curline'><a href='../S/1588.html#L706'>shm</a>               706 TSRM/tsrm_win32.c 			memcpy(buf, shm-&gt;descriptor, sizeof(struct shmid_ds));</span>
+<span class='curline'><a href='../S/1588.html#L710'>shm</a>               710 TSRM/tsrm_win32.c 			shm-&gt;descriptor-&gt;shm_ctime		= time(NULL);</span>
+<span class='curline'><a href='../S/1588.html#L711'>shm</a>               711 TSRM/tsrm_win32.c 			shm-&gt;descriptor-&gt;shm_perm.uid	= buf-&gt;shm_perm.uid;</span>
+<span class='curline'><a href='../S/1588.html#L712'>shm</a>               712 TSRM/tsrm_win32.c 			shm-&gt;descriptor-&gt;shm_perm.gid	= buf-&gt;shm_perm.gid;</span>
+<span class='curline'><a href='../S/1588.html#L713'>shm</a>               713 TSRM/tsrm_win32.c 			shm-&gt;descriptor-&gt;shm_perm.mode	= buf-&gt;shm_perm.mode;</span>
+<span class='curline'><a href='../S/1588.html#L717'>shm</a>               717 TSRM/tsrm_win32.c 			if (shm-&gt;descriptor-&gt;shm_nattch &lt; 1) {</span>
+<span class='curline'><a href='../S/1588.html#L718'>shm</a>               718 TSRM/tsrm_win32.c 				shm-&gt;descriptor-&gt;shm_perm.key = -1;</span>
+<span class='curline'><a href='../S/1589.html#L65'>shm</a>                65 TSRM/tsrm_win32.h 	shm_pair		*shm;</span>
+<span class='curline'><a href='../S/995.html#L151'>shm</a>               151 ext/shmop/shmop.c 	struct shmid_ds shm;</span>
+<span class='curline'><a href='../S/995.html#L205'>shm</a>               205 ext/shmop/shmop.c 	if (shmctl(shmop-&gt;shmid, IPC_STAT, &amp;shm)) {</span>
+<span class='curline'><a href='../S/995.html#L216'>shm</a>               216 ext/shmop/shmop.c 	shmop-&gt;size = shm.shm_segsz;</span>
+<span class='curline'><a href='../S/1505.html#L25'>shm</a>                25 sapi/fpm/fpm/fpm_status.h void fpm_status_update_activity(struct fpm_shm_s *shm, int idle, int active, int total, unsigned cur_lq, int max_lq, int clear_last_update);</span>
+<span class='curline'><a href='../S/1505.html#L26'>shm</a>                26 sapi/fpm/fpm/fpm_status.h void fpm_status_update_accepted_conn(struct fpm_shm_s *shm, unsigned long int accepted_conn);</span>
+<span class='curline'><a href='../S/1505.html#L27'>shm</a>                27 sapi/fpm/fpm/fpm_status.h void fpm_status_increment_accepted_conn(struct fpm_shm_s *shm);</span>
+<span class='curline'><a href='../S/1505.html#L28'>shm</a>                28 sapi/fpm/fpm/fpm_status.h void fpm_status_set_pm(struct fpm_shm_s *shm, int pm);</span>
+<span class='curline'><a href='../S/1505.html#L29'>shm</a>                29 sapi/fpm/fpm/fpm_status.h void fpm_status_update_max_children_reached(struct fpm_shm_s *shm, unsigned int max_children_reached);</span>
+<span class='curline'><a href='../S/1505.html#L30'>shm</a>                30 sapi/fpm/fpm/fpm_status.h void fpm_status_increment_max_children_reached(struct fpm_shm_s *shm);</span>
+</pre>
+</body>
+</html>

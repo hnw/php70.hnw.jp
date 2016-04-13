@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>win32/registry.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1871.html'>win32</a>/registry.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L284'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L43' title='Defined at 43.'>OpenPhpRegistryKey</a></li>
+<li><a href='#L78' title='Defined at 78.'>LoadDirectory</a></li>
+<li><a href='#L173' title='Defined at 173.'>delete_internal_hashtable</a></li>
+<li><a href='#L182' title='Defined at 182.'>UpdateIniFromRegistry</a></li>
+<li><a href='#L284' title='Defined at 284.'>GetIniPathFromRegistry</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Author: Zeev Suraski &lt;zeev@zend.com&gt;                                 |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1378.html'>php.h</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='1385.html'>php_ini.h</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='1607.html'>php_win32_globals.h</a>"
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#define</em> <a href='../R/7586.html' title='Multiple referred from 5 places.'>PHP_REGISTRY_KEY</a>              "SOFTWARE\\PHP"
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#define</em> <a href='../S/1610.html#L30' title='Referred from 30 in win32/registry.c.'>PHP_VER1</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>)                  #<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#define</em> <a href='../S/1610.html#L31' title='Referred from 31 in win32/registry.c.'>PHP_VER2</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>)               #<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>"."#<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> <a href='../S/1610.html#L32' title='Referred from 32 in win32/registry.c.'>PHP_VER3</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>,<a href='../Y/7095.html' title='Multiple used in 2 places.'>V3</a>)            #<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>"."#<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>"."#<a href='../Y/7095.html' title='Multiple used in 2 places.'>V3</a>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> <a href='../S/1610.html#L35' title='Referred from 35 in win32/registry.c.'>PHP_REGISTRY_KEYV</a>(VER)        <a href='../S/1610.html#L23' title='Defined at 23 in win32/registry.c.'>PHP_REGISTRY_KEY</a>"\\"VER
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> <a href='../S/1610.html#L38' title='Referred from 38 in win32/registry.c.'>PHP_REGISTRY_KEY1</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>)         <a href='../S/1610.html#L23' title='Defined at 23 in win32/registry.c.'>PHP_REGISTRY_KEY</a>"\\"<a href='../S/1610.html#L25' title='Defined at 25 in win32/registry.c.'>PHP_VER1</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>)
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#define</em> <a href='../S/1610.html#L37' title='Referred from 37 in win32/registry.c.'>PHP_REGISTRY_KEY2</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>)      <a href='../S/1610.html#L23' title='Defined at 23 in win32/registry.c.'>PHP_REGISTRY_KEY</a>"\\"<a href='../S/1610.html#L26' title='Defined at 26 in win32/registry.c.'>PHP_VER2</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>)
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#define</em> <a href='../S/1610.html#L36' title='Referred from 36 in win32/registry.c.'>PHP_REGISTRY_KEY3</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>,<a href='../Y/7095.html' title='Multiple used in 2 places.'>V3</a>)   <a href='../S/1610.html#L23' title='Defined at 23 in win32/registry.c.'>PHP_REGISTRY_KEY</a>"\\"<a href='../S/1610.html#L27' title='Defined at 27 in win32/registry.c.'>PHP_VER3</a>(<a href='../Y/7093.html' title='Multiple used in 6 places.'>V1</a>,<a href='../Y/7094.html' title='Multiple used in 4 places.'>V2</a>,<a href='../Y/7095.html' title='Multiple used in 2 places.'>V3</a>)
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/34403.html' title='Multiple used in 2 places.'>registry_keys</a>[] = <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35         <a href='../S/1610.html#L29' title='Defined at 29 in win32/registry.c.'>PHP_REGISTRY_KEYV</a>(<a href='../S/1403.html#L7' title='Defined at 7 in main/php_version.h.'>PHP_VERSION</a>),
+<a id='L36' name='L36'></a>  36         <a href='../S/1610.html#L32' title='Defined at 32 in win32/registry.c.'>PHP_REGISTRY_KEY3</a>(<a href='../S/1403.html#L3' title='Defined at 3 in main/php_version.h.'>PHP_MAJOR_VERSION</a>, <a href='../S/1403.html#L4' title='Defined at 4 in main/php_version.h.'>PHP_MINOR_VERSION</a>, <a href='../S/1403.html#L5' title='Defined at 5 in main/php_version.h.'>PHP_RELEASE_VERSION</a>),
+<a id='L37' name='L37'></a>  37         <a href='../S/1610.html#L31' title='Defined at 31 in win32/registry.c.'>PHP_REGISTRY_KEY2</a>(<a href='../S/1403.html#L3' title='Defined at 3 in main/php_version.h.'>PHP_MAJOR_VERSION</a>, <a href='../S/1403.html#L4' title='Defined at 4 in main/php_version.h.'>PHP_MINOR_VERSION</a>),
+<a id='L38' name='L38'></a>  38         <a href='../S/1610.html#L30' title='Defined at 30 in win32/registry.c.'>PHP_REGISTRY_KEY1</a>(<a href='../S/1403.html#L3' title='Defined at 3 in main/php_version.h.'>PHP_MAJOR_VERSION</a>),
+<a id='L39' name='L39'></a>  39         <a href='../S/1610.html#L23' title='Defined at 23 in win32/registry.c.'>PHP_REGISTRY_KEY</a>,
+<a id='L40' name='L40'></a>  40         <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>
+<a id='L41' name='L41'></a>  41 <em class='brace'>}</em>;
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/6081.html' title='Multiple referred from 2 places.'>OpenPhpRegistryKey</a>(<strong class='reserved'>char</strong>* <a href='../Y/37796.html' title='Multiple used in 4 places.'>sub_key</a>, <a href='../Y/3180.html' title='Multiple used in 9 places.'>HKEY</a> *<a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>)
+<a id='L44' name='L44'></a>  44 <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> **<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a> = <a href='../Y/34403.html' title='Multiple used in 2 places.'>registry_keys</a>;
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>if</strong> (<a href='../Y/37796.html' title='Multiple used in 4 places.'>sub_key</a>) <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48                 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/25741.html' title='Multiple used in 5 places.'>main_key_len</a>;
+<a id='L49' name='L49'></a>  49                 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/37797.html' title='Multiple used in 3 places.'>sub_key_len</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/37796.html' title='Multiple used in 4 places.'>sub_key</a>);
+<a id='L50' name='L50'></a>  50                 <strong class='reserved'>char</strong> *<a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52                 <strong class='reserved'>while</strong> (*<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>) <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53                         <a href='../Y/3891.html' title='Multiple used in 52 places.'>LONG</a> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55                         <a href='../Y/25741.html' title='Multiple used in 5 places.'>main_key_len</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(*<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>);
+<a id='L56' name='L56'></a>  56                         <a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a> = <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/25741.html' title='Multiple used in 5 places.'>main_key_len</a> + <a href='../Y/37797.html' title='Multiple used in 3 places.'>sub_key_len</a> + 1);
+<a id='L57' name='L57'></a>  57                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a>, *<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>, <a href='../Y/25741.html' title='Multiple used in 5 places.'>main_key_len</a>);
+<a id='L58' name='L58'></a>  58                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a> + <a href='../Y/25741.html' title='Multiple used in 5 places.'>main_key_len</a>, <a href='../Y/37796.html' title='Multiple used in 4 places.'>sub_key</a>, <a href='../Y/37797.html' title='Multiple used in 3 places.'>sub_key_len</a> + 1);
+<a id='L59' name='L59'></a>  59                         <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = <a href='../Y/5450.html' title='Multiple used in 5 places.'>RegOpenKeyEx</a>(<a href='../Y/3182.html' title='Multiple used in 5 places.'>HKEY_LOCAL_MACHINE</a>, <a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a>, 0, <a href='../Y/3669.html' title='Multiple used in 5 places.'>KEY_READ</a>, <a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>);
+<a id='L60' name='L60'></a>  60                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/34362.html' title='Multiple used in 6 places.'>reg_key</a>);
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62                         <strong class='reserved'>if</strong> (<a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                                 <strong class='reserved'>return</strong> 1;
+<a id='L64' name='L64'></a>  64                         <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65                         ++<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>;
+<a id='L66' name='L66'></a>  66                 <em class='brace'>}</em>
+<a id='L67' name='L67'></a>  67         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>while</strong> (*<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>) <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69                         <strong class='reserved'>if</strong> (<a href='../Y/5450.html' title='Multiple used in 5 places.'>RegOpenKeyEx</a>(<a href='../Y/3182.html' title='Multiple used in 5 places.'>HKEY_LOCAL_MACHINE</a>, *<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>, 0, <a href='../Y/3669.html' title='Multiple used in 5 places.'>KEY_READ</a>, <a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>) == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                                 <strong class='reserved'>return</strong> 1;
+<a id='L71' name='L71'></a>  71                         <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72                         ++<a href='../Y/24458.html' title='Multiple used in 40 places.'>key_name</a>;
+<a id='L73' name='L73'></a>  73                 <em class='brace'>}</em>
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75         <strong class='reserved'>return</strong> 0;
+<a id='L76' name='L76'></a>  76 <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/4052.html' title='Multiple referred from 3 places.'>LoadDirectory</a>(<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/15744.html' title='Multiple used in 3 places.'>directories</a>, <a href='../Y/3180.html' title='Multiple used in 9 places.'>HKEY</a> <a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <strong class='reserved'>char</strong> *<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <strong class='reserved'>int</strong> <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>, <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/31182.html' title='Multiple used in 4 places.'>parent_ht</a>)
+<a id='L79' name='L79'></a>  79 <em class='brace'>{</em>
+<a id='L80' name='L80'></a>  80         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/24490.html' title='Multiple used in 39 places.'>keys</a>, <a href='../S/800.html#L1198' title='Defined at 1198 in ext/mysqlnd/mysqlnd_structs.h.'>values</a>, <a href='../Y/25902.html' title='Multiple used in 5 places.'>max_key</a>, <a href='../Y/25913.html' title='Multiple used in 5 places.'>max_name</a>, <a href='../Y/25936.html' title='Multiple used in 10 places.'>max_value</a>;
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>int</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = 0;
+<a id='L82' name='L82'></a>  82         <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>if</strong> (<a href='../Y/5451.html' title='Multiple used in 3 places.'>RegQueryInfoKey</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../Y/24490.html' title='Multiple used in 39 places.'>keys</a>, &amp;<a href='../Y/25902.html' title='Multiple used in 5 places.'>max_key</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../S/800.html#L1198' title='Defined at 1198 in ext/mysqlnd/mysqlnd_structs.h.'>values</a>, &amp;<a href='../Y/25913.html' title='Multiple used in 5 places.'>max_name</a>, &amp;<a href='../Y/25936.html' title='Multiple used in 10 places.'>max_value</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>if</strong> (<a href='../S/800.html#L1198' title='Defined at 1198 in ext/mysqlnd/mysqlnd_structs.h.'>values</a>) <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87                         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L88' name='L88'></a>  88                         <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a> = (<strong class='reserved'>char</strong>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/25913.html' title='Multiple used in 5 places.'>max_name</a>+1);
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>char</strong> *<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a> = (<strong class='reserved'>char</strong>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/25936.html' title='Multiple used in 10 places.'>max_value</a>+1);
+<a id='L90' name='L90'></a>  90                         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>, <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../Y/40094.html' title='Multiple used in 157 places.'>value_len</a>;
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../S/800.html#L1198' title='Defined at 1198 in ext/mysqlnd/mysqlnd_structs.h.'>values</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93                                 <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a> = <a href='../Y/25913.html' title='Multiple used in 5 places.'>max_name</a>+1;
+<a id='L94' name='L94'></a>  94                                 <a href='../Y/40094.html' title='Multiple used in 157 places.'>value_len</a> = <a href='../Y/25936.html' title='Multiple used in 10 places.'>max_value</a>+1;
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96                                 <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, '\0', <a href='../Y/25913.html' title='Multiple used in 5 places.'>max_name</a>+1);
+<a id='L97' name='L97'></a>  97                                 <a href='../S/868.html#L374' title='Defined at 374 in ext/pcre/pcrelib/pcre_internal.h.'>memset</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, '\0', <a href='../Y/25936.html' title='Multiple used in 10 places.'>max_value</a>+1);
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99                                 <strong class='reserved'>if</strong> (RegEnumValue(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, &amp;<a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, &amp;<a href='../Y/40094.html' title='Multiple used in 157 places.'>value_len</a>) == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100                                         <strong class='reserved'>if</strong> ((<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> == REG_SZ) || (<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a> == REG_EXPAND_SZ)) <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                                                 <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103                                                 <strong class='reserved'>if</strong> (!<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>) <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104                                                         <a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> = (<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>*)<a href='../S/1215.html#L35' title='Defined at 35 in ext/xmlrpc/libxmlrpc/base64.h.'>malloc</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>));
+<a id='L105' name='L105'></a> 105                                                         <strong class='reserved'>if</strong> (!<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>) <em class='brace'>{</em>
+<a id='L106' name='L106'></a> 106                                                                 <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L107' name='L107'></a> 107                                                         <em class='brace'>}</em>
+<a id='L108' name='L108'></a> 108                                                         <a href='../S/1668.html#L61' title='Defined at 61 in Zend/zend_hash.h.'>zend_hash_init</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>, 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1733.html#L149' title='Defined at 149 in Zend/zend_variables.h.'>ZVAL_INTERNAL_PTR_DTOR</a>, 1);
+<a id='L109' name='L109'></a> 109                                                 <em class='brace'>}</em>
+<a id='L110' name='L110'></a> 110                                                 <a href='../S/1632.html#L581' title='Defined at 581 in Zend/zend_API.h.'>ZVAL_PSTRINGL</a>(&amp;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>, <a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>, <a href='../Y/40094.html' title='Multiple used in 157 places.'>value_len</a>-1);
+<a id='L111' name='L111'></a> 111                                                 <a href='../S/1668.html#L91' title='Defined at 91 in Zend/zend_hash.h.'>zend_hash_str_update</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>, &amp;<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>);
+<a id='L112' name='L112'></a> 112                                         <em class='brace'>}</em>
+<a id='L113' name='L113'></a> 113                                 <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114                         <em class='brace'>}</em>
+<a id='L115' name='L115'></a> 115                         <strong class='reserved'>if</strong> (<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>) <em class='brace'>{</em>
+<a id='L116' name='L116'></a> 116                                 <strong class='reserved'>if</strong> (<a href='../Y/31182.html' title='Multiple used in 4 places.'>parent_ht</a>) <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117                                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>;
+<a id='L118' name='L118'></a> 118                                         <a href='../D/34840.html' title='Multiple defined in 2 places.'>zend_ulong</a> <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>;
+<a id='L119' name='L119'></a> 119                                         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/38692.html' title='Multiple used in 3 places.'>tmpdata</a>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121                                         <a href='../S/1668.html#L809' title='Defined at 809 in Zend/zend_hash.h.'>ZEND_HASH_FOREACH_KEY_VAL</a>(<a href='../Y/31182.html' title='Multiple used in 4 places.'>parent_ht</a>, <a href='../Y/28824.html' title='Multiple used in 1143 places.'>num</a>, <a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>, <a href='../Y/38692.html' title='Multiple used in 3 places.'>tmpdata</a>) <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122                                                 <a href='../S/1668.html#L80' title='Defined at 80 in Zend/zend_hash.h.'>zend_hash_add</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>, <a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>, <a href='../Y/38692.html' title='Multiple used in 3 places.'>tmpdata</a>);
+<a id='L123' name='L123'></a> 123                                         <em class='brace'>}</em> <a href='../S/1668.html#L766' title='Defined at 766 in Zend/zend_hash.h.'>ZEND_HASH_FOREACH_END</a>();
+<a id='L124' name='L124'></a> 124                                 <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125                                 <a href='../S/1668.html#L590' title='Defined at 590 in Zend/zend_hash.h.'>zend_hash_str_update_mem</a>(<a href='../Y/15744.html' title='Multiple used in 3 places.'>directories</a>, <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>, <a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>, <strong class='reserved'>sizeof</strong>(<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>));
+<a id='L126' name='L126'></a> 126                                 <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = 1;
+<a id='L127' name='L127'></a> 127                         <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L130' name='L130'></a> 130                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/32633.html' title='Multiple defined in 3 places.'>value</a>);
+<a id='L131' name='L131'></a> 131                 <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133                 <strong class='reserved'>if</strong> (<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L134' name='L134'></a> 134                         <a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> = <a href='../Y/31182.html' title='Multiple used in 4 places.'>parent_ht</a>;
+<a id='L135' name='L135'></a> 135                 <em class='brace'>}</em>
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137                 <strong class='reserved'>if</strong> (<a href='../Y/24490.html' title='Multiple used in 39 places.'>keys</a>) <em class='brace'>{</em>
+<a id='L138' name='L138'></a> 138                         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>;
+<a id='L139' name='L139'></a> 139                         <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a> = (<strong class='reserved'>char</strong>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/25902.html' title='Multiple used in 5 places.'>max_key</a>+1);
+<a id='L140' name='L140'></a> 140                         <strong class='reserved'>char</strong> *<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a> = (<strong class='reserved'>char</strong>*)<a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>+<a href='../Y/25902.html' title='Multiple used in 5 places.'>max_key</a>+2);
+<a id='L141' name='L141'></a> 141                         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>;
+<a id='L142' name='L142'></a> 142                         <a href='../Y/2302.html' title='Multiple used in 15 places.'>FILETIME</a> <a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>;
+<a id='L143' name='L143'></a> 143                         <a href='../Y/3180.html' title='Multiple used in 9 places.'>HKEY</a> <a href='../Y/37827.html' title='Multiple used in 4 places.'>subkey</a>;
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145                         <strong class='reserved'>for</strong> (<a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> = 0; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a> &lt; <a href='../Y/24490.html' title='Multiple used in 39 places.'>keys</a>; <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146                                 <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a> = <a href='../Y/25902.html' title='Multiple used in 5 places.'>max_key</a>+1;
+<a id='L147' name='L147'></a> 147                                 <strong class='reserved'>if</strong> (RegEnumKeyEx(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../Y/22042.html' title='Multiple used in 12009 places.'>i</a>, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, &amp;<a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../Y/38053.html' title='Multiple used in 1295 places.'>t</a>) == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L148' name='L148'></a> 148                                         <strong class='reserved'>if</strong> (<a href='../Y/5450.html' title='Multiple used in 5 places.'>RegOpenKeyEx</a>(<a href='../D/23759.html' title='Multiple defined in 4 places.'>key</a>, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, 0, <a href='../Y/3669.html' title='Multiple used in 5 places.'>KEY_READ</a>, &amp;<a href='../Y/37827.html' title='Multiple used in 4 places.'>subkey</a>) == <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149                                                 <strong class='reserved'>if</strong> (<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>) <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150                                                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>, <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>);
+<a id='L151' name='L151'></a> 151                                                         <a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] = '/';
+<a id='L152' name='L152'></a> 152                                                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>+<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>+1, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>+1);
+<a id='L153' name='L153'></a> 153                                                         <a href='../S/1706.html#L2433' title='Defined at 2433 in Zend/zend_operators.c.'>zend_str_tolower</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>, <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>+<a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>+1);
+<a id='L154' name='L154'></a> 154                                                         <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a> += <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>+1;
+<a id='L155' name='L155'></a> 155                                                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156                                                         <a href='../D/24499.html' title='Multiple defined in 4 places.'>memcpy</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>, <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>+1);
+<a id='L157' name='L157'></a> 157                                                         <a href='../S/1706.html#L2433' title='Defined at 2433 in Zend/zend_operators.c.'>zend_str_tolower</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>, <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>);
+<a id='L158' name='L158'></a> 158                                                 <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159                                                 <strong class='reserved'>if</strong> (<a href='../S/1610.html#L78' title='Defined at 78 in win32/registry.c.'>LoadDirectory</a>(<a href='../Y/15744.html' title='Multiple used in 3 places.'>directories</a>, <a href='../Y/37827.html' title='Multiple used in 4 places.'>subkey</a>, <a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>, <a href='../Y/27946.html' title='Multiple used in 528 places.'>name_len</a>, <a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>)) <em class='brace'>{</em>
+<a id='L160' name='L160'></a> 160                                                         <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> = 1;
+<a id='L161' name='L161'></a> 161                                                 <em class='brace'>}</em>
+<a id='L162' name='L162'></a> 162                                                 <a href='../Y/5444.html' title='Multiple used in 9 places.'>RegCloseKey</a>(<a href='../Y/37827.html' title='Multiple used in 4 places.'>subkey</a>);
+<a id='L163' name='L163'></a> 163                                         <em class='brace'>}</em>
+<a id='L164' name='L164'></a> 164                                 <em class='brace'>}</em>
+<a id='L165' name='L165'></a> 165                         <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/28316.html' title='Multiple used in 27 places.'>new_path</a>);
+<a id='L167' name='L167'></a> 167                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>);
+<a id='L168' name='L168'></a> 168                 <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169         <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L171' name='L171'></a> 171 <em class='brace'>}</em>
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1610.html#L196' title='Referred from 196 in win32/registry.c.'>delete_internal_hashtable</a>(<a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>)
+<a id='L174' name='L174'></a> 174 <em class='brace'>{</em>
+<a id='L175' name='L175'></a> 175         <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> = (<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *)<a href='../S/1731.html#L585' title='Defined at 585 in Zend/zend_types.h.'>Z_PTR_P</a>(<a href='../D/35120.html' title='Multiple defined in 3 places.'>zv</a>);
+<a id='L176' name='L176'></a> 176         <a href='../S/1667.html#L1249' title='Defined at 1249 in Zend/zend_hash.c.'>zend_hash_destroy</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>);
+<a id='L177' name='L177'></a> 177         <a href='../S/1215.html#L36' title='Defined at 36 in ext/xmlrpc/libxmlrpc/base64.h.'>free</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>);
+<a id='L178' name='L178'></a> 178 <em class='brace'>}</em>
+<a id='L179' name='L179'></a> 179 
+<a id='L180' name='L180'></a> 180 <em class='sharp'>#define</em> <a href='../R/8866.html' title='Multiple referred from 2 places.'>RegNotifyFlags</a> (REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_ATTRIBUTES | REG_NOTIFY_CHANGE_LAST_SET)
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 <strong class='reserved'>void</strong> <a href='../R/12539.html' title='Multiple referred from 3 places.'>UpdateIniFromRegistry</a>(<strong class='reserved'>char</strong> *<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>)
+<a id='L183' name='L183'></a> 183 <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184         <strong class='reserved'>char</strong> *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>, *<a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a>;
+<a id='L185' name='L185'></a> 185         <strong class='reserved'>int</strong> <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>;
+<a id='L186' name='L186'></a> 186 
+<a id='L187' name='L187'></a> 187         <strong class='reserved'>if</strong>(!<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>) <em class='brace'>{</em>
+<a id='L188' name='L188'></a> 188                 <strong class='reserved'>return</strong>;
+<a id='L189' name='L189'></a> 189         <em class='brace'>}</em>
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191         <strong class='reserved'>if</strong> (!<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>)) <em class='brace'>{</em>
+<a id='L192' name='L192'></a> 192                 <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>) = (<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>*)<a href='../S/1215.html#L35' title='Defined at 35 in ext/xmlrpc/libxmlrpc/base64.h.'>malloc</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a>));
+<a id='L193' name='L193'></a> 193                 <strong class='reserved'>if</strong> (!<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>)) <em class='brace'>{</em>
+<a id='L194' name='L194'></a> 194                         <strong class='reserved'>return</strong>;
+<a id='L195' name='L195'></a> 195                 <em class='brace'>}</em>
+<a id='L196' name='L196'></a> 196                 <a href='../S/1668.html#L61' title='Defined at 61 in Zend/zend_hash.h.'>zend_hash_init</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>), 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../S/1610.html#L173' title='Defined at 173 in win32/registry.c.'>delete_internal_hashtable</a>, 1);
+<a id='L197' name='L197'></a> 197                 <strong class='reserved'>if</strong> (!<a href='../S/1610.html#L43' title='Defined at 43 in win32/registry.c.'>OpenPhpRegistryKey</a>("\\Per Directory Values", &amp;<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>))) <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198                         <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>) = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L199' name='L199'></a> 199                         <strong class='reserved'>return</strong>;
+<a id='L200' name='L200'></a> 200                 <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201                 <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>) = <a href='../Y/1286.html' title='Multiple used in 2 places.'>CreateEvent</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>, <a href='../D/2350.html' title='Multiple defined in 23 places.'>FALSE</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L202' name='L202'></a> 202                 <strong class='reserved'>if</strong> (<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>)) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203                         <a href='../Y/5448.html' title='Multiple used in 2 places.'>RegNotifyChangeKeyValue</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>), <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>, <a href='../S/1610.html#L180' title='Defined at 180 in win32/registry.c.'>RegNotifyFlags</a>, <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>), <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>);
+<a id='L204' name='L204'></a> 204                 <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205                 <strong class='reserved'>if</strong> (!<a href='../S/1610.html#L78' title='Defined at 78 in win32/registry.c.'>LoadDirectory</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>), <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>), "", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)) <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                         <strong class='reserved'>return</strong>;
+<a id='L207' name='L207'></a> 207                 <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>) &amp;&amp; <a href='../Y/7347.html' title='Multiple used in 13 places.'>WaitForSingleObject</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>), 0) == <a href='../Y/7233.html' title='Multiple used in 8 places.'>WAIT_OBJECT_0</a>) <em class='brace'>{</em>
+<a id='L209' name='L209'></a> 209                 <a href='../Y/5448.html' title='Multiple used in 2 places.'>RegNotifyChangeKeyValue</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>), <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>, <a href='../S/1610.html#L180' title='Defined at 180 in win32/registry.c.'>RegNotifyFlags</a>, <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34401.html' title='Multiple used in 9 places.'>registry_event</a>), <a href='../D/13974.html' title='Multiple defined in 23 places.'>TRUE</a>);
+<a id='L210' name='L210'></a> 210                 <a href='../S/1667.html#L1364' title='Defined at 1364 in Zend/zend_hash.c.'>zend_hash_clean</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>));
+<a id='L211' name='L211'></a> 211                 <strong class='reserved'>if</strong> (!<a href='../S/1610.html#L78' title='Defined at 78 in win32/registry.c.'>LoadDirectory</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>), <a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34402.html' title='Multiple used in 10 places.'>registry_key</a>), "", 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>)) <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212                         <strong class='reserved'>return</strong>;
+<a id='L213' name='L213'></a> 213                 <em class='brace'>}</em>
+<a id='L214' name='L214'></a> 214         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../S/1668.html#L211' title='Defined at 211 in Zend/zend_hash.h.'>zend_hash_num_elements</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>)) == 0) <em class='brace'>{</em>
+<a id='L215' name='L215'></a> 215                 <strong class='reserved'>return</strong>;
+<a id='L216' name='L216'></a> 216         <em class='brace'>}</em>
+<a id='L217' name='L217'></a> 217 
+<a id='L218' name='L218'></a> 218         <a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a> = <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a> = <a href='../S/1629.html#L172' title='Defined at 172 in Zend/zend_alloc.h.'>estrdup</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>);
+<a id='L219' name='L219'></a> 219 
+<a id='L220' name='L220'></a> 220         <em class='comment'>/* Get rid of C:, if exists */</em>
+<a id='L221' name='L221'></a> 221         <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/37559.html' title='Multiple used in 192 places.'>strchr</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, ':');
+<a id='L222' name='L222'></a> 222         <strong class='reserved'>if</strong> (<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>) <em class='brace'>{</em>
+<a id='L223' name='L223'></a> 223                 *<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[0];   <em class='comment'>/* replace the colon with the drive letter */</em>
+<a id='L224' name='L224'></a> 224                 <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a> = <a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a>;               <em class='comment'>/* make path point to the drive letter */</em>
+<a id='L225' name='L225'></a> 225         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L226' name='L226'></a> 226                 <strong class='reserved'>if</strong> (<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[0] != '\\' &amp;&amp; <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[0] != '/') <em class='brace'>{</em>
+<a id='L227' name='L227'></a> 227                         <strong class='reserved'>char</strong> <a href='../Y/38606.html' title='Multiple used in 67 places.'>tmp_buf</a>[<a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>], *<a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a>;
+<a id='L228' name='L228'></a> 228                         <strong class='reserved'>char</strong> <a href='../Y/16185.html' title='Multiple used in 4 places.'>drive_letter</a>;
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230                         <em class='comment'>/* get current working directory and prepend it to the path */</em>
+<a id='L231' name='L231'></a> 231                         <strong class='reserved'>if</strong> (!<a href='../D/14705.html' title='Multiple defined in 2 places.'>VCWD_GETCWD</a>(<a href='../Y/38606.html' title='Multiple used in 67 places.'>tmp_buf</a>, <a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>)) <em class='brace'>{</em>
+<a id='L232' name='L232'></a> 232                                 <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a>);
+<a id='L233' name='L233'></a> 233                                 <strong class='reserved'>return</strong>;
+<a id='L234' name='L234'></a> 234                         <em class='brace'>}</em>
+<a id='L235' name='L235'></a> 235                         <a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a> = <a href='../Y/37559.html' title='Multiple used in 192 places.'>strchr</a>(<a href='../Y/38606.html' title='Multiple used in 67 places.'>tmp_buf</a>, ':');
+<a id='L236' name='L236'></a> 236                         <strong class='reserved'>if</strong> (!<a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a>) <em class='brace'>{</em>
+<a id='L237' name='L237'></a> 237                                 <a href='../Y/16185.html' title='Multiple used in 4 places.'>drive_letter</a> = 'C';
+<a id='L238' name='L238'></a> 238                                 <a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a> = <a href='../Y/38606.html' title='Multiple used in 67 places.'>tmp_buf</a>;
+<a id='L239' name='L239'></a> 239                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240                                 <a href='../Y/16185.html' title='Multiple used in 4 places.'>drive_letter</a> = <a href='../Y/38606.html' title='Multiple used in 67 places.'>tmp_buf</a>[0];
+<a id='L241' name='L241'></a> 241                                 <a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a>++;
+<a id='L242' name='L242'></a> 242                         <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243                         <strong class='reserved'>while</strong> (*<a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a> == '\\' || *<a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a> == '/') <em class='brace'>{</em>
+<a id='L244' name='L244'></a> 244                                 <a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a>++;
+<a id='L245' name='L245'></a> 245                         <em class='brace'>}</em>
+<a id='L246' name='L246'></a> 246                         <a href='../S/1411.html#L865' title='Defined at 865 in main/spprintf.c.'>spprintf</a>(&amp;<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, 0, "%c\\%s\\%s", <a href='../Y/16185.html' title='Multiple used in 4 places.'>drive_letter</a>, <a href='../Y/14926.html' title='Multiple used in 286 places.'>cwd</a>, <a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a>);
+<a id='L247' name='L247'></a> 247                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a>);
+<a id='L248' name='L248'></a> 248                         <a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a> = <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>;
+<a id='L249' name='L249'></a> 249                 <em class='brace'>}</em>
+<a id='L250' name='L250'></a> 250         <em class='brace'>}</em>
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a> = 0;
+<a id='L253' name='L253'></a> 253         <strong class='reserved'>while</strong> (<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] != 0) <em class='brace'>{</em>
+<a id='L254' name='L254'></a> 254                 <strong class='reserved'>if</strong> (<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] == '\\') <em class='brace'>{</em>
+<a id='L255' name='L255'></a> 255                         <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] = '/';
+<a id='L256' name='L256'></a> 256                 <em class='brace'>}</em>
+<a id='L257' name='L257'></a> 257                 <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>++;
+<a id='L258' name='L258'></a> 258         <em class='brace'>}</em>
+<a id='L259' name='L259'></a> 259         <a href='../S/1706.html#L2433' title='Defined at 2433 in Zend/zend_operators.c.'>zend_str_tolower</a>(<a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>);
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261         <strong class='reserved'>while</strong> (<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a> &gt; 0) <em class='brace'>{</em>
+<a id='L262' name='L262'></a> 262                 <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> = (<a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *)<a href='../S/1668.html#L693' title='Defined at 693 in Zend/zend_hash.h.'>zend_hash_str_find_ptr</a>(<a href='../D/9385.html' title='Multiple defined in 2 places.'>PW32G</a>(<a href='../Y/34400.html' title='Multiple used in 14 places.'>registry_directories</a>), <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>, <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>);
+<a id='L263' name='L263'></a> 263 
+<a id='L264' name='L264'></a> 264                 <strong class='reserved'>if</strong> (<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a> != <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L265' name='L265'></a> 265                         <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>;
+<a id='L266' name='L266'></a> 266                         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>;
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268                         <a href='../S/1668.html#L804' title='Defined at 804 in Zend/zend_hash.h.'>ZEND_HASH_FOREACH_STR_KEY_VAL</a>(<a href='../Y/20065.html' title='Multiple used in 1981 places.'>ht</a>, <a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>, <a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>) <em class='brace'>{</em>
+<a id='L269' name='L269'></a> 269                                 <a href='../S/1673.html#L299' title='Defined at 299 in Zend/zend_ini.c.'>zend_alter_ini_entry</a>(<a href='../Y/23106.html' title='Multiple used in 857 places.'>index</a>, <a href='../S/1731.html#L513' title='Defined at 513 in Zend/zend_types.h.'>Z_STR_P</a>(<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>), <a href='../S/1385.html#L45' title='Defined at 45 in main/php_ini.h.'>PHP_INI_USER</a>, <a href='../S/1385.html#L77' title='Defined at 77 in main/php_ini.h.'>PHP_INI_STAGE_ACTIVATE</a>);
+<a id='L270' name='L270'></a> 270                         <em class='brace'>}</em> <a href='../S/1668.html#L766' title='Defined at 766 in Zend/zend_hash.h.'>ZEND_HASH_FOREACH_END</a>();
+<a id='L271' name='L271'></a> 271                 <em class='brace'>}</em>
+<a id='L272' name='L272'></a> 272 
+<a id='L273' name='L273'></a> 273                 <strong class='reserved'>do</strong> <em class='brace'>{</em>
+<a id='L274' name='L274'></a> 274                         <a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>--;
+<a id='L275' name='L275'></a> 275                 <em class='brace'>}</em> <strong class='reserved'>while</strong> (<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a> &gt; 0 &amp;&amp; <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] != '/');
+<a id='L276' name='L276'></a> 276                 <a href='../Y/31274.html' title='Multiple used in 1194 places.'>path</a>[<a href='../Y/31287.html' title='Multiple used in 287 places.'>path_len</a>] = 0;
+<a id='L277' name='L277'></a> 277         <em class='brace'>}</em>
+<a id='L278' name='L278'></a> 278 
+<a id='L279' name='L279'></a> 279         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/30001.html' title='Multiple used in 47 places.'>orig_path</a>);
+<a id='L280' name='L280'></a> 280 <em class='brace'>}</em>
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282 <em class='sharp'>#define</em> <a href='../S/1610.html#L292' title='Referred from 292 in win32/registry.c.'>PHPRC_REGISTRY_NAME</a> "IniFilePath"
+<a id='L283' name='L283'></a> 283 
+<a id='L284' name='L284'></a> 284 <strong class='reserved'>char</strong> *<a href='../R/2903.html' title='Multiple referred from 2 places.'>GetIniPathFromRegistry</a>()
+<a id='L285' name='L285'></a> 285 <em class='brace'>{</em>
+<a id='L286' name='L286'></a> 286         <strong class='reserved'>char</strong> *<a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L287' name='L287'></a> 287         <a href='../Y/3180.html' title='Multiple used in 9 places.'>HKEY</a> <a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>;
+<a id='L288' name='L288'></a> 288 
+<a id='L289' name='L289'></a> 289         <strong class='reserved'>if</strong> (<a href='../S/1610.html#L43' title='Defined at 43 in win32/registry.c.'>OpenPhpRegistryKey</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, &amp;<a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>)) <em class='brace'>{</em>
+<a id='L290' name='L290'></a> 290                 <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a> = <a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>;
+<a id='L291' name='L291'></a> 291                 <a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a> = <a href='../D/21334.html' title='Multiple defined in 2 places.'>emalloc</a>(<a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>+1);
+<a id='L292' name='L292'></a> 292                 <strong class='reserved'>if</strong>(<a href='../Y/5453.html' title='Multiple used in 4 places.'>RegQueryValueEx</a>(<a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>, <a href='../S/1610.html#L282' title='Defined at 282 in win32/registry.c.'>PHPRC_REGISTRY_NAME</a>, 0, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a>, &amp;<a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>) != <a href='../Y/1847.html' title='Multiple used in 17 places.'>ERROR_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L293' name='L293'></a> 293                         <a href='../Y/5444.html' title='Multiple used in 9 places.'>RegCloseKey</a>(<a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>);
+<a id='L294' name='L294'></a> 294                         <a href='../D/21328.html' title='Multiple defined in 2 places.'>efree</a>(<a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a>);
+<a id='L295' name='L295'></a> 295                         <a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L296' name='L296'></a> 296                         <strong class='reserved'>return</strong> <a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a>;
+<a id='L297' name='L297'></a> 297                 <em class='brace'>}</em>
+<a id='L298' name='L298'></a> 298                 <a href='../Y/5444.html' title='Multiple used in 9 places.'>RegCloseKey</a>(<a href='../Y/19594.html' title='Multiple used in 8 places.'>hKey</a>);
+<a id='L299' name='L299'></a> 299         <em class='brace'>}</em>
+<a id='L300' name='L300'></a> 300         <strong class='reserved'>return</strong> <a href='../Y/34364.html' title='Multiple used in 12 places.'>reg_location</a>;
+<a id='L301' name='L301'></a> 301 <em class='brace'>}</em>
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303 <em class='comment'>/*</em>
+<a id='L304' name='L304'></a> 304 <em class='comment'> * Local variables:</em>
+<a id='L305' name='L305'></a> 305 <em class='comment'> * tab-width: 4</em>
+<a id='L306' name='L306'></a> 306 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L307' name='L307'></a> 307 <em class='comment'> * End:</em>
+<a id='L308' name='L308'></a> 308 <em class='comment'> * vim600: sw=4 ts=4 fdm=marker</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'> * vim&lt;600: sw=4 ts=4</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L284'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

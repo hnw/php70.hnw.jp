@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>persistent_script</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/849.html#L852'>persistent_script</a>  852 ext/opcache/ZendAccelerator.c static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)</span>
+<span class='curline'><a href='../S/849.html#L862'>persistent_script</a>  862 ext/opcache/ZendAccelerator.c 		if (persistent_script-&gt;full_path != file_handle-&gt;opened_path &amp;&amp;</span>
+<span class='curline'><a href='../S/849.html#L863'>persistent_script</a>  863 ext/opcache/ZendAccelerator.c 		    (ZSTR_LEN(persistent_script-&gt;full_path) != ZSTR_LEN(file_handle-&gt;opened_path) ||</span>
+<span class='curline'><a href='../S/849.html#L864'>persistent_script</a>  864 ext/opcache/ZendAccelerator.c 		     memcmp(ZSTR_VAL(persistent_script-&gt;full_path), ZSTR_VAL(file_handle-&gt;opened_path), ZSTR_LEN(file_handle-&gt;opened_path)) != 0)) {</span>
+<span class='curline'><a href='../S/849.html#L870'>persistent_script</a>  870 ext/opcache/ZendAccelerator.c 		    persistent_script-&gt;full_path != full_path_ptr &amp;&amp;</span>
+<span class='curline'><a href='../S/849.html#L871'>persistent_script</a>  871 ext/opcache/ZendAccelerator.c 		    (ZSTR_LEN(persistent_script-&gt;full_path) != ZSTR_LEN(full_path_ptr) ||</span>
+<span class='curline'><a href='../S/849.html#L872'>persistent_script</a>  872 ext/opcache/ZendAccelerator.c 		     memcmp(ZSTR_VAL(persistent_script-&gt;full_path), ZSTR_VAL(full_path_ptr), ZSTR_LEN(full_path_ptr)) != 0)) {</span>
+<span class='curline'><a href='../S/849.html#L879'>persistent_script</a>  879 ext/opcache/ZendAccelerator.c 	if (persistent_script-&gt;timestamp == 0) {</span>
+<span class='curline'><a href='../S/849.html#L887'>persistent_script</a>  887 ext/opcache/ZendAccelerator.c 	if (zend_get_file_handle_timestamp(file_handle, NULL) == persistent_script-&gt;timestamp) {</span>
+<span class='curline'><a href='../S/849.html#L900'>persistent_script</a>  900 ext/opcache/ZendAccelerator.c 	ps_handle.filename = ZSTR_VAL(persistent_script-&gt;full_path);</span>
+<span class='curline'><a href='../S/849.html#L901'>persistent_script</a>  901 ext/opcache/ZendAccelerator.c 	ps_handle.opened_path = persistent_script-&gt;full_path;</span>
+<span class='curline'><a href='../S/849.html#L903'>persistent_script</a>  903 ext/opcache/ZendAccelerator.c 	if (zend_get_file_handle_timestamp(&amp;ps_handle, NULL) == persistent_script-&gt;timestamp) {</span>
+<span class='curline'><a href='../S/849.html#L910'>persistent_script</a>  910 ext/opcache/ZendAccelerator.c int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)</span>
+<span class='curline'><a href='../S/849.html#L913'>persistent_script</a>  913 ext/opcache/ZendAccelerator.c 	    persistent_script-&gt;dynamic_members.revalidate &gt;= ZCG(request_time)) {</span>
+<span class='curline'><a href='../S/849.html#L915'>persistent_script</a>  915 ext/opcache/ZendAccelerator.c 	} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {</span>
+<span class='curline'><a href='../S/849.html#L918'>persistent_script</a>  918 ext/opcache/ZendAccelerator.c 		persistent_script-&gt;dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;</span>
+<span class='curline'><a href='../S/849.html#L1085'>persistent_script</a> 1085 ext/opcache/ZendAccelerator.c 	zend_persistent_script *persistent_script;</span>
+<span class='curline'><a href='../S/849.html#L1103'>persistent_script</a> 1103 ext/opcache/ZendAccelerator.c 	persistent_script = zend_accel_hash_find(&amp;ZCSG(hash), realpath);</span>
+<span class='curline'><a href='../S/849.html#L1104'>persistent_script</a> 1104 ext/opcache/ZendAccelerator.c 	if (persistent_script &amp;&amp; !persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1113'>persistent_script</a> 1113 ext/opcache/ZendAccelerator.c 			do_validate_timestamps(persistent_script, &amp;file_handle) == FAILURE) {</span>
+<span class='curline'><a href='../S/849.html#L1116'>persistent_script</a> 1116 ext/opcache/ZendAccelerator.c 			if (!persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1117'>persistent_script</a> 1117 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;corrupted = 1;</span>
+<span class='curline'><a href='../S/849.html#L1118'>persistent_script</a> 1118 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;timestamp = 0;</span>
+<span class='curline'><a href='../S/849.html#L1119'>persistent_script</a> 1119 ext/opcache/ZendAccelerator.c 				ZSMMG(wasted_shared_memory) += persistent_script-&gt;dynamic_members.memory_consumption;</span>
+<span class='curline'><a href='../S/849.html#L1552'>persistent_script</a> 1552 ext/opcache/ZendAccelerator.c 	zend_persistent_script *persistent_script;</span>
+<span class='curline'><a href='../S/849.html#L1575'>persistent_script</a> 1575 ext/opcache/ZendAccelerator.c 	persistent_script = zend_file_cache_script_load(file_handle);</span>
+<span class='curline'><a href='../S/849.html#L1577'>persistent_script</a> 1577 ext/opcache/ZendAccelerator.c 	if (persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1579'>persistent_script</a> 1579 ext/opcache/ZendAccelerator.c 		if (persistent_script-&gt;full_path) {</span>
+<span class='curline'><a href='../S/849.html#L1586'>persistent_script</a> 1586 ext/opcache/ZendAccelerator.c 				if (zend_hash_add_empty_element(&amp;EG(included_files), persistent_script-&gt;full_path) != NULL) {</span>
+<span class='curline'><a href='../S/849.html#L1588'>persistent_script</a> 1588 ext/opcache/ZendAccelerator.c 					if (persistent_script-&gt;is_phar) {</span>
+<span class='curline'><a href='../S/849.html#L1590'>persistent_script</a> 1590 ext/opcache/ZendAccelerator.c 						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script-&gt;full_path));</span>
+<span class='curline'><a href='../S/849.html#L1593'>persistent_script</a> 1593 ext/opcache/ZendAccelerator.c 						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script-&gt;full_path), ZSTR_LEN(persistent_script-&gt;full_path) + 1);</span>
+<span class='curline'><a href='../S/849.html#L1602'>persistent_script</a> 1602 ext/opcache/ZendAccelerator.c 	    if (persistent_script-&gt;ping_auto_globals_mask) {</span>
+<span class='curline'><a href='../S/849.html#L1603'>persistent_script</a> 1603 ext/opcache/ZendAccelerator.c 			zend_accel_set_auto_globals(persistent_script-&gt;ping_auto_globals_mask);</span>
+<span class='curline'><a href='../S/849.html#L1606'>persistent_script</a> 1606 ext/opcache/ZendAccelerator.c 		return zend_accel_load_script(persistent_script, 1);</span>
+<span class='curline'><a href='../S/849.html#L1609'>persistent_script</a> 1609 ext/opcache/ZendAccelerator.c 	persistent_script = opcache_compile_file(file_handle, type, NULL, 0, &amp;op_array);</span>
+<span class='curline'><a href='../S/849.html#L1611'>persistent_script</a> 1611 ext/opcache/ZendAccelerator.c 	if (persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1613'>persistent_script</a> 1613 ext/opcache/ZendAccelerator.c 		persistent_script = cache_script_in_file_cache(persistent_script, &amp;from_memory);</span>
+<span class='curline'><a href='../S/849.html#L1614'>persistent_script</a> 1614 ext/opcache/ZendAccelerator.c 		return zend_accel_load_script(persistent_script, from_memory);</span>
+<span class='curline'><a href='../S/849.html#L1624'>persistent_script</a> 1624 ext/opcache/ZendAccelerator.c 	zend_persistent_script *persistent_script = NULL;</span>
+<span class='curline'><a href='../S/849.html#L1658'>persistent_script</a> 1658 ext/opcache/ZendAccelerator.c 		persistent_script = ZCG(cache_persistent_script);</span>
+<span class='curline'><a href='../S/849.html#L1671'>persistent_script</a> 1671 ext/opcache/ZendAccelerator.c 			persistent_script = zend_accel_hash_str_find(&amp;ZCSG(hash), key, key_length);</span>
+<span class='curline'><a href='../S/849.html#L1673'>persistent_script</a> 1673 ext/opcache/ZendAccelerator.c 		if (!persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1693'>persistent_script</a> 1693 ext/opcache/ZendAccelerator.c 					persistent_script = (zend_persistent_script *)bucket-&gt;data;</span>
+<span class='curline'><a href='../S/849.html#L1695'>persistent_script</a> 1695 ext/opcache/ZendAccelerator.c 					if (key &amp;&amp; !persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1711'>persistent_script</a> 1711 ext/opcache/ZendAccelerator.c 	if (persistent_script &amp;&amp; persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1712'>persistent_script</a> 1712 ext/opcache/ZendAccelerator.c 		persistent_script = NULL;</span>
+<span class='curline'><a href='../S/849.html#L1734'>persistent_script</a> 1734 ext/opcache/ZendAccelerator.c 	if (persistent_script &amp;&amp; ZCG(accel_directives).validate_timestamps) {</span>
+<span class='curline'><a href='../S/849.html#L1735'>persistent_script</a> 1735 ext/opcache/ZendAccelerator.c 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {</span>
+<span class='curline'><a href='../S/849.html#L1737'>persistent_script</a> 1737 ext/opcache/ZendAccelerator.c 			if (!persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1738'>persistent_script</a> 1738 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;corrupted = 1;</span>
+<span class='curline'><a href='../S/849.html#L1739'>persistent_script</a> 1739 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;timestamp = 0;</span>
+<span class='curline'><a href='../S/849.html#L1740'>persistent_script</a> 1740 ext/opcache/ZendAccelerator.c 				ZSMMG(wasted_shared_memory) += persistent_script-&gt;dynamic_members.memory_consumption;</span>
+<span class='curline'><a href='../S/849.html#L1748'>persistent_script</a> 1748 ext/opcache/ZendAccelerator.c 			persistent_script = NULL;</span>
+<span class='curline'><a href='../S/849.html#L1753'>persistent_script</a> 1753 ext/opcache/ZendAccelerator.c 	if (persistent_script &amp;&amp; ZCG(accel_directives).consistency_checks</span>
+<span class='curline'><a href='../S/849.html#L1754'>persistent_script</a> 1754 ext/opcache/ZendAccelerator.c 		&amp;&amp; persistent_script-&gt;dynamic_members.hits % ZCG(accel_directives).consistency_checks == 0) {</span>
+<span class='curline'><a href='../S/849.html#L1756'>persistent_script</a> 1756 ext/opcache/ZendAccelerator.c 		unsigned int checksum = zend_accel_script_checksum(persistent_script);</span>
+<span class='curline'><a href='../S/849.html#L1757'>persistent_script</a> 1757 ext/opcache/ZendAccelerator.c 		if (checksum != persistent_script-&gt;dynamic_members.checksum ) {</span>
+<span class='curline'><a href='../S/849.html#L1760'>persistent_script</a> 1760 ext/opcache/ZendAccelerator.c 							 persistent_script-&gt;full_path, persistent_script-&gt;dynamic_members.checksum, checksum);</span>
+<span class='curline'><a href='../S/849.html#L1762'>persistent_script</a> 1762 ext/opcache/ZendAccelerator.c 			if (!persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1763'>persistent_script</a> 1763 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;corrupted = 1;</span>
+<span class='curline'><a href='../S/849.html#L1764'>persistent_script</a> 1764 ext/opcache/ZendAccelerator.c 				persistent_script-&gt;timestamp = 0;</span>
+<span class='curline'><a href='../S/849.html#L1765'>persistent_script</a> 1765 ext/opcache/ZendAccelerator.c 				ZSMMG(wasted_shared_memory) += persistent_script-&gt;dynamic_members.memory_consumption;</span>
+<span class='curline'><a href='../S/849.html#L1773'>persistent_script</a> 1773 ext/opcache/ZendAccelerator.c 			persistent_script = NULL;</span>
+<span class='curline'><a href='../S/849.html#L1779'>persistent_script</a> 1779 ext/opcache/ZendAccelerator.c 	if (!persistent_script &amp;&amp; ZCG(accel_directives).file_cache) {</span>
+<span class='curline'><a href='../S/849.html#L1780'>persistent_script</a> 1780 ext/opcache/ZendAccelerator.c 		persistent_script = zend_file_cache_script_load(file_handle);</span>
+<span class='curline'><a href='../S/849.html#L1785'>persistent_script</a> 1785 ext/opcache/ZendAccelerator.c 	if (!persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1802'>persistent_script</a> 1802 ext/opcache/ZendAccelerator.c 		persistent_script = opcache_compile_file(file_handle, type, key, key ? key_length : 0, &amp;op_array);</span>
+<span class='curline'><a href='../S/849.html#L1803'>persistent_script</a> 1803 ext/opcache/ZendAccelerator.c 		if (persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1804'>persistent_script</a> 1804 ext/opcache/ZendAccelerator.c 			persistent_script = cache_script_in_shared_memory(persistent_script, key, key ? key_length : 0, &amp;from_shared_memory);</span>
+<span class='curline'><a href='../S/849.html#L1810'>persistent_script</a> 1810 ext/opcache/ZendAccelerator.c 		if (!persistent_script) {</span>
+<span class='curline'><a href='../S/849.html#L1826'>persistent_script</a> 1826 ext/opcache/ZendAccelerator.c 		persistent_script-&gt;dynamic_members.hits++; /* see above */</span>
+<span class='curline'><a href='../S/849.html#L1833'>persistent_script</a> 1833 ext/opcache/ZendAccelerator.c 		InterlockedIncrement64(&amp;persistent_script-&gt;dynamic_members.hits);</span>
+<span class='curline'><a href='../S/849.html#L1837'>persistent_script</a> 1837 ext/opcache/ZendAccelerator.c 		if (persistent_script-&gt;full_path) {</span>
+<span class='curline'><a href='../S/849.html#L1844'>persistent_script</a> 1844 ext/opcache/ZendAccelerator.c 				if (zend_hash_add_empty_element(&amp;EG(included_files), persistent_script-&gt;full_path) != NULL) {</span>
+<span class='curline'><a href='../S/849.html#L1846'>persistent_script</a> 1846 ext/opcache/ZendAccelerator.c 					if (persistent_script-&gt;is_phar) {</span>
+<span class='curline'><a href='../S/849.html#L1848'>persistent_script</a> 1848 ext/opcache/ZendAccelerator.c 						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script-&gt;full_path));</span>
+<span class='curline'><a href='../S/849.html#L1851'>persistent_script</a> 1851 ext/opcache/ZendAccelerator.c 						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script-&gt;full_path), ZSTR_LEN(persistent_script-&gt;full_path) + 1);</span>
+<span class='curline'><a href='../S/849.html#L1862'>persistent_script</a> 1862 ext/opcache/ZendAccelerator.c 	persistent_script-&gt;dynamic_members.last_used = ZCG(request_time);</span>
+<span class='curline'><a href='../S/849.html#L1867'>persistent_script</a> 1867 ext/opcache/ZendAccelerator.c     if (persistent_script-&gt;ping_auto_globals_mask) {</span>
+<span class='curline'><a href='../S/849.html#L1868'>persistent_script</a> 1868 ext/opcache/ZendAccelerator.c 		zend_accel_set_auto_globals(persistent_script-&gt;ping_auto_globals_mask);</span>
+<span class='curline'><a href='../S/849.html#L1871'>persistent_script</a> 1871 ext/opcache/ZendAccelerator.c 	return zend_accel_load_script(persistent_script, from_shared_memory);</span>
+<span class='curline'><a href='../S/849.html#L1928'>persistent_script</a> 1928 ext/opcache/ZendAccelerator.c 						zend_persistent_script *persistent_script = (zend_persistent_script *)bucket-&gt;data;</span>
+<span class='curline'><a href='../S/849.html#L1929'>persistent_script</a> 1929 ext/opcache/ZendAccelerator.c 						if (!persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1931'>persistent_script</a> 1931 ext/opcache/ZendAccelerator.c 							ZCG(cache_persistent_script) = persistent_script;</span>
+<span class='curline'><a href='../S/849.html#L1932'>persistent_script</a> 1932 ext/opcache/ZendAccelerator.c 							return zend_string_copy(persistent_script-&gt;full_path);</span>
+<span class='curline'><a href='../S/849.html#L1949'>persistent_script</a> 1949 ext/opcache/ZendAccelerator.c 					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket-&gt;data;</span>
+<span class='curline'><a href='../S/849.html#L1950'>persistent_script</a> 1950 ext/opcache/ZendAccelerator.c 					if (!persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/849.html#L1962'>persistent_script</a> 1962 ext/opcache/ZendAccelerator.c 						ZCG(cache_persistent_script) = persistent_script;</span>
+<span class='curline'><a href='../S/850.html#L325'>persistent_script</a>  325 ext/opcache/ZendAccelerator.h int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);</span>
+<span class='curline'><a href='../S/850.html#L327'>persistent_script</a>  327 ext/opcache/ZendAccelerator.h int  zend_accel_script_optimize(zend_persistent_script *persistent_script);</span>
+<span class='curline'><a href='../S/838.html#L326'>persistent_script</a>  326 ext/opcache/zend_accelerator_module.c 		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&amp;ZCSG(hash), key, key_length);</span>
+<span class='curline'><a href='../S/838.html#L327'>persistent_script</a>  327 ext/opcache/zend_accelerator_module.c 		if (persistent_script &amp;&amp; !persistent_script-&gt;corrupted) {</span>
+<span class='curline'><a href='../S/838.html#L334'>persistent_script</a>  334 ext/opcache/zend_accelerator_module.c 				return validate_timestamp_and_record(persistent_script, &amp;handle) == SUCCESS;</span>
+<span class='curline'><a href='../S/840.html#L72'>persistent_script</a>   72 ext/opcache/zend_accelerator_util_funcs.c 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));</span>
+<span class='curline'><a href='../S/840.html#L73'>persistent_script</a>   73 ext/opcache/zend_accelerator_util_funcs.c 	memset(persistent_script, 0, sizeof(zend_persistent_script));</span>
+<span class='curline'><a href='../S/840.html#L75'>persistent_script</a>   75 ext/opcache/zend_accelerator_util_funcs.c 	zend_hash_init(&amp;persistent_script-&gt;function_table, 128, NULL, ZEND_FUNCTION_DTOR, 0);</span>
+<span class='curline'><a href='../S/840.html#L80'>persistent_script</a>   80 ext/opcache/zend_accelerator_util_funcs.c 	zend_hash_init(&amp;persistent_script-&gt;class_table, 16, NULL, ZEND_CLASS_DTOR, 0);</span>
+<span class='curline'><a href='../S/840.html#L82'>persistent_script</a>   82 ext/opcache/zend_accelerator_util_funcs.c 	return persistent_script;</span>
+<span class='curline'><a href='../S/840.html#L85'>persistent_script</a>   85 ext/opcache/zend_accelerator_util_funcs.c void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)</span>
+<span class='curline'><a href='../S/840.html#L88'>persistent_script</a>   88 ext/opcache/zend_accelerator_util_funcs.c 		persistent_script-&gt;function_table.pDestructor = zend_accel_destroy_zend_function;</span>
+<span class='curline'><a href='../S/840.html#L89'>persistent_script</a>   89 ext/opcache/zend_accelerator_util_funcs.c 		persistent_script-&gt;class_table.pDestructor = zend_accel_destroy_zend_class;</span>
+<span class='curline'><a href='../S/840.html#L91'>persistent_script</a>   91 ext/opcache/zend_accelerator_util_funcs.c 		persistent_script-&gt;function_table.pDestructor = NULL;</span>
+<span class='curline'><a href='../S/840.html#L92'>persistent_script</a>   92 ext/opcache/zend_accelerator_util_funcs.c 		persistent_script-&gt;class_table.pDestructor = NULL;</span>
+<span class='curline'><a href='../S/840.html#L95'>persistent_script</a>   95 ext/opcache/zend_accelerator_util_funcs.c 	zend_hash_destroy(&amp;persistent_script-&gt;function_table);</span>
+<span class='curline'><a href='../S/840.html#L96'>persistent_script</a>   96 ext/opcache/zend_accelerator_util_funcs.c 	zend_hash_destroy(&amp;persistent_script-&gt;class_table);</span>
+<span class='curline'><a href='../S/840.html#L98'>persistent_script</a>   98 ext/opcache/zend_accelerator_util_funcs.c 	if (persistent_script-&gt;full_path) {</span>
+<span class='curline'><a href='../S/840.html#L99'>persistent_script</a>   99 ext/opcache/zend_accelerator_util_funcs.c 		zend_string_release(persistent_script-&gt;full_path);</span>
+<span class='curline'><a href='../S/840.html#L102'>persistent_script</a>  102 ext/opcache/zend_accelerator_util_funcs.c 	efree(persistent_script);</span>
+<span class='curline'><a href='../S/840.html#L677'>persistent_script</a>  677 ext/opcache/zend_accelerator_util_funcs.c zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)</span>
+<span class='curline'><a href='../S/840.html#L682'>persistent_script</a>  682 ext/opcache/zend_accelerator_util_funcs.c 	*op_array = persistent_script-&gt;main_op_array;</span>
+<span class='curline'><a href='../S/840.html#L687'>persistent_script</a>  687 ext/opcache/zend_accelerator_util_funcs.c 		ZCG(current_persistent_script) = persistent_script;</span>
+<span class='curline'><a href='../S/840.html#L689'>persistent_script</a>  689 ext/opcache/zend_accelerator_util_funcs.c 		if (EXPECTED(persistent_script-&gt;arena_size)) {</span>
+<span class='curline'><a href='../S/840.html#L692'>persistent_script</a>  692 ext/opcache/zend_accelerator_util_funcs.c 			ZCG(arena_mem) = zend_arena_alloc(&amp;CG(arena), persistent_script-&gt;arena_size + 64);</span>
+<span class='curline'><a href='../S/840.html#L694'>persistent_script</a>  694 ext/opcache/zend_accelerator_util_funcs.c 			fast_memcpy(ZCG(arena_mem), persistent_script-&gt;arena_mem, persistent_script-&gt;arena_size);</span>
+<span class='curline'><a href='../S/840.html#L696'>persistent_script</a>  696 ext/opcache/zend_accelerator_util_funcs.c 			ZCG(arena_mem) = zend_arena_alloc(&amp;CG(arena), persistent_script-&gt;arena_size);</span>
+<span class='curline'><a href='../S/840.html#L697'>persistent_script</a>  697 ext/opcache/zend_accelerator_util_funcs.c 			memcpy(ZCG(arena_mem), persistent_script-&gt;arena_mem, persistent_script-&gt;arena_size);</span>
+<span class='curline'><a href='../S/840.html#L702'>persistent_script</a>  702 ext/opcache/zend_accelerator_util_funcs.c 		if (zend_hash_num_elements(&amp;persistent_script-&gt;class_table) &gt; 0) {</span>
+<span class='curline'><a href='../S/840.html#L703'>persistent_script</a>  703 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_class_hash_copy(CG(class_table), &amp;persistent_script-&gt;class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor);</span>
+<span class='curline'><a href='../S/840.html#L707'>persistent_script</a>  707 ext/opcache/zend_accelerator_util_funcs.c 		if (zend_hash_num_elements(&amp;persistent_script-&gt;function_table) &gt; 0) {</span>
+<span class='curline'><a href='../S/840.html#L708'>persistent_script</a>  708 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_function_hash_copy_from_shm(CG(function_table), &amp;persistent_script-&gt;function_table);</span>
+<span class='curline'><a href='../S/840.html#L712'>persistent_script</a>  712 ext/opcache/zend_accelerator_util_funcs.c 		if (persistent_script-&gt;compiler_halt_offset != 0 &amp;&amp;</span>
+<span class='curline'><a href='../S/840.html#L713'>persistent_script</a>  713 ext/opcache/zend_accelerator_util_funcs.c 		    persistent_script-&gt;full_path) {</span>
+<span class='curline'><a href='../S/840.html#L717'>persistent_script</a>  717 ext/opcache/zend_accelerator_util_funcs.c 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script-&gt;full_path), ZSTR_LEN(persistent_script-&gt;full_path), 0);</span>
+<span class='curline'><a href='../S/840.html#L719'>persistent_script</a>  719 ext/opcache/zend_accelerator_util_funcs.c 				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script-&gt;compiler_halt_offset, CONST_CS, 0);</span>
+<span class='curline'><a href='../S/840.html#L727'>persistent_script</a>  727 ext/opcache/zend_accelerator_util_funcs.c 		if (zend_hash_num_elements(&amp;persistent_script-&gt;function_table) &gt; 0) {</span>
+<span class='curline'><a href='../S/840.html#L728'>persistent_script</a>  728 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_function_hash_copy(CG(function_table), &amp;persistent_script-&gt;function_table);</span>
+<span class='curline'><a href='../S/840.html#L730'>persistent_script</a>  730 ext/opcache/zend_accelerator_util_funcs.c 		if (zend_hash_num_elements(&amp;persistent_script-&gt;class_table) &gt; 0) {</span>
+<span class='curline'><a href='../S/840.html#L731'>persistent_script</a>  731 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_class_hash_copy(CG(class_table), &amp;persistent_script-&gt;class_table, NULL);</span>
+<span class='curline'><a href='../S/840.html#L737'>persistent_script</a>  737 ext/opcache/zend_accelerator_util_funcs.c 		CG(compiled_filename) = persistent_script-&gt;full_path;</span>
+<span class='curline'><a href='../S/840.html#L743'>persistent_script</a>  743 ext/opcache/zend_accelerator_util_funcs.c 		free_persistent_script(persistent_script, 0); /* free only hashes */</span>
+<span class='curline'><a href='../S/840.html#L826'>persistent_script</a>  826 ext/opcache/zend_accelerator_util_funcs.c unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script)</span>
+<span class='curline'><a href='../S/840.html#L828'>persistent_script</a>  828 ext/opcache/zend_accelerator_util_funcs.c 	signed char *mem = (signed char*)persistent_script-&gt;mem;</span>
+<span class='curline'><a href='../S/840.html#L829'>persistent_script</a>  829 ext/opcache/zend_accelerator_util_funcs.c 	size_t size = persistent_script-&gt;size;</span>
+<span class='curline'><a href='../S/840.html#L830'>persistent_script</a>  830 ext/opcache/zend_accelerator_util_funcs.c 	size_t persistent_script_check_block_size = ((char *)&amp;(persistent_script-&gt;dynamic_members)) - (char *)persistent_script;</span>
+<span class='curline'><a href='../S/840.html#L833'>persistent_script</a>  833 ext/opcache/zend_accelerator_util_funcs.c 	if (mem &lt; (signed char*)persistent_script) {</span>
+<span class='curline'><a href='../S/840.html#L834'>persistent_script</a>  834 ext/opcache/zend_accelerator_util_funcs.c 		checksum = zend_adler32(checksum, mem, (signed char*)persistent_script - mem);</span>
+<span class='curline'><a href='../S/840.html#L835'>persistent_script</a>  835 ext/opcache/zend_accelerator_util_funcs.c 		size -= (signed char*)persistent_script - mem;</span>
+<span class='curline'><a href='../S/840.html#L836'>persistent_script</a>  836 ext/opcache/zend_accelerator_util_funcs.c 		mem  += (signed char*)persistent_script - mem;</span>
+<span class='curline'><a href='../S/840.html#L840'>persistent_script</a>  840 ext/opcache/zend_accelerator_util_funcs.c 	mem  += sizeof(*persistent_script);</span>
+<span class='curline'><a href='../S/840.html#L841'>persistent_script</a>  841 ext/opcache/zend_accelerator_util_funcs.c 	size -= sizeof(*persistent_script);</span>
+<span class='curline'><a href='../S/841.html#L31'>persistent_script</a>   31 ext/opcache/zend_accelerator_util_funcs.h void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements);</span>
+<span class='curline'><a href='../S/841.html#L36'>persistent_script</a>   36 ext/opcache/zend_accelerator_util_funcs.h zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory);</span>
+<span class='curline'><a href='../S/841.html#L42'>persistent_script</a>   42 ext/opcache/zend_accelerator_util_funcs.h unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);</span>
+</pre>
+</body>
+</html>

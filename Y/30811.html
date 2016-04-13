@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pRtree</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L151231'>pRtree</a>           151231 ext/sqlite3/libsqlite/sqlite3.c     (pRtree-&gt;eCoordType==RTREE_COORD_REAL32) ?      \</span>
+<span class='curline'><a href='../S/1054.html#L151407'>pRtree</a>           151407 ext/sqlite3/libsqlite/sqlite3.c static void nodeZero(Rtree *pRtree, RtreeNode *p){</span>
+<span class='curline'><a href='../S/1054.html#L151408'>pRtree</a>           151408 ext/sqlite3/libsqlite/sqlite3.c   memset(&amp;p-&gt;zData[2], 0, pRtree-&gt;iNodeSize-2);</span>
+<span class='curline'><a href='../S/1054.html#L151424'>pRtree</a>           151424 ext/sqlite3/libsqlite/sqlite3.c static RtreeNode *nodeHashLookup(Rtree *pRtree, i64 iNode){</span>
+<span class='curline'><a href='../S/1054.html#L151426'>pRtree</a>           151426 ext/sqlite3/libsqlite/sqlite3.c   for(p=pRtree-&gt;aHash[nodeHash(iNode)]; p &amp;&amp; p-&gt;iNode!=iNode; p=p-&gt;pNext);</span>
+<span class='curline'><a href='../S/1054.html#L151433'>pRtree</a>           151433 ext/sqlite3/libsqlite/sqlite3.c static void nodeHashInsert(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L151437'>pRtree</a>           151437 ext/sqlite3/libsqlite/sqlite3.c   pNode-&gt;pNext = pRtree-&gt;aHash[iHash];</span>
+<span class='curline'><a href='../S/1054.html#L151438'>pRtree</a>           151438 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;aHash[iHash] = pNode;</span>
+<span class='curline'><a href='../S/1054.html#L151444'>pRtree</a>           151444 ext/sqlite3/libsqlite/sqlite3.c static void nodeHashDelete(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L151447'>pRtree</a>           151447 ext/sqlite3/libsqlite/sqlite3.c     pp = &amp;pRtree-&gt;aHash[nodeHash(pNode-&gt;iNode)];</span>
+<span class='curline'><a href='../S/1054.html#L151460'>pRtree</a>           151460 ext/sqlite3/libsqlite/sqlite3.c static RtreeNode *nodeNew(Rtree *pRtree, RtreeNode *pParent){</span>
+<span class='curline'><a href='../S/1054.html#L151462'>pRtree</a>           151462 ext/sqlite3/libsqlite/sqlite3.c   pNode = (RtreeNode *)sqlite3_malloc(sizeof(RtreeNode) + pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L151464'>pRtree</a>           151464 ext/sqlite3/libsqlite/sqlite3.c     memset(pNode, 0, sizeof(RtreeNode) + pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L151478'>pRtree</a>           151478 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,             /* R-tree structure */</span>
+<span class='curline'><a href='../S/1054.html#L151490'>pRtree</a>           151490 ext/sqlite3/libsqlite/sqlite3.c   if( (pNode = nodeHashLookup(pRtree, iNode)) ){</span>
+<span class='curline'><a href='../S/1054.html#L151501'>pRtree</a>           151501 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pReadNode, 1, iNode);</span>
+<span class='curline'><a href='../S/1054.html#L151502'>pRtree</a>           151502 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_step(pRtree-&gt;pReadNode);</span>
+<span class='curline'><a href='../S/1054.html#L151504'>pRtree</a>           151504 ext/sqlite3/libsqlite/sqlite3.c     const u8 *zBlob = sqlite3_column_blob(pRtree-&gt;pReadNode, 0);</span>
+<span class='curline'><a href='../S/1054.html#L151505'>pRtree</a>           151505 ext/sqlite3/libsqlite/sqlite3.c     if( pRtree-&gt;iNodeSize==sqlite3_column_bytes(pRtree-&gt;pReadNode, 0) ){</span>
+<span class='curline'><a href='../S/1054.html#L151506'>pRtree</a>           151506 ext/sqlite3/libsqlite/sqlite3.c       pNode = (RtreeNode *)sqlite3_malloc(sizeof(RtreeNode)+pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L151516'>pRtree</a>           151516 ext/sqlite3/libsqlite/sqlite3.c         memcpy(pNode-&gt;zData, zBlob, pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L151521'>pRtree</a>           151521 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_reset(pRtree-&gt;pReadNode);</span>
+<span class='curline'><a href='../S/1054.html#L151531'>pRtree</a>           151531 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;iDepth = readInt16(pNode-&gt;zData);</span>
+<span class='curline'><a href='../S/1054.html#L151532'>pRtree</a>           151532 ext/sqlite3/libsqlite/sqlite3.c     if( pRtree-&gt;iDepth&gt;RTREE_MAX_DEPTH ){</span>
+<span class='curline'><a href='../S/1054.html#L151542'>pRtree</a>           151542 ext/sqlite3/libsqlite/sqlite3.c     if( NCELL(pNode)&gt;((pRtree-&gt;iNodeSize-4)/pRtree-&gt;nBytesPerCell) ){</span>
+<span class='curline'><a href='../S/1054.html#L151549'>pRtree</a>           151549 ext/sqlite3/libsqlite/sqlite3.c       nodeHashInsert(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L151566'>pRtree</a>           151566 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,             /* The overall R-Tree */</span>
+<span class='curline'><a href='../S/1054.html#L151572'>pRtree</a>           151572 ext/sqlite3/libsqlite/sqlite3.c   u8 *p = &amp;pNode-&gt;zData[4 + pRtree-&gt;nBytesPerCell*iCell];</span>
+<span class='curline'><a href='../S/1054.html#L151574'>pRtree</a>           151574 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii++){</span>
+<span class='curline'><a href='../S/1054.html#L151583'>pRtree</a>           151583 ext/sqlite3/libsqlite/sqlite3.c static void nodeDeleteCell(Rtree *pRtree, RtreeNode *pNode, int iCell){</span>
+<span class='curline'><a href='../S/1054.html#L151584'>pRtree</a>           151584 ext/sqlite3/libsqlite/sqlite3.c   u8 *pDst = &amp;pNode-&gt;zData[4 + pRtree-&gt;nBytesPerCell*iCell];</span>
+<span class='curline'><a href='../S/1054.html#L151585'>pRtree</a>           151585 ext/sqlite3/libsqlite/sqlite3.c   u8 *pSrc = &amp;pDst[pRtree-&gt;nBytesPerCell];</span>
+<span class='curline'><a href='../S/1054.html#L151586'>pRtree</a>           151586 ext/sqlite3/libsqlite/sqlite3.c   int nByte = (NCELL(pNode) - iCell - 1) * pRtree-&gt;nBytesPerCell;</span>
+<span class='curline'><a href='../S/1054.html#L151599'>pRtree</a>           151599 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,                /* The overall R-Tree */</span>
+<span class='curline'><a href='../S/1054.html#L151606'>pRtree</a>           151606 ext/sqlite3/libsqlite/sqlite3.c   nMaxCell = (pRtree-&gt;iNodeSize-4)/pRtree-&gt;nBytesPerCell;</span>
+<span class='curline'><a href='../S/1054.html#L151611'>pRtree</a>           151611 ext/sqlite3/libsqlite/sqlite3.c     nodeOverwriteCell(pRtree, pNode, pCell, nCell);</span>
+<span class='curline'><a href='../S/1054.html#L151622'>pRtree</a>           151622 ext/sqlite3/libsqlite/sqlite3.c static int nodeWrite(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L151625'>pRtree</a>           151625 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_stmt *p = pRtree-&gt;pWriteNode;</span>
+<span class='curline'><a href='../S/1054.html#L151631'>pRtree</a>           151631 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_blob(p, 2, pNode-&gt;zData, pRtree-&gt;iNodeSize, SQLITE_STATIC);</span>
+<span class='curline'><a href='../S/1054.html#L151636'>pRtree</a>           151636 ext/sqlite3/libsqlite/sqlite3.c       pNode-&gt;iNode = sqlite3_last_insert_rowid(pRtree-&gt;db);</span>
+<span class='curline'><a href='../S/1054.html#L151637'>pRtree</a>           151637 ext/sqlite3/libsqlite/sqlite3.c       nodeHashInsert(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L151647'>pRtree</a>           151647 ext/sqlite3/libsqlite/sqlite3.c static int nodeRelease(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L151654'>pRtree</a>           151654 ext/sqlite3/libsqlite/sqlite3.c         pRtree-&gt;iDepth = -1;</span>
+<span class='curline'><a href='../S/1054.html#L151657'>pRtree</a>           151657 ext/sqlite3/libsqlite/sqlite3.c         rc = nodeRelease(pRtree, pNode-&gt;pParent);</span>
+<span class='curline'><a href='../S/1054.html#L151660'>pRtree</a>           151660 ext/sqlite3/libsqlite/sqlite3.c         rc = nodeWrite(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L151662'>pRtree</a>           151662 ext/sqlite3/libsqlite/sqlite3.c       nodeHashDelete(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L151675'>pRtree</a>           151675 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,       /* The overall R-Tree */</span>
+<span class='curline'><a href='../S/1054.html#L151680'>pRtree</a>           151680 ext/sqlite3/libsqlite/sqlite3.c   return readInt64(&amp;pNode-&gt;zData[4 + pRtree-&gt;nBytesPerCell*iCell]);</span>
+<span class='curline'><a href='../S/1054.html#L151687'>pRtree</a>           151687 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,               /* The overall R-Tree */</span>
+<span class='curline'><a href='../S/1054.html#L151693'>pRtree</a>           151693 ext/sqlite3/libsqlite/sqlite3.c   readCoord(&amp;pNode-&gt;zData[12 + pRtree-&gt;nBytesPerCell*iCell + 4*iCoord], pCoord);</span>
+<span class='curline'><a href='../S/1054.html#L151701'>pRtree</a>           151701 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,               /* The overall R-Tree */</span>
+<span class='curline'><a href='../S/1054.html#L151709'>pRtree</a>           151709 ext/sqlite3/libsqlite/sqlite3.c   pCell-&gt;iRowid = nodeGetRowid(pRtree, pNode, iCell);</span>
+<span class='curline'><a href='../S/1054.html#L151710'>pRtree</a>           151710 ext/sqlite3/libsqlite/sqlite3.c   pData = pNode-&gt;zData + (12 + pRtree-&gt;nBytesPerCell*iCell);</span>
+<span class='curline'><a href='../S/1054.html#L151712'>pRtree</a>           151712 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;pRtree-&gt;nDim*2; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L151754'>pRtree</a>           151754 ext/sqlite3/libsqlite/sqlite3.c static void rtreeReference(Rtree *pRtree){</span>
+<span class='curline'><a href='../S/1054.html#L151755'>pRtree</a>           151755 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;nBusy++;</span>
+<span class='curline'><a href='../S/1054.html#L151762'>pRtree</a>           151762 ext/sqlite3/libsqlite/sqlite3.c static void rtreeRelease(Rtree *pRtree){</span>
+<span class='curline'><a href='../S/1054.html#L151763'>pRtree</a>           151763 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;nBusy--;</span>
+<span class='curline'><a href='../S/1054.html#L151764'>pRtree</a>           151764 ext/sqlite3/libsqlite/sqlite3.c   if( pRtree-&gt;nBusy==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L151765'>pRtree</a>           151765 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pReadNode);</span>
+<span class='curline'><a href='../S/1054.html#L151766'>pRtree</a>           151766 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pWriteNode);</span>
+<span class='curline'><a href='../S/1054.html#L151767'>pRtree</a>           151767 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pDeleteNode);</span>
+<span class='curline'><a href='../S/1054.html#L151768'>pRtree</a>           151768 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pReadRowid);</span>
+<span class='curline'><a href='../S/1054.html#L151769'>pRtree</a>           151769 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pWriteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L151770'>pRtree</a>           151770 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pDeleteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L151771'>pRtree</a>           151771 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pReadParent);</span>
+<span class='curline'><a href='../S/1054.html#L151772'>pRtree</a>           151772 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pWriteParent);</span>
+<span class='curline'><a href='../S/1054.html#L151773'>pRtree</a>           151773 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_finalize(pRtree-&gt;pDeleteParent);</span>
+<span class='curline'><a href='../S/1054.html#L151774'>pRtree</a>           151774 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_free(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L151790'>pRtree</a>           151790 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L151796'>pRtree</a>           151796 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;zDb, pRtree-&gt;zName, </span>
+<span class='curline'><a href='../S/1054.html#L151797'>pRtree</a>           151797 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;zDb, pRtree-&gt;zName,</span>
+<span class='curline'><a href='../S/1054.html#L151798'>pRtree</a>           151798 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;zDb, pRtree-&gt;zName</span>
+<span class='curline'><a href='../S/1054.html#L151803'>pRtree</a>           151803 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_exec(pRtree-&gt;db, zCreate, 0, 0, 0);</span>
+<span class='curline'><a href='../S/1054.html#L151807'>pRtree</a>           151807 ext/sqlite3/libsqlite/sqlite3.c     rtreeRelease(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L151854'>pRtree</a>           151854 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)(cur-&gt;pVtab);</span>
+<span class='curline'><a href='../S/1054.html#L151859'>pRtree</a>           151859 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;RTREE_CACHE_SZ; ii++) nodeRelease(pRtree, pCsr-&gt;aNode[ii]);</span>
+<span class='curline'><a href='../S/1054.html#L152037'>pRtree</a>           152037 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree, </span>
+<span class='curline'><a href='../S/1054.html#L152046'>pRtree</a>           152046 ext/sqlite3/libsqlite/sqlite3.c     if( nodeGetRowid(pRtree, pNode, ii)==iRowid ){</span>
+<span class='curline'><a href='../S/1054.html#L152058'>pRtree</a>           152058 ext/sqlite3/libsqlite/sqlite3.c static int nodeParentIndex(Rtree *pRtree, RtreeNode *pNode, int *piIndex){</span>
+<span class='curline'><a href='../S/1054.html#L152061'>pRtree</a>           152061 ext/sqlite3/libsqlite/sqlite3.c     return nodeRowidIndex(pRtree, pParent, pNode-&gt;iNode, piIndex);</span>
+<span class='curline'><a href='../S/1054.html#L152287'>pRtree</a>           152287 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = RTREE_OF_CURSOR(pCur);</span>
+<span class='curline'><a href='../S/1054.html#L152297'>pRtree</a>           152297 ext/sqlite3/libsqlite/sqlite3.c   eInt = pRtree-&gt;eCoordType==RTREE_COORD_INT32;</span>
+<span class='curline'><a href='../S/1054.html#L152305'>pRtree</a>           152305 ext/sqlite3/libsqlite/sqlite3.c       u8 *pCellData = pNode-&gt;zData + (4+pRtree-&gt;nBytesPerCell*p-&gt;iCell);</span>
+<span class='curline'><a href='../S/1054.html#L152384'>pRtree</a>           152384 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)cur-&gt;pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L152394'>pRtree</a>           152394 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_result_int64(ctx, nodeGetRowid(pRtree, pNode, p-&gt;iCell));</span>
+<span class='curline'><a href='../S/1054.html#L152397'>pRtree</a>           152397 ext/sqlite3/libsqlite/sqlite3.c     nodeGetCoord(pRtree, pNode, p-&gt;iCell, i-1, &amp;c);</span>
+<span class='curline'><a href='../S/1054.html#L152399'>pRtree</a>           152399 ext/sqlite3/libsqlite/sqlite3.c     if( pRtree-&gt;eCoordType==RTREE_COORD_REAL32 ){</span>
+<span class='curline'><a href='../S/1054.html#L152404'>pRtree</a>           152404 ext/sqlite3/libsqlite/sqlite3.c       assert( pRtree-&gt;eCoordType==RTREE_COORD_INT32 );</span>
+<span class='curline'><a href='../S/1054.html#L152419'>pRtree</a>           152419 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,              /* RTree to search */</span>
+<span class='curline'><a href='../S/1054.html#L152426'>pRtree</a>           152426 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pReadRowid, 1, iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152427'>pRtree</a>           152427 ext/sqlite3/libsqlite/sqlite3.c   if( sqlite3_step(pRtree-&gt;pReadRowid)==SQLITE_ROW ){</span>
+<span class='curline'><a href='../S/1054.html#L152428'>pRtree</a>           152428 ext/sqlite3/libsqlite/sqlite3.c     i64 iNode = sqlite3_column_int64(pRtree-&gt;pReadRowid, 0);</span>
+<span class='curline'><a href='../S/1054.html#L152430'>pRtree</a>           152430 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeAcquire(pRtree, iNode, 0, ppLeaf);</span>
+<span class='curline'><a href='../S/1054.html#L152431'>pRtree</a>           152431 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_reset(pRtree-&gt;pReadRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152433'>pRtree</a>           152433 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pRtree-&gt;pReadRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152495'>pRtree</a>           152495 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)pVtabCursor-&gt;pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L152502'>pRtree</a>           152502 ext/sqlite3/libsqlite/sqlite3.c   rtreeReference(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L152508'>pRtree</a>           152508 ext/sqlite3/libsqlite/sqlite3.c   pCsr-&gt;base.pVtab = (sqlite3_vtab*)pRtree;</span>
+<span class='curline'><a href='../S/1054.html#L152517'>pRtree</a>           152517 ext/sqlite3/libsqlite/sqlite3.c     rc = findLeafNode(pRtree, iRowid, &amp;pLeaf, &amp;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L152524'>pRtree</a>           152524 ext/sqlite3/libsqlite/sqlite3.c       rc = nodeRowidIndex(pRtree, pLeaf, iRowid, &amp;iCell);</span>
+<span class='curline'><a href='../S/1054.html#L152534'>pRtree</a>           152534 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeAcquire(pRtree, 1, 0, &amp;pRoot);</span>
+<span class='curline'><a href='../S/1054.html#L152542'>pRtree</a>           152542 ext/sqlite3/libsqlite/sqlite3.c         memset(pCsr-&gt;anQueue, 0, sizeof(u32)*(pRtree-&gt;iDepth + 1));</span>
+<span class='curline'><a href='../S/1054.html#L152558'>pRtree</a>           152558 ext/sqlite3/libsqlite/sqlite3.c             p-&gt;pInfo-&gt;nCoord = pRtree-&gt;nDim*2;</span>
+<span class='curline'><a href='../S/1054.html#L152560'>pRtree</a>           152560 ext/sqlite3/libsqlite/sqlite3.c             p-&gt;pInfo-&gt;mxLevel = pRtree-&gt;iDepth + 1;</span>
+<span class='curline'><a href='../S/1054.html#L152573'>pRtree</a>           152573 ext/sqlite3/libsqlite/sqlite3.c       pNew = rtreeSearchPointNew(pCsr, RTREE_ZERO, pRtree-&gt;iDepth+1);</span>
+<span class='curline'><a href='../S/1054.html#L152586'>pRtree</a>           152586 ext/sqlite3/libsqlite/sqlite3.c   nodeRelease(pRtree, pRoot);</span>
+<span class='curline'><a href='../S/1054.html#L152587'>pRtree</a>           152587 ext/sqlite3/libsqlite/sqlite3.c   rtreeRelease(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L152639'>pRtree</a>           152639 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree*)tab;</span>
+<span class='curline'><a href='../S/1054.html#L152700'>pRtree</a>           152700 ext/sqlite3/libsqlite/sqlite3.c   nRow = pRtree-&gt;nRowEst / (iIdx + 1);</span>
+<span class='curline'><a href='../S/1054.html#L152710'>pRtree</a>           152710 ext/sqlite3/libsqlite/sqlite3.c static RtreeDValue cellArea(Rtree *pRtree, RtreeCell *p){</span>
+<span class='curline'><a href='../S/1054.html#L152713'>pRtree</a>           152713 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152723'>pRtree</a>           152723 ext/sqlite3/libsqlite/sqlite3.c static RtreeDValue cellMargin(Rtree *pRtree, RtreeCell *p){</span>
+<span class='curline'><a href='../S/1054.html#L152726'>pRtree</a>           152726 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152735'>pRtree</a>           152735 ext/sqlite3/libsqlite/sqlite3.c static void cellUnion(Rtree *pRtree, RtreeCell *p1, RtreeCell *p2){</span>
+<span class='curline'><a href='../S/1054.html#L152737'>pRtree</a>           152737 ext/sqlite3/libsqlite/sqlite3.c   if( pRtree-&gt;eCoordType==RTREE_COORD_REAL32 ){</span>
+<span class='curline'><a href='../S/1054.html#L152738'>pRtree</a>           152738 ext/sqlite3/libsqlite/sqlite3.c     for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152743'>pRtree</a>           152743 ext/sqlite3/libsqlite/sqlite3.c     for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152754'>pRtree</a>           152754 ext/sqlite3/libsqlite/sqlite3.c static int cellContains(Rtree *pRtree, RtreeCell *p1, RtreeCell *p2){</span>
+<span class='curline'><a href='../S/1054.html#L152756'>pRtree</a>           152756 ext/sqlite3/libsqlite/sqlite3.c   int isInt = (pRtree-&gt;eCoordType==RTREE_COORD_INT32);</span>
+<span class='curline'><a href='../S/1054.html#L152757'>pRtree</a>           152757 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;(pRtree-&gt;nDim*2); ii+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152772'>pRtree</a>           152772 ext/sqlite3/libsqlite/sqlite3.c static RtreeDValue cellGrowth(Rtree *pRtree, RtreeCell *p, RtreeCell *pCell){</span>
+<span class='curline'><a href='../S/1054.html#L152776'>pRtree</a>           152776 ext/sqlite3/libsqlite/sqlite3.c   area = cellArea(pRtree, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L152777'>pRtree</a>           152777 ext/sqlite3/libsqlite/sqlite3.c   cellUnion(pRtree, &amp;cell, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L152778'>pRtree</a>           152778 ext/sqlite3/libsqlite/sqlite3.c   return (cellArea(pRtree, &amp;cell)-area);</span>
+<span class='curline'><a href='../S/1054.html#L152782'>pRtree</a>           152782 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree, </span>
+<span class='curline'><a href='../S/1054.html#L152792'>pRtree</a>           152792 ext/sqlite3/libsqlite/sqlite3.c     for(jj=0; jj&lt;(pRtree-&gt;nDim*2); jj+=2){</span>
+<span class='curline'><a href='../S/1054.html#L152814'>pRtree</a>           152814 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,               /* Rtree table */</span>
+<span class='curline'><a href='../S/1054.html#L152822'>pRtree</a>           152822 ext/sqlite3/libsqlite/sqlite3.c   rc = nodeAcquire(pRtree, 1, 0, &amp;pNode);</span>
+<span class='curline'><a href='../S/1054.html#L152824'>pRtree</a>           152824 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; rc==SQLITE_OK &amp;&amp; ii&lt;(pRtree-&gt;iDepth-iHeight); ii++){</span>
+<span class='curline'><a href='../S/1054.html#L152845'>pRtree</a>           152845 ext/sqlite3/libsqlite/sqlite3.c       nodeGetCell(pRtree, pNode, iCell, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L152846'>pRtree</a>           152846 ext/sqlite3/libsqlite/sqlite3.c       growth = cellGrowth(pRtree, &amp;cell, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L152847'>pRtree</a>           152847 ext/sqlite3/libsqlite/sqlite3.c       area = cellArea(pRtree, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L152859'>pRtree</a>           152859 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeAcquire(pRtree, iBest, pNode, &amp;pChild);</span>
+<span class='curline'><a href='../S/1054.html#L152860'>pRtree</a>           152860 ext/sqlite3/libsqlite/sqlite3.c     nodeRelease(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L152874'>pRtree</a>           152874 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,                    /* Rtree table */</span>
+<span class='curline'><a href='../S/1054.html#L152884'>pRtree</a>           152884 ext/sqlite3/libsqlite/sqlite3.c     if( nodeParentIndex(pRtree, p, &amp;iCell) ){</span>
+<span class='curline'><a href='../S/1054.html#L152888'>pRtree</a>           152888 ext/sqlite3/libsqlite/sqlite3.c     nodeGetCell(pRtree, pParent, iCell, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L152889'>pRtree</a>           152889 ext/sqlite3/libsqlite/sqlite3.c     if( !cellContains(pRtree, &amp;cell, pCell) ){</span>
+<span class='curline'><a href='../S/1054.html#L152890'>pRtree</a>           152890 ext/sqlite3/libsqlite/sqlite3.c       cellUnion(pRtree, &amp;cell, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L152891'>pRtree</a>           152891 ext/sqlite3/libsqlite/sqlite3.c       nodeOverwriteCell(pRtree, pParent, &amp;cell, iCell);</span>
+<span class='curline'><a href='../S/1054.html#L152902'>pRtree</a>           152902 ext/sqlite3/libsqlite/sqlite3.c static int rowidWrite(Rtree *pRtree, sqlite3_int64 iRowid, sqlite3_int64 iNode){</span>
+<span class='curline'><a href='../S/1054.html#L152903'>pRtree</a>           152903 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pWriteRowid, 1, iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152904'>pRtree</a>           152904 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pWriteRowid, 2, iNode);</span>
+<span class='curline'><a href='../S/1054.html#L152905'>pRtree</a>           152905 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pRtree-&gt;pWriteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152906'>pRtree</a>           152906 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_reset(pRtree-&gt;pWriteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L152912'>pRtree</a>           152912 ext/sqlite3/libsqlite/sqlite3.c static int parentWrite(Rtree *pRtree, sqlite3_int64 iNode, sqlite3_int64 iPar){</span>
+<span class='curline'><a href='../S/1054.html#L152913'>pRtree</a>           152913 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pWriteParent, 1, iNode);</span>
+<span class='curline'><a href='../S/1054.html#L152914'>pRtree</a>           152914 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pWriteParent, 2, iPar);</span>
+<span class='curline'><a href='../S/1054.html#L152915'>pRtree</a>           152915 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pRtree-&gt;pWriteParent);</span>
+<span class='curline'><a href='../S/1054.html#L152916'>pRtree</a>           152916 ext/sqlite3/libsqlite/sqlite3.c   return sqlite3_reset(pRtree-&gt;pWriteParent);</span>
+<span class='curline'><a href='../S/1054.html#L153006'>pRtree</a>           153006 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,</span>
+<span class='curline'><a href='../S/1054.html#L153023'>pRtree</a>           153023 ext/sqlite3/libsqlite/sqlite3.c     SortByDimension(pRtree, aLeft, nLeft, iDim, aCell, aSpare);</span>
+<span class='curline'><a href='../S/1054.html#L153024'>pRtree</a>           153024 ext/sqlite3/libsqlite/sqlite3.c     SortByDimension(pRtree, aRight, nRight, iDim, aCell, aSpare);</span>
+<span class='curline'><a href='../S/1054.html#L153065'>pRtree</a>           153065 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,</span>
+<span class='curline'><a href='../S/1054.html#L153081'>pRtree</a>           153081 ext/sqlite3/libsqlite/sqlite3.c   int nByte = (pRtree-&gt;nDim+1)*(sizeof(int*)+nCell*sizeof(int));</span>
+<span class='curline'><a href='../S/1054.html#L153088'>pRtree</a>           153088 ext/sqlite3/libsqlite/sqlite3.c   aSpare = &amp;((int *)&amp;aaSorted[pRtree-&gt;nDim])[pRtree-&gt;nDim*nCell];</span>
+<span class='curline'><a href='../S/1054.html#L153090'>pRtree</a>           153090 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;pRtree-&gt;nDim; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L153092'>pRtree</a>           153092 ext/sqlite3/libsqlite/sqlite3.c     aaSorted[ii] = &amp;((int *)&amp;aaSorted[pRtree-&gt;nDim])[ii*nCell];</span>
+<span class='curline'><a href='../S/1054.html#L153096'>pRtree</a>           153096 ext/sqlite3/libsqlite/sqlite3.c     SortByDimension(pRtree, aaSorted[ii], nCell, ii, aCell, aSpare);</span>
+<span class='curline'><a href='../S/1054.html#L153099'>pRtree</a>           153099 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; ii&lt;pRtree-&gt;nDim; ii++){</span>
+<span class='curline'><a href='../S/1054.html#L153107'>pRtree</a>           153107 ext/sqlite3/libsqlite/sqlite3.c       nLeft=RTREE_MINCELLS(pRtree); </span>
+<span class='curline'><a href='../S/1054.html#L153108'>pRtree</a>           153108 ext/sqlite3/libsqlite/sqlite3.c       nLeft&lt;=(nCell-RTREE_MINCELLS(pRtree)); </span>
+<span class='curline'><a href='../S/1054.html#L153121'>pRtree</a>           153121 ext/sqlite3/libsqlite/sqlite3.c           cellUnion(pRtree, &amp;left, &amp;aCell[aaSorted[ii][kk]]);</span>
+<span class='curline'><a href='../S/1054.html#L153123'>pRtree</a>           153123 ext/sqlite3/libsqlite/sqlite3.c           cellUnion(pRtree, &amp;right, &amp;aCell[aaSorted[ii][kk]]);</span>
+<span class='curline'><a href='../S/1054.html#L153126'>pRtree</a>           153126 ext/sqlite3/libsqlite/sqlite3.c       margin += cellMargin(pRtree, &amp;left);</span>
+<span class='curline'><a href='../S/1054.html#L153127'>pRtree</a>           153127 ext/sqlite3/libsqlite/sqlite3.c       margin += cellMargin(pRtree, &amp;right);</span>
+<span class='curline'><a href='../S/1054.html#L153128'>pRtree</a>           153128 ext/sqlite3/libsqlite/sqlite3.c       overlap = cellOverlap(pRtree, &amp;left, &amp;right, 1);</span>
+<span class='curline'><a href='../S/1054.html#L153129'>pRtree</a>           153129 ext/sqlite3/libsqlite/sqlite3.c       area = cellArea(pRtree, &amp;left) + cellArea(pRtree, &amp;right);</span>
+<span class='curline'><a href='../S/1054.html#L153130'>pRtree</a>           153130 ext/sqlite3/libsqlite/sqlite3.c       if( (nLeft==RTREE_MINCELLS(pRtree))</span>
+<span class='curline'><a href='../S/1054.html#L153153'>pRtree</a>           153153 ext/sqlite3/libsqlite/sqlite3.c     nodeInsertCell(pRtree, pTarget, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L153154'>pRtree</a>           153154 ext/sqlite3/libsqlite/sqlite3.c     cellUnion(pRtree, pBbox, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L153163'>pRtree</a>           153163 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree, </span>
+<span class='curline'><a href='../S/1054.html#L153171'>pRtree</a>           153171 ext/sqlite3/libsqlite/sqlite3.c     RtreeNode *pChild = nodeHashLookup(pRtree, iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153173'>pRtree</a>           153173 ext/sqlite3/libsqlite/sqlite3.c       nodeRelease(pRtree, pChild-&gt;pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153178'>pRtree</a>           153178 ext/sqlite3/libsqlite/sqlite3.c   return xSetMapping(pRtree, iRowid, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153182'>pRtree</a>           153182 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,</span>
+<span class='curline'><a href='../S/1054.html#L153212'>pRtree</a>           153212 ext/sqlite3/libsqlite/sqlite3.c     nodeGetCell(pRtree, pNode, i, &amp;aCell[i]);</span>
+<span class='curline'><a href='../S/1054.html#L153214'>pRtree</a>           153214 ext/sqlite3/libsqlite/sqlite3.c   nodeZero(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153219'>pRtree</a>           153219 ext/sqlite3/libsqlite/sqlite3.c     pRight = nodeNew(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153220'>pRtree</a>           153220 ext/sqlite3/libsqlite/sqlite3.c     pLeft = nodeNew(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153221'>pRtree</a>           153221 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;iDepth++;</span>
+<span class='curline'><a href='../S/1054.html#L153223'>pRtree</a>           153223 ext/sqlite3/libsqlite/sqlite3.c     writeInt16(pNode-&gt;zData, pRtree-&gt;iDepth);</span>
+<span class='curline'><a href='../S/1054.html#L153226'>pRtree</a>           153226 ext/sqlite3/libsqlite/sqlite3.c     pRight = nodeNew(pRtree, pLeft-&gt;pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153235'>pRtree</a>           153235 ext/sqlite3/libsqlite/sqlite3.c   memset(pLeft-&gt;zData, 0, pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L153236'>pRtree</a>           153236 ext/sqlite3/libsqlite/sqlite3.c   memset(pRight-&gt;zData, 0, pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L153238'>pRtree</a>           153238 ext/sqlite3/libsqlite/sqlite3.c   rc = splitNodeStartree(pRtree, aCell, nCell, pLeft, pRight,</span>
+<span class='curline'><a href='../S/1054.html#L153249'>pRtree</a>           153249 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_OK!=(rc = nodeWrite(pRtree, pRight))</span>
+<span class='curline'><a href='../S/1054.html#L153250'>pRtree</a>           153250 ext/sqlite3/libsqlite/sqlite3.c    || (0==pLeft-&gt;iNode &amp;&amp; SQLITE_OK!=(rc = nodeWrite(pRtree, pLeft)))</span>
+<span class='curline'><a href='../S/1054.html#L153259'>pRtree</a>           153259 ext/sqlite3/libsqlite/sqlite3.c     rc = rtreeInsertCell(pRtree, pLeft-&gt;pParent, &amp;leftbbox, iHeight+1);</span>
+<span class='curline'><a href='../S/1054.html#L153266'>pRtree</a>           153266 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeParentIndex(pRtree, pLeft, &amp;iCell);</span>
+<span class='curline'><a href='../S/1054.html#L153268'>pRtree</a>           153268 ext/sqlite3/libsqlite/sqlite3.c       nodeOverwriteCell(pRtree, pParent, &amp;leftbbox, iCell);</span>
+<span class='curline'><a href='../S/1054.html#L153269'>pRtree</a>           153269 ext/sqlite3/libsqlite/sqlite3.c       rc = AdjustTree(pRtree, pParent, &amp;leftbbox);</span>
+<span class='curline'><a href='../S/1054.html#L153275'>pRtree</a>           153275 ext/sqlite3/libsqlite/sqlite3.c   if( (rc = rtreeInsertCell(pRtree, pRight-&gt;pParent, &amp;rightbbox, iHeight+1)) ){</span>
+<span class='curline'><a href='../S/1054.html#L153280'>pRtree</a>           153280 ext/sqlite3/libsqlite/sqlite3.c     i64 iRowid = nodeGetRowid(pRtree, pRight, i);</span>
+<span class='curline'><a href='../S/1054.html#L153281'>pRtree</a>           153281 ext/sqlite3/libsqlite/sqlite3.c     rc = updateMapping(pRtree, iRowid, pRight, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153291'>pRtree</a>           153291 ext/sqlite3/libsqlite/sqlite3.c       i64 iRowid = nodeGetRowid(pRtree, pLeft, i);</span>
+<span class='curline'><a href='../S/1054.html#L153292'>pRtree</a>           153292 ext/sqlite3/libsqlite/sqlite3.c       rc = updateMapping(pRtree, iRowid, pLeft, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153298'>pRtree</a>           153298 ext/sqlite3/libsqlite/sqlite3.c     rc = updateMapping(pRtree, pCell-&gt;iRowid, pLeft, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153302'>pRtree</a>           153302 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeRelease(pRtree, pRight);</span>
+<span class='curline'><a href='../S/1054.html#L153306'>pRtree</a>           153306 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeRelease(pRtree, pLeft);</span>
+<span class='curline'><a href='../S/1054.html#L153311'>pRtree</a>           153311 ext/sqlite3/libsqlite/sqlite3.c   nodeRelease(pRtree, pRight);</span>
+<span class='curline'><a href='../S/1054.html#L153312'>pRtree</a>           153312 ext/sqlite3/libsqlite/sqlite3.c   nodeRelease(pRtree, pLeft);</span>
+<span class='curline'><a href='../S/1054.html#L153328'>pRtree</a>           153328 ext/sqlite3/libsqlite/sqlite3.c static int fixLeafParent(Rtree *pRtree, RtreeNode *pLeaf){</span>
+<span class='curline'><a href='../S/1054.html#L153333'>pRtree</a>           153333 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pRtree-&gt;pReadParent, 1, pChild-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153334'>pRtree</a>           153334 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_step(pRtree-&gt;pReadParent);</span>
+<span class='curline'><a href='../S/1054.html#L153344'>pRtree</a>           153344 ext/sqlite3/libsqlite/sqlite3.c       iNode = sqlite3_column_int64(pRtree-&gt;pReadParent, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153347'>pRtree</a>           153347 ext/sqlite3/libsqlite/sqlite3.c         rc2 = nodeAcquire(pRtree, iNode, 0, &amp;pChild-&gt;pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153350'>pRtree</a>           153350 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pRtree-&gt;pReadParent);</span>
+<span class='curline'><a href='../S/1054.html#L153360'>pRtree</a>           153360 ext/sqlite3/libsqlite/sqlite3.c static int removeNode(Rtree *pRtree, RtreeNode *pNode, int iHeight){</span>
+<span class='curline'><a href='../S/1054.html#L153369'>pRtree</a>           153369 ext/sqlite3/libsqlite/sqlite3.c   rc = nodeParentIndex(pRtree, pNode, &amp;iCell);</span>
+<span class='curline'><a href='../S/1054.html#L153373'>pRtree</a>           153373 ext/sqlite3/libsqlite/sqlite3.c     rc = deleteCell(pRtree, pParent, iCell, iHeight+1);</span>
+<span class='curline'><a href='../S/1054.html#L153375'>pRtree</a>           153375 ext/sqlite3/libsqlite/sqlite3.c   rc2 = nodeRelease(pRtree, pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153384'>pRtree</a>           153384 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pDeleteNode, 1, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153385'>pRtree</a>           153385 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pRtree-&gt;pDeleteNode);</span>
+<span class='curline'><a href='../S/1054.html#L153386'>pRtree</a>           153386 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_OK!=(rc = sqlite3_reset(pRtree-&gt;pDeleteNode)) ){</span>
+<span class='curline'><a href='../S/1054.html#L153391'>pRtree</a>           153391 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_int64(pRtree-&gt;pDeleteParent, 1, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153392'>pRtree</a>           153392 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pRtree-&gt;pDeleteParent);</span>
+<span class='curline'><a href='../S/1054.html#L153393'>pRtree</a>           153393 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_OK!=(rc = sqlite3_reset(pRtree-&gt;pDeleteParent)) ){</span>
+<span class='curline'><a href='../S/1054.html#L153400'>pRtree</a>           153400 ext/sqlite3/libsqlite/sqlite3.c   nodeHashDelete(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153402'>pRtree</a>           153402 ext/sqlite3/libsqlite/sqlite3.c   pNode-&gt;pNext = pRtree-&gt;pDeleted;</span>
+<span class='curline'><a href='../S/1054.html#L153404'>pRtree</a>           153404 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;pDeleted = pNode;</span>
+<span class='curline'><a href='../S/1054.html#L153409'>pRtree</a>           153409 ext/sqlite3/libsqlite/sqlite3.c static int fixBoundingBox(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L153416'>pRtree</a>           153416 ext/sqlite3/libsqlite/sqlite3.c     nodeGetCell(pRtree, pNode, 0, &amp;box);</span>
+<span class='curline'><a href='../S/1054.html#L153419'>pRtree</a>           153419 ext/sqlite3/libsqlite/sqlite3.c       nodeGetCell(pRtree, pNode, ii, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L153420'>pRtree</a>           153420 ext/sqlite3/libsqlite/sqlite3.c       cellUnion(pRtree, &amp;box, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L153423'>pRtree</a>           153423 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeParentIndex(pRtree, pNode, &amp;ii);</span>
+<span class='curline'><a href='../S/1054.html#L153425'>pRtree</a>           153425 ext/sqlite3/libsqlite/sqlite3.c       nodeOverwriteCell(pRtree, pParent, &amp;box, ii);</span>
+<span class='curline'><a href='../S/1054.html#L153426'>pRtree</a>           153426 ext/sqlite3/libsqlite/sqlite3.c       rc = fixBoundingBox(pRtree, pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153436'>pRtree</a>           153436 ext/sqlite3/libsqlite/sqlite3.c static int deleteCell(Rtree *pRtree, RtreeNode *pNode, int iCell, int iHeight){</span>
+<span class='curline'><a href='../S/1054.html#L153440'>pRtree</a>           153440 ext/sqlite3/libsqlite/sqlite3.c   if( SQLITE_OK!=(rc = fixLeafParent(pRtree, pNode)) ){</span>
+<span class='curline'><a href='../S/1054.html#L153447'>pRtree</a>           153447 ext/sqlite3/libsqlite/sqlite3.c   nodeDeleteCell(pRtree, pNode, iCell);</span>
+<span class='curline'><a href='../S/1054.html#L153457'>pRtree</a>           153457 ext/sqlite3/libsqlite/sqlite3.c     if( NCELL(pNode)&lt;RTREE_MINCELLS(pRtree) ){</span>
+<span class='curline'><a href='../S/1054.html#L153458'>pRtree</a>           153458 ext/sqlite3/libsqlite/sqlite3.c       rc = removeNode(pRtree, pNode, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153460'>pRtree</a>           153460 ext/sqlite3/libsqlite/sqlite3.c       rc = fixBoundingBox(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153468'>pRtree</a>           153468 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree, </span>
+<span class='curline'><a href='../S/1054.html#L153509'>pRtree</a>           153509 ext/sqlite3/libsqlite/sqlite3.c       nodeGetCell(pRtree, pNode, ii, &amp;aCell[ii]);</span>
+<span class='curline'><a href='../S/1054.html#L153512'>pRtree</a>           153512 ext/sqlite3/libsqlite/sqlite3.c     for(iDim=0; iDim&lt;pRtree-&gt;nDim; iDim++){</span>
+<span class='curline'><a href='../S/1054.html#L153517'>pRtree</a>           153517 ext/sqlite3/libsqlite/sqlite3.c   for(iDim=0; iDim&lt;pRtree-&gt;nDim; iDim++){</span>
+<span class='curline'><a href='../S/1054.html#L153523'>pRtree</a>           153523 ext/sqlite3/libsqlite/sqlite3.c     for(iDim=0; iDim&lt;pRtree-&gt;nDim; iDim++){</span>
+<span class='curline'><a href='../S/1054.html#L153531'>pRtree</a>           153531 ext/sqlite3/libsqlite/sqlite3.c   nodeZero(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153533'>pRtree</a>           153533 ext/sqlite3/libsqlite/sqlite3.c   for(ii=0; rc==SQLITE_OK &amp;&amp; ii&lt;(nCell-(RTREE_MINCELLS(pRtree)+1)); ii++){</span>
+<span class='curline'><a href='../S/1054.html#L153535'>pRtree</a>           153535 ext/sqlite3/libsqlite/sqlite3.c     nodeInsertCell(pRtree, pNode, p);</span>
+<span class='curline'><a href='../S/1054.html#L153538'>pRtree</a>           153538 ext/sqlite3/libsqlite/sqlite3.c         rc = rowidWrite(pRtree, p-&gt;iRowid, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153540'>pRtree</a>           153540 ext/sqlite3/libsqlite/sqlite3.c         rc = parentWrite(pRtree, p-&gt;iRowid, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153545'>pRtree</a>           153545 ext/sqlite3/libsqlite/sqlite3.c     rc = fixBoundingBox(pRtree, pNode);</span>
+<span class='curline'><a href='../S/1054.html#L153553'>pRtree</a>           153553 ext/sqlite3/libsqlite/sqlite3.c     rc = ChooseLeaf(pRtree, p, iHeight, &amp;pInsert);</span>
+<span class='curline'><a href='../S/1054.html#L153556'>pRtree</a>           153556 ext/sqlite3/libsqlite/sqlite3.c       rc = rtreeInsertCell(pRtree, pInsert, p, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153557'>pRtree</a>           153557 ext/sqlite3/libsqlite/sqlite3.c       rc2 = nodeRelease(pRtree, pInsert);</span>
+<span class='curline'><a href='../S/1054.html#L153573'>pRtree</a>           153573 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,</span>
+<span class='curline'><a href='../S/1054.html#L153580'>pRtree</a>           153580 ext/sqlite3/libsqlite/sqlite3.c     RtreeNode *pChild = nodeHashLookup(pRtree, pCell-&gt;iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153582'>pRtree</a>           153582 ext/sqlite3/libsqlite/sqlite3.c       nodeRelease(pRtree, pChild-&gt;pParent);</span>
+<span class='curline'><a href='../S/1054.html#L153587'>pRtree</a>           153587 ext/sqlite3/libsqlite/sqlite3.c   if( nodeInsertCell(pRtree, pNode, pCell) ){</span>
+<span class='curline'><a href='../S/1054.html#L153588'>pRtree</a>           153588 ext/sqlite3/libsqlite/sqlite3.c     if( iHeight&lt;=pRtree-&gt;iReinsertHeight || pNode-&gt;iNode==1){</span>
+<span class='curline'><a href='../S/1054.html#L153589'>pRtree</a>           153589 ext/sqlite3/libsqlite/sqlite3.c       rc = SplitNode(pRtree, pNode, pCell, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153591'>pRtree</a>           153591 ext/sqlite3/libsqlite/sqlite3.c       pRtree-&gt;iReinsertHeight = iHeight;</span>
+<span class='curline'><a href='../S/1054.html#L153592'>pRtree</a>           153592 ext/sqlite3/libsqlite/sqlite3.c       rc = Reinsert(pRtree, pNode, pCell, iHeight);</span>
+<span class='curline'><a href='../S/1054.html#L153595'>pRtree</a>           153595 ext/sqlite3/libsqlite/sqlite3.c     rc = AdjustTree(pRtree, pNode, pCell);</span>
+<span class='curline'><a href='../S/1054.html#L153598'>pRtree</a>           153598 ext/sqlite3/libsqlite/sqlite3.c         rc = rowidWrite(pRtree, pCell-&gt;iRowid, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153600'>pRtree</a>           153600 ext/sqlite3/libsqlite/sqlite3.c         rc = parentWrite(pRtree, pCell-&gt;iRowid, pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153607'>pRtree</a>           153607 ext/sqlite3/libsqlite/sqlite3.c static int reinsertNodeContent(Rtree *pRtree, RtreeNode *pNode){</span>
+<span class='curline'><a href='../S/1054.html#L153615'>pRtree</a>           153615 ext/sqlite3/libsqlite/sqlite3.c     nodeGetCell(pRtree, pNode, ii, &amp;cell);</span>
+<span class='curline'><a href='../S/1054.html#L153620'>pRtree</a>           153620 ext/sqlite3/libsqlite/sqlite3.c     rc = ChooseLeaf(pRtree, &amp;cell, (int)pNode-&gt;iNode, &amp;pInsert);</span>
+<span class='curline'><a href='../S/1054.html#L153623'>pRtree</a>           153623 ext/sqlite3/libsqlite/sqlite3.c       rc = rtreeInsertCell(pRtree, pInsert, &amp;cell, (int)pNode-&gt;iNode);</span>
+<span class='curline'><a href='../S/1054.html#L153624'>pRtree</a>           153624 ext/sqlite3/libsqlite/sqlite3.c       rc2 = nodeRelease(pRtree, pInsert);</span>
+<span class='curline'><a href='../S/1054.html#L153636'>pRtree</a>           153636 ext/sqlite3/libsqlite/sqlite3.c static int newRowid(Rtree *pRtree, i64 *piRowid){</span>
+<span class='curline'><a href='../S/1054.html#L153638'>pRtree</a>           153638 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_null(pRtree-&gt;pWriteRowid, 1);</span>
+<span class='curline'><a href='../S/1054.html#L153639'>pRtree</a>           153639 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_bind_null(pRtree-&gt;pWriteRowid, 2);</span>
+<span class='curline'><a href='../S/1054.html#L153640'>pRtree</a>           153640 ext/sqlite3/libsqlite/sqlite3.c   sqlite3_step(pRtree-&gt;pWriteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153641'>pRtree</a>           153641 ext/sqlite3/libsqlite/sqlite3.c   rc = sqlite3_reset(pRtree-&gt;pWriteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153642'>pRtree</a>           153642 ext/sqlite3/libsqlite/sqlite3.c   *piRowid = sqlite3_last_insert_rowid(pRtree-&gt;db);</span>
+<span class='curline'><a href='../S/1054.html#L153649'>pRtree</a>           153649 ext/sqlite3/libsqlite/sqlite3.c static int rtreeDeleteRowid(Rtree *pRtree, sqlite3_int64 iDelete){</span>
+<span class='curline'><a href='../S/1054.html#L153657'>pRtree</a>           153657 ext/sqlite3/libsqlite/sqlite3.c   rc = nodeAcquire(pRtree, 1, 0, &amp;pRoot);</span>
+<span class='curline'><a href='../S/1054.html#L153663'>pRtree</a>           153663 ext/sqlite3/libsqlite/sqlite3.c     rc = findLeafNode(pRtree, iDelete, &amp;pLeaf, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153669'>pRtree</a>           153669 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeRowidIndex(pRtree, pLeaf, iDelete, &amp;iCell);</span>
+<span class='curline'><a href='../S/1054.html#L153671'>pRtree</a>           153671 ext/sqlite3/libsqlite/sqlite3.c       rc = deleteCell(pRtree, pLeaf, iCell, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153673'>pRtree</a>           153673 ext/sqlite3/libsqlite/sqlite3.c     rc2 = nodeRelease(pRtree, pLeaf);</span>
+<span class='curline'><a href='../S/1054.html#L153681'>pRtree</a>           153681 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_bind_int64(pRtree-&gt;pDeleteRowid, 1, iDelete);</span>
+<span class='curline'><a href='../S/1054.html#L153682'>pRtree</a>           153682 ext/sqlite3/libsqlite/sqlite3.c     sqlite3_step(pRtree-&gt;pDeleteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153683'>pRtree</a>           153683 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_reset(pRtree-&gt;pDeleteRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153694'>pRtree</a>           153694 ext/sqlite3/libsqlite/sqlite3.c   if( rc==SQLITE_OK &amp;&amp; pRtree-&gt;iDepth&gt;0 &amp;&amp; NCELL(pRoot)==1 ){</span>
+<span class='curline'><a href='../S/1054.html#L153697'>pRtree</a>           153697 ext/sqlite3/libsqlite/sqlite3.c     i64 iChild = nodeGetRowid(pRtree, pRoot, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153698'>pRtree</a>           153698 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeAcquire(pRtree, iChild, pRoot, &amp;pChild);</span>
+<span class='curline'><a href='../S/1054.html#L153700'>pRtree</a>           153700 ext/sqlite3/libsqlite/sqlite3.c       rc = removeNode(pRtree, pChild, pRtree-&gt;iDepth-1);</span>
+<span class='curline'><a href='../S/1054.html#L153702'>pRtree</a>           153702 ext/sqlite3/libsqlite/sqlite3.c     rc2 = nodeRelease(pRtree, pChild);</span>
+<span class='curline'><a href='../S/1054.html#L153705'>pRtree</a>           153705 ext/sqlite3/libsqlite/sqlite3.c       pRtree-&gt;iDepth--;</span>
+<span class='curline'><a href='../S/1054.html#L153706'>pRtree</a>           153706 ext/sqlite3/libsqlite/sqlite3.c       writeInt16(pRoot-&gt;zData, pRtree-&gt;iDepth);</span>
+<span class='curline'><a href='../S/1054.html#L153712'>pRtree</a>           153712 ext/sqlite3/libsqlite/sqlite3.c   for(pLeaf=pRtree-&gt;pDeleted; pLeaf; pLeaf=pRtree-&gt;pDeleted){</span>
+<span class='curline'><a href='../S/1054.html#L153714'>pRtree</a>           153714 ext/sqlite3/libsqlite/sqlite3.c       rc = reinsertNodeContent(pRtree, pLeaf);</span>
+<span class='curline'><a href='../S/1054.html#L153716'>pRtree</a>           153716 ext/sqlite3/libsqlite/sqlite3.c     pRtree-&gt;pDeleted = pLeaf-&gt;pNext;</span>
+<span class='curline'><a href='../S/1054.html#L153722'>pRtree</a>           153722 ext/sqlite3/libsqlite/sqlite3.c     rc = nodeRelease(pRtree, pRoot);</span>
+<span class='curline'><a href='../S/1054.html#L153724'>pRtree</a>           153724 ext/sqlite3/libsqlite/sqlite3.c     nodeRelease(pRtree, pRoot);</span>
+<span class='curline'><a href='../S/1054.html#L153769'>pRtree</a>           153769 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L153774'>pRtree</a>           153774 ext/sqlite3/libsqlite/sqlite3.c   rtreeReference(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L153801'>pRtree</a>           153801 ext/sqlite3/libsqlite/sqlite3.c     assert( nData&lt;=(pRtree-&gt;nDim*2 + 3) );</span>
+<span class='curline'><a href='../S/1054.html#L153804'>pRtree</a>           153804 ext/sqlite3/libsqlite/sqlite3.c     if( pRtree-&gt;eCoordType==RTREE_COORD_REAL32 ){</span>
+<span class='curline'><a href='../S/1054.html#L153834'>pRtree</a>           153834 ext/sqlite3/libsqlite/sqlite3.c         sqlite3_bind_int64(pRtree-&gt;pReadRowid, 1, cell.iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153835'>pRtree</a>           153835 ext/sqlite3/libsqlite/sqlite3.c         steprc = sqlite3_step(pRtree-&gt;pReadRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153836'>pRtree</a>           153836 ext/sqlite3/libsqlite/sqlite3.c         rc = sqlite3_reset(pRtree-&gt;pReadRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153838'>pRtree</a>           153838 ext/sqlite3/libsqlite/sqlite3.c           if( sqlite3_vtab_on_conflict(pRtree-&gt;db)==SQLITE_REPLACE ){</span>
+<span class='curline'><a href='../S/1054.html#L153839'>pRtree</a>           153839 ext/sqlite3/libsqlite/sqlite3.c             rc = rtreeDeleteRowid(pRtree, cell.iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153855'>pRtree</a>           153855 ext/sqlite3/libsqlite/sqlite3.c     rc = rtreeDeleteRowid(pRtree, sqlite3_value_int64(azData[0]));</span>
+<span class='curline'><a href='../S/1054.html#L153868'>pRtree</a>           153868 ext/sqlite3/libsqlite/sqlite3.c       rc = newRowid(pRtree, &amp;cell.iRowid);</span>
+<span class='curline'><a href='../S/1054.html#L153873'>pRtree</a>           153873 ext/sqlite3/libsqlite/sqlite3.c       rc = ChooseLeaf(pRtree, &amp;cell, 0, &amp;pLeaf);</span>
+<span class='curline'><a href='../S/1054.html#L153877'>pRtree</a>           153877 ext/sqlite3/libsqlite/sqlite3.c       pRtree-&gt;iReinsertHeight = -1;</span>
+<span class='curline'><a href='../S/1054.html#L153878'>pRtree</a>           153878 ext/sqlite3/libsqlite/sqlite3.c       rc = rtreeInsertCell(pRtree, pLeaf, &amp;cell, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153879'>pRtree</a>           153879 ext/sqlite3/libsqlite/sqlite3.c       rc2 = nodeRelease(pRtree, pLeaf);</span>
+<span class='curline'><a href='../S/1054.html#L153887'>pRtree</a>           153887 ext/sqlite3/libsqlite/sqlite3.c   rtreeRelease(pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L153895'>pRtree</a>           153895 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree = (Rtree *)pVtab;</span>
+<span class='curline'><a href='../S/1054.html#L153901'>pRtree</a>           153901 ext/sqlite3/libsqlite/sqlite3.c     , pRtree-&gt;zDb, pRtree-&gt;zName, zNewName </span>
+<span class='curline'><a href='../S/1054.html#L153902'>pRtree</a>           153902 ext/sqlite3/libsqlite/sqlite3.c     , pRtree-&gt;zDb, pRtree-&gt;zName, zNewName </span>
+<span class='curline'><a href='../S/1054.html#L153903'>pRtree</a>           153903 ext/sqlite3/libsqlite/sqlite3.c     , pRtree-&gt;zDb, pRtree-&gt;zName, zNewName</span>
+<span class='curline'><a href='../S/1054.html#L153906'>pRtree</a>           153906 ext/sqlite3/libsqlite/sqlite3.c     rc = sqlite3_exec(pRtree-&gt;db, zSql, 0, 0, 0);</span>
+<span class='curline'><a href='../S/1054.html#L153917'>pRtree</a>           153917 ext/sqlite3/libsqlite/sqlite3.c static int rtreeQueryStat1(sqlite3 *db, Rtree *pRtree){</span>
+<span class='curline'><a href='../S/1054.html#L153924'>pRtree</a>           153924 ext/sqlite3/libsqlite/sqlite3.c   zSql = sqlite3_mprintf(zFmt, pRtree-&gt;zDb, pRtree-&gt;zName);</span>
+<span class='curline'><a href='../S/1054.html#L153938'>pRtree</a>           153938 ext/sqlite3/libsqlite/sqlite3.c         pRtree-&gt;nRowEst = RTREE_DEFAULT_ROWEST;</span>
+<span class='curline'><a href='../S/1054.html#L153940'>pRtree</a>           153940 ext/sqlite3/libsqlite/sqlite3.c         pRtree-&gt;nRowEst = MAX(nRow, RTREE_MIN_ROWEST);</span>
+<span class='curline'><a href='../S/1054.html#L153976'>pRtree</a>           153976 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree, </span>
+<span class='curline'><a href='../S/1054.html#L154004'>pRtree</a>           154004 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;db = db;</span>
+<span class='curline'><a href='../S/1054.html#L154013'>pRtree</a>           154013 ext/sqlite3/libsqlite/sqlite3.c       zDb, zPrefix, zDb, zPrefix, zDb, zPrefix, zDb, zPrefix, pRtree-&gt;iNodeSize</span>
+<span class='curline'><a href='../S/1054.html#L154025'>pRtree</a>           154025 ext/sqlite3/libsqlite/sqlite3.c   appStmt[0] = &amp;pRtree-&gt;pReadNode;</span>
+<span class='curline'><a href='../S/1054.html#L154026'>pRtree</a>           154026 ext/sqlite3/libsqlite/sqlite3.c   appStmt[1] = &amp;pRtree-&gt;pWriteNode;</span>
+<span class='curline'><a href='../S/1054.html#L154027'>pRtree</a>           154027 ext/sqlite3/libsqlite/sqlite3.c   appStmt[2] = &amp;pRtree-&gt;pDeleteNode;</span>
+<span class='curline'><a href='../S/1054.html#L154028'>pRtree</a>           154028 ext/sqlite3/libsqlite/sqlite3.c   appStmt[3] = &amp;pRtree-&gt;pReadRowid;</span>
+<span class='curline'><a href='../S/1054.html#L154029'>pRtree</a>           154029 ext/sqlite3/libsqlite/sqlite3.c   appStmt[4] = &amp;pRtree-&gt;pWriteRowid;</span>
+<span class='curline'><a href='../S/1054.html#L154030'>pRtree</a>           154030 ext/sqlite3/libsqlite/sqlite3.c   appStmt[5] = &amp;pRtree-&gt;pDeleteRowid;</span>
+<span class='curline'><a href='../S/1054.html#L154031'>pRtree</a>           154031 ext/sqlite3/libsqlite/sqlite3.c   appStmt[6] = &amp;pRtree-&gt;pReadParent;</span>
+<span class='curline'><a href='../S/1054.html#L154032'>pRtree</a>           154032 ext/sqlite3/libsqlite/sqlite3.c   appStmt[7] = &amp;pRtree-&gt;pWriteParent;</span>
+<span class='curline'><a href='../S/1054.html#L154033'>pRtree</a>           154033 ext/sqlite3/libsqlite/sqlite3.c   appStmt[8] = &amp;pRtree-&gt;pDeleteParent;</span>
+<span class='curline'><a href='../S/1054.html#L154035'>pRtree</a>           154035 ext/sqlite3/libsqlite/sqlite3.c   rc = rtreeQueryStat1(db, pRtree);</span>
+<span class='curline'><a href='../S/1054.html#L154088'>pRtree</a>           154088 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree,                  /* Rtree handle */</span>
+<span class='curline'><a href='../S/1054.html#L154096'>pRtree</a>           154096 ext/sqlite3/libsqlite/sqlite3.c     zSql = sqlite3_mprintf("PRAGMA %Q.page_size", pRtree-&gt;zDb);</span>
+<span class='curline'><a href='../S/1054.html#L154099'>pRtree</a>           154099 ext/sqlite3/libsqlite/sqlite3.c       pRtree-&gt;iNodeSize = iPageSize-64;</span>
+<span class='curline'><a href='../S/1054.html#L154100'>pRtree</a>           154100 ext/sqlite3/libsqlite/sqlite3.c       if( (4+pRtree-&gt;nBytesPerCell*RTREE_MAXCELLS)&lt;pRtree-&gt;iNodeSize ){</span>
+<span class='curline'><a href='../S/1054.html#L154101'>pRtree</a>           154101 ext/sqlite3/libsqlite/sqlite3.c         pRtree-&gt;iNodeSize = 4+pRtree-&gt;nBytesPerCell*RTREE_MAXCELLS;</span>
+<span class='curline'><a href='../S/1054.html#L154109'>pRtree</a>           154109 ext/sqlite3/libsqlite/sqlite3.c         pRtree-&gt;zDb, pRtree-&gt;zName</span>
+<span class='curline'><a href='../S/1054.html#L154111'>pRtree</a>           154111 ext/sqlite3/libsqlite/sqlite3.c     rc = getIntFromStmt(db, zSql, &amp;pRtree-&gt;iNodeSize);</span>
+<span class='curline'><a href='../S/1054.html#L154139'>pRtree</a>           154139 ext/sqlite3/libsqlite/sqlite3.c   Rtree *pRtree;</span>
+<span class='curline'><a href='../S/1054.html#L154162'>pRtree</a>           154162 ext/sqlite3/libsqlite/sqlite3.c   pRtree = (Rtree *)sqlite3_malloc(sizeof(Rtree)+nDb+nName+2);</span>
+<span class='curline'><a href='../S/1054.html#L154163'>pRtree</a>           154163 ext/sqlite3/libsqlite/sqlite3.c   if( !pRtree ){</span>
+<span class='curline'><a href='../S/1054.html#L154166'>pRtree</a>           154166 ext/sqlite3/libsqlite/sqlite3.c   memset(pRtree, 0, sizeof(Rtree)+nDb+nName+2);</span>
+<span class='curline'><a href='../S/1054.html#L154167'>pRtree</a>           154167 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;nBusy = 1;</span>
+<span class='curline'><a href='../S/1054.html#L154168'>pRtree</a>           154168 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;base.pModule = &amp;rtreeModule;</span>
+<span class='curline'><a href='../S/1054.html#L154169'>pRtree</a>           154169 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;zDb = (char *)&amp;pRtree[1];</span>
+<span class='curline'><a href='../S/1054.html#L154170'>pRtree</a>           154170 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;zName = &amp;pRtree-&gt;zDb[nDb+1];</span>
+<span class='curline'><a href='../S/1054.html#L154171'>pRtree</a>           154171 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;nDim = (argc-4)/2;</span>
+<span class='curline'><a href='../S/1054.html#L154172'>pRtree</a>           154172 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;nBytesPerCell = 8 + pRtree-&gt;nDim*4*2;</span>
+<span class='curline'><a href='../S/1054.html#L154173'>pRtree</a>           154173 ext/sqlite3/libsqlite/sqlite3.c   pRtree-&gt;eCoordType = eCoordType;</span>
+<span class='curline'><a href='../S/1054.html#L154174'>pRtree</a>           154174 ext/sqlite3/libsqlite/sqlite3.c   memcpy(pRtree-&gt;zDb, argv[1], nDb);</span>
+<span class='curline'><a href='../S/1054.html#L154175'>pRtree</a>           154175 ext/sqlite3/libsqlite/sqlite3.c   memcpy(pRtree-&gt;zName, argv[2], nName);</span>
+<span class='curline'><a href='../S/1054.html#L154178'>pRtree</a>           154178 ext/sqlite3/libsqlite/sqlite3.c   rc = getNodeSize(db, pRtree, isCreate, pzErr);</span>
+<span class='curline'><a href='../S/1054.html#L154185'>pRtree</a>           154185 ext/sqlite3/libsqlite/sqlite3.c     if( (rc = rtreeSqlInit(pRtree, db, argv[1], argv[2], isCreate)) ){</span>
+<span class='curline'><a href='../S/1054.html#L154211'>pRtree</a>           154211 ext/sqlite3/libsqlite/sqlite3.c     *ppVtab = (sqlite3_vtab *)pRtree;</span>
+<span class='curline'><a href='../S/1054.html#L154214'>pRtree</a>           154214 ext/sqlite3/libsqlite/sqlite3.c     assert( pRtree-&gt;nBusy==1 );</span>
+<span class='curline'><a href='../S/1054.html#L154215'>pRtree</a>           154215 ext/sqlite3/libsqlite/sqlite3.c     rtreeRelease(pRtree);</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/opcache/shared_alloc_win32.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1810.html'>opcache</a>/shared_alloc_win32.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L344'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L40' title='Defined at 40.'>zend_win_error_message</a></li>
+<li><a href='#L77' title='Defined at 77.'>create_name_with_username</a></li>
+<li><a href='#L88' title='Defined at 88.'>get_mmap_base_file</a></li>
+<li><a href='#L102' title='Defined at 102.'>zend_shared_alloc_create_lock</a></li>
+<li><a href='#L112' title='Defined at 112.'>zend_shared_alloc_lock_win32</a></li>
+<li><a href='#L121' title='Defined at 121.'>zend_shared_alloc_unlock_win32</a></li>
+<li><a href='#L126' title='Defined at 126.'>zend_shared_alloc_reattach</a></li>
+<li><a href='#L198' title='Defined at 198.'>create_segments</a></li>
+<li><a href='#L329' title='Defined at 329.'>detach_segment</a></li>
+<li><a href='#L344' title='Defined at 344.'>segment_type_size</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | Zend OPcache                                                         |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1998-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Andi Gutmans &lt;andi@zend.com&gt;                                |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Zeev Suraski &lt;zeev@zend.com&gt;                                |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |          Stanislav Malyshev &lt;stas@zend.com&gt;                          |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   |          Dmitry Stogov &lt;dmitry@zend.com&gt;                             |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>*/</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='850.html'>ZendAccelerator.h</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='848.html'>zend_shared_alloc.h</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='841.html'>zend_accelerator_util_funcs.h</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;winbase.h&gt;
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;process.h&gt;
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;LMCONS.H&gt;
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> <a href='../R/9.html' title='Multiple referred from 2 places.'>ACCEL_FILEMAP_NAME</a> "ZendOPcache.SharedMemoryArea"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> <a href='../S/831.html#L104' title='Referred from 104 in ext/opcache/shared_alloc_win32.c.'>ACCEL_MUTEX_NAME</a> "ZendOPcache.SharedMemoryMutex"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#define</em> ACCEL_FILEMAP_BASE_DEFAULT 0x01000000
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#define</em> <a href='../S/831.html#L98' title='Referred from 98 in ext/opcache/shared_alloc_win32.c.'>ACCEL_FILEMAP_BASE</a> "ZendOPcache.MemoryBase"
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#define</em> <a href='../S/831.html#L58' title='Referred from 58 in ext/opcache/shared_alloc_win32.c.'>ACCEL_EVENT_SOURCE</a> "Zend OPcache"
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>static</strong> <a href='../Y/2678.html' title='Multiple used in 143 places.'>HANDLE</a> <a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> *<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#define</em> <a href='../R/4184.html' title='Multiple referred from 2 places.'>MAX_MAP_RETRIES</a> 25
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/31479.html' title='Multiple referred from 14 places.'>zend_win_error_message</a>(<strong class='reserved'>int</strong> <a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <strong class='reserved'>char</strong> *<a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>, <strong class='reserved'>int</strong> <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>)
+<a id='L41' name='L41'></a>  41 <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42         <a href='../Y/3922.html' title='Multiple used in 25 places.'>LPVOID</a> <a href='../Y/25462.html' title='Multiple used in 4 places.'>lpMsgBuf</a>;
+<a id='L43' name='L43'></a>  43         <a href='../Y/2678.html' title='Multiple used in 143 places.'>HANDLE</a> <a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a>;
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>char</strong> *<a href='../Y/17166.html' title='Multiple used in 4 places.'>ev_msgs</a>[2];
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46         <a href='../Y/2465.html' title='Multiple used in 7 places.'>FormatMessage</a>(
+<a id='L47' name='L47'></a>  47                 <a href='../Y/2344.html' title='Multiple used in 8 places.'>FORMAT_MESSAGE_ALLOCATE_BUFFER</a> |
+<a id='L48' name='L48'></a>  48                 <a href='../Y/2345.html' title='Multiple used in 10 places.'>FORMAT_MESSAGE_FROM_SYSTEM</a> |
+<a id='L49' name='L49'></a>  49                 <a href='../Y/2346.html' title='Multiple used in 9 places.'>FORMAT_MESSAGE_IGNORE_INSERTS</a>,
+<a id='L50' name='L50'></a>  50                 <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,
+<a id='L51' name='L51'></a>  51                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>,
+<a id='L52' name='L52'></a>  52                 <a href='../Y/3972.html' title='Multiple used in 6 places.'>MAKELANGID</a>(<a href='../Y/3681.html' title='Multiple used in 15 places.'>LANG_NEUTRAL</a>, <a href='../Y/6317.html' title='Multiple used in 6 places.'>SUBLANG_DEFAULT</a>), <em class='comment'>// Default language</em>
+<a id='L53' name='L53'></a>  53                 (<a href='../Y/3919.html' title='Multiple used in 10 places.'>LPTSTR</a>) &amp;<a href='../Y/25462.html' title='Multiple used in 4 places.'>lpMsgBuf</a>,
+<a id='L54' name='L54'></a>  54                 0,
+<a id='L55' name='L55'></a>  55                 <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>
+<a id='L56' name='L56'></a>  56         );
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a> = <a href='../Y/5456.html' title='Multiple used in 2 places.'>RegisterEventSource</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/6509.html' title='Multiple used in 2 places.'>TEXT</a>(<a href='../S/831.html#L33' title='Defined at 33 in ext/opcache/shared_alloc_win32.c.'>ACCEL_EVENT_SOURCE</a>));
+<a id='L59' name='L59'></a>  59         <a href='../Y/17166.html' title='Multiple used in 4 places.'>ev_msgs</a>[0] = <a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>;
+<a id='L60' name='L60'></a>  60         <a href='../Y/17166.html' title='Multiple used in 4 places.'>ev_msgs</a>[1] = <a href='../Y/25462.html' title='Multiple used in 4 places.'>lpMsgBuf</a>;
+<a id='L61' name='L61'></a>  61         <a href='../Y/5463.html' title='Multiple used in 2 places.'>ReportEvent</a>(<a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a>,                            <em class='comment'>// event log handle</em>
+<a id='L62' name='L62'></a>  62             <a href='../Y/2091.html' title='Multiple used in 2 places.'>EVENTLOG_ERROR_TYPE</a>,  <em class='comment'>// event type</em>
+<a id='L63' name='L63'></a>  63             0,                    <em class='comment'>// category zero</em>
+<a id='L64' name='L64'></a>  64             <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>,                                  <em class='comment'>// event identifier</em>
+<a id='L65' name='L65'></a>  65             <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>,                 <em class='comment'>// no user security identifier</em>
+<a id='L66' name='L66'></a>  66             2,                    <em class='comment'>// one substitution string</em>
+<a id='L67' name='L67'></a>  67             0,                    <em class='comment'>// no data</em>
+<a id='L68' name='L68'></a>  68             <a href='../Y/17166.html' title='Multiple used in 4 places.'>ev_msgs</a>,              <em class='comment'>// pointer to string array</em>
+<a id='L69' name='L69'></a>  69             <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);                <em class='comment'>// pointer to data</em>
+<a id='L70' name='L70'></a>  70         <a href='../Y/1651.html' title='Multiple used in 2 places.'>DeregisterEventSource</a>(<a href='../Y/19585.html' title='Multiple used in 1591 places.'>h</a>);
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <a href='../Y/3945.html' title='Multiple used in 25 places.'>LocalFree</a>( <a href='../Y/25462.html' title='Multiple used in 4 places.'>lpMsgBuf</a> );
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <a href='../S/834.html#L31' title='Defined at 31 in ext/opcache/zend_accelerator_debug.c.'>zend_accel_error</a>(<a href='../D/32173.html' title='Multiple defined in 6 places.'>type</a>, <a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>);
+<a id='L75' name='L75'></a>  75 <em class='brace'>}</em>
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> *<a href='../R/17905.html' title='Multiple referred from 3 places.'>create_name_with_username</a>(<strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>)
+<a id='L78' name='L78'></a>  78 <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <a href='../Y/28398.html' title='Multiple used in 16 places.'>newname</a>[<a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a> + <a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a> + 4 + 1 + 32];
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>char</strong> <a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>[<a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a> + 1];
+<a id='L81' name='L81'></a>  81         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/39645.html' title='Multiple used in 4 places.'>unsize</a> = <a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a>;
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83         <a href='../Y/2656.html' title='Multiple used in 3 places.'>GetUserName</a>(<a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>, &amp;<a href='../Y/39645.html' title='Multiple used in 4 places.'>unsize</a>);
+<a id='L84' name='L84'></a>  84         <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/28398.html' title='Multiple used in 16 places.'>newname</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/28398.html' title='Multiple used in 16 places.'>newname</a>) - 1, "%s@%s@%.32s", <a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>, <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/37985.html' title='Multiple used in 9 places.'>system_id</a>));
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>return</strong> <a href='../Y/28398.html' title='Multiple used in 16 places.'>newname</a>;
+<a id='L86' name='L86'></a>  86 <em class='brace'>}</em>
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88 <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> *<a href='../R/20265.html' title='Multiple referred from 2 places.'>get_mmap_base_file</a>(<strong class='reserved'>void</strong>)
+<a id='L89' name='L89'></a>  89 <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>static</strong> <strong class='reserved'>char</strong> <a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a>[<a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>+<a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a> + 3 + <strong class='reserved'>sizeof</strong>("\\\\@") + 1 + 32];
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>char</strong> <a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>[<a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a> + 1];
+<a id='L92' name='L92'></a>  92         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/39645.html' title='Multiple used in 4 places.'>unsize</a> = <a href='../Y/6804.html' title='Multiple used in 6 places.'>UNLEN</a>;
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>int</strong> <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>;
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <a href='../Y/2646.html' title='Multiple used in 2 places.'>GetTempPath</a>(<a href='../D/4806.html' title='Multiple defined in 9 places.'>MAXPATHLEN</a>, <a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a>);
+<a id='L96' name='L96'></a>  96         <a href='../Y/2656.html' title='Multiple used in 3 places.'>GetUserName</a>(<a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>, &amp;<a href='../Y/39645.html' title='Multiple used in 4 places.'>unsize</a>);
+<a id='L97' name='L97'></a>  97         <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> = <a href='../S/868.html#L369' title='Defined at 369 in ext/pcre/pcrelib/pcre_internal.h.'>strlen</a>(<a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a>);
+<a id='L98' name='L98'></a>  98         <a href='../D/29935.html' title='Multiple defined in 5 places.'>snprintf</a>(<a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a> + <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a>) - <a href='../S/800.html#L1184' title='Defined at 1184 in ext/mysqlnd/mysqlnd_structs.h.'>l</a> - 1, "\\%s@%s@%.32s", <a href='../S/831.html#L32' title='Defined at 32 in ext/opcache/shared_alloc_win32.c.'>ACCEL_FILEMAP_BASE</a>, <a href='../Y/39513.html' title='Multiple used in 13 places.'>uname</a>, <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/37985.html' title='Multiple used in 9 places.'>system_id</a>));
+<a id='L99' name='L99'></a>  99         <strong class='reserved'>return</strong> <a href='../Y/40741.html' title='Multiple used in 5 places.'>windir</a>;
+<a id='L100' name='L100'></a> 100 <em class='brace'>}</em>
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <strong class='reserved'>void</strong> <a href='../R/31169.html' title='Multiple referred from 2 places.'>zend_shared_alloc_create_lock</a>(<strong class='reserved'>void</strong>)
+<a id='L103' name='L103'></a> 103 <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104         <a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a> = <a href='../Y/1299.html' title='Multiple used in 3 places.'>CreateMutex</a>(<a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../D/2350.html' title='Multiple defined in 23 places.'>FALSE</a>, <a href='../S/831.html#L77' title='Defined at 77 in ext/opcache/shared_alloc_win32.c.'>create_name_with_username</a>(<a href='../S/831.html#L30' title='Defined at 30 in ext/opcache/shared_alloc_win32.c.'>ACCEL_MUTEX_NAME</a>));
+<a id='L105' name='L105'></a> 105         <strong class='reserved'>if</strong> (!<a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a>) <em class='brace'>{</em>
+<a id='L106' name='L106'></a> 106                 <a href='../S/834.html#L31' title='Defined at 31 in ext/opcache/zend_accelerator_debug.c.'>zend_accel_error</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Cannot create mutex");
+<a id='L107' name='L107'></a> 107                 <strong class='reserved'>return</strong>;
+<a id='L108' name='L108'></a> 108         <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109         <a href='../Y/5459.html' title='Multiple used in 6 places.'>ReleaseMutex</a>(<a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a>);
+<a id='L110' name='L110'></a> 110 <em class='brace'>}</em>
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112 <strong class='reserved'>void</strong> <a href='../R/31176.html' title='Multiple referred from 5 places.'>zend_shared_alloc_lock_win32</a>(<strong class='reserved'>void</strong>)
+<a id='L113' name='L113'></a> 113 <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114         <a href='../S/156.html#L1328' title='Defined at 1328 in ext/exif/exif.c.'>DWORD</a> <a href='../Y/40571.html' title='Multiple used in 2 places.'>waitRes</a> = <a href='../Y/7347.html' title='Multiple used in 13 places.'>WaitForSingleObject</a>(<a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a>, <a href='../Y/3320.html' title='Multiple used in 11 places.'>INFINITE</a>);
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>if</strong> (<a href='../Y/40571.html' title='Multiple used in 2 places.'>waitRes</a> == <a href='../Y/7231.html' title='Multiple used in 3 places.'>WAIT_FAILED</a>) <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117                 <a href='../S/834.html#L31' title='Defined at 31 in ext/opcache/zend_accelerator_debug.c.'>zend_accel_error</a>(<a href='../S/835.html#L26' title='Defined at 26 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_ERROR</a>, "Cannot lock mutex");
+<a id='L118' name='L118'></a> 118         <em class='brace'>}</em>
+<a id='L119' name='L119'></a> 119 <em class='brace'>}</em>
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121 <strong class='reserved'>void</strong> <a href='../R/31186.html' title='Multiple referred from 12 places.'>zend_shared_alloc_unlock_win32</a>(<strong class='reserved'>void</strong>)
+<a id='L122' name='L122'></a> 122 <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123         <a href='../Y/5459.html' title='Multiple used in 6 places.'>ReleaseMutex</a>(<a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a>);
+<a id='L124' name='L124'></a> 124 <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../S/831.html#L227' title='Referred from 227 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_reattach</a>(<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <strong class='reserved'>char</strong> **<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>)
+<a id='L127' name='L127'></a> 127 <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>int</strong> <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>;
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>void</strong> *<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>;
+<a id='L130' name='L130'></a> 130         <strong class='reserved'>char</strong> *<a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a> = <a href='../S/831.html#L88' title='Defined at 88 in ext/opcache/shared_alloc_win32.c.'>get_mmap_base_file</a>();
+<a id='L131' name='L131'></a> 131         <a href='../Y/2301.html' title='Multiple used in 249 places.'>FILE</a> *<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> = <a href='../Y/18163.html' title='Multiple used in 78 places.'>fopen</a>(<a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a>, "r");
+<a id='L132' name='L132'></a> 132         MEMORY_BASIC_INFORMATION <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>;
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134         <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>if</strong> (!<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>) <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L27' title='Defined at 27 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_WARNING</a>, <a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a>, <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L137' name='L137'></a> 137                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to open base address file", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L138' name='L138'></a> 138                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>="fopen";
+<a id='L139' name='L139'></a> 139                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>if</strong> (!<a href='../Y/18456.html' title='Multiple used in 8 places.'>fscanf</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>, "%p", &amp;<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>)) <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L143' name='L143'></a> 143                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to read base address", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L144' name='L144'></a> 144                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>="read mapping base";
+<a id='L145' name='L145'></a> 145                 <a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>);
+<a id='L146' name='L146'></a> 146                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L147' name='L147'></a> 147         <em class='brace'>}</em>
+<a id='L148' name='L148'></a> 148         <a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>);
+<a id='L149' name='L149'></a> 149         <em class='comment'>/* Check if the requested address space is free */</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>if</strong> (VirtualQuery(<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>, &amp;<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>, <strong class='reserved'>sizeof</strong>(<a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>)) == 0 ||
+<a id='L151' name='L151'></a> 151             <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>.State != MEM_FREE ||
+<a id='L152' name='L152'></a> 152             <a href='../Y/23151.html' title='Multiple used in 990 places.'>info</a>.RegionSize &lt; <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>) <em class='brace'>{</em>
+<a id='L153' name='L153'></a> 153 <em class='sharp'>#if</em> <a href='../S/850.html#L143' title='Defined at 143 in ext/opcache/ZendAccelerator.h.'>ENABLE_FILE_CACHE_FALLBACK</a>
+<a id='L154' name='L154'></a> 154                 <strong class='reserved'>if</strong> (<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17815.html' title='Multiple used in 16 places.'>file_cache</a> &amp;&amp; <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17817.html' title='Multiple used in 5 places.'>file_cache_fallback</a>) <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155                         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/33228.html' title='Multiple used in 3 places.'>pre_size</a>, <a href='../Y/40601.html' title='Multiple used in 3 places.'>wanted_mb_save</a>;
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157                         <a href='../Y/40601.html' title='Multiple used in 3 places.'>wanted_mb_save</a> = (<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a>)<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>;
+<a id='L158' name='L158'></a> 158 
+<a id='L159' name='L159'></a> 159                         <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/1830.html' title='Multiple used in 3 places.'>ERROR_INVALID_ADDRESS</a>;
+<a id='L160' name='L160'></a> 160                         <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L27' title='Defined at 27 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_WARNING</a>, "Base address marks unusable memory region (fall-back to file cache)", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162                         <a href='../Y/33228.html' title='Multiple used in 3 places.'>pre_size</a> = <a href='../S/848.html#L145' title='Defined at 145 in ext/opcache/zend_shared_alloc.h.'>ZEND_ALIGNED_SIZE</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/848.html#L113' title='Defined at 113 in ext/opcache/zend_shared_alloc.h.'>zend_smm_shared_globals</a>)) + <a href='../S/848.html#L145' title='Defined at 145 in ext/opcache/zend_shared_alloc.h.'>ZEND_ALIGNED_SIZE</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a>)) + <a href='../S/848.html#L145' title='Defined at 145 in ext/opcache/zend_shared_alloc.h.'>ZEND_ALIGNED_SIZE</a>(<strong class='reserved'>sizeof</strong>(<strong class='reserved'>void</strong> *)) + <a href='../S/848.html#L145' title='Defined at 145 in ext/opcache/zend_shared_alloc.h.'>ZEND_ALIGNED_SIZE</a>(<strong class='reserved'>sizeof</strong>(<strong class='reserved'>int</strong>));
+<a id='L163' name='L163'></a> 163                         <em class='comment'>/* Map only part of SHM to have access opcache shared globals */</em>
+<a id='L164' name='L164'></a> 164                         <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> = <a href='../Y/4157.html' title='Multiple used in 5 places.'>MapViewOfFileEx</a>(<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a>, <a href='../Y/2323.html' title='Multiple used in 7 places.'>FILE_MAP_ALL_ACCESS</a>, 0, 0, <a href='../Y/33228.html' title='Multiple used in 3 places.'>pre_size</a> + <a href='../S/848.html#L145' title='Defined at 145 in ext/opcache/zend_shared_alloc.h.'>ZEND_ALIGNED_SIZE</a>(<strong class='reserved'>sizeof</strong>(<a href='../S/850.html#L297' title='Defined at 297 in ext/opcache/ZendAccelerator.h.'>zend_accel_shared_globals</a>)), <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>);
+<a id='L165' name='L165'></a> 165                         <strong class='reserved'>if</strong> (<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L166' name='L166'></a> 166                                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L167' name='L167'></a> 167                                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to reattach to opcache shared globals", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L168' name='L168'></a> 168                                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L169' name='L169'></a> 169                         <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170                         <a href='../Y/8710.html' title='Multiple used in 9 places.'>accel_shared_globals</a> = (<a href='../S/850.html#L297' title='Defined at 297 in ext/opcache/ZendAccelerator.h.'>zend_accel_shared_globals</a> *)((<strong class='reserved'>char</strong> *)((<a href='../S/848.html#L113' title='Defined at 113 in ext/opcache/zend_shared_alloc.h.'>zend_smm_shared_globals</a> *)<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>)-&gt;<a href='../Y/9330.html' title='Multiple used in 4 places.'>app_shared_globals</a> + ((<strong class='reserved'>char</strong> *)<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> - (<strong class='reserved'>char</strong> *)<a href='../Y/40601.html' title='Multiple used in 3 places.'>wanted_mb_save</a>));
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172                         <em class='comment'>/* Make this process to use file-cache only */</em>
+<a id='L173' name='L173'></a> 173                         <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/17818.html' title='Multiple used in 17 places.'>file_cache_only</a> = 1;
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175                         <strong class='reserved'>return</strong> <a href='../S/848.html#L71' title='Defined at 71 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FALLBACK</a>;
+<a id='L176' name='L176'></a> 176                 <em class='brace'>}</em>
+<a id='L177' name='L177'></a> 177 <em class='sharp'>#endif</em>
+<a id='L178' name='L178'></a> 178             <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/1830.html' title='Multiple used in 3 places.'>ERROR_INVALID_ADDRESS</a>;
+<a id='L179' name='L179'></a> 179                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_callback directives for more convenient Opcache usage", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L180' name='L180'></a> 180                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L181' name='L181'></a> 181         <em class='brace'>}</em>
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183         <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> = <a href='../Y/4157.html' title='Multiple used in 5 places.'>MapViewOfFileEx</a>(<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a>, <a href='../Y/2323.html' title='Multiple used in 7 places.'>FILE_MAP_ALL_ACCESS</a>, 0, 0, 0, <a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>);
+<a id='L184' name='L184'></a> 184         <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>if</strong> (<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187                 <strong class='reserved'>if</strong> (<a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> == <a href='../Y/1830.html' title='Multiple used in 3 places.'>ERROR_INVALID_ADDRESS</a>) <em class='brace'>{</em>
+<a id='L188' name='L188'></a> 188                         <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to reattach to base address", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L189' name='L189'></a> 189                         <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L190' name='L190'></a> 190                 <em class='brace'>}</em>
+<a id='L191' name='L191'></a> 191                 <strong class='reserved'>return</strong> <a href='../S/848.html#L70' title='Defined at 70 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAIL_MAPPING</a>;
+<a id='L192' name='L192'></a> 192         <em class='brace'>}</em>
+<a id='L193' name='L193'></a> 193         <a href='../Y/36351.html' title='Multiple used in 11 places.'>smm_shared_globals</a> = (<a href='../S/848.html#L113' title='Defined at 113 in ext/opcache/zend_shared_alloc.h.'>zend_smm_shared_globals</a> *) <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>;
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195         <strong class='reserved'>return</strong> <a href='../S/848.html#L69' title='Defined at 69 in ext/opcache/zend_shared_alloc.h.'>SUCCESSFULLY_REATTACHED</a>;
+<a id='L196' name='L196'></a> 196 <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/17909.html' title='Multiple referred from 6 places.'>create_segments</a>(<a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> ***<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>, <strong class='reserved'>int</strong> *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a>, <strong class='reserved'>char</strong> **<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>)
+<a id='L199' name='L199'></a> 199 <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200         <strong class='reserved'>int</strong> <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>, <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L201' name='L201'></a> 201         <a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> *<a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>;
+<a id='L202' name='L202'></a> 202         <strong class='reserved'>int</strong> <a href='../Y/25791.html' title='Multiple used in 4 places.'>map_retries</a> = 0;
+<a id='L203' name='L203'></a> 203         <strong class='reserved'>void</strong> *<a href='../Y/15447.html' title='Multiple used in 3 places.'>default_mapping_base_set</a>[] = <em class='brace'>{</em> 0, 0 <em class='brace'>}</em>;
+<a id='L204' name='L204'></a> 204         <em class='comment'>/* TODO:</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>          improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'>          through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'>          desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'>        */</em>
+<a id='L209' name='L209'></a> 209 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../S/788.html#L32' title='Defined at 32 in ext/mysqlnd/mysqlnd_portability.h.'>_WIN64</a>)
+<a id='L210' name='L210'></a> 210         <strong class='reserved'>void</strong> *<a href='../Y/40261.html' title='Multiple used in 3 places.'>vista_mapping_base_set</a>[] = <em class='brace'>{</em> (<strong class='reserved'>void</strong> *) 0x0000100000000000, (<strong class='reserved'>void</strong> *) 0x0000200000000000, (<strong class='reserved'>void</strong> *) 0x0000300000000000, (<strong class='reserved'>void</strong> *) 0x0000700000000000, 0 <em class='brace'>}</em>;
+<a id='L211' name='L211'></a> 211 <em class='sharp'>#else</em>
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>void</strong> *<a href='../Y/40261.html' title='Multiple used in 3 places.'>vista_mapping_base_set</a>[] = <em class='brace'>{</em> (<strong class='reserved'>void</strong> *) 0x20000000, (<strong class='reserved'>void</strong> *) 0x21000000, (<strong class='reserved'>void</strong> *) 0x30000000, (<strong class='reserved'>void</strong> *) 0x31000000, (<strong class='reserved'>void</strong> *) 0x50000000, 0 <em class='brace'>}</em>;
+<a id='L213' name='L213'></a> 213 <em class='sharp'>#endif</em>
+<a id='L214' name='L214'></a> 214         <strong class='reserved'>void</strong> **<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a> = <a href='../Y/15447.html' title='Multiple used in 3 places.'>default_mapping_base_set</a>;
+<a id='L215' name='L215'></a> 215 
+<a id='L216' name='L216'></a> 216         <a href='../S/831.html#L112' title='Defined at 112 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_lock_win32</a>();
+<a id='L217' name='L217'></a> 217         <em class='comment'>/* Mapping retries: When Apache2 restarts, the parent process startup routine</em>
+<a id='L218' name='L218'></a> 218 <em class='comment'>           can be called before the child process is killed. In this case, the map will fail</em>
+<a id='L219' name='L219'></a> 219 <em class='comment'>           and we have to sleep some time (until the child releases the mapping object) and retry.*/</em>
+<a id='L220' name='L220'></a> 220         <strong class='reserved'>do</strong> <em class='brace'>{</em>
+<a id='L221' name='L221'></a> 221                 <a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> = <a href='../Y/4835.html' title='Multiple used in 3 places.'>OpenFileMapping</a>(<a href='../Y/2326.html' title='Multiple used in 8 places.'>FILE_MAP_WRITE</a>, 0, <a href='../S/831.html#L77' title='Defined at 77 in ext/opcache/shared_alloc_win32.c.'>create_name_with_username</a>(<a href='../S/831.html#L29' title='Defined at 29 in ext/opcache/shared_alloc_win32.c.'>ACCEL_FILEMAP_NAME</a>));
+<a id='L222' name='L222'></a> 222                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L223' name='L223'></a> 223                 <strong class='reserved'>if</strong> (<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L224' name='L224'></a> 224                         <strong class='reserved'>break</strong>;
+<a id='L225' name='L225'></a> 225                 <em class='brace'>}</em>
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227                 <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> =  <a href='../S/831.html#L126' title='Defined at 126 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_reattach</a>(<a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>, <a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a>);
+<a id='L228' name='L228'></a> 228                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L229' name='L229'></a> 229                 <strong class='reserved'>if</strong> (<a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a> == <a href='../S/848.html#L70' title='Defined at 70 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAIL_MAPPING</a>) <em class='brace'>{</em>
+<a id='L230' name='L230'></a> 230                         <em class='comment'>/* Mapping failed, wait for mapping object to get freed and retry */</em>
+<a id='L231' name='L231'></a> 231                         <a href='../Y/1247.html' title='Multiple used in 45 places.'>CloseHandle</a>(<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a>);
+<a id='L232' name='L232'></a> 232                         <a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L233' name='L233'></a> 233                         <strong class='reserved'>if</strong> (++<a href='../Y/25791.html' title='Multiple used in 4 places.'>map_retries</a> &gt;= <a href='../S/831.html#L38' title='Defined at 38 in ext/opcache/shared_alloc_win32.c.'>MAX_MAP_RETRIES</a>) <em class='brace'>{</em>
+<a id='L234' name='L234'></a> 234                                 <strong class='reserved'>break</strong>;
+<a id='L235' name='L235'></a> 235                         <em class='brace'>}</em>
+<a id='L236' name='L236'></a> 236                         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L237' name='L237'></a> 237                         <a href='../Y/6428.html' title='Multiple used in 2 places.'>Sleep</a>(1000 * (<a href='../Y/25791.html' title='Multiple used in 4 places.'>map_retries</a> + 1));
+<a id='L238' name='L238'></a> 238                         <a href='../S/831.html#L112' title='Defined at 112 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_lock_win32</a>();
+<a id='L239' name='L239'></a> 239                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240                         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L241' name='L241'></a> 241                         <strong class='reserved'>return</strong> <a href='../Y/34775.html' title='Multiple used in 4028 places.'>ret</a>;
+<a id='L242' name='L242'></a> 242                 <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243         <em class='brace'>}</em> <strong class='reserved'>while</strong> (1);
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         <strong class='reserved'>if</strong> (<a href='../Y/25791.html' title='Multiple used in 4 places.'>map_retries</a> == <a href='../S/831.html#L38' title='Defined at 38 in ext/opcache/shared_alloc_win32.c.'>MAX_MAP_RETRIES</a>) <em class='brace'>{</em>
+<a id='L246' name='L246'></a> 246                 <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L247' name='L247'></a> 247                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to open file mapping", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L248' name='L248'></a> 248                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "OpenFileMapping";
+<a id='L249' name='L249'></a> 249                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L250' name='L250'></a> 250         <em class='brace'>}</em>
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <em class='comment'>/* creating segment here */</em>
+<a id='L253' name='L253'></a> 253         *<a href='../Y/36000.html' title='Multiple used in 32 places.'>shared_segments_count</a> = 1;
+<a id='L254' name='L254'></a> 254         *<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a> = (<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> **) <a href='../Y/13295.html' title='Multiple used in 43 places.'>calloc</a>(1, <strong class='reserved'>sizeof</strong>(<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a>)+<strong class='reserved'>sizeof</strong>(<strong class='reserved'>void</strong> *));
+<a id='L255' name='L255'></a> 255         <strong class='reserved'>if</strong> (!*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>) <em class='brace'>{</em>
+<a id='L256' name='L256'></a> 256                 <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L257' name='L257'></a> 257                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "calloc() failed", <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>());
+<a id='L258' name='L258'></a> 258                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "calloc";
+<a id='L259' name='L259'></a> 259                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L260' name='L260'></a> 260         <em class='brace'>}</em>
+<a id='L261' name='L261'></a> 261         <a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a> = (<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> *)((<strong class='reserved'>char</strong> *)(*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>) + <strong class='reserved'>sizeof</strong>(<strong class='reserved'>void</strong> *));
+<a id='L262' name='L262'></a> 262         (*<a href='../Y/36002.html' title='Multiple used in 27 places.'>shared_segments_p</a>)[0] = <a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>;
+<a id='L263' name='L263'></a> 263 
+<a id='L264' name='L264'></a> 264         <a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> = <a href='../Y/1291.html' title='Multiple used in 4 places.'>CreateFileMapping</a>(<a href='../Y/3351.html' title='Multiple used in 74 places.'>INVALID_HANDLE_VALUE</a>, <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>, <a href='../Y/4865.html' title='Multiple used in 16 places.'>PAGE_READWRITE</a>, 0, <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>,
+<a id='L265' name='L265'></a> 265                                                                 <a href='../S/831.html#L77' title='Defined at 77 in ext/opcache/shared_alloc_win32.c.'>create_name_with_username</a>(<a href='../S/831.html#L29' title='Defined at 29 in ext/opcache/shared_alloc_win32.c.'>ACCEL_FILEMAP_NAME</a>));
+<a id='L266' name='L266'></a> 266         <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L267' name='L267'></a> 267         <strong class='reserved'>if</strong> (<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L268' name='L268'></a> 268                 <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L269' name='L269'></a> 269                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to create file mapping", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L270' name='L270'></a> 270                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "CreateFileMapping";
+<a id='L271' name='L271'></a> 271                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L272' name='L272'></a> 272         <em class='brace'>}</em>
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274         <em class='comment'>/* Starting from windows Vista, heap randomization occurs which might cause our mapping base to</em>
+<a id='L275' name='L275'></a> 275 <em class='comment'>           be taken (fail to map). So under Vista, we try to map into a hard coded predefined addresses</em>
+<a id='L276' name='L276'></a> 276 <em class='comment'>           in high memory. */</em>
+<a id='L277' name='L277'></a> 277         <strong class='reserved'>if</strong> (!<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/26684.html' title='Multiple used in 4 places.'>mmap_base</a> || !*<a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/26684.html' title='Multiple used in 4 places.'>mmap_base</a>) <em class='brace'>{</em>
+<a id='L278' name='L278'></a> 278                 <a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a> = <a href='../Y/40261.html' title='Multiple used in 3 places.'>vista_mapping_base_set</a>;
+<a id='L279' name='L279'></a> 279         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L280' name='L280'></a> 280                 <strong class='reserved'>char</strong> *<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> = <a href='../D/15550.html' title='Multiple defined in 2 places.'>ZCG</a>(<a href='../Y/8703.html' title='Multiple used in 155 places.'>accel_directives</a>).<a href='../Y/26684.html' title='Multiple used in 4 places.'>mmap_base</a>;
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282                 <em class='comment'>/* skip leading 0x, %p assumes hexdeciaml format anyway */</em>
+<a id='L283' name='L283'></a> 283                 <strong class='reserved'>if</strong> (*<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> == '0' &amp;&amp; *(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> + 1) == 'x') <em class='brace'>{</em>
+<a id='L284' name='L284'></a> 284                         <a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a> += 2;
+<a id='L285' name='L285'></a> 285                 <em class='brace'>}</em>
+<a id='L286' name='L286'></a> 286                 <strong class='reserved'>if</strong> (<a href='../Y/37037.html' title='Multiple used in 26 places.'>sscanf</a>(<a href='../D/29280.html' title='Multiple defined in 6 places.'>s</a>, "%p", &amp;<a href='../Y/15447.html' title='Multiple used in 3 places.'>default_mapping_base_set</a>[0]) != 1) <em class='brace'>{</em>
+<a id='L287' name='L287'></a> 287                         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L288' name='L288'></a> 288                         <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Bad mapping address specified in opcache.mmap_base", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L289' name='L289'></a> 289                         <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L290' name='L290'></a> 290                 <em class='brace'>}</em>
+<a id='L291' name='L291'></a> 291         <em class='brace'>}</em>
+<a id='L292' name='L292'></a> 292 
+<a id='L293' name='L293'></a> 293         <strong class='reserved'>do</strong> <em class='brace'>{</em>
+<a id='L294' name='L294'></a> 294                 <a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>-&gt;<a href='../Y/30244.html' title='Multiple used in 13181 places.'>p</a> = <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> = <a href='../Y/4157.html' title='Multiple used in 5 places.'>MapViewOfFileEx</a>(<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a>, <a href='../Y/2323.html' title='Multiple used in 7 places.'>FILE_MAP_ALL_ACCESS</a>, 0, 0, 0, *<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>);
+<a id='L295' name='L295'></a> 295                 <strong class='reserved'>if</strong> (*<a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em> <em class='comment'>/* Auto address (NULL) is the last option on the array */</em>
+<a id='L296' name='L296'></a> 296                         <strong class='reserved'>break</strong>;
+<a id='L297' name='L297'></a> 297                 <em class='brace'>}</em>
+<a id='L298' name='L298'></a> 298                 <a href='../Y/40600.html' title='Multiple used in 10 places.'>wanted_mapping_base</a>++;
+<a id='L299' name='L299'></a> 299         <em class='brace'>}</em> <strong class='reserved'>while</strong> (!<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>);
+<a id='L300' name='L300'></a> 300 
+<a id='L301' name='L301'></a> 301         <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L302' name='L302'></a> 302         <strong class='reserved'>if</strong> (<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> == <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>) <em class='brace'>{</em>
+<a id='L303' name='L303'></a> 303                 <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L304' name='L304'></a> 304                 <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to create view for file mapping", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L305' name='L305'></a> 305                 *<a href='../Y/17061.html' title='Multiple used in 28 places.'>error_in</a> = "MapViewOfFile";
+<a id='L306' name='L306'></a> 306                 <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L307' name='L307'></a> 307         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L308' name='L308'></a> 308                 <strong class='reserved'>char</strong> *<a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a> = <a href='../S/831.html#L88' title='Defined at 88 in ext/opcache/shared_alloc_win32.c.'>get_mmap_base_file</a>();
+<a id='L309' name='L309'></a> 309                 <a href='../Y/2301.html' title='Multiple used in 249 places.'>FILE</a> *<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a> = <a href='../Y/18163.html' title='Multiple used in 78 places.'>fopen</a>(<a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a>, "w");
+<a id='L310' name='L310'></a> 310                 <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a> = <a href='../Y/2621.html' title='Multiple used in 49 places.'>GetLastError</a>();
+<a id='L311' name='L311'></a> 311                 <strong class='reserved'>if</strong> (!<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>) <em class='brace'>{</em>
+<a id='L312' name='L312'></a> 312                         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L313' name='L313'></a> 313                         <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L27' title='Defined at 27 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_WARNING</a>, <a href='../Y/26685.html' title='Multiple used in 6 places.'>mmap_base_file</a>, <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L314' name='L314'></a> 314                         <a href='../S/831.html#L40' title='Defined at 40 in ext/opcache/shared_alloc_win32.c.'>zend_win_error_message</a>(<a href='../S/835.html#L25' title='Defined at 25 in ext/opcache/zend_accelerator_debug.h.'>ACCEL_LOG_FATAL</a>, "Unable to write base address", <a href='../Y/16980.html' title='Multiple used in 1388 places.'>err</a>);
+<a id='L315' name='L315'></a> 315                         <strong class='reserved'>return</strong> <a href='../S/848.html#L66' title='Defined at 66 in ext/opcache/zend_shared_alloc.h.'>ALLOC_FAILURE</a>;
+<a id='L316' name='L316'></a> 316                 <em class='brace'>}</em>
+<a id='L317' name='L317'></a> 317                 <a href='../Y/18299.html' title='Multiple used in 899 places.'>fprintf</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>, "%p\n", <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>);
+<a id='L318' name='L318'></a> 318                 <a href='../Y/17686.html' title='Multiple used in 106 places.'>fclose</a>(<a href='../Y/18242.html' title='Multiple used in 999 places.'>fp</a>);
+<a id='L319' name='L319'></a> 319         <em class='brace'>}</em>
+<a id='L320' name='L320'></a> 320 
+<a id='L321' name='L321'></a> 321         <a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>-&gt;<a href='../Y/33027.html' title='Multiple used in 1249 places.'>pos</a> = 0;
+<a id='L322' name='L322'></a> 322         <a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>-&gt;<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a> = <a href='../Y/34597.html' title='Multiple used in 30 places.'>requested_size</a>;
+<a id='L323' name='L323'></a> 323 
+<a id='L324' name='L324'></a> 324         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L325' name='L325'></a> 325 
+<a id='L326' name='L326'></a> 326         <strong class='reserved'>return</strong> <a href='../S/848.html#L67' title='Defined at 67 in ext/opcache/zend_shared_alloc.h.'>ALLOC_SUCCESS</a>;
+<a id='L327' name='L327'></a> 327 <em class='brace'>}</em>
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/18189.html' title='Multiple referred from 7 places.'>detach_segment</a>(<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a> *<a href='../Y/35995.html' title='Multiple used in 36 places.'>shared_segment</a>)
+<a id='L330' name='L330'></a> 330 <em class='brace'>{</em>
+<a id='L331' name='L331'></a> 331         <a href='../S/831.html#L112' title='Defined at 112 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_lock_win32</a>();
+<a id='L332' name='L332'></a> 332         <strong class='reserved'>if</strong> (<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>) <em class='brace'>{</em>
+<a id='L333' name='L333'></a> 333                 <a href='../Y/7082.html' title='Multiple used in 9 places.'>UnmapViewOfFile</a>(<a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a>);
+<a id='L334' name='L334'></a> 334                 <a href='../Y/25797.html' title='Multiple used in 14 places.'>mapping_base</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L335' name='L335'></a> 335         <em class='brace'>}</em>
+<a id='L336' name='L336'></a> 336         <a href='../Y/1247.html' title='Multiple used in 45 places.'>CloseHandle</a>(<a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a>);
+<a id='L337' name='L337'></a> 337         <a href='../Y/26472.html' title='Multiple used in 12 places.'>memfile</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L338' name='L338'></a> 338         <a href='../S/831.html#L121' title='Defined at 121 in ext/opcache/shared_alloc_win32.c.'>zend_shared_alloc_unlock_win32</a>();
+<a id='L339' name='L339'></a> 339         <a href='../Y/1247.html' title='Multiple used in 45 places.'>CloseHandle</a>(<a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a>);
+<a id='L340' name='L340'></a> 340         <a href='../Y/26483.html' title='Multiple used in 8 places.'>memory_mutex</a> = <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>;
+<a id='L341' name='L341'></a> 341         <strong class='reserved'>return</strong> 0;
+<a id='L342' name='L342'></a> 342 <em class='brace'>}</em>
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344 <strong class='reserved'>static</strong> <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../R/26349.html' title='Multiple referred from 9 places.'>segment_type_size</a>(<strong class='reserved'>void</strong>)
+<a id='L345' name='L345'></a> 345 <em class='brace'>{</em>
+<a id='L346' name='L346'></a> 346         <strong class='reserved'>return</strong> <strong class='reserved'>sizeof</strong>(<a href='../S/848.html#L77' title='Defined at 77 in ext/opcache/zend_shared_alloc.h.'>zend_shared_segment</a>);
+<a id='L347' name='L347'></a> 347 <em class='brace'>}</em>
+<a id='L348' name='L348'></a> 348 
+<a id='L349' name='L349'></a> 349 <a href='../S/848.html#L86' title='Defined at 86 in ext/opcache/zend_shared_alloc.h.'>zend_shared_memory_handlers</a> <a href='../Y/43668.html' title='Multiple used in 3 places.'>zend_alloc_win32_handlers</a> = <em class='brace'>{</em>
+<a id='L350' name='L350'></a> 350         <a href='../D/20724.html' title='Multiple defined in 4 places.'>create_segments</a>,
+<a id='L351' name='L351'></a> 351         <a href='../D/21013.html' title='Multiple defined in 4 places.'>detach_segment</a>,
+<a id='L352' name='L352'></a> 352         <a href='../D/29608.html' title='Multiple defined in 4 places.'>segment_type_size</a>
+<a id='L353' name='L353'></a> 353 <em class='brace'>}</em>;
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L344'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

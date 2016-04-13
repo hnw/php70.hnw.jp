@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>pSort</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1054.html#L106956'>pSort</a>            106956 ext/sqlite3/libsqlite/sqlite3.c   SortCtx *pSort,        /* Information about the ORDER BY clause */</span>
+<span class='curline'><a href='../S/1054.html#L106963'>pSort</a>            106963 ext/sqlite3/libsqlite/sqlite3.c   int bSeq = ((pSort-&gt;sortFlags &amp; SORTFLAG_UseSorter)==0);</span>
+<span class='curline'><a href='../S/1054.html#L106964'>pSort</a>            106964 ext/sqlite3/libsqlite/sqlite3.c   int nExpr = pSort-&gt;pOrderBy-&gt;nExpr;              /* No. of ORDER BY terms */</span>
+<span class='curline'><a href='../S/1054.html#L106968'>pSort</a>            106968 ext/sqlite3/libsqlite/sqlite3.c   int nOBSat = pSort-&gt;nOBSat;                      /* ORDER BY terms to skip */</span>
+<span class='curline'><a href='../S/1054.html#L106979'>pSort</a>            106979 ext/sqlite3/libsqlite/sqlite3.c   sqlite3ExprCodeExprList(pParse, pSort-&gt;pOrderBy, regBase, SQLITE_ECEL_DUP);</span>
+<span class='curline'><a href='../S/1054.html#L106981'>pSort</a>            106981 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp2(v, OP_Sequence, pSort-&gt;iECursor, regBase+nExpr);</span>
+<span class='curline'><a href='../S/1054.html#L106997'>pSort</a>            106997 ext/sqlite3/libsqlite/sqlite3.c     pParse-&gt;nMem += pSort-&gt;nOBSat;</span>
+<span class='curline'><a href='../S/1054.html#L106998'>pSort</a>            106998 ext/sqlite3/libsqlite/sqlite3.c     nKey = nExpr - pSort-&gt;nOBSat + bSeq;</span>
+<span class='curline'><a href='../S/1054.html#L107002'>pSort</a>            107002 ext/sqlite3/libsqlite/sqlite3.c       addrFirst = sqlite3VdbeAddOp1(v, OP_SequenceTest, pSort-&gt;iECursor);</span>
+<span class='curline'><a href='../S/1054.html#L107005'>pSort</a>            107005 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp3(v, OP_Compare, regPrevKey, regBase, pSort-&gt;nOBSat);</span>
+<span class='curline'><a href='../S/1054.html#L107006'>pSort</a>            107006 ext/sqlite3/libsqlite/sqlite3.c     pOp = sqlite3VdbeGetOp(v, pSort-&gt;addrSortIndex);</span>
+<span class='curline'><a href='../S/1054.html#L107013'>pSort</a>            107013 ext/sqlite3/libsqlite/sqlite3.c     pOp-&gt;p4.pKeyInfo = keyInfoFromExprList(pParse, pSort-&gt;pOrderBy, nOBSat,</span>
+<span class='curline'><a href='../S/1054.html#L107017'>pSort</a>            107017 ext/sqlite3/libsqlite/sqlite3.c     pSort-&gt;labelBkOut = sqlite3VdbeMakeLabel(v);</span>
+<span class='curline'><a href='../S/1054.html#L107018'>pSort</a>            107018 ext/sqlite3/libsqlite/sqlite3.c     pSort-&gt;regReturn = ++pParse-&gt;nMem;</span>
+<span class='curline'><a href='../S/1054.html#L107019'>pSort</a>            107019 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp2(v, OP_Gosub, pSort-&gt;regReturn, pSort-&gt;labelBkOut);</span>
+<span class='curline'><a href='../S/1054.html#L107020'>pSort</a>            107020 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp1(v, OP_ResetSorter, pSort-&gt;iECursor);</span>
+<span class='curline'><a href='../S/1054.html#L107022'>pSort</a>            107022 ext/sqlite3/libsqlite/sqlite3.c     sqlite3ExprCodeMove(pParse, regBase, regPrevKey, pSort-&gt;nOBSat);</span>
+<span class='curline'><a href='../S/1054.html#L107025'>pSort</a>            107025 ext/sqlite3/libsqlite/sqlite3.c   if( pSort-&gt;sortFlags &amp; SORTFLAG_UseSorter ){</span>
+<span class='curline'><a href='../S/1054.html#L107030'>pSort</a>            107030 ext/sqlite3/libsqlite/sqlite3.c   sqlite3VdbeAddOp2(v, op, pSort-&gt;iECursor, regRecord);</span>
+<span class='curline'><a href='../S/1054.html#L107040'>pSort</a>            107040 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp1(v, OP_Last, pSort-&gt;iECursor);</span>
+<span class='curline'><a href='../S/1054.html#L107041'>pSort</a>            107041 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp1(v, OP_Delete, pSort-&gt;iECursor);</span>
+<span class='curline'><a href='../S/1054.html#L107128'>pSort</a>            107128 ext/sqlite3/libsqlite/sqlite3.c   SortCtx *pSort,         /* If not NULL, info on how to process ORDER BY */</span>
+<span class='curline'><a href='../S/1054.html#L107146'>pSort</a>            107146 ext/sqlite3/libsqlite/sqlite3.c   if( pSort &amp;&amp; pSort-&gt;pOrderBy==0 ) pSort = 0;</span>
+<span class='curline'><a href='../S/1054.html#L107147'>pSort</a>            107147 ext/sqlite3/libsqlite/sqlite3.c   if( pSort==0 &amp;&amp; !hasDistinct ){</span>
+<span class='curline'><a href='../S/1054.html#L107157'>pSort</a>            107157 ext/sqlite3/libsqlite/sqlite3.c     if( pSort ){</span>
+<span class='curline'><a href='../S/1054.html#L107158'>pSort</a>            107158 ext/sqlite3/libsqlite/sqlite3.c       nPrefixReg = pSort-&gt;pOrderBy-&gt;nExpr;</span>
+<span class='curline'><a href='../S/1054.html#L107159'>pSort</a>            107159 ext/sqlite3/libsqlite/sqlite3.c       if( !(pSort-&gt;sortFlags &amp; SORTFLAG_UseSorter) ) nPrefixReg++;</span>
+<span class='curline'><a href='../S/1054.html#L107243'>pSort</a>            107243 ext/sqlite3/libsqlite/sqlite3.c     if( pSort==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L107292'>pSort</a>            107292 ext/sqlite3/libsqlite/sqlite3.c         assert( pSort==0 );</span>
+<span class='curline'><a href='../S/1054.html#L107295'>pSort</a>            107295 ext/sqlite3/libsqlite/sqlite3.c       if( pSort ){</span>
+<span class='curline'><a href='../S/1054.html#L107296'>pSort</a>            107296 ext/sqlite3/libsqlite/sqlite3.c         pushOntoSorter(pParse, pSort, p, r1+nPrefixReg, 1, nPrefixReg);</span>
+<span class='curline'><a href='../S/1054.html#L107317'>pSort</a>            107317 ext/sqlite3/libsqlite/sqlite3.c       if( pSort ){</span>
+<span class='curline'><a href='../S/1054.html#L107322'>pSort</a>            107322 ext/sqlite3/libsqlite/sqlite3.c         pushOntoSorter(pParse, pSort, p, regResult, 1, nPrefixReg);</span>
+<span class='curline'><a href='../S/1054.html#L107347'>pSort</a>            107347 ext/sqlite3/libsqlite/sqlite3.c       if( pSort ){</span>
+<span class='curline'><a href='../S/1054.html#L107348'>pSort</a>            107348 ext/sqlite3/libsqlite/sqlite3.c         pushOntoSorter(pParse, pSort, p, regResult, 1, nPrefixReg);</span>
+<span class='curline'><a href='../S/1054.html#L107361'>pSort</a>            107361 ext/sqlite3/libsqlite/sqlite3.c       if( pSort ){</span>
+<span class='curline'><a href='../S/1054.html#L107362'>pSort</a>            107362 ext/sqlite3/libsqlite/sqlite3.c         pushOntoSorter(pParse, pSort, p, regResult, nResultCol, nPrefixReg);</span>
+<span class='curline'><a href='../S/1054.html#L107438'>pSort</a>            107438 ext/sqlite3/libsqlite/sqlite3.c   if( pSort==0 &amp;&amp; p-&gt;iLimit ){</span>
+<span class='curline'><a href='../S/1054.html#L107632'>pSort</a>            107632 ext/sqlite3/libsqlite/sqlite3.c   SortCtx *pSort,   /* Information on the ORDER BY clause */</span>
+<span class='curline'><a href='../S/1054.html#L107642'>pSort</a>            107642 ext/sqlite3/libsqlite/sqlite3.c   ExprList *pOrderBy = pSort-&gt;pOrderBy;</span>
+<span class='curline'><a href='../S/1054.html#L107656'>pSort</a>            107656 ext/sqlite3/libsqlite/sqlite3.c   if( pSort-&gt;labelBkOut ){</span>
+<span class='curline'><a href='../S/1054.html#L107657'>pSort</a>            107657 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeAddOp2(v, OP_Gosub, pSort-&gt;regReturn, pSort-&gt;labelBkOut);</span>
+<span class='curline'><a href='../S/1054.html#L107659'>pSort</a>            107659 ext/sqlite3/libsqlite/sqlite3.c     sqlite3VdbeResolveLabel(v, pSort-&gt;labelBkOut);</span>
+<span class='curline'><a href='../S/1054.html#L107661'>pSort</a>            107661 ext/sqlite3/libsqlite/sqlite3.c   iTab = pSort-&gt;iECursor;</span>
+<span class='curline'><a href='../S/1054.html#L107671'>pSort</a>            107671 ext/sqlite3/libsqlite/sqlite3.c   nKey = pOrderBy-&gt;nExpr - pSort-&gt;nOBSat;</span>
+<span class='curline'><a href='../S/1054.html#L107672'>pSort</a>            107672 ext/sqlite3/libsqlite/sqlite3.c   if( pSort-&gt;sortFlags &amp; SORTFLAG_UseSorter ){</span>
+<span class='curline'><a href='../S/1054.html#L107675'>pSort</a>            107675 ext/sqlite3/libsqlite/sqlite3.c     if( pSort-&gt;labelBkOut ){</span>
+<span class='curline'><a href='../S/1054.html#L107741'>pSort</a>            107741 ext/sqlite3/libsqlite/sqlite3.c   if( pSort-&gt;sortFlags &amp; SORTFLAG_UseSorter ){</span>
+<span class='curline'><a href='../S/1054.html#L107746'>pSort</a>            107746 ext/sqlite3/libsqlite/sqlite3.c   if( pSort-&gt;regReturn ) sqlite3VdbeAddOp1(v, OP_Return, pSort-&gt;regReturn);</span>
+</pre>
+</body>
+</html>

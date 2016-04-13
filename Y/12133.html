@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>auth_resp_packet</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/772.html#L55'>auth_resp_packet</a>   55 ext/mysqlnd/mysqlnd_auth.c 	MYSQLND_PACKET_AUTH_RESPONSE * auth_resp_packet = NULL;</span>
+<span class='curline'><a href='../S/772.html#L60'>auth_resp_packet</a>   60 ext/mysqlnd/mysqlnd_auth.c 	auth_resp_packet = conn-&gt;protocol-&gt;m.get_auth_response_packet(conn-&gt;protocol, FALSE);</span>
+<span class='curline'><a href='../S/772.html#L62'>auth_resp_packet</a>   62 ext/mysqlnd/mysqlnd_auth.c 	if (!auth_resp_packet) {</span>
+<span class='curline'><a href='../S/772.html#L114'>auth_resp_packet</a>  114 ext/mysqlnd/mysqlnd_auth.c 	if (FAIL == PACKET_READ(auth_resp_packet, conn) || auth_resp_packet-&gt;response_code &gt;= 0xFE) {</span>
+<span class='curline'><a href='../S/772.html#L115'>auth_resp_packet</a>  115 ext/mysqlnd/mysqlnd_auth.c 		if (auth_resp_packet-&gt;response_code == 0xFE) {</span>
+<span class='curline'><a href='../S/772.html#L117'>auth_resp_packet</a>  117 ext/mysqlnd/mysqlnd_auth.c 			if (!auth_resp_packet-&gt;new_auth_protocol) {</span>
+<span class='curline'><a href='../S/772.html#L121'>auth_resp_packet</a>  121 ext/mysqlnd/mysqlnd_auth.c 				*switch_to_auth_protocol = mnd_pestrndup(auth_resp_packet-&gt;new_auth_protocol, auth_resp_packet-&gt;new_auth_protocol_len, FALSE);</span>
+<span class='curline'><a href='../S/772.html#L122'>auth_resp_packet</a>  122 ext/mysqlnd/mysqlnd_auth.c 				*switch_to_auth_protocol_len = auth_resp_packet-&gt;new_auth_protocol_len;</span>
+<span class='curline'><a href='../S/772.html#L123'>auth_resp_packet</a>  123 ext/mysqlnd/mysqlnd_auth.c 				if (auth_resp_packet-&gt;new_auth_protocol_data) {</span>
+<span class='curline'><a href='../S/772.html#L124'>auth_resp_packet</a>  124 ext/mysqlnd/mysqlnd_auth.c 					*switch_to_auth_protocol_data_len = auth_resp_packet-&gt;new_auth_protocol_data_len;</span>
+<span class='curline'><a href='../S/772.html#L126'>auth_resp_packet</a>  126 ext/mysqlnd/mysqlnd_auth.c 					memcpy(*switch_to_auth_protocol_data, auth_resp_packet-&gt;new_auth_protocol_data, *switch_to_auth_protocol_data_len);</span>
+<span class='curline'><a href='../S/772.html#L132'>auth_resp_packet</a>  132 ext/mysqlnd/mysqlnd_auth.c 		} else if (auth_resp_packet-&gt;response_code == 0xFF) {</span>
+<span class='curline'><a href='../S/772.html#L133'>auth_resp_packet</a>  133 ext/mysqlnd/mysqlnd_auth.c 			if (auth_resp_packet-&gt;sqlstate[0]) {</span>
+<span class='curline'><a href='../S/772.html#L134'>auth_resp_packet</a>  134 ext/mysqlnd/mysqlnd_auth.c 				strlcpy(conn-&gt;error_info-&gt;sqlstate, auth_resp_packet-&gt;sqlstate, sizeof(conn-&gt;error_info-&gt;sqlstate));</span>
+<span class='curline'><a href='../S/772.html#L135'>auth_resp_packet</a>  135 ext/mysqlnd/mysqlnd_auth.c 				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", auth_resp_packet-&gt;error_no, auth_resp_packet-&gt;sqlstate, auth_resp_packet-&gt;error);</span>
+<span class='curline'><a href='../S/772.html#L137'>auth_resp_packet</a>  137 ext/mysqlnd/mysqlnd_auth.c 			SET_CLIENT_ERROR(*conn-&gt;error_info, auth_resp_packet-&gt;error_no, UNKNOWN_SQLSTATE, auth_resp_packet-&gt;error);</span>
+<span class='curline'><a href='../S/772.html#L142'>auth_resp_packet</a>  142 ext/mysqlnd/mysqlnd_auth.c 	SET_NEW_MESSAGE(conn-&gt;last_message, conn-&gt;last_message_len, auth_resp_packet-&gt;message, auth_resp_packet-&gt;message_len, conn-&gt;persistent);</span>
+<span class='curline'><a href='../S/772.html#L147'>auth_resp_packet</a>  147 ext/mysqlnd/mysqlnd_auth.c 	PACKET_FREE(auth_resp_packet);</span>
+</pre>
+</body>
+</html>

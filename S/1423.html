@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>main/streams/php_stream_transport.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1858.html'>main</a>/<a href='../files/1859.html'>streams</a>/php_stream_transport.h</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L121'>[^]</a><a href='#L194'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='1397.html#L467' title='Included from 467 in main/php_streams.h.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L121' title='Defined at 121.'>END_EXTERN_C</a></li>
+<li><a href='#L194' title='Defined at 194.'>BEGIN_EXTERN_C</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>  | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>  | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>  | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>  | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>  | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>  | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>  | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>  | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>  | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>  | Author: Wez Furlong &lt;wez@thebrainroom.com&gt;                           |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>  +----------------------------------------------------------------------+</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>*/</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='comment'>/* $Id$ */</em>
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#ifdef</em> <a href='../Y/5051.html' title='Multiple used in 686 places.'>PHP_WIN32</a>
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "config.w32.h"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;Ws2tcpip.h&gt;
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#endif</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#if</em> <a href='../Y/3096.html' title='Multiple used in 8 places.'>HAVE_SYS_SOCKET_H</a>
+<a id='L26' name='L26'></a>  26 <em class='sharp'># include</em> &lt;sys/socket.h&gt;
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#endif</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>typedef</strong> <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *(<a href='../Y/32609.html' title='Multiple used in 4 places.'>php_stream_transport_factory_func</a>)(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/33511.html' title='Multiple used in 52 places.'>proto</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/33525.html' title='Multiple used in 14 places.'>protolen</a>,
+<a id='L30' name='L30'></a>  30                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/34680.html' title='Multiple used in 7 places.'>resourcename</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/34681.html' title='Multiple used in 6 places.'>resourcenamelen</a>,
+<a id='L31' name='L31'></a>  31                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/31647.html' title='Multiple used in 65 places.'>persistent_id</a>, <strong class='reserved'>int</strong> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>,
+<a id='L32' name='L32'></a>  32                 <strong class='reserved'>struct</strong> <a href='../Y/38523.html' title='Multiple used in 175 places.'>timeval</a> *<a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>,
+<a id='L33' name='L33'></a>  33                 <a href='../S/1397.html#L102' title='Defined at 102 in main/php_streams.h.'>php_stream_context</a> *<a href='../Y/14371.html' title='Multiple used in 2063 places.'>context</a> <a href='../D/12260.html' title='Multiple defined in 2 places.'>STREAMS_DC</a>);
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>typedef</strong> <a href='../Y/32609.html' title='Multiple used in 4 places.'>php_stream_transport_factory_func</a> *<a href='../R/24928.html' title='Multiple referred from 3 places.'>php_stream_transport_factory</a>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <a href='../D/355.html' title='Multiple defined in 15 places.'>BEGIN_EXTERN_C</a>()
+<a id='L37' name='L37'></a>  37 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L32' title='Defined at 32 in main/streams/transports.c.'>php_stream_xport_register</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/800.html#L911' title='Defined at 911 in ext/mysqlnd/mysqlnd_structs.h.'>protocol</a>, <a href='../S/1423.html#L34' title='Defined at 34 in main/streams/php_stream_transport.h.'>php_stream_transport_factory</a> <a href='../Y/17541.html' title='Multiple used in 21 places.'>factory</a>);
+<a id='L38' name='L38'></a>  38 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L37' title='Defined at 37 in main/streams/transports.c.'>php_stream_xport_unregister</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../S/800.html#L911' title='Defined at 911 in ext/mysqlnd/mysqlnd_structs.h.'>protocol</a>);
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#define</em> <a href='../R/10645.html' title='Multiple referred from 8 places.'>STREAM_XPORT_CLIENT</a>                     0
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#define</em> <a href='../R/10661.html' title='Multiple referred from 2 places.'>STREAM_XPORT_SERVER</a>                     1
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#define</em> <a href='../R/10646.html' title='Multiple referred from 9 places.'>STREAM_XPORT_CONNECT</a>            2
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#define</em> <a href='../R/10644.html' title='Multiple referred from 3 places.'>STREAM_XPORT_BIND</a>                       4
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#define</em> <a href='../R/10650.html' title='Multiple referred from 3 places.'>STREAM_XPORT_LISTEN</a>                     8
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#define</em> <a href='../R/10647.html' title='Multiple referred from 3 places.'>STREAM_XPORT_CONNECT_ASYNC</a>      16
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <em class='comment'>/* Open a client or server socket connection */</em>
+<a id='L49' name='L49'></a>  49 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/1428.html#L52' title='Defined at 52 in main/streams/transports.c.'>_php_stream_xport_create</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>, <strong class='reserved'>int</strong> <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>,
+<a id='L50' name='L50'></a>  50                 <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/31647.html' title='Multiple used in 65 places.'>persistent_id</a>,
+<a id='L51' name='L51'></a>  51                 <strong class='reserved'>struct</strong> <a href='../Y/38523.html' title='Multiple used in 175 places.'>timeval</a> *<a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>,
+<a id='L52' name='L52'></a>  52                 <a href='../S/1397.html#L102' title='Defined at 102 in main/php_streams.h.'>php_stream_context</a> *<a href='../Y/14371.html' title='Multiple used in 2063 places.'>context</a>,
+<a id='L53' name='L53'></a>  53                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/17088.html' title='Multiple used in 42 places.'>error_string</a>,
+<a id='L54' name='L54'></a>  54                 <strong class='reserved'>int</strong> *<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>
+<a id='L55' name='L55'></a>  55                 <a href='../D/12260.html' title='Multiple defined in 2 places.'>STREAMS_DC</a>);
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#define</em> <a href='../R/24945.html' title='Multiple referred from 9 places.'>php_stream_xport_create</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <a href='../Y/31647.html' title='Multiple used in 65 places.'>persistent_id</a>, <a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>, <a href='../Y/14371.html' title='Multiple used in 2063 places.'>context</a>, <a href='../Y/17158.html' title='Multiple used in 9 places.'>estr</a>, <a href='../D/21326.html' title='Multiple defined in 2 places.'>ecode</a>) \
+<a id='L58' name='L58'></a>  58         <a href='../S/1428.html#L52' title='Defined at 52 in main/streams/transports.c.'>_php_stream_xport_create</a>(<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>, <a href='../D/25509.html' title='Multiple defined in 3 places.'>options</a>, <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <a href='../Y/31647.html' title='Multiple used in 65 places.'>persistent_id</a>, <a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>, <a href='../Y/14371.html' title='Multiple used in 2063 places.'>context</a>, <a href='../Y/17158.html' title='Multiple used in 9 places.'>estr</a>, <a href='../D/21326.html' title='Multiple defined in 2 places.'>ecode</a> <a href='../D/12258.html' title='Multiple defined in 2 places.'>STREAMS_CC</a>)
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <em class='comment'>/* Bind the stream to a local address */</em>
+<a id='L61' name='L61'></a>  61 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L196' title='Defined at 196 in main/streams/transports.c.'>php_stream_xport_bind</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>,
+<a id='L62' name='L62'></a>  62                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>,
+<a id='L63' name='L63'></a>  63                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/17089.html' title='Multiple used in 38 places.'>error_text</a>
+<a id='L64' name='L64'></a>  64                 );
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <em class='comment'>/* Connect to a remote address */</em>
+<a id='L67' name='L67'></a>  67 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L224' title='Defined at 224 in main/streams/transports.c.'>php_stream_xport_connect</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>,
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>,
+<a id='L69' name='L69'></a>  69                 <strong class='reserved'>int</strong> <a href='../Y/12060.html' title='Multiple used in 11 places.'>asynchronous</a>,
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>struct</strong> <a href='../Y/38523.html' title='Multiple used in 175 places.'>timeval</a> *<a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>,
+<a id='L71' name='L71'></a>  71                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/17089.html' title='Multiple used in 38 places.'>error_text</a>,
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>int</strong> *<a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>
+<a id='L73' name='L73'></a>  73                 );
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <em class='comment'>/* Prepare to listen */</em>
+<a id='L76' name='L76'></a>  76 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L260' title='Defined at 260 in main/streams/transports.c.'>php_stream_xport_listen</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>,
+<a id='L77' name='L77'></a>  77                 <strong class='reserved'>int</strong> <a href='../Y/12401.html' title='Multiple used in 29 places.'>backlog</a>,
+<a id='L78' name='L78'></a>  78                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/17089.html' title='Multiple used in 38 places.'>error_text</a>
+<a id='L79' name='L79'></a>  79                 );
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81 <em class='comment'>/* Get the next client and their address as a string, or the underlying address</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'> * structure.  You must efree either of these if you request them */</em>
+<a id='L83' name='L83'></a>  83 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L284' title='Defined at 284 in main/streams/transports.c.'>php_stream_xport_accept</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> **<a href='../Y/13838.html' title='Multiple used in 253 places.'>client</a>,
+<a id='L84' name='L84'></a>  84                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/38287.html' title='Multiple used in 40 places.'>textaddr</a>,
+<a id='L85' name='L85'></a>  85                 <strong class='reserved'>void</strong> **<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>, <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> *<a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>,
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>struct</strong> <a href='../Y/38523.html' title='Multiple used in 175 places.'>timeval</a> *<a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>,
+<a id='L87' name='L87'></a>  87                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/17089.html' title='Multiple used in 38 places.'>error_text</a>
+<a id='L88' name='L88'></a>  88                 );
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 <em class='comment'>/* Get the name of either the socket or it's peer */</em>
+<a id='L91' name='L91'></a>  91 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L322' title='Defined at 322 in main/streams/transports.c.'>php_stream_xport_get_name</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <strong class='reserved'>int</strong> <a href='../Y/40598.html' title='Multiple used in 8 places.'>want_peer</a>,
+<a id='L92' name='L92'></a>  92                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/38287.html' title='Multiple used in 40 places.'>textaddr</a>,
+<a id='L93' name='L93'></a>  93                 <strong class='reserved'>void</strong> **<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>, <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> *<a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>
+<a id='L94' name='L94'></a>  94                 );
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96 <strong class='reserved'>enum</strong> php_stream_xport_send_recv_flags <em class='brace'>{</em>
+<a id='L97' name='L97'></a>  97         <a href='../R/10628.html' title='Multiple referred from 5 places.'>STREAM_OOB</a> = 1,
+<a id='L98' name='L98'></a>  98         <a href='../R/10631.html' title='Multiple referred from 2 places.'>STREAM_PEEK</a> = 2
+<a id='L99' name='L99'></a>  99 <em class='brace'>}</em>;
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <em class='comment'>/* Similar to recv() system call; read data from the stream, optionally</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'> * peeking, optionally retrieving OOB data */</em>
+<a id='L103' name='L103'></a> 103 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L395' title='Defined at 395 in main/streams/transports.c.'>php_stream_xport_recvfrom</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>,
+<a id='L104' name='L104'></a> 104                 <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <strong class='reserved'>void</strong> **<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>, <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> *<a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>,
+<a id='L105' name='L105'></a> 105                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> **<a href='../Y/38287.html' title='Multiple used in 40 places.'>textaddr</a>);
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107 <em class='comment'>/* Similar to send() system call; send data to the stream, optionally</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'> * sending it as OOB data */</em>
+<a id='L109' name='L109'></a> 109 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L464' title='Defined at 464 in main/streams/transports.c.'>php_stream_xport_sendto</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>, <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>,
+<a id='L110' name='L110'></a> 110                 <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>, <strong class='reserved'>void</strong> *<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>, <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> <a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>);
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L113' name='L113'></a> 113         <a href='../R/10632.html' title='Multiple referred from 2 places.'>STREAM_SHUT_RD</a>,
+<a id='L114' name='L114'></a> 114         <a href='../R/10634.html' title='Multiple referred from 2 places.'>STREAM_SHUT_WR</a>,
+<a id='L115' name='L115'></a> 115         <a href='../R/10633.html' title='Multiple referred from 2 places.'>STREAM_SHUT_RDWR</a>
+<a id='L116' name='L116'></a> 116 <em class='brace'>}</em> <a href='../R/28384.html' title='Multiple referred from 4 places.'>stream_shutdown_t</a>;
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118 <em class='comment'>/* Similar to shutdown() system call; shut down part of a full-duplex</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'> * connection */</em>
+<a id='L120' name='L120'></a> 120 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L504' title='Defined at 504 in main/streams/transports.c.'>php_stream_xport_shutdown</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <a href='../S/1423.html#L116' title='Defined at 116 in main/streams/php_stream_transport.h.'>stream_shutdown_t</a> <a href='../Y/20043.html' title='Multiple used in 65 places.'>how</a>);
+<a id='L121' name='L121'></a> 121 <a href='../R/1666.html' title='Multiple referred from 100 places.'>END_EXTERN_C</a>()
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124 <em class='comment'>/* Structure definition for the set_option interface that the above functions wrap */</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _php_stream_xport_param <em class='brace'>{</em>
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128                 <a href='../R/10652.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_BIND</a>, <a href='../R/10653.html' title='Multiple referred from 3 places.'>STREAM_XPORT_OP_CONNECT</a>,
+<a id='L129' name='L129'></a> 129                 <a href='../R/10657.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_LISTEN</a>, <a href='../R/10651.html' title='Multiple referred from 3 places.'>STREAM_XPORT_OP_ACCEPT</a>,
+<a id='L130' name='L130'></a> 130                 <a href='../R/10654.html' title='Multiple referred from 7 places.'>STREAM_XPORT_OP_CONNECT_ASYNC</a>,
+<a id='L131' name='L131'></a> 131                 <a href='../R/10655.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_GET_NAME</a>,
+<a id='L132' name='L132'></a> 132                 <a href='../R/10656.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_GET_PEER_NAME</a>,
+<a id='L133' name='L133'></a> 133                 <a href='../R/10658.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_RECV</a>,
+<a id='L134' name='L134'></a> 134                 <a href='../R/10659.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_SEND</a>,
+<a id='L135' name='L135'></a> 135                 <a href='../R/10660.html' title='Multiple referred from 2 places.'>STREAM_XPORT_OP_SHUTDOWN</a>
+<a id='L136' name='L136'></a> 136         <em class='brace'>}</em> <a href='../D/25474.html' title='Multiple defined in 2 places.'>op</a>;
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/40596.html' title='Multiple used in 17 places.'>want_addr</a>:1;
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/40599.html' title='Multiple used in 9 places.'>want_textaddr</a>:1;
+<a id='L139' name='L139'></a> 139         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/40597.html' title='Multiple used in 15 places.'>want_errortext</a>:1;
+<a id='L140' name='L140'></a> 140         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/20043.html' title='Multiple used in 65 places.'>how</a>:2;
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142         <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L143' name='L143'></a> 143                 <strong class='reserved'>char</strong> *<a href='../D/25114.html' title='Multiple defined in 4 places.'>name</a>;
+<a id='L144' name='L144'></a> 144                 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/27975.html' title='Multiple used in 122 places.'>namelen</a>;
+<a id='L145' name='L145'></a> 145                 <strong class='reserved'>struct</strong> <a href='../Y/38523.html' title='Multiple used in 175 places.'>timeval</a> *<a href='../Y/38503.html' title='Multiple used in 253 places.'>timeout</a>;
+<a id='L146' name='L146'></a> 146                 <strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a> *<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>;
+<a id='L147' name='L147'></a> 147                 <strong class='reserved'>char</strong> *<a href='../Y/12975.html' title='Multiple used in 3888 places.'>buf</a>;
+<a id='L148' name='L148'></a> 148                 <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../Y/13022.html' title='Multiple used in 288 places.'>buflen</a>;
+<a id='L149' name='L149'></a> 149                 <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> <a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>;
+<a id='L150' name='L150'></a> 150                 <strong class='reserved'>int</strong> <a href='../Y/12401.html' title='Multiple used in 29 places.'>backlog</a>;
+<a id='L151' name='L151'></a> 151                 <strong class='reserved'>int</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>;
+<a id='L152' name='L152'></a> 152         <em class='brace'>}</em> <a href='../Y/23311.html' title='Multiple used in 46 places.'>inputs</a>;
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154                 <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../Y/13838.html' title='Multiple used in 253 places.'>client</a>;
+<a id='L155' name='L155'></a> 155                 <strong class='reserved'>struct</strong> <a href='../Y/36476.html' title='Multiple used in 152 places.'>sockaddr</a> *<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>;
+<a id='L156' name='L156'></a> 156                 <a href='../S/1366.html#L91' title='Defined at 91 in main/fastcgi.c.'>socklen_t</a> <a href='../Y/8930.html' title='Multiple used in 49 places.'>addrlen</a>;
+<a id='L157' name='L157'></a> 157                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/38287.html' title='Multiple used in 40 places.'>textaddr</a>;
+<a id='L158' name='L158'></a> 158                 <a href='../S/1731.html#L87' title='Defined at 87 in Zend/zend_types.h.'>zend_string</a> *<a href='../Y/17089.html' title='Multiple used in 38 places.'>error_text</a>;
+<a id='L159' name='L159'></a> 159                 <strong class='reserved'>int</strong> <a href='../Y/34854.html' title='Multiple used in 29 places.'>returncode</a>;
+<a id='L160' name='L160'></a> 160                 <strong class='reserved'>int</strong> <a href='../Y/17042.html' title='Multiple used in 194 places.'>error_code</a>;
+<a id='L161' name='L161'></a> 161         <em class='brace'>}</em> <a href='../Y/30199.html' title='Multiple used in 88 places.'>outputs</a>;
+<a id='L162' name='L162'></a> 162 <em class='brace'>}</em> <a href='../Y/32617.html' title='Multiple used in 20 places.'>php_stream_xport_param</a>;
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164 <em class='comment'>/* Because both client and server streams use the same mechanisms</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'>   for encryption we use the LSB to denote clients.</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'>*/</em>
+<a id='L167' name='L167'></a> 167 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L168' name='L168'></a> 168         <a href='../R/10605.html' title='Multiple referred from 3 places.'>STREAM_CRYPTO_METHOD_SSLv2_CLIENT</a> = (1 &lt;&lt; 1 | 1),
+<a id='L169' name='L169'></a> 169         <a href='../R/10608.html' title='Multiple referred from 3 places.'>STREAM_CRYPTO_METHOD_SSLv3_CLIENT</a> = (1 &lt;&lt; 2 | 1),
+<a id='L170' name='L170'></a> 170         <em class='comment'>/* v23 no longer negotiates SSL2 or SSL3 */</em>
+<a id='L171' name='L171'></a> 171         <a href='../R/10603.html' title='Multiple referred from 7 places.'>STREAM_CRYPTO_METHOD_SSLv23_CLIENT</a> = ((1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5) | 1),
+<a id='L172' name='L172'></a> 172         <a href='../R/10613.html' title='Multiple referred from 2 places.'>STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT</a> = (1 &lt;&lt; 3 | 1),
+<a id='L173' name='L173'></a> 173         <a href='../R/10616.html' title='Multiple referred from 2 places.'>STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT</a> = (1 &lt;&lt; 4 | 1),
+<a id='L174' name='L174'></a> 174         <a href='../R/10619.html' title='Multiple referred from 2 places.'>STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT</a> = (1 &lt;&lt; 5 | 1),
+<a id='L175' name='L175'></a> 175         <em class='comment'>/* tls now equates only to the specific TLSv1 method for BC with pre-5.6 */</em>
+<a id='L176' name='L176'></a> 176         <a href='../R/10610.html' title='Multiple referred from 5 places.'>STREAM_CRYPTO_METHOD_TLS_CLIENT</a> = (1 &lt;&lt; 3 | 1),
+<a id='L177' name='L177'></a> 177         STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT = ((1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5) | 1),
+<a id='L178' name='L178'></a> 178         <a href='../R/10600.html' title='Multiple referred from 2 places.'>STREAM_CRYPTO_METHOD_ANY_CLIENT</a> = ((1 &lt;&lt; 1) | (1 &lt;&lt; 2) | (1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5) | 1),
+<a id='L179' name='L179'></a> 179         <a href='../S/1093.html#L223' title='Referred from 223 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_SSLv2_SERVER</a> = (1 &lt;&lt; 1),
+<a id='L180' name='L180'></a> 180         <a href='../S/1093.html#L224' title='Referred from 224 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_SSLv3_SERVER</a> = (1 &lt;&lt; 2),
+<a id='L181' name='L181'></a> 181         <em class='comment'>/* v23 no longer negotiates SSL2 or SSL3 */</em>
+<a id='L182' name='L182'></a> 182         <a href='../S/1093.html#L225' title='Referred from 225 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_SSLv23_SERVER</a> = ((1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5)),
+<a id='L183' name='L183'></a> 183         <a href='../S/1093.html#L227' title='Referred from 227 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_TLSv1_0_SERVER</a> = (1 &lt;&lt; 3),
+<a id='L184' name='L184'></a> 184         <a href='../S/1093.html#L228' title='Referred from 228 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_TLSv1_1_SERVER</a> = (1 &lt;&lt; 4),
+<a id='L185' name='L185'></a> 185         <a href='../S/1093.html#L229' title='Referred from 229 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_TLSv1_2_SERVER</a> = (1 &lt;&lt; 5),
+<a id='L186' name='L186'></a> 186         <em class='comment'>/* tls equates only to the specific TLSv1 method for BC with pre-5.6 */</em>
+<a id='L187' name='L187'></a> 187         <a href='../S/1093.html#L226' title='Referred from 226 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_TLS_SERVER</a> = (1 &lt;&lt; 3),
+<a id='L188' name='L188'></a> 188         STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5)),
+<a id='L189' name='L189'></a> 189         <a href='../S/1093.html#L222' title='Referred from 222 in ext/standard/file.c.'>STREAM_CRYPTO_METHOD_ANY_SERVER</a> = ((1 &lt;&lt; 1) | (1 &lt;&lt; 2) | (1 &lt;&lt; 3) | (1 &lt;&lt; 4) | (1 &lt;&lt; 5))
+<a id='L190' name='L190'></a> 190 <em class='brace'>}</em> <a href='../R/24946.html' title='Multiple referred from 4 places.'>php_stream_xport_crypt_method_t</a>;
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192 <em class='comment'>/* These functions provide crypto support on the underlying transport */</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194 <a href='../R/308.html' title='Multiple referred from 96 places.'>BEGIN_EXTERN_C</a>()
+<a id='L195' name='L195'></a> 195 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L352' title='Defined at 352 in main/streams/transports.c.'>php_stream_xport_crypto_setup</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <a href='../S/1423.html#L190' title='Defined at 190 in main/streams/php_stream_transport.h.'>php_stream_xport_crypt_method_t</a> <a href='../Y/14640.html' title='Multiple used in 14 places.'>crypto_method</a>, <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../Y/35804.html' title='Multiple used in 3 places.'>session_stream</a>);
+<a id='L196' name='L196'></a> 196 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <strong class='reserved'>int</strong> <a href='../S/1428.html#L373' title='Defined at 373 in main/streams/transports.c.'>php_stream_xport_crypto_enable</a>(<a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../S/800.html#L861' title='Defined at 861 in ext/mysqlnd/mysqlnd_structs.h.'>stream</a>, <strong class='reserved'>int</strong> <a href='../Y/8770.html' title='Multiple used in 15 places.'>activate</a>);
+<a id='L197' name='L197'></a> 197 <a href='../D/1951.html' title='Multiple defined in 10 places.'>END_EXTERN_C</a>()
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> _php_stream_xport_crypto_param <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200         <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L201' name='L201'></a> 201                 <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../Y/35772.html' title='Multiple used in 123 places.'>session</a>;
+<a id='L202' name='L202'></a> 202                 <strong class='reserved'>int</strong> <a href='../Y/8770.html' title='Multiple used in 15 places.'>activate</a>;
+<a id='L203' name='L203'></a> 203                 <a href='../S/1423.html#L190' title='Defined at 190 in main/streams/php_stream_transport.h.'>php_stream_xport_crypt_method_t</a> <a href='../Y/26521.html' title='Multiple used in 490 places.'>method</a>;
+<a id='L204' name='L204'></a> 204         <em class='brace'>}</em> <a href='../Y/23311.html' title='Multiple used in 46 places.'>inputs</a>;
+<a id='L205' name='L205'></a> 205         <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                 <strong class='reserved'>int</strong> <a href='../Y/34854.html' title='Multiple used in 29 places.'>returncode</a>;
+<a id='L207' name='L207'></a> 207         <em class='brace'>}</em> <a href='../Y/30199.html' title='Multiple used in 88 places.'>outputs</a>;
+<a id='L208' name='L208'></a> 208         <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L209' name='L209'></a> 209                 <a href='../R/10649.html' title='Multiple referred from 2 places.'>STREAM_XPORT_CRYPTO_OP_SETUP</a>,
+<a id='L210' name='L210'></a> 210                 <a href='../R/10648.html' title='Multiple referred from 2 places.'>STREAM_XPORT_CRYPTO_OP_ENABLE</a>
+<a id='L211' name='L211'></a> 211         <em class='brace'>}</em> <a href='../D/25474.html' title='Multiple defined in 2 places.'>op</a>;
+<a id='L212' name='L212'></a> 212 <em class='brace'>}</em> <a href='../Y/32616.html' title='Multiple used in 6 places.'>php_stream_xport_crypto_param</a>;
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214 <a href='../D/355.html' title='Multiple defined in 15 places.'>BEGIN_EXTERN_C</a>()
+<a id='L215' name='L215'></a> 215 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <a href='../S/1731.html#L174' title='Defined at 174 in Zend/zend_types.h.'>HashTable</a> *<a href='../S/1428.html#L27' title='Defined at 27 in main/streams/transports.c.'>php_stream_xport_get_hash</a>(<strong class='reserved'>void</strong>);
+<a id='L216' name='L216'></a> 216 <a href='../D/7575.html' title='Multiple defined in 9 places.'>PHPAPI</a> <a href='../Y/32609.html' title='Multiple used in 4 places.'>php_stream_transport_factory_func</a> <a href='../S/1430.html#L855' title='Defined at 855 in main/streams/xp_socket.c.'>php_stream_generic_socket_factory</a>;
+<a id='L217' name='L217'></a> 217 <a href='../D/1951.html' title='Multiple defined in 10 places.'>END_EXTERN_C</a>()
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219 <em class='comment'>/*</em>
+<a id='L220' name='L220'></a> 220 <em class='comment'> * Local variables:</em>
+<a id='L221' name='L221'></a> 221 <em class='comment'> * tab-width: 4</em>
+<a id='L222' name='L222'></a> 222 <em class='comment'> * c-basic-offset: 4</em>
+<a id='L223' name='L223'></a> 223 <em class='comment'> * End:</em>
+<a id='L224' name='L224'></a> 224 <em class='comment'> * vim600: noet sw=4 ts=4 fdm=marker</em>
+<a id='L225' name='L225'></a> 225 <em class='comment'> * vim&lt;600: noet sw=4 ts=4</em>
+<a id='L226' name='L226'></a> 226 <em class='comment'> */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L121'>[^]</a><a href='#L194'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

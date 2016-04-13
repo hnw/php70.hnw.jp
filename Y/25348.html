@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>lock</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/81.html#L428'>lock</a>              428 ext/dba/dba.c  	if (info-&gt;fp &amp;&amp; info-&gt;fp != info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L435'>lock</a>              435 ext/dba/dba.c  	if (info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L437'>lock</a>              437 ext/dba/dba.c  			php_stream_pclose(info-&gt;lock.fp);</span>
+<span class='curline'><a href='../S/81.html#L439'>lock</a>              439 ext/dba/dba.c  			php_stream_close(info-&gt;lock.fp);</span>
+<span class='curline'><a href='../S/81.html#L442'>lock</a>              442 ext/dba/dba.c  	if (info-&gt;lock.name) {</span>
+<span class='curline'><a href='../S/81.html#L443'>lock</a>              443 ext/dba/dba.c  		pefree(info-&gt;lock.name, info-&gt;flags&amp;DBA_PERSISTENT);</span>
+<span class='curline'><a href='../S/81.html#L840'>lock</a>              840 ext/dba/dba.c  	info-&gt;lock.mode = lock_mode;</span>
+<span class='curline'><a href='../S/81.html#L848'>lock</a>              848 ext/dba/dba.c  			if (   ( (lock_mode&amp;LOCK_EX)        &amp;&amp; (other-&gt;lock.mode&amp;(LOCK_EX|LOCK_SH)) )</span>
+<span class='curline'><a href='../S/81.html#L849'>lock</a>              849 ext/dba/dba.c  			    || ( (other-&gt;lock.mode&amp;LOCK_EX) &amp;&amp; (lock_mode&amp;(LOCK_EX|LOCK_SH))        )</span>
+<span class='curline'><a href='../S/81.html#L865'>lock</a>              865 ext/dba/dba.c  				info-&gt;lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &amp;opened_path);</span>
+<span class='curline'><a href='../S/81.html#L867'>lock</a>              867 ext/dba/dba.c  			if (!info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L872'>lock</a>              872 ext/dba/dba.c  					info-&gt;lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);</span>
+<span class='curline'><a href='../S/81.html#L877'>lock</a>              877 ext/dba/dba.c  		if (!info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L878'>lock</a>              878 ext/dba/dba.c  			info-&gt;lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &amp;opened_path);</span>
+<span class='curline'><a href='../S/81.html#L879'>lock</a>              879 ext/dba/dba.c  			if (info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L886'>lock</a>              886 ext/dba/dba.c  				info-&gt;lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);</span>
+<span class='curline'><a href='../S/81.html#L893'>lock</a>              893 ext/dba/dba.c  		if (!info-&gt;lock.fp) {</span>
+<span class='curline'><a href='../S/81.html#L899'>lock</a>              899 ext/dba/dba.c  		if (!php_stream_supports_lock(info-&gt;lock.fp)) {</span>
+<span class='curline'><a href='../S/81.html#L902'>lock</a>              902 ext/dba/dba.c  		if (php_stream_lock(info-&gt;lock.fp, lock_mode)) {</span>
+<span class='curline'><a href='../S/81.html#L909'>lock</a>              909 ext/dba/dba.c  		if (info-&gt;lock.fp &amp;&amp; lock_dbf) {</span>
+<span class='curline'><a href='../S/81.html#L910'>lock</a>              910 ext/dba/dba.c  			info-&gt;fp = info-&gt;lock.fp; /* use the same stream for locking and database access */</span>
+<span class='curline'><a href='../S/109.html#L56'>lock</a>               56 ext/dba/php_dba.h 	dba_lock lock;</span>
+<span class='curline'><a href='../S/1054.html#L26853'>lock</a>             26853 ext/sqlite3/libsqlite/sqlite3.c     struct flock lock;</span>
+<span class='curline'><a href='../S/1054.html#L26854'>lock</a>             26854 ext/sqlite3/libsqlite/sqlite3.c     lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L26855'>lock</a>             26855 ext/sqlite3/libsqlite/sqlite3.c     lock.l_start = RESERVED_BYTE;</span>
+<span class='curline'><a href='../S/1054.html#L26856'>lock</a>             26856 ext/sqlite3/libsqlite/sqlite3.c     lock.l_len = 1;</span>
+<span class='curline'><a href='../S/1054.html#L26857'>lock</a>             26857 ext/sqlite3/libsqlite/sqlite3.c     lock.l_type = F_WRLCK;</span>
+<span class='curline'><a href='../S/1054.html#L26858'>lock</a>             26858 ext/sqlite3/libsqlite/sqlite3.c     if( osFcntl(pFile-&gt;h, F_GETLK, &amp;lock) ){</span>
+<span class='curline'><a href='../S/1054.html#L26861'>lock</a>             26861 ext/sqlite3/libsqlite/sqlite3.c     } else if( lock.l_type!=F_UNLCK ){</span>
+<span class='curline'><a href='../S/1054.html#L26902'>lock</a>             26902 ext/sqlite3/libsqlite/sqlite3.c       struct flock lock;</span>
+<span class='curline'><a href='../S/1054.html#L26904'>lock</a>             26904 ext/sqlite3/libsqlite/sqlite3.c       lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L26905'>lock</a>             26905 ext/sqlite3/libsqlite/sqlite3.c       lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L26906'>lock</a>             26906 ext/sqlite3/libsqlite/sqlite3.c       lock.l_len = SHARED_SIZE;</span>
+<span class='curline'><a href='../S/1054.html#L26907'>lock</a>             26907 ext/sqlite3/libsqlite/sqlite3.c       lock.l_type = F_WRLCK;</span>
+<span class='curline'><a href='../S/1054.html#L26908'>lock</a>             26908 ext/sqlite3/libsqlite/sqlite3.c       rc = osFcntl(pFile-&gt;h, F_SETLK, &amp;lock);</span>
+<span class='curline'><a href='../S/1054.html#L26987'>lock</a>             26987 ext/sqlite3/libsqlite/sqlite3.c   struct flock lock;</span>
+<span class='curline'><a href='../S/1054.html#L27050'>lock</a>             27050 ext/sqlite3/libsqlite/sqlite3.c   lock.l_len = 1L;</span>
+<span class='curline'><a href='../S/1054.html#L27051'>lock</a>             27051 ext/sqlite3/libsqlite/sqlite3.c   lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27055'>lock</a>             27055 ext/sqlite3/libsqlite/sqlite3.c     lock.l_type = (eFileLock==SHARED_LOCK?F_RDLCK:F_WRLCK);</span>
+<span class='curline'><a href='../S/1054.html#L27056'>lock</a>             27056 ext/sqlite3/libsqlite/sqlite3.c     lock.l_start = PENDING_BYTE;</span>
+<span class='curline'><a href='../S/1054.html#L27057'>lock</a>             27057 ext/sqlite3/libsqlite/sqlite3.c     if( unixFileLock(pFile, &amp;lock) ){</span>
+<span class='curline'><a href='../S/1054.html#L27077'>lock</a>             27077 ext/sqlite3/libsqlite/sqlite3.c     lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L27078'>lock</a>             27078 ext/sqlite3/libsqlite/sqlite3.c     lock.l_len = SHARED_SIZE;</span>
+<span class='curline'><a href='../S/1054.html#L27079'>lock</a>             27079 ext/sqlite3/libsqlite/sqlite3.c     if( unixFileLock(pFile, &amp;lock) ){</span>
+<span class='curline'><a href='../S/1054.html#L27085'>lock</a>             27085 ext/sqlite3/libsqlite/sqlite3.c     lock.l_start = PENDING_BYTE;</span>
+<span class='curline'><a href='../S/1054.html#L27086'>lock</a>             27086 ext/sqlite3/libsqlite/sqlite3.c     lock.l_len = 1L;</span>
+<span class='curline'><a href='../S/1054.html#L27087'>lock</a>             27087 ext/sqlite3/libsqlite/sqlite3.c     lock.l_type = F_UNLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27088'>lock</a>             27088 ext/sqlite3/libsqlite/sqlite3.c     if( unixFileLock(pFile, &amp;lock) &amp;&amp; rc==SQLITE_OK ){</span>
+<span class='curline'><a href='../S/1054.html#L27114'>lock</a>             27114 ext/sqlite3/libsqlite/sqlite3.c     lock.l_type = F_WRLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27118'>lock</a>             27118 ext/sqlite3/libsqlite/sqlite3.c       lock.l_start = RESERVED_BYTE;</span>
+<span class='curline'><a href='../S/1054.html#L27119'>lock</a>             27119 ext/sqlite3/libsqlite/sqlite3.c       lock.l_len = 1L;</span>
+<span class='curline'><a href='../S/1054.html#L27121'>lock</a>             27121 ext/sqlite3/libsqlite/sqlite3.c       lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L27122'>lock</a>             27122 ext/sqlite3/libsqlite/sqlite3.c       lock.l_len = SHARED_SIZE;</span>
+<span class='curline'><a href='../S/1054.html#L27125'>lock</a>             27125 ext/sqlite3/libsqlite/sqlite3.c     if( unixFileLock(pFile, &amp;lock) ){</span>
+<span class='curline'><a href='../S/1054.html#L27196'>lock</a>             27196 ext/sqlite3/libsqlite/sqlite3.c   struct flock lock;</span>
+<span class='curline'><a href='../S/1054.html#L27245'>lock</a>             27245 ext/sqlite3/libsqlite/sqlite3.c         lock.l_type = F_UNLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27246'>lock</a>             27246 ext/sqlite3/libsqlite/sqlite3.c         lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27247'>lock</a>             27247 ext/sqlite3/libsqlite/sqlite3.c         lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L27248'>lock</a>             27248 ext/sqlite3/libsqlite/sqlite3.c         lock.l_len = divSize;</span>
+<span class='curline'><a href='../S/1054.html#L27249'>lock</a>             27249 ext/sqlite3/libsqlite/sqlite3.c         if( unixFileLock(pFile, &amp;lock)==(-1) ){</span>
+<span class='curline'><a href='../S/1054.html#L27257'>lock</a>             27257 ext/sqlite3/libsqlite/sqlite3.c         lock.l_type = F_RDLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27258'>lock</a>             27258 ext/sqlite3/libsqlite/sqlite3.c         lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27259'>lock</a>             27259 ext/sqlite3/libsqlite/sqlite3.c         lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L27260'>lock</a>             27260 ext/sqlite3/libsqlite/sqlite3.c         lock.l_len = divSize;</span>
+<span class='curline'><a href='../S/1054.html#L27261'>lock</a>             27261 ext/sqlite3/libsqlite/sqlite3.c         if( unixFileLock(pFile, &amp;lock)==(-1) ){</span>
+<span class='curline'><a href='../S/1054.html#L27269'>lock</a>             27269 ext/sqlite3/libsqlite/sqlite3.c         lock.l_type = F_UNLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27270'>lock</a>             27270 ext/sqlite3/libsqlite/sqlite3.c         lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27271'>lock</a>             27271 ext/sqlite3/libsqlite/sqlite3.c         lock.l_start = SHARED_FIRST+divSize;</span>
+<span class='curline'><a href='../S/1054.html#L27272'>lock</a>             27272 ext/sqlite3/libsqlite/sqlite3.c         lock.l_len = SHARED_SIZE-divSize;</span>
+<span class='curline'><a href='../S/1054.html#L27273'>lock</a>             27273 ext/sqlite3/libsqlite/sqlite3.c         if( unixFileLock(pFile, &amp;lock)==(-1) ){</span>
+<span class='curline'><a href='../S/1054.html#L27284'>lock</a>             27284 ext/sqlite3/libsqlite/sqlite3.c         lock.l_type = F_RDLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27285'>lock</a>             27285 ext/sqlite3/libsqlite/sqlite3.c         lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27286'>lock</a>             27286 ext/sqlite3/libsqlite/sqlite3.c         lock.l_start = SHARED_FIRST;</span>
+<span class='curline'><a href='../S/1054.html#L27287'>lock</a>             27287 ext/sqlite3/libsqlite/sqlite3.c         lock.l_len = SHARED_SIZE;</span>
+<span class='curline'><a href='../S/1054.html#L27288'>lock</a>             27288 ext/sqlite3/libsqlite/sqlite3.c         if( unixFileLock(pFile, &amp;lock) ){</span>
+<span class='curline'><a href='../S/1054.html#L27301'>lock</a>             27301 ext/sqlite3/libsqlite/sqlite3.c     lock.l_type = F_UNLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27302'>lock</a>             27302 ext/sqlite3/libsqlite/sqlite3.c     lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27303'>lock</a>             27303 ext/sqlite3/libsqlite/sqlite3.c     lock.l_start = PENDING_BYTE;</span>
+<span class='curline'><a href='../S/1054.html#L27304'>lock</a>             27304 ext/sqlite3/libsqlite/sqlite3.c     lock.l_len = 2L;  assert( PENDING_BYTE+1==RESERVED_BYTE );</span>
+<span class='curline'><a href='../S/1054.html#L27305'>lock</a>             27305 ext/sqlite3/libsqlite/sqlite3.c     if( unixFileLock(pFile, &amp;lock)==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L27320'>lock</a>             27320 ext/sqlite3/libsqlite/sqlite3.c       lock.l_type = F_UNLCK;</span>
+<span class='curline'><a href='../S/1054.html#L27321'>lock</a>             27321 ext/sqlite3/libsqlite/sqlite3.c       lock.l_whence = SEEK_SET;</span>
+<span class='curline'><a href='../S/1054.html#L27322'>lock</a>             27322 ext/sqlite3/libsqlite/sqlite3.c       lock.l_start = lock.l_len = 0L;</span>
+<span class='curline'><a href='../S/1054.html#L27323'>lock</a>             27323 ext/sqlite3/libsqlite/sqlite3.c       if( unixFileLock(pFile, &amp;lock)==0 ){</span>
+<span class='curline'><a href='../S/1054.html#L52440'>lock</a>             52440 ext/sqlite3/libsqlite/sqlite3.c   BtLock lock;       /* Object used to lock page 1 */</span>
+<span class='curline'><a href='../S/1054.html#L53448'>lock</a>             53448 ext/sqlite3/libsqlite/sqlite3.c       assert( pLock-&gt;iTable!=1 || pLock==&amp;p-&gt;lock );</span>
+<span class='curline'><a href='../S/1054.html#L55002'>lock</a>             55002 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;lock.pBtree = p;</span>
+<span class='curline'><a href='../S/1054.html#L55003'>lock</a>             55003 ext/sqlite3/libsqlite/sqlite3.c   p-&gt;lock.iTable = 1;</span>
+<span class='curline'><a href='../S/1054.html#L56018'>lock</a>             56018 ext/sqlite3/libsqlite/sqlite3.c         assert( p-&gt;lock.pBtree==p &amp;&amp; p-&gt;lock.iTable==1 );</span>
+<span class='curline'><a href='../S/1054.html#L56019'>lock</a>             56019 ext/sqlite3/libsqlite/sqlite3.c         p-&gt;lock.eLock = READ_LOCK;</span>
+<span class='curline'><a href='../S/1054.html#L56020'>lock</a>             56020 ext/sqlite3/libsqlite/sqlite3.c         p-&gt;lock.pNext = pBt-&gt;pLock;</span>
+<span class='curline'><a href='../S/1054.html#L56021'>lock</a>             56021 ext/sqlite3/libsqlite/sqlite3.c         pBt-&gt;pLock = &amp;p-&gt;lock;</span>
+<span class='curline'><a href='../S/1366.html#L97'>lock</a>               97 main/fastcgi.c 		struct flock lock;							\</span>
+<span class='curline'><a href='../S/1366.html#L98'>lock</a>               98 main/fastcgi.c 		lock.l_type = F_WRLCK;						\</span>
+<span class='curline'><a href='../S/1366.html#L99'>lock</a>               99 main/fastcgi.c 		lock.l_start = 0;							\</span>
+<span class='curline'><a href='../S/1366.html#L100'>lock</a>              100 main/fastcgi.c 		lock.l_whence = SEEK_SET;					\</span>
+<span class='curline'><a href='../S/1366.html#L101'>lock</a>              101 main/fastcgi.c 		lock.l_len = 0;								\</span>
+<span class='curline'><a href='../S/1366.html#L102'>lock</a>              102 main/fastcgi.c 		if (fcntl(fd, F_SETLKW, &amp;lock) != -1) {		\</span>
+<span class='curline'><a href='../S/1366.html#L113'>lock</a>              113 main/fastcgi.c 			struct flock lock;						\</span>
+<span class='curline'><a href='../S/1366.html#L114'>lock</a>              114 main/fastcgi.c 			lock.l_type = F_UNLCK;					\</span>
+<span class='curline'><a href='../S/1366.html#L115'>lock</a>              115 main/fastcgi.c 			lock.l_start = 0;						\</span>
+<span class='curline'><a href='../S/1366.html#L116'>lock</a>              116 main/fastcgi.c 			lock.l_whence = SEEK_SET;				\</span>
+<span class='curline'><a href='../S/1366.html#L117'>lock</a>              117 main/fastcgi.c 			lock.l_len = 0;							\</span>
+<span class='curline'><a href='../S/1366.html#L118'>lock</a>              118 main/fastcgi.c 			if (fcntl(fd, F_SETLK, &amp;lock) != -1) {	\</span>
+<span class='curline'><a href='../S/1471.html#L43'>lock</a>               43 sapi/fpm/fpm/fpm_atomic.h static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L48'>lock</a>               48 sapi/fpm/fpm/fpm_atomic.h 		"=a" (res) : "m" (*lock), "a" (old), "r" (set) : "memory");</span>
+<span class='curline'><a href='../S/1471.html#L69'>lock</a>               69 sapi/fpm/fpm/fpm_atomic.h static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L74'>lock</a>               74 sapi/fpm/fpm/fpm_atomic.h 		"=a" (res) : "m" (*lock), "a" (old), "r" (set) : "memory");</span>
+<span class='curline'><a href='../S/1471.html#L104'>lock</a>              104 sapi/fpm/fpm/fpm_atomic.h static inline int atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L106'>lock</a>              106 sapi/fpm/fpm/fpm_atomic.h 	__asm__ __volatile__("casx [%2], %3, %0 " : "=&amp;r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");</span>
+<span class='curline'><a href='../S/1471.html#L112'>lock</a>              112 sapi/fpm/fpm/fpm_atomic.h static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L114'>lock</a>              114 sapi/fpm/fpm/fpm_atomic.h 	return (atomic_cas_64(lock, old, set)==old);</span>
+<span class='curline'><a href='../S/1471.html#L121'>lock</a>              121 sapi/fpm/fpm/fpm_atomic.h static inline int atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L123'>lock</a>              123 sapi/fpm/fpm/fpm_atomic.h 	__asm__ __volatile__("cas [%2], %3, %0 " : "=&amp;r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");</span>
+<span class='curline'><a href='../S/1471.html#L129'>lock</a>              129 sapi/fpm/fpm/fpm_atomic.h static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L131'>lock</a>              131 sapi/fpm/fpm/fpm_atomic.h 	return (atomic_cas_32(lock, old, set)==old);</span>
+<span class='curline'><a href='../S/1471.html#L146'>lock</a>              146 sapi/fpm/fpm/fpm_atomic.h static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */</span>
+<span class='curline'><a href='../S/1471.html#L149'>lock</a>              149 sapi/fpm/fpm/fpm_atomic.h 		return atomic_cmp_set(lock, 0, 1) ? 1 : 0;</span>
+<span class='curline'><a href='../S/1471.html#L154'>lock</a>              154 sapi/fpm/fpm/fpm_atomic.h 		if (atomic_cmp_set(lock, 0, 1)) {</span>
+<span class='curline'><a href='../S/1471.html#L165'>lock</a>              165 sapi/fpm/fpm/fpm_atomic.h #define fpm_unlock(lock) lock = 0</span>
+<span class='curline'><a href='../S/1496.html#L87'>lock</a>               87 sapi/fpm/fpm/fpm_scoreboard.c 	fpm_spinlock(&amp;scoreboard-&gt;lock, 0);</span>
+<span class='curline'><a href='../S/1496.html#L152'>lock</a>              152 sapi/fpm/fpm/fpm_scoreboard.c 	fpm_unlock(scoreboard-&gt;lock);</span>
+<span class='curline'><a href='../S/1496.html#L193'>lock</a>              193 sapi/fpm/fpm/fpm_scoreboard.c 	if (!fpm_spinlock(&amp;s-&gt;lock, nohang)) {</span>
+<span class='curline'><a href='../S/1496.html#L205'>lock</a>              205 sapi/fpm/fpm/fpm_scoreboard.c 	scoreboard-&gt;lock = 0;</span>
+<span class='curline'><a href='../S/1496.html#L217'>lock</a>              217 sapi/fpm/fpm/fpm_scoreboard.c 	if (!fpm_spinlock(&amp;proc-&gt;lock, nohang)) {</span>
+<span class='curline'><a href='../S/1496.html#L231'>lock</a>              231 sapi/fpm/fpm/fpm_scoreboard.c 	proc-&gt;lock = 0;</span>
+<span class='curline'><a href='../S/1497.html#L22'>lock</a>               22 sapi/fpm/fpm/fpm_scoreboard.h 		atomic_t lock;</span>
+<span class='curline'><a href='../S/1497.html#L51'>lock</a>               51 sapi/fpm/fpm/fpm_scoreboard.h 		atomic_t lock;</span>
+<span class='curline'><a href='../S/1504.html#L96'>lock</a>               96 sapi/fpm/fpm/fpm_status.c 		if (!fpm_spinlock(&amp;scoreboard_p-&gt;lock, 1)) {</span>
+<span class='curline'><a href='../S/1504.html#L107'>lock</a>              107 sapi/fpm/fpm/fpm_status.c 		fpm_unlock(scoreboard_p-&gt;lock);</span>
+</pre>
+</body>
+</html>

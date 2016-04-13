@@ -1,0 +1,777 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>CG</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1626.html#L41'>CG</a>                 41 Zend/zend.c    # define GLOBAL_FUNCTION_TABLE		CG(function_table)</span>
+<span class='curline'><a href='../S/1626.html#L42'>CG</a>                 42 Zend/zend.c    # define GLOBAL_CLASS_TABLE			CG(class_table)</span>
+<span class='curline'><a href='../S/1626.html#L43'>CG</a>                 43 Zend/zend.c    # define GLOBAL_AUTO_GLOBALS_TABLE	CG(auto_globals)</span>
+<span class='curline'><a href='../S/1626.html#L92'>CG</a>                 92 Zend/zend.c    	if (!CG(multibyte)) {</span>
+<span class='curline'><a href='../S/1626.html#L400'>CG</a>                400 Zend/zend.c    	CG(short_tags) = short_tags_default;</span>
+<span class='curline'><a href='../S/1626.html#L401'>CG</a>                401 Zend/zend.c    	CG(compiler_options) = compiler_options_default;</span>
+<span class='curline'><a href='../S/1626.html#L787'>CG</a>                787 Zend/zend.c    	short_tags_default = CG(short_tags);</span>
+<span class='curline'><a href='../S/1626.html#L788'>CG</a>                788 Zend/zend.c    	compiler_options_default = CG(compiler_options);</span>
+<span class='curline'><a href='../S/1626.html#L900'>CG</a>                900 Zend/zend.c    	CG(unclean_shutdown) = 1;</span>
+<span class='curline'><a href='../S/1626.html#L901'>CG</a>                901 Zend/zend.c    	CG(active_class_entry) = NULL;</span>
+<span class='curline'><a href='../S/1626.html#L902'>CG</a>                902 Zend/zend.c    	CG(in_compilation) = 0;</span>
+<span class='curline'><a href='../S/1626.html#L1015'>CG</a>               1015 Zend/zend.c    		if (CG(stack).top) { \</span>
+<span class='curline'><a href='../S/1626.html#L1016'>CG</a>               1016 Zend/zend.c    			memcpy(&amp;stack, &amp;CG(stack), sizeof(zend_stack)); \</span>
+<span class='curline'><a href='../S/1626.html#L1017'>CG</a>               1017 Zend/zend.c    			CG(stack).top = CG(stack).max = 0; \</span>
+<span class='curline'><a href='../S/1626.html#L1018'>CG</a>               1018 Zend/zend.c    			CG(stack).elements = NULL; \</span>
+<span class='curline'><a href='../S/1626.html#L1026'>CG</a>               1026 Zend/zend.c    			zend_stack_destroy(&amp;CG(stack)); \</span>
+<span class='curline'><a href='../S/1626.html#L1027'>CG</a>               1027 Zend/zend.c    			memcpy(&amp;CG(stack), &amp;stack, sizeof(zend_stack)); \</span>
+<span class='curline'><a href='../S/1626.html#L1213'>CG</a>               1213 Zend/zend.c    			in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1626.html#L1215'>CG</a>               1215 Zend/zend.c    				saved_class_entry = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1626.html#L1216'>CG</a>               1216 Zend/zend.c    				CG(active_class_entry) = NULL;</span>
+<span class='curline'><a href='../S/1626.html#L1219'>CG</a>               1219 Zend/zend.c    				CG(in_compilation) = 0;</span>
+<span class='curline'><a href='../S/1626.html#L1222'>CG</a>               1222 Zend/zend.c    			if (call_user_function_ex(CG(function_table), NULL, &amp;orig_user_error_handler, &amp;retval, 5, params, 1, NULL) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1626.html#L1235'>CG</a>               1235 Zend/zend.c    				CG(active_class_entry) = saved_class_entry;</span>
+<span class='curline'><a href='../S/1626.html#L1238'>CG</a>               1238 Zend/zend.c    				CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1626.html#L1315'>CG</a>               1315 Zend/zend.c    	if (EG(current_execute_data) &amp;&amp; !CG(in_compilation)) {</span>
+<span class='curline'><a href='../S/1626.html#L1393'>CG</a>               1393 Zend/zend.c    			if (call_user_function_ex(CG(function_table), NULL, &amp;orig_user_exception_handler, &amp;retval2, 1, params, 1, NULL) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1631.html#L1106'>CG</a>               1106 Zend/zend_API.c 			CG(static_members_table)[(zend_intptr_t)(class_type-&gt;static_members_table)] = emalloc(sizeof(zval) * class_type-&gt;default_static_members_count);</span>
+<span class='curline'><a href='../S/1631.html#L1128'>CG</a>               1128 Zend/zend_API.c 			zend_class_entry **scope = EG(current_execute_data) ? &amp;EG(scope) : &amp;CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1631.html#L1949'>CG</a>               1949 Zend/zend_API.c 	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {</span>
+<span class='curline'><a href='../S/1631.html#L1962'>CG</a>               1962 Zend/zend_API.c 		ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {</span>
+<span class='curline'><a href='../S/1631.html#L2142'>CG</a>               2142 Zend/zend_API.c 		target_function_table = CG(function_table);</span>
+<span class='curline'><a href='../S/1631.html#L2439'>CG</a>               2439 Zend/zend_API.c 		target_function_table = CG(function_table);</span>
+<span class='curline'><a href='../S/1631.html#L2664'>CG</a>               2664 Zend/zend_API.c 	zend_hash_update_ptr(CG(class_table), lowercase_name, class_entry);</span>
+<span class='curline'><a href='../S/1631.html#L2731'>CG</a>               2731 Zend/zend_API.c 	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);</span>
+<span class='curline'><a href='../S/1631.html#L2778'>CG</a>               2778 Zend/zend_API.c 	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {</span>
+<span class='curline'><a href='../S/1631.html#L2816'>CG</a>               2816 Zend/zend_API.c 	disabled_class = zend_hash_find_ptr(CG(class_table), key);</span>
+<span class='curline'><a href='../S/1631.html#L3617'>CG</a>               3617 Zend/zend_API.c 		property_info = zend_arena_alloc(&amp;CG(arena), sizeof(zend_property_info));</span>
+<span class='curline'><a href='../S/1632.html#L238'>CG</a>                238 Zend/zend_API.h #	define CE_STATIC_MEMBERS(ce) (((ce)-&gt;type==ZEND_USER_CLASS)?(ce)-&gt;static_members_table:CG(static_members_table)[(zend_intptr_t)(ce)-&gt;static_members_table])</span>
+<span class='curline'><a href='../S/1634.html#L32'>CG</a>                 32 Zend/zend_ast.c 	return zend_arena_alloc(&amp;CG(ast_arena), size);</span>
+<span class='curline'><a href='../S/1634.html#L55'>CG</a>                 55 Zend/zend_ast.c 	ast-&gt;lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1634.html#L67'>CG</a>                 67 Zend/zend_ast.c 	ast-&gt;val.u2.lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1634.html#L81'>CG</a>                 81 Zend/zend_ast.c 	ast-&gt;end_lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1634.html#L114'>CG</a>                114 Zend/zend_ast.c 		ast-&gt;lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1634.html#L150'>CG</a>                150 Zend/zend_ast.c 	list-&gt;lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1638.html#L2764'>CG</a>               2764 Zend/zend_builtin_functions.c 	ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {</span>
+<span class='curline'><a href='../S/1640.html#L62'>CG</a>                 62 Zend/zend_closures.c 	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {</span>
+<span class='curline'><a href='../S/1640.html#L580'>CG</a>                580 Zend/zend_closures.c 			closure-&gt;func.op_array.run_time_cache = func-&gt;op_array.run_time_cache = zend_arena_alloc(&amp;CG(arena), func-&gt;op_array.cache_size);</span>
+<span class='curline'><a href='../S/1642.html#L40'>CG</a>                 40 Zend/zend_compile.c 			target.constant = zend_add_literal(CG(active_op_array), &amp;(src)-&gt;u.constant); \</span>
+<span class='curline'><a href='../S/1642.html#L55'>CG</a>                 55 Zend/zend_compile.c #define FC(member) (CG(file_context).member)</span>
+<span class='curline'><a href='../S/1642.html#L68'>CG</a>                 68 Zend/zend_compile.c 	zend_op_array *op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L76'>CG</a>                 76 Zend/zend_compile.c 	zend_op_array *op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L117'>CG</a>                117 Zend/zend_compile.c 	zend_string *filename = CG(active_op_array)-&gt;filename;</span>
+<span class='curline'><a href='../S/1642.html#L220'>CG</a>                220 Zend/zend_compile.c 	*prev_context = CG(context);</span>
+<span class='curline'><a href='../S/1642.html#L221'>CG</a>                221 Zend/zend_compile.c 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;</span>
+<span class='curline'><a href='../S/1642.html#L222'>CG</a>                222 Zend/zend_compile.c 	CG(context).vars_size = 0;</span>
+<span class='curline'><a href='../S/1642.html#L223'>CG</a>                223 Zend/zend_compile.c 	CG(context).literals_size = 0;</span>
+<span class='curline'><a href='../S/1642.html#L224'>CG</a>                224 Zend/zend_compile.c 	CG(context).current_brk_cont = -1;</span>
+<span class='curline'><a href='../S/1642.html#L225'>CG</a>                225 Zend/zend_compile.c 	CG(context).backpatch_count = 0;</span>
+<span class='curline'><a href='../S/1642.html#L226'>CG</a>                226 Zend/zend_compile.c 	CG(context).in_finally = 0;</span>
+<span class='curline'><a href='../S/1642.html#L227'>CG</a>                227 Zend/zend_compile.c 	CG(context).fast_call_var = -1;</span>
+<span class='curline'><a href='../S/1642.html#L228'>CG</a>                228 Zend/zend_compile.c 	CG(context).labels = NULL;</span>
+<span class='curline'><a href='../S/1642.html#L234'>CG</a>                234 Zend/zend_compile.c 	if (CG(context).labels) {</span>
+<span class='curline'><a href='../S/1642.html#L235'>CG</a>                235 Zend/zend_compile.c 		zend_hash_destroy(CG(context).labels);</span>
+<span class='curline'><a href='../S/1642.html#L236'>CG</a>                236 Zend/zend_compile.c 		FREE_HASHTABLE(CG(context).labels);</span>
+<span class='curline'><a href='../S/1642.html#L237'>CG</a>                237 Zend/zend_compile.c 		CG(context).labels = NULL;</span>
+<span class='curline'><a href='../S/1642.html#L239'>CG</a>                239 Zend/zend_compile.c 	CG(context) = *prev_context;</span>
+<span class='curline'><a href='../S/1642.html#L277'>CG</a>                277 Zend/zend_compile.c 	*prev_context = CG(file_context);</span>
+<span class='curline'><a href='../S/1642.html#L291'>CG</a>                291 Zend/zend_compile.c 	CG(file_context) = *prev_context;</span>
+<span class='curline'><a href='../S/1642.html#L297'>CG</a>                297 Zend/zend_compile.c 	zend_stack_init(&amp;CG(loop_var_stack), sizeof(zend_loop_var));</span>
+<span class='curline'><a href='../S/1642.html#L298'>CG</a>                298 Zend/zend_compile.c 	zend_stack_init(&amp;CG(delayed_oplines_stack), sizeof(zend_op));</span>
+<span class='curline'><a href='../S/1642.html#L299'>CG</a>                299 Zend/zend_compile.c 	CG(active_class_entry) = NULL;</span>
+<span class='curline'><a href='../S/1642.html#L300'>CG</a>                300 Zend/zend_compile.c 	CG(in_compilation) = 0;</span>
+<span class='curline'><a href='../S/1642.html#L301'>CG</a>                301 Zend/zend_compile.c 	CG(start_lineno) = 0;</span>
+<span class='curline'><a href='../S/1642.html#L302'>CG</a>                302 Zend/zend_compile.c 	zend_hash_init(&amp;CG(const_filenames), 8, NULL, NULL, 0);</span>
+<span class='curline'><a href='../S/1642.html#L304'>CG</a>                304 Zend/zend_compile.c 	CG(encoding_declared) = 0;</span>
+<span class='curline'><a href='../S/1642.html#L317'>CG</a>                317 Zend/zend_compile.c 	CG(arena) = zend_arena_create(64 * 1024);</span>
+<span class='curline'><a href='../S/1642.html#L318'>CG</a>                318 Zend/zend_compile.c 	CG(active_op_array) = NULL;</span>
+<span class='curline'><a href='../S/1642.html#L319'>CG</a>                319 Zend/zend_compile.c 	memset(&amp;CG(context), 0, sizeof(CG(context)));</span>
+<span class='curline'><a href='../S/1642.html#L322'>CG</a>                322 Zend/zend_compile.c 	zend_hash_init(&amp;CG(filenames_table), 8, NULL, ZVAL_PTR_DTOR, 0);</span>
+<span class='curline'><a href='../S/1642.html#L323'>CG</a>                323 Zend/zend_compile.c 	zend_llist_init(&amp;CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);</span>
+<span class='curline'><a href='../S/1642.html#L324'>CG</a>                324 Zend/zend_compile.c 	CG(unclean_shutdown) = 0;</span>
+<span class='curline'><a href='../S/1642.html#L330'>CG</a>                330 Zend/zend_compile.c 	zend_stack_destroy(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L331'>CG</a>                331 Zend/zend_compile.c 	zend_stack_destroy(&amp;CG(delayed_oplines_stack));</span>
+<span class='curline'><a href='../S/1642.html#L332'>CG</a>                332 Zend/zend_compile.c 	zend_hash_destroy(&amp;CG(filenames_table));</span>
+<span class='curline'><a href='../S/1642.html#L333'>CG</a>                333 Zend/zend_compile.c 	zend_hash_destroy(&amp;CG(const_filenames));</span>
+<span class='curline'><a href='../S/1642.html#L334'>CG</a>                334 Zend/zend_compile.c 	zend_arena_destroy(CG(arena));</span>
+<span class='curline'><a href='../S/1642.html#L342'>CG</a>                342 Zend/zend_compile.c 	if ((p = zend_hash_find(&amp;CG(filenames_table), new_compiled_filename))) {</span>
+<span class='curline'><a href='../S/1642.html#L344'>CG</a>                344 Zend/zend_compile.c 		CG(compiled_filename) = Z_STR_P(p);</span>
+<span class='curline'><a href='../S/1642.html#L349'>CG</a>                349 Zend/zend_compile.c 	zend_hash_update(&amp;CG(filenames_table), new_compiled_filename, &amp;rv);</span>
+<span class='curline'><a href='../S/1642.html#L351'>CG</a>                351 Zend/zend_compile.c 	CG(compiled_filename) = new_compiled_filename;</span>
+<span class='curline'><a href='../S/1642.html#L358'>CG</a>                358 Zend/zend_compile.c 	CG(compiled_filename) = original_compiled_filename;</span>
+<span class='curline'><a href='../S/1642.html#L364'>CG</a>                364 Zend/zend_compile.c 	return CG(compiled_filename);</span>
+<span class='curline'><a href='../S/1642.html#L370'>CG</a>                370 Zend/zend_compile.c 	return CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1642.html#L376'>CG</a>                376 Zend/zend_compile.c 	return CG(in_compilation);</span>
+<span class='curline'><a href='../S/1642.html#L402'>CG</a>                402 Zend/zend_compile.c 	if (op_array-&gt;last_var &gt; CG(context).vars_size) {</span>
+<span class='curline'><a href='../S/1642.html#L403'>CG</a>                403 Zend/zend_compile.c 		CG(context).vars_size += 16; /* FIXME */</span>
+<span class='curline'><a href='../S/1642.html#L404'>CG</a>                404 Zend/zend_compile.c 		op_array-&gt;vars = erealloc(op_array-&gt;vars, CG(context).vars_size * sizeof(zend_string*));</span>
+<span class='curline'><a href='../S/1642.html#L445'>CG</a>                445 Zend/zend_compile.c 	if (i &gt;= CG(context).literals_size) {</span>
+<span class='curline'><a href='../S/1642.html#L446'>CG</a>                446 Zend/zend_compile.c 		while (i &gt;= CG(context).literals_size) {</span>
+<span class='curline'><a href='../S/1642.html#L447'>CG</a>                447 Zend/zend_compile.c 			CG(context).literals_size += 16; /* FIXME */</span>
+<span class='curline'><a href='../S/1642.html#L449'>CG</a>                449 Zend/zend_compile.c 		op_array-&gt;literals = (zval*)erealloc(op_array-&gt;literals, CG(context).literals_size * sizeof(zval));</span>
+<span class='curline'><a href='../S/1642.html#L563'>CG</a>                563 Zend/zend_compile.c 		op.constant = zend_add_literal(CG(active_op_array), &amp;_c); \</span>
+<span class='curline'><a href='../S/1642.html#L576'>CG</a>                576 Zend/zend_compile.c 	int parent = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L579'>CG</a>                579 Zend/zend_compile.c 	CG(context).current_brk_cont = CG(active_op_array)-&gt;last_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L580'>CG</a>                580 Zend/zend_compile.c 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L587'>CG</a>                587 Zend/zend_compile.c 		info.u.brk_cont_offset = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L588'>CG</a>                588 Zend/zend_compile.c 		brk_cont_element-&gt;start = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L596'>CG</a>                596 Zend/zend_compile.c 	zend_stack_push(&amp;CG(loop_var_stack), &amp;info);</span>
+<span class='curline'><a href='../S/1642.html#L603'>CG</a>                603 Zend/zend_compile.c 		= &amp;CG(active_op_array)-&gt;brk_cont_array[CG(context).current_brk_cont];</span>
+<span class='curline'><a href='../S/1642.html#L605'>CG</a>                605 Zend/zend_compile.c 	brk_cont_element-&gt;brk = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L606'>CG</a>                606 Zend/zend_compile.c 	CG(context).current_brk_cont = brk_cont_element-&gt;parent;</span>
+<span class='curline'><a href='../S/1642.html#L608'>CG</a>                608 Zend/zend_compile.c 	zend_stack_del_top(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L615'>CG</a>                615 Zend/zend_compile.c 		zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L621'>CG</a>                621 Zend/zend_compile.c 		zend_op *opline = &amp;CG(active_op_array)-&gt;opcodes[CG(active_op_array)-&gt;last-1];</span>
+<span class='curline'><a href='../S/1642.html#L634'>CG</a>                634 Zend/zend_compile.c 				opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L642'>CG</a>                642 Zend/zend_compile.c 			while (opline &gt;= CG(active_op_array)-&gt;opcodes) {</span>
+<span class='curline'><a href='../S/1642.html#L646'>CG</a>                646 Zend/zend_compile.c 					opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L657'>CG</a>                657 Zend/zend_compile.c 						opline = &amp;CG(active_op_array)-&gt;opcodes[CG(active_op_array)-&gt;last-1];</span>
+<span class='curline'><a href='../S/1642.html#L899'>CG</a>                899 Zend/zend_compile.c 	zend_op_array *op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L952'>CG</a>                952 Zend/zend_compile.c 	new_function = zend_arena_alloc(&amp;CG(arena), sizeof(zend_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1061'>CG</a>               1061 Zend/zend_compile.c 	zend_op *opline = &amp;CG(active_op_array)-&gt;opcodes[CG(active_op_array)-&gt;last-1];</span>
+<span class='curline'><a href='../S/1642.html#L1064'>CG</a>               1064 Zend/zend_compile.c 	while (opline-&gt;opcode == ZEND_TICKS &amp;&amp; opline &gt; CG(active_op_array)-&gt;opcodes) {</span>
+<span class='curline'><a href='../S/1642.html#L1070'>CG</a>               1070 Zend/zend_compile.c 			if (do_bind_function(CG(active_op_array), opline, CG(function_table), 1) == FAILURE) {</span>
+<span class='curline'><a href='../S/1642.html#L1073'>CG</a>               1073 Zend/zend_compile.c 			table = CG(function_table);</span>
+<span class='curline'><a href='../S/1642.html#L1076'>CG</a>               1076 Zend/zend_compile.c 			if (do_bind_class(CG(active_op_array), opline, CG(class_table), 1) == NULL) {</span>
+<span class='curline'><a href='../S/1642.html#L1079'>CG</a>               1079 Zend/zend_compile.c 			table = CG(class_table);</span>
+<span class='curline'><a href='../S/1642.html#L1089'>CG</a>               1089 Zend/zend_compile.c 				    ((CG(compiler_options) &amp; ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &amp;&amp;</span>
+<span class='curline'><a href='../S/1642.html#L1091'>CG</a>               1091 Zend/zend_compile.c 					if (CG(compiler_options) &amp; ZEND_COMPILE_DELAYED_BINDING) {</span>
+<span class='curline'><a href='../S/1642.html#L1092'>CG</a>               1092 Zend/zend_compile.c 						uint32_t *opline_num = &amp;CG(active_op_array)-&gt;early_binding;</span>
+<span class='curline'><a href='../S/1642.html#L1095'>CG</a>               1095 Zend/zend_compile.c 							opline_num = &amp;CG(active_op_array)-&gt;opcodes[*opline_num].result.opline_num;</span>
+<span class='curline'><a href='../S/1642.html#L1097'>CG</a>               1097 Zend/zend_compile.c 						*opline_num = opline - CG(active_op_array)-&gt;opcodes;</span>
+<span class='curline'><a href='../S/1642.html#L1104'>CG</a>               1104 Zend/zend_compile.c 				if (do_bind_inherited_class(CG(active_op_array), opline, CG(class_table), ce, 1) == NULL) {</span>
+<span class='curline'><a href='../S/1642.html#L1108'>CG</a>               1108 Zend/zend_compile.c 				zend_del_literal(CG(active_op_array), fetch_class_opline-&gt;op2.constant);</span>
+<span class='curline'><a href='../S/1642.html#L1111'>CG</a>               1111 Zend/zend_compile.c 				table = CG(class_table);</span>
+<span class='curline'><a href='../S/1642.html#L1127'>CG</a>               1127 Zend/zend_compile.c 	zend_del_literal(CG(active_op_array), opline-&gt;op1.constant);</span>
+<span class='curline'><a href='../S/1642.html#L1128'>CG</a>               1128 Zend/zend_compile.c 	zend_del_literal(CG(active_op_array), opline-&gt;op2.constant);</span>
+<span class='curline'><a href='../S/1642.html#L1135'>CG</a>               1135 Zend/zend_compile.c 	if (!CG(active_op_array)-&gt;function_name) {</span>
+<span class='curline'><a href='../S/1642.html#L1139'>CG</a>               1139 Zend/zend_compile.c 	if (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_HAS_RETURN_TYPE) {</span>
+<span class='curline'><a href='../S/1642.html#L1141'>CG</a>               1141 Zend/zend_compile.c 		if (!CG(active_op_array)-&gt;arg_info[-1].class_name) {</span>
+<span class='curline'><a href='../S/1642.html#L1143'>CG</a>               1143 Zend/zend_compile.c 				zend_get_type_by_const(CG(active_op_array)-&gt;arg_info[-1].type_hint));</span>
+<span class='curline'><a href='../S/1642.html#L1145'>CG</a>               1145 Zend/zend_compile.c 		if (!(ZSTR_LEN(CG(active_op_array)-&gt;arg_info[-1].class_name) == sizeof("Traversable")-1</span>
+<span class='curline'><a href='../S/1642.html#L1146'>CG</a>               1146 Zend/zend_compile.c 				&amp;&amp; zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)-&gt;arg_info[-1].class_name), sizeof("Traversable")-1, "Traversable", sizeof("Traversable")-1) == 0) &amp;&amp;</span>
+<span class='curline'><a href='../S/1642.html#L1147'>CG</a>               1147 Zend/zend_compile.c 			!(ZSTR_LEN(CG(active_op_array)-&gt;arg_info[-1].class_name) == sizeof("Iterator")-1</span>
+<span class='curline'><a href='../S/1642.html#L1148'>CG</a>               1148 Zend/zend_compile.c 				&amp;&amp; zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)-&gt;arg_info[-1].class_name), sizeof("Iterator")-1, "Iterator", sizeof("Iterator")-1) == 0) &amp;&amp;</span>
+<span class='curline'><a href='../S/1642.html#L1149'>CG</a>               1149 Zend/zend_compile.c 			!(ZSTR_LEN(CG(active_op_array)-&gt;arg_info[-1].class_name) == sizeof("Generator")-1</span>
+<span class='curline'><a href='../S/1642.html#L1150'>CG</a>               1150 Zend/zend_compile.c 				&amp;&amp; zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)-&gt;arg_info[-1].class_name), sizeof("Generator")-1, "Generator", sizeof("Generator")-1) == 0)) {</span>
+<span class='curline'><a href='../S/1642.html#L1151'>CG</a>               1151 Zend/zend_compile.c 			zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(CG(active_op_array)-&gt;arg_info[-1].class_name));</span>
+<span class='curline'><a href='../S/1642.html#L1155'>CG</a>               1155 Zend/zend_compile.c 	CG(active_op_array)-&gt;fn_flags |= ZEND_ACC_GENERATOR;</span>
+<span class='curline'><a href='../S/1642.html#L1162'>CG</a>               1162 Zend/zend_compile.c 		zend_bool orig_in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1642.html#L1166'>CG</a>               1166 Zend/zend_compile.c 		CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1642.html#L1174'>CG</a>               1174 Zend/zend_compile.c 		CG(in_compilation) = orig_in_compilation;</span>
+<span class='curline'><a href='../S/1642.html#L1262'>CG</a>               1262 Zend/zend_compile.c 	      ((c-&gt;flags &amp; CONST_PERSISTENT) &amp;&amp; !(CG(compiler_options) &amp; ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION))</span>
+<span class='curline'><a href='../S/1642.html#L1263'>CG</a>               1263 Zend/zend_compile.c 	   || (Z_TYPE(c-&gt;value) &lt; IS_OBJECT &amp;&amp; !(CG(compiler_options) &amp; ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION))</span>
+<span class='curline'><a href='../S/1642.html#L1291'>CG</a>               1291 Zend/zend_compile.c 	if (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_CLOSURE) {</span>
+<span class='curline'><a href='../S/1642.html#L1296'>CG</a>               1296 Zend/zend_compile.c 	if (!CG(active_class_entry)) {</span>
+<span class='curline'><a href='../S/1642.html#L1299'>CG</a>               1299 Zend/zend_compile.c 		return CG(active_op_array)-&gt;function_name != NULL;</span>
+<span class='curline'><a href='../S/1642.html#L1303'>CG</a>               1303 Zend/zend_compile.c 	return (CG(active_class_entry)-&gt;ce_flags &amp; ZEND_ACC_TRAIT) == 0;</span>
+<span class='curline'><a href='../S/1642.html#L1309'>CG</a>               1309 Zend/zend_compile.c 	if (!CG(active_class_entry)) {</span>
+<span class='curline'><a href='../S/1642.html#L1316'>CG</a>               1316 Zend/zend_compile.c 		&amp;&amp; zend_string_equals_ci(class_name, CG(active_class_entry)-&gt;name);</span>
+<span class='curline'><a href='../S/1642.html#L1347'>CG</a>               1347 Zend/zend_compile.c 	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT &amp;&amp; !CG(active_class_entry) &amp;&amp; zend_is_scope_known()) {</span>
+<span class='curline'><a href='../S/1642.html#L1377'>CG</a>               1377 Zend/zend_compile.c 			if (constant || (CG(active_class_entry) &amp;&amp; zend_is_scope_known())) {</span>
+<span class='curline'><a href='../S/1642.html#L1378'>CG</a>               1378 Zend/zend_compile.c 				ZVAL_STR_COPY(zv, CG(active_class_entry)-&gt;name);</span>
+<span class='curline'><a href='../S/1642.html#L1408'>CG</a>               1408 Zend/zend_compile.c 		c = zend_hash_find(&amp;CG(active_class_entry)-&gt;constants_table, name);</span>
+<span class='curline'><a href='../S/1642.html#L1409'>CG</a>               1409 Zend/zend_compile.c 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT &amp;&amp; !(CG(compiler_options) &amp; ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {</span>
+<span class='curline'><a href='../S/1642.html#L1410'>CG</a>               1410 Zend/zend_compile.c 		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(class_name), ZSTR_LEN(class_name));</span>
+<span class='curline'><a href='../S/1642.html#L1420'>CG</a>               1420 Zend/zend_compile.c 	if (CG(compiler_options) &amp; ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION) {</span>
+<span class='curline'><a href='../S/1642.html#L1458'>CG</a>               1458 Zend/zend_compile.c 	if (!(CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO)) {</span>
+<span class='curline'><a href='../S/1642.html#L1462'>CG</a>               1462 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1474'>CG</a>               1474 Zend/zend_compile.c 	if (!(CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO)) {</span>
+<span class='curline'><a href='../S/1642.html#L1478'>CG</a>               1478 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1490'>CG</a>               1490 Zend/zend_compile.c 	if (!(CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO)) {</span>
+<span class='curline'><a href='../S/1642.html#L1494'>CG</a>               1494 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1505'>CG</a>               1505 Zend/zend_compile.c 	if ((auto_global = zend_hash_str_find_ptr(CG(auto_globals), name, len)) != NULL) {</span>
+<span class='curline'><a href='../S/1642.html#L1519'>CG</a>               1519 Zend/zend_compile.c 	if ((auto_global = zend_hash_find_ptr(CG(auto_globals), name)) != NULL) {</span>
+<span class='curline'><a href='../S/1642.html#L1538'>CG</a>               1538 Zend/zend_compile.c 	retval = zend_hash_add_mem(CG(auto_globals), auto_global.name, &amp;auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;</span>
+<span class='curline'><a href='../S/1642.html#L1549'>CG</a>               1549 Zend/zend_compile.c 	ZEND_HASH_FOREACH_PTR(CG(auto_globals), auto_global) {</span>
+<span class='curline'><a href='../S/1642.html#L1566'>CG</a>               1566 Zend/zend_compile.c 	if (CG(increment_lineno)) {</span>
+<span class='curline'><a href='../S/1642.html#L1567'>CG</a>               1567 Zend/zend_compile.c 		CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1642.html#L1568'>CG</a>               1568 Zend/zend_compile.c 		CG(increment_lineno) = 0;</span>
+<span class='curline'><a href='../S/1642.html#L1587'>CG</a>               1587 Zend/zend_compile.c 				CG(increment_lineno) = 1;</span>
+<span class='curline'><a href='../S/1642.html#L1611'>CG</a>               1611 Zend/zend_compile.c 	if (CG(compiler_options) &amp; ZEND_COMPILE_GUARDS) {</span>
+<span class='curline'><a href='../S/1642.html#L1623'>CG</a>               1623 Zend/zend_compile.c 		int n = zend_hash_num_elements(CG(class_table));</span>
+<span class='curline'><a href='../S/1642.html#L1625'>CG</a>               1625 Zend/zend_compile.c 		if (CG(static_members_table) &amp;&amp; n &gt;= CG(last_static_member)) {</span>
+<span class='curline'><a href='../S/1642.html#L1627'>CG</a>               1627 Zend/zend_compile.c 			CG(last_static_member) = n+1;</span>
+<span class='curline'><a href='../S/1642.html#L1628'>CG</a>               1628 Zend/zend_compile.c 			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval*));</span>
+<span class='curline'><a href='../S/1642.html#L1629'>CG</a>               1629 Zend/zend_compile.c 			CG(static_members_table)[n] = NULL;</span>
+<span class='curline'><a href='../S/1642.html#L1838'>CG</a>               1838 Zend/zend_compile.c 	opline-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1846'>CG</a>               1846 Zend/zend_compile.c 	opline-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1853'>CG</a>               1853 Zend/zend_compile.c 	zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1877'>CG</a>               1877 Zend/zend_compile.c 	zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1905'>CG</a>               1905 Zend/zend_compile.c 	if (CG(active_op_array)-&gt;last &amp;&amp; CG(active_op_array)-&gt;opcodes[CG(active_op_array)-&gt;last - 1].opcode == ZEND_TICKS) {</span>
+<span class='curline'><a href='../S/1642.html#L1909'>CG</a>               1909 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1926'>CG</a>               1926 Zend/zend_compile.c 	uint32_t opnum = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1935'>CG</a>               1935 Zend/zend_compile.c 	uint32_t opnum = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L1944'>CG</a>               1944 Zend/zend_compile.c 	zend_op *opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_jump];</span>
+<span class='curline'><a href='../S/1642.html#L1963'>CG</a>               1963 Zend/zend_compile.c 	zend_update_jump_target(opnum_jump, get_next_op_number(CG(active_op_array)));</span>
+<span class='curline'><a href='../S/1642.html#L1986'>CG</a>               1986 Zend/zend_compile.c 	zend_stack_push(&amp;CG(delayed_oplines_stack), &amp;tmp_opline);</span>
+<span class='curline'><a href='../S/1642.html#L1987'>CG</a>               1987 Zend/zend_compile.c 	return zend_stack_top(&amp;CG(delayed_oplines_stack));</span>
+<span class='curline'><a href='../S/1642.html#L1993'>CG</a>               1993 Zend/zend_compile.c 	return zend_stack_count(&amp;CG(delayed_oplines_stack));</span>
+<span class='curline'><a href='../S/1642.html#L1999'>CG</a>               1999 Zend/zend_compile.c 	zend_op *opline = NULL, *oplines = zend_stack_base(&amp;CG(delayed_oplines_stack));</span>
+<span class='curline'><a href='../S/1642.html#L2000'>CG</a>               2000 Zend/zend_compile.c 	uint32_t i, count = zend_stack_count(&amp;CG(delayed_oplines_stack));</span>
+<span class='curline'><a href='../S/1642.html#L2004'>CG</a>               2004 Zend/zend_compile.c 		opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L2007'>CG</a>               2007 Zend/zend_compile.c 	CG(delayed_oplines_stack).top = offset;</span>
+<span class='curline'><a href='../S/1642.html#L2018'>CG</a>               2018 Zend/zend_compile.c 			opline-&gt;result.var = expr-&gt;u.op.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L2021'>CG</a>               2021 Zend/zend_compile.c 			opline-&gt;op2.num = CG(active_op_array)-&gt;cache_size;</span>
+<span class='curline'><a href='../S/1642.html#L2022'>CG</a>               2022 Zend/zend_compile.c 			CG(active_op_array)-&gt;cache_size += sizeof(void*);</span>
+<span class='curline'><a href='../S/1642.html#L2034'>CG</a>               2034 Zend/zend_compile.c 	zend_bool returns_reference = (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_RETURN_REFERENCE) != 0;</span>
+<span class='curline'><a href='../S/1642.html#L2036'>CG</a>               2036 Zend/zend_compile.c 	if (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_HAS_RETURN_TYPE) {</span>
+<span class='curline'><a href='../S/1642.html#L2037'>CG</a>               2037 Zend/zend_compile.c 		zend_emit_return_type_check(NULL, CG(active_op_array)-&gt;arg_info - 1);</span>
+<span class='curline'><a href='../S/1642.html#L2115'>CG</a>               2115 Zend/zend_compile.c 			CG(active_op_array), Z_STR(class_node-&gt;u.constant));</span>
+<span class='curline'><a href='../S/1642.html#L2145'>CG</a>               2145 Zend/zend_compile.c 			opline-&gt;op2.constant = zend_add_class_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L2173'>CG</a>               2173 Zend/zend_compile.c 		result-&gt;u.op.var = lookup_cv(CG(active_op_array), name);</span>
+<span class='curline'><a href='../S/1642.html#L2176'>CG</a>               2176 Zend/zend_compile.c 		name = CG(active_op_array)-&gt;vars[EX_VAR_TO_NUM(result-&gt;u.op.var)];</span>
+<span class='curline'><a href='../S/1642.html#L2179'>CG</a>               2179 Zend/zend_compile.c 			CG(active_op_array)-&gt;this_var = result-&gt;u.op.var;</span>
+<span class='curline'><a href='../S/1642.html#L2213'>CG</a>               2213 Zend/zend_compile.c 			&amp;&amp; CG(active_op_array)-&gt;scope &amp;&amp; CG(active_op_array)-&gt;this_var == (uint32_t)-1</span>
+<span class='curline'><a href='../S/1642.html#L2216'>CG</a>               2216 Zend/zend_compile.c 			CG(active_op_array)-&gt;this_var = lookup_cv(CG(active_op_array), key);</span>
+<span class='curline'><a href='../S/1642.html#L2388'>CG</a>               2388 Zend/zend_compile.c 			CG(active_op_array), Z_STR(class_node.u.constant));</span>
+<span class='curline'><a href='../S/1642.html#L2758'>CG</a>               2758 Zend/zend_compile.c 		opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L2812'>CG</a>               2812 Zend/zend_compile.c 	uint32_t opnum_init = get_next_op_number(CG(active_op_array)) - 1;</span>
+<span class='curline'><a href='../S/1642.html#L2820'>CG</a>               2820 Zend/zend_compile.c 	opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_init];</span>
+<span class='curline'><a href='../S/1642.html#L2850'>CG</a>               2850 Zend/zend_compile.c 	zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L2855'>CG</a>               2855 Zend/zend_compile.c 		CG(active_op_array), Z_STR(name_node-&gt;u.constant));</span>
+<span class='curline'><a href='../S/1642.html#L2864'>CG</a>               2864 Zend/zend_compile.c 	zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L2873'>CG</a>               2873 Zend/zend_compile.c 			opline-&gt;op1.constant = zend_add_class_name_literal(CG(active_op_array), class);</span>
+<span class='curline'><a href='../S/1642.html#L2875'>CG</a>               2875 Zend/zend_compile.c 			opline-&gt;op2.constant = zend_add_func_name_literal(CG(active_op_array), method);</span>
+<span class='curline'><a href='../S/1642.html#L2882'>CG</a>               2882 Zend/zend_compile.c 			opline-&gt;op2.constant = zend_add_func_name_literal(CG(active_op_array), str);</span>
+<span class='curline'><a href='../S/1642.html#L2911'>CG</a>               2911 Zend/zend_compile.c 	if ((CG(compiler_options) &amp; ZEND_COMPILE_NO_BUILTIN_STRLEN)</span>
+<span class='curline'><a href='../S/1642.html#L2970'>CG</a>               2970 Zend/zend_compile.c 		zend_add_literal(CG(active_op_array), &amp;c);</span>
+<span class='curline'><a href='../S/1642.html#L2989'>CG</a>               2989 Zend/zend_compile.c 	fbc = zend_hash_find_ptr(CG(function_table), lcname);</span>
+<span class='curline'><a href='../S/1642.html#L2991'>CG</a>               2991 Zend/zend_compile.c 	 || (fbc-&gt;type == ZEND_INTERNAL_FUNCTION &amp;&amp; (CG(compiler_options) &amp; ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))</span>
+<span class='curline'><a href='../S/1642.html#L2992'>CG</a>               2992 Zend/zend_compile.c 	 || (fbc-&gt;type == ZEND_USER_FUNCTION &amp;&amp; (CG(compiler_options) &amp; ZEND_COMPILE_IGNORE_USER_FUNCTIONS))</span>
+<span class='curline'><a href='../S/1642.html#L3109'>CG</a>               3109 Zend/zend_compile.c 		uint32_t check_op_number = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3122'>CG</a>               3122 Zend/zend_compile.c 				CG(active_op_array), name);</span>
+<span class='curline'><a href='../S/1642.html#L3137'>CG</a>               3137 Zend/zend_compile.c 		CG(active_op_array)-&gt;opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3229'>CG</a>               3229 Zend/zend_compile.c 		fbc = zend_hash_find_ptr(CG(function_table), lcname);</span>
+<span class='curline'><a href='../S/1642.html#L3231'>CG</a>               3231 Zend/zend_compile.c 		 || (fbc-&gt;type == ZEND_INTERNAL_FUNCTION &amp;&amp; (CG(compiler_options) &amp; ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))</span>
+<span class='curline'><a href='../S/1642.html#L3232'>CG</a>               3232 Zend/zend_compile.c 		 || (fbc-&gt;type == ZEND_USER_FUNCTION &amp;&amp; (CG(compiler_options) &amp; ZEND_COMPILE_IGNORE_USER_FUNCTIONS))</span>
+<span class='curline'><a href='../S/1642.html#L3282'>CG</a>               3282 Zend/zend_compile.c 		opline-&gt;op2.constant = zend_add_func_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L3329'>CG</a>               3329 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3337'>CG</a>               3337 Zend/zend_compile.c 		opline-&gt;op2.constant = zend_add_func_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L3367'>CG</a>               3367 Zend/zend_compile.c 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3370'>CG</a>               3370 Zend/zend_compile.c 		opline = &amp;CG(active_op_array)-&gt;opcodes[dcl_opnum];</span>
+<span class='curline'><a href='../S/1642.html#L3376'>CG</a>               3376 Zend/zend_compile.c 		opline-&gt;op1.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3381'>CG</a>               3381 Zend/zend_compile.c 	opnum = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3387'>CG</a>               3387 Zend/zend_compile.c 			CG(active_op_array), Z_STR(class_node.u.constant));</span>
+<span class='curline'><a href='../S/1642.html#L3396'>CG</a>               3396 Zend/zend_compile.c 	opline = &amp;CG(active_op_array)-&gt;opcodes[opnum];</span>
+<span class='curline'><a href='../S/1642.html#L3397'>CG</a>               3397 Zend/zend_compile.c 	opline-&gt;op2.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3445'>CG</a>               3445 Zend/zend_compile.c 	if (!CG(active_op_array)-&gt;static_variables) {</span>
+<span class='curline'><a href='../S/1642.html#L3446'>CG</a>               3446 Zend/zend_compile.c 		if (CG(active_op_array)-&gt;scope) {</span>
+<span class='curline'><a href='../S/1642.html#L3447'>CG</a>               3447 Zend/zend_compile.c 			CG(active_op_array)-&gt;scope-&gt;ce_flags |= ZEND_HAS_STATIC_IN_METHODS;</span>
+<span class='curline'><a href='../S/1642.html#L3449'>CG</a>               3449 Zend/zend_compile.c 		ALLOC_HASHTABLE(CG(active_op_array)-&gt;static_variables);</span>
+<span class='curline'><a href='../S/1642.html#L3450'>CG</a>               3450 Zend/zend_compile.c 		zend_hash_init(CG(active_op_array)-&gt;static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);</span>
+<span class='curline'><a href='../S/1642.html#L3453'>CG</a>               3453 Zend/zend_compile.c 	if (GC_REFCOUNT(CG(active_op_array)-&gt;static_variables) &gt; 1) {</span>
+<span class='curline'><a href='../S/1642.html#L3454'>CG</a>               3454 Zend/zend_compile.c 		if (!(GC_FLAGS(CG(active_op_array)-&gt;static_variables) &amp; IS_ARRAY_IMMUTABLE)) {</span>
+<span class='curline'><a href='../S/1642.html#L3455'>CG</a>               3455 Zend/zend_compile.c 			GC_REFCOUNT(CG(active_op_array)-&gt;static_variables)--;</span>
+<span class='curline'><a href='../S/1642.html#L3457'>CG</a>               3457 Zend/zend_compile.c 		CG(active_op_array)-&gt;static_variables = zend_array_dup(CG(active_op_array)-&gt;static_variables);</span>
+<span class='curline'><a href='../S/1642.html#L3459'>CG</a>               3459 Zend/zend_compile.c 	zend_hash_update(CG(active_op_array)-&gt;static_variables, Z_STR(var_node.u.constant), value);</span>
+<span class='curline'><a href='../S/1642.html#L3528'>CG</a>               3528 Zend/zend_compile.c 	zend_loop_var *loop_var = zend_stack_top(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L3533'>CG</a>               3533 Zend/zend_compile.c 	base = zend_stack_base(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L3536'>CG</a>               3536 Zend/zend_compile.c 			zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3556'>CG</a>               3556 Zend/zend_compile.c 			opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3572'>CG</a>               3572 Zend/zend_compile.c 	return zend_handle_loops_and_finally_ex(zend_stack_count(&amp;CG(loop_var_stack)) + 1);</span>
+<span class='curline'><a href='../S/1642.html#L3579'>CG</a>               3579 Zend/zend_compile.c 	zend_bool by_ref = (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_RETURN_REFERENCE) != 0;</span>
+<span class='curline'><a href='../S/1642.html#L3593'>CG</a>               3593 Zend/zend_compile.c 	if (CG(context).in_finally) {</span>
+<span class='curline'><a href='../S/1642.html#L3596'>CG</a>               3596 Zend/zend_compile.c 		opline-&gt;op1.var = CG(context).fast_call_var;</span>
+<span class='curline'><a href='../S/1642.html#L3600'>CG</a>               3600 Zend/zend_compile.c 	if (!(CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_GENERATOR) &amp;&amp; CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_HAS_RETURN_TYPE) {</span>
+<span class='curline'><a href='../S/1642.html#L3601'>CG</a>               3601 Zend/zend_compile.c 		zend_emit_return_type_check(expr_ast ? &amp;expr_node : NULL, CG(active_op_array)-&gt;arg_info - 1);</span>
+<span class='curline'><a href='../S/1642.html#L3670'>CG</a>               3670 Zend/zend_compile.c 	if (CG(context).current_brk_cont == -1) {</span>
+<span class='curline'><a href='../S/1642.html#L3681'>CG</a>               3681 Zend/zend_compile.c 	opline-&gt;op1.num = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L3694'>CG</a>               3694 Zend/zend_compile.c 	if (CG(context).labels == NULL ||</span>
+<span class='curline'><a href='../S/1642.html#L3695'>CG</a>               3695 Zend/zend_compile.c 	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL</span>
+<span class='curline'><a href='../S/1642.html#L3697'>CG</a>               3697 Zend/zend_compile.c 		CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1642.html#L3698'>CG</a>               3698 Zend/zend_compile.c 		CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1642.html#L3699'>CG</a>               3699 Zend/zend_compile.c 		CG(zend_lineno) = opline-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L3709'>CG</a>               3709 Zend/zend_compile.c 			CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1642.html#L3710'>CG</a>               3710 Zend/zend_compile.c 			CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1642.html#L3711'>CG</a>               3711 Zend/zend_compile.c 			CG(zend_lineno) = opline-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L3752'>CG</a>               3752 Zend/zend_compile.c 	uint32_t opnum_start = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3759'>CG</a>               3759 Zend/zend_compile.c 	opline-&gt;op1.num = get_next_op_number(CG(active_op_array)) - opnum_start - 1;</span>
+<span class='curline'><a href='../S/1642.html#L3760'>CG</a>               3760 Zend/zend_compile.c 	opline-&gt;extended_value = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L3769'>CG</a>               3769 Zend/zend_compile.c 	if (!CG(context).labels) {</span>
+<span class='curline'><a href='../S/1642.html#L3770'>CG</a>               3770 Zend/zend_compile.c 		ALLOC_HASHTABLE(CG(context).labels);</span>
+<span class='curline'><a href='../S/1642.html#L3771'>CG</a>               3771 Zend/zend_compile.c 		zend_hash_init(CG(context).labels, 8, NULL, label_ptr_dtor, 0);</span>
+<span class='curline'><a href='../S/1642.html#L3774'>CG</a>               3774 Zend/zend_compile.c 	dest.brk_cont = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L3775'>CG</a>               3775 Zend/zend_compile.c 	dest.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3777'>CG</a>               3777 Zend/zend_compile.c 	if (!zend_hash_add_mem(CG(context).labels, label, &amp;dest, sizeof(zend_label))) {</span>
+<span class='curline'><a href='../S/1642.html#L3794'>CG</a>               3794 Zend/zend_compile.c 	opnum_start = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3797'>CG</a>               3797 Zend/zend_compile.c 	opnum_cond = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3817'>CG</a>               3817 Zend/zend_compile.c 	opnum_start = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3820'>CG</a>               3820 Zend/zend_compile.c 	opnum_cond = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3868'>CG</a>               3868 Zend/zend_compile.c 	opnum_start = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3871'>CG</a>               3871 Zend/zend_compile.c 	opnum_loop = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3922'>CG</a>               3922 Zend/zend_compile.c 	opnum_reset = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3925'>CG</a>               3925 Zend/zend_compile.c 	opnum_fetch = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3933'>CG</a>               3933 Zend/zend_compile.c 		opline-&gt;op2.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3943'>CG</a>               3943 Zend/zend_compile.c 		opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_fetch];</span>
+<span class='curline'><a href='../S/1642.html#L3954'>CG</a>               3954 Zend/zend_compile.c 	opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_reset];</span>
+<span class='curline'><a href='../S/1642.html#L3955'>CG</a>               3955 Zend/zend_compile.c 	opline-&gt;op2.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L3957'>CG</a>               3957 Zend/zend_compile.c 	opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_fetch];</span>
+<span class='curline'><a href='../S/1642.html#L3958'>CG</a>               3958 Zend/zend_compile.c 	opline-&gt;extended_value = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4026'>CG</a>               4026 Zend/zend_compile.c 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4035'>CG</a>               4035 Zend/zend_compile.c 				CG(zend_lineno) = case_ast-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L4082'>CG</a>               4082 Zend/zend_compile.c 	zend_end_loop(get_next_op_number(CG(active_op_array)));</span>
+<span class='curline'><a href='../S/1642.html#L4110'>CG</a>               4110 Zend/zend_compile.c 	if (CG(context).labels) {</span>
+<span class='curline'><a href='../S/1642.html#L4112'>CG</a>               4112 Zend/zend_compile.c 		ZEND_HASH_REVERSE_FOREACH_PTR(CG(context).labels, label) {</span>
+<span class='curline'><a href='../S/1642.html#L4113'>CG</a>               4113 Zend/zend_compile.c 			if (label-&gt;opline_num == get_next_op_number(CG(active_op_array))) {</span>
+<span class='curline'><a href='../S/1642.html#L4120'>CG</a>               4120 Zend/zend_compile.c 	try_catch_offset = zend_add_try_element(get_next_op_number(CG(active_op_array)));</span>
+<span class='curline'><a href='../S/1642.html#L4124'>CG</a>               4124 Zend/zend_compile.c 		if (!(CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_HAS_FINALLY_BLOCK)) {</span>
+<span class='curline'><a href='../S/1642.html#L4125'>CG</a>               4125 Zend/zend_compile.c 			CG(active_op_array)-&gt;fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;</span>
+<span class='curline'><a href='../S/1642.html#L4126'>CG</a>               4126 Zend/zend_compile.c 			CG(context).fast_call_var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4132'>CG</a>               4132 Zend/zend_compile.c 		fast_call.var_num = CG(context).fast_call_var;</span>
+<span class='curline'><a href='../S/1642.html#L4134'>CG</a>               4134 Zend/zend_compile.c 		zend_stack_push(&amp;CG(loop_var_stack), &amp;fast_call);</span>
+<span class='curline'><a href='../S/1642.html#L4157'>CG</a>               4157 Zend/zend_compile.c 		opnum_catch = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4159'>CG</a>               4159 Zend/zend_compile.c 			CG(active_op_array)-&gt;try_catch_array[try_catch_offset].catch_op = opnum_catch;</span>
+<span class='curline'><a href='../S/1642.html#L4162'>CG</a>               4162 Zend/zend_compile.c 		CG(zend_lineno) = catch_ast-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L4164'>CG</a>               4164 Zend/zend_compile.c 		opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4167'>CG</a>               4167 Zend/zend_compile.c 		opline-&gt;op1.constant = zend_add_class_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L4171'>CG</a>               4171 Zend/zend_compile.c 		opline-&gt;op2.var = lookup_cv(CG(active_op_array), zend_string_copy(Z_STR_P(var_name)));</span>
+<span class='curline'><a href='../S/1642.html#L4180'>CG</a>               4180 Zend/zend_compile.c 		opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_catch];</span>
+<span class='curline'><a href='../S/1642.html#L4181'>CG</a>               4181 Zend/zend_compile.c 		opline-&gt;extended_value = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4189'>CG</a>               4189 Zend/zend_compile.c 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;</span>
+<span class='curline'><a href='../S/1642.html#L4192'>CG</a>               4192 Zend/zend_compile.c 		zend_stack_del_top(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L4194'>CG</a>               4194 Zend/zend_compile.c 		CG(zend_lineno) = finally_ast-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L4199'>CG</a>               4199 Zend/zend_compile.c 		opline-&gt;result.var = CG(context).fast_call_var;</span>
+<span class='curline'><a href='../S/1642.html#L4203'>CG</a>               4203 Zend/zend_compile.c 		CG(context).in_finally++;</span>
+<span class='curline'><a href='../S/1642.html#L4205'>CG</a>               4205 Zend/zend_compile.c 		CG(context).in_finally--;</span>
+<span class='curline'><a href='../S/1642.html#L4207'>CG</a>               4207 Zend/zend_compile.c 		CG(active_op_array)-&gt;try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;</span>
+<span class='curline'><a href='../S/1642.html#L4208'>CG</a>               4208 Zend/zend_compile.c 		CG(active_op_array)-&gt;try_catch_array[try_catch_offset].finally_end</span>
+<span class='curline'><a href='../S/1642.html#L4209'>CG</a>               4209 Zend/zend_compile.c 			= get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4213'>CG</a>               4213 Zend/zend_compile.c 		opline-&gt;op1.var = CG(context).fast_call_var;</span>
+<span class='curline'><a href='../S/1642.html#L4238'>CG</a>               4238 Zend/zend_compile.c 			if (CG(multibyte)) {</span>
+<span class='curline'><a href='../S/1642.html#L4244'>CG</a>               4244 Zend/zend_compile.c 				CG(encoding_declared) = 1;</span>
+<span class='curline'><a href='../S/1642.html#L4274'>CG</a>               4274 Zend/zend_compile.c 	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));</span>
+<span class='curline'><a href='../S/1642.html#L4337'>CG</a>               4337 Zend/zend_compile.c 				CG(active_op_array)-&gt;fn_flags |= ZEND_ACC_STRICT_TYPES;</span>
+<span class='curline'><a href='../S/1642.html#L4424'>CG</a>               4424 Zend/zend_compile.c 	zend_op_array *op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L4468'>CG</a>               4468 Zend/zend_compile.c 		var_node.u.op.var = lookup_cv(CG(active_op_array), zend_string_copy(name));</span>
+<span class='curline'><a href='../S/1642.html#L4495'>CG</a>               4495 Zend/zend_compile.c 			uint32_t cops = CG(compiler_options);</span>
+<span class='curline'><a href='../S/1642.html#L4496'>CG</a>               4496 Zend/zend_compile.c 			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;</span>
+<span class='curline'><a href='../S/1642.html#L4500'>CG</a>               4500 Zend/zend_compile.c 			CG(compiler_options) = cops;</span>
+<span class='curline'><a href='../S/1642.html#L4630'>CG</a>               4630 Zend/zend_compile.c 	zend_class_entry *ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L4826'>CG</a>               4826 Zend/zend_compile.c 		opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4838'>CG</a>               4838 Zend/zend_compile.c 		zend_hash_update_ptr(CG(function_table), key, op_array);</span>
+<span class='curline'><a href='../S/1642.html#L4854'>CG</a>               4854 Zend/zend_compile.c 	zend_op_array *orig_op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L4855'>CG</a>               4855 Zend/zend_compile.c 	zend_op_array *op_array = zend_arena_alloc(&amp;CG(arena), sizeof(zend_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4878'>CG</a>               4878 Zend/zend_compile.c 	CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1642.html#L4882'>CG</a>               4882 Zend/zend_compile.c 	if (CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO) {</span>
+<span class='curline'><a href='../S/1642.html#L4892'>CG</a>               4892 Zend/zend_compile.c 		zend_stack_push(&amp;CG(loop_var_stack), (void *) &amp;dummy_var);</span>
+<span class='curline'><a href='../S/1642.html#L4903'>CG</a>               4903 Zend/zend_compile.c 			CG(active_class_entry), (zend_function *) op_array, E_COMPILE_ERROR);</span>
+<span class='curline'><a href='../S/1642.html#L4907'>CG</a>               4907 Zend/zend_compile.c 	CG(zend_lineno) = decl-&gt;end_lineno;</span>
+<span class='curline'><a href='../S/1642.html#L4912'>CG</a>               4912 Zend/zend_compile.c 	pass_two(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L4916'>CG</a>               4916 Zend/zend_compile.c 	zend_stack_del_top(&amp;CG(loop_var_stack));</span>
+<span class='curline'><a href='../S/1642.html#L4918'>CG</a>               4918 Zend/zend_compile.c 	CG(active_op_array) = orig_op_array;</span>
+<span class='curline'><a href='../S/1642.html#L4926'>CG</a>               4926 Zend/zend_compile.c 	zend_class_entry *ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L4977'>CG</a>               4977 Zend/zend_compile.c 	zend_class_entry *ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L5058'>CG</a>               5058 Zend/zend_compile.c 	zend_add_to_list(&amp;CG(active_class_entry)-&gt;trait_precedences, precedence);</span>
+<span class='curline'><a href='../S/1642.html#L5088'>CG</a>               5088 Zend/zend_compile.c 	zend_add_to_list(&amp;CG(active_class_entry)-&gt;trait_aliases, alias);</span>
+<span class='curline'><a href='../S/1642.html#L5096'>CG</a>               5096 Zend/zend_compile.c 	zend_class_entry *ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L5118'>CG</a>               5118 Zend/zend_compile.c 		opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L5122'>CG</a>               5122 Zend/zend_compile.c 		opline-&gt;op2.constant = zend_add_class_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L5164'>CG</a>               5164 Zend/zend_compile.c 		opline-&gt;op2.constant = zend_add_class_name_literal(CG(active_op_array),</span>
+<span class='curline'><a href='../S/1642.html#L5167'>CG</a>               5167 Zend/zend_compile.c 		CG(active_class_entry)-&gt;num_interfaces++;</span>
+<span class='curline'><a href='../S/1642.html#L5177'>CG</a>               5177 Zend/zend_compile.c 	zend_string *filename = CG(active_op_array)-&gt;filename;</span>
+<span class='curline'><a href='../S/1642.html#L5193'>CG</a>               5193 Zend/zend_compile.c 	zend_class_entry *ce = zend_arena_alloc(&amp;CG(arena), sizeof(zend_class_entry));</span>
+<span class='curline'><a href='../S/1642.html#L5197'>CG</a>               5197 Zend/zend_compile.c 	zend_class_entry *original_ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L5201'>CG</a>               5201 Zend/zend_compile.c 		if (CG(active_class_entry)) {</span>
+<span class='curline'><a href='../S/1642.html#L5261'>CG</a>               5261 Zend/zend_compile.c 	opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L5280'>CG</a>               5280 Zend/zend_compile.c 		zend_hash_update_ptr(CG(class_table), lcname, ce);</span>
+<span class='curline'><a href='../S/1642.html#L5296'>CG</a>               5296 Zend/zend_compile.c 		zend_hash_update_ptr(CG(class_table), key, ce);</span>
+<span class='curline'><a href='../S/1642.html#L5299'>CG</a>               5299 Zend/zend_compile.c 	CG(active_class_entry) = ce;</span>
+<span class='curline'><a href='../S/1642.html#L5308'>CG</a>               5308 Zend/zend_compile.c 	CG(zend_lineno) = ast-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L5381'>CG</a>               5381 Zend/zend_compile.c 	CG(active_class_entry) = original_ce;</span>
+<span class='curline'><a href='../S/1642.html#L5496'>CG</a>               5496 Zend/zend_compile.c 			if (zend_hash_exists(CG(class_table), ns_name)) {</span>
+<span class='curline'><a href='../S/1642.html#L5505'>CG</a>               5505 Zend/zend_compile.c 					zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lookup_name);</span>
+<span class='curline'><a href='../S/1642.html#L5507'>CG</a>               5507 Zend/zend_compile.c 						&amp;&amp; ce-&gt;info.user.filename == CG(compiled_filename)</span>
+<span class='curline'><a href='../S/1642.html#L5515'>CG</a>               5515 Zend/zend_compile.c 					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);</span>
+<span class='curline'><a href='../S/1642.html#L5517'>CG</a>               5517 Zend/zend_compile.c 						&amp;&amp; fn-&gt;op_array.filename == CG(compiled_filename)</span>
+<span class='curline'><a href='../S/1642.html#L5525'>CG</a>               5525 Zend/zend_compile.c 					zend_string *filename = zend_hash_find_ptr(&amp;CG(const_filenames), lookup_name);</span>
+<span class='curline'><a href='../S/1642.html#L5526'>CG</a>               5526 Zend/zend_compile.c 					if (filename &amp;&amp; filename == CG(compiled_filename)) {</span>
+<span class='curline'><a href='../S/1642.html#L5606'>CG</a>               5606 Zend/zend_compile.c 		zend_hash_add_ptr(&amp;CG(const_filenames), name, CG(compiled_filename));</span>
+<span class='curline'><a href='../S/1642.html#L5638'>CG</a>               5638 Zend/zend_compile.c 		 || (with_bracket &amp;&amp; !FC(has_bracketed_namespaces))) &amp;&amp; CG(active_op_array)-&gt;last &gt; 0</span>
+<span class='curline'><a href='../S/1642.html#L5641'>CG</a>               5641 Zend/zend_compile.c 		uint32_t num = CG(active_op_array)-&gt;last;</span>
+<span class='curline'><a href='../S/1642.html#L5643'>CG</a>               5643 Zend/zend_compile.c 		       (CG(active_op_array)-&gt;opcodes[num-1].opcode == ZEND_EXT_STMT ||</span>
+<span class='curline'><a href='../S/1642.html#L5644'>CG</a>               5644 Zend/zend_compile.c 		        CG(active_op_array)-&gt;opcodes[num-1].opcode == ZEND_TICKS)) {</span>
+<span class='curline'><a href='../S/1642.html#L5707'>CG</a>               5707 Zend/zend_compile.c 	zend_op_array *op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1642.html#L5708'>CG</a>               5708 Zend/zend_compile.c 	zend_class_entry *ce = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1642.html#L5715'>CG</a>               5715 Zend/zend_compile.c 			ZVAL_STR_COPY(zv, CG(compiled_filename));</span>
+<span class='curline'><a href='../S/1642.html#L5719'>CG</a>               5719 Zend/zend_compile.c 			zend_string *filename = CG(compiled_filename);</span>
+<span class='curline'><a href='../S/1642.html#L6065'>CG</a>               6065 Zend/zend_compile.c 	opnum_jmpz = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6072'>CG</a>               6072 Zend/zend_compile.c 		opline_jmpz-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6151'>CG</a>               6151 Zend/zend_compile.c 	opnum_jmp_set = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6210'>CG</a>               6210 Zend/zend_compile.c 	opnum = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6218'>CG</a>               6218 Zend/zend_compile.c 	opline = &amp;CG(active_op_array)-&gt;opcodes[opnum];</span>
+<span class='curline'><a href='../S/1642.html#L6219'>CG</a>               6219 Zend/zend_compile.c 	opline-&gt;op2.opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6264'>CG</a>               6264 Zend/zend_compile.c 	zend_bool returns_by_ref = (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_RETURN_REFERENCE) != 0;</span>
+<span class='curline'><a href='../S/1642.html#L6297'>CG</a>               6297 Zend/zend_compile.c 	if (CG(active_op_array)-&gt;fn_flags &amp; ZEND_ACC_RETURN_REFERENCE) {</span>
+<span class='curline'><a href='../S/1642.html#L6334'>CG</a>               6334 Zend/zend_compile.c 			CG(active_op_array), Z_STR(class_node.u.constant));</span>
+<span class='curline'><a href='../S/1642.html#L6416'>CG</a>               6416 Zend/zend_compile.c 	begin_opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6427'>CG</a>               6427 Zend/zend_compile.c 	end_opline_num = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6432'>CG</a>               6432 Zend/zend_compile.c 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6491'>CG</a>               6491 Zend/zend_compile.c 			opnum_init = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6514'>CG</a>               6514 Zend/zend_compile.c 		opline = &amp;CG(active_op_array)-&gt;opcodes[opnum_init];</span>
+<span class='curline'><a href='../S/1642.html#L6531'>CG</a>               6531 Zend/zend_compile.c 		zend_ast *last = CG(ast);</span>
+<span class='curline'><a href='../S/1642.html#L6556'>CG</a>               6556 Zend/zend_compile.c 			CG(active_op_array), resolved_name, 0);</span>
+<span class='curline'><a href='../S/1642.html#L6562'>CG</a>               6562 Zend/zend_compile.c 				CG(active_op_array), resolved_name, 1);</span>
+<span class='curline'><a href='../S/1642.html#L6565'>CG</a>               6565 Zend/zend_compile.c 				CG(active_op_array), resolved_name, 0);</span>
+<span class='curline'><a href='../S/1642.html#L6639'>CG</a>               6639 Zend/zend_compile.c 			if (CG(active_class_entry) &amp;&amp; zend_is_scope_known()) {</span>
+<span class='curline'><a href='../S/1642.html#L6641'>CG</a>               6641 Zend/zend_compile.c 				ZVAL_STR_COPY(&amp;result-&gt;u.constant, CG(active_class_entry)-&gt;name);</span>
+<span class='curline'><a href='../S/1642.html#L6665'>CG</a>               6665 Zend/zend_compile.c 	zend_op *opline = get_next_op(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6713'>CG</a>               6713 Zend/zend_compile.c 				rope_init_lineno = get_next_op_number(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6735'>CG</a>               6735 Zend/zend_compile.c 	init_opline = CG(active_op_array)-&gt;opcodes + rope_init_lineno;</span>
+<span class='curline'><a href='../S/1642.html#L6746'>CG</a>               6746 Zend/zend_compile.c 			opline-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6756'>CG</a>               6756 Zend/zend_compile.c 		opline-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6761'>CG</a>               6761 Zend/zend_compile.c 		zend_brk_cont_element *info = get_next_brk_cont_element(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6763'>CG</a>               6763 Zend/zend_compile.c 		info-&gt;parent = CG(context).current_brk_cont;</span>
+<span class='curline'><a href='../S/1642.html#L6764'>CG</a>               6764 Zend/zend_compile.c 		info-&gt;cont = info-&gt;brk = opline - CG(active_op_array)-&gt;opcodes;</span>
+<span class='curline'><a href='../S/1642.html#L6768'>CG</a>               6768 Zend/zend_compile.c 		opline-&gt;result.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6769'>CG</a>               6769 Zend/zend_compile.c 		var = opline-&gt;op1.var = get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6775'>CG</a>               6775 Zend/zend_compile.c 			get_temporary_variable(CG(active_op_array));</span>
+<span class='curline'><a href='../S/1642.html#L6804'>CG</a>               6804 Zend/zend_compile.c 	            CG(active_class_entry) &amp;&amp;</span>
+<span class='curline'><a href='../S/1642.html#L6805'>CG</a>               6805 Zend/zend_compile.c 	            (CG(active_class_entry)-&gt;ce_flags &amp; ZEND_ACC_TRAIT) != 0);</span>
+<span class='curline'><a href='../S/1642.html#L6907'>CG</a>               6907 Zend/zend_compile.c 	            CG(active_class_entry) &amp;&amp;</span>
+<span class='curline'><a href='../S/1642.html#L6908'>CG</a>               6908 Zend/zend_compile.c 	            (CG(active_class_entry)-&gt;ce_flags &amp; ZEND_ACC_TRAIT) != 0);</span>
+<span class='curline'><a href='../S/1642.html#L6989'>CG</a>               6989 Zend/zend_compile.c 		CG(zend_lineno) = ((zend_ast_decl *) ast)-&gt;end_lineno;</span>
+<span class='curline'><a href='../S/1642.html#L7001'>CG</a>               7001 Zend/zend_compile.c 	CG(zend_lineno) = ast-&gt;lineno;</span>
+<span class='curline'><a href='../S/1642.html#L7003'>CG</a>               7003 Zend/zend_compile.c 	if ((CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO) &amp;&amp; !zend_is_unticked_stmt(ast)) {</span>
+<span class='curline'><a href='../S/1642.html#L7111'>CG</a>               7111 Zend/zend_compile.c 	CG(zend_lineno) = zend_ast_get_lineno(ast);</span>
+<span class='curline'><a href='../S/1642.html#L7447'>CG</a>               7447 Zend/zend_compile.c 				if (CG(one_char_string)[c]) {</span>
+<span class='curline'><a href='../S/1642.html#L7448'>CG</a>               7448 Zend/zend_compile.c 					ZVAL_INTERNED_STR(&amp;result, CG(one_char_string)[c]);</span>
+<span class='curline'><a href='../S/1643.html#L49'>CG</a>                 49 Zend/zend_compile.h 	if (CG(doc_comment)) { \</span>
+<span class='curline'><a href='../S/1643.html#L50'>CG</a>                 50 Zend/zend_compile.h 		zend_string_release(CG(doc_comment)); \</span>
+<span class='curline'><a href='../S/1643.html#L51'>CG</a>                 51 Zend/zend_compile.h 		CG(doc_comment) = NULL; \</span>
+<span class='curline'><a href='../S/1643.html#L567'>CG</a>                567 Zend/zend_compile.h 	CT_CONSTANT_EX(CG(active_op_array), (node).constant)</span>
+<span class='curline'><a href='../S/1646.html#L329'>CG</a>                329 Zend/zend_constants.c 				scope = CG(active_class_entry);</span>
+<span class='curline'><a href='../S/1654.html#L1346'>CG</a>               1346 Zend/zend_execute.c 		if (CG(one_char_string)[c]) {</span>
+<span class='curline'><a href='../S/1654.html#L1347'>CG</a>               1347 Zend/zend_execute.c 			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);</span>
+<span class='curline'><a href='../S/1654.html#L1873'>CG</a>               1873 Zend/zend_execute.c 			if (CG(one_char_string)[c]) {</span>
+<span class='curline'><a href='../S/1654.html#L1874'>CG</a>               1874 Zend/zend_execute.c 				ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);</span>
+<span class='curline'><a href='../S/1654.html#L2172'>CG</a>               2172 Zend/zend_execute.c 		op_array-&gt;run_time_cache = zend_arena_alloc(&amp;CG(arena), op_array-&gt;cache_size);</span>
+<span class='curline'><a href='../S/1654.html#L2289'>CG</a>               2289 Zend/zend_execute.c 			op_array-&gt;run_time_cache = zend_arena_alloc(&amp;CG(arena), op_array-&gt;cache_size);</span>
+<span class='curline'><a href='../S/1656.html#L143'>CG</a>                143 Zend/zend_execute_API.c 	EG(function_table) = CG(function_table);</span>
+<span class='curline'><a href='../S/1656.html#L144'>CG</a>                144 Zend/zend_execute_API.c 	EG(class_table) = CG(class_table);</span>
+<span class='curline'><a href='../S/1656.html#L233'>CG</a>                233 Zend/zend_execute_API.c 	if (CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1656.html#L274'>CG</a>                274 Zend/zend_execute_API.c 		if (CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1656.html#L343'>CG</a>                343 Zend/zend_execute_API.c 		zend_llist_destroy(&amp;CG(open_files));</span>
+<span class='curline'><a href='../S/1656.html#L351'>CG</a>                351 Zend/zend_execute_API.c 	if (GC_G(gc_enabled) &amp;&amp; !CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1656.html#L401'>CG</a>                401 Zend/zend_execute_API.c 	if (EG(ht_iterators_used) &amp;&amp; !CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1656.html#L1120'>CG</a>               1120 Zend/zend_execute_API.c 	original_compiler_options = CG(compiler_options);</span>
+<span class='curline'><a href='../S/1656.html#L1121'>CG</a>               1121 Zend/zend_execute_API.c 	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;</span>
+<span class='curline'><a href='../S/1656.html#L1123'>CG</a>               1123 Zend/zend_execute_API.c 	CG(compiler_options) = original_compiler_options;</span>
+<span class='curline'><a href='../S/1661.html#L222'>CG</a>                222 Zend/zend_gc.c 	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {</span>
+<span class='curline'><a href='../S/1663.html#L78'>CG</a>                 78 Zend/zend_generators.c 		if (UNEXPECTED(CG(unclean_shutdown))) {</span>
+<span class='curline'><a href='../S/1671.html#L38'>CG</a>                 38 Zend/zend_inheritance.c 	new_property_info = zend_arena_alloc(&amp;CG(arena), sizeof(zend_property_info));</span>
+<span class='curline'><a href='../S/1671.html#L66'>CG</a>                 66 Zend/zend_inheritance.c 			new_function = zend_arena_alloc(&amp;CG(arena), sizeof(zend_internal_function));</span>
+<span class='curline'><a href='../S/1671.html#L84'>CG</a>                 84 Zend/zend_inheritance.c 		new_function = zend_arena_alloc(&amp;CG(arena), sizeof(zend_op_array));</span>
+<span class='curline'><a href='../S/1671.html#L597'>CG</a>                597 Zend/zend_inheritance.c 			zend_function *new_function = zend_arena_alloc(&amp;CG(arena), sizeof(zend_op_array));</span>
+<span class='curline'><a href='../S/1671.html#L1156'>CG</a>               1156 Zend/zend_inheritance.c 	new_fn = zend_arena_alloc(&amp;CG(arena), sizeof(zend_op_array));</span>
+<span class='curline'><a href='../S/1676.html#L41'>CG</a>                 41 Zend/zend_ini_parser.y #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))-&gt;ini_parser_cb</span>
+<span class='curline'><a href='../S/1676.html#L42'>CG</a>                 42 Zend/zend_ini_parser.y #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))-&gt;arg</span>
+<span class='curline'><a href='../S/1676.html#L192'>CG</a>                192 Zend/zend_ini_parser.y 	if (CG(ini_parser_unbuffered_errors)) {</span>
+<span class='curline'><a href='../S/1676.html#L213'>CG</a>                213 Zend/zend_ini_parser.y 	CG(ini_parser_param) = &amp;ini_parser_param;</span>
+<span class='curline'><a href='../S/1676.html#L219'>CG</a>                219 Zend/zend_ini_parser.y 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;</span>
+<span class='curline'><a href='../S/1676.html#L242'>CG</a>                242 Zend/zend_ini_parser.y 	CG(ini_parser_param) = &amp;ini_parser_param;</span>
+<span class='curline'><a href='../S/1676.html#L248'>CG</a>                248 Zend/zend_ini_parser.y 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;</span>
+<span class='curline'><a href='../S/1686.html#L265'>CG</a>                265 Zend/zend_language_parser.y 	top_statement_list	{ CG(ast) = $1; }</span>
+<span class='curline'><a href='../S/1686.html#L493'>CG</a>                493 Zend/zend_language_parser.y 		class_modifiers T_CLASS { $&lt;num&gt;$ = CG(zend_lineno); }</span>
+<span class='curline'><a href='../S/1686.html#L496'>CG</a>                496 Zend/zend_language_parser.y 	|	T_CLASS { $&lt;num&gt;$ = CG(zend_lineno); }</span>
+<span class='curline'><a href='../S/1686.html#L512'>CG</a>                512 Zend/zend_language_parser.y 		T_TRAIT { $&lt;num&gt;$ = CG(zend_lineno); }</span>
+<span class='curline'><a href='../S/1686.html#L518'>CG</a>                518 Zend/zend_language_parser.y 		T_INTERFACE { $&lt;num&gt;$ = CG(zend_lineno); }</span>
+<span class='curline'><a href='../S/1686.html#L839'>CG</a>                839 Zend/zend_language_parser.y         T_CLASS { $&lt;num&gt;$ = CG(zend_lineno); } ctor_arguments</span>
+<span class='curline'><a href='../S/1686.html#L975'>CG</a>                975 Zend/zend_language_parser.y 	T_FUNCTION { $$ = CG(zend_lineno); }</span>
+<span class='curline'><a href='../S/1686.html#L979'>CG</a>                979 Zend/zend_language_parser.y 	/* empty */ { $$ = CG(doc_comment); CG(doc_comment) = NULL; }</span>
+<span class='curline'><a href='../S/1686.html#L1287'>CG</a>               1287 Zend/zend_language_parser.y 	if (yyres &amp;&amp; CG(parse_error) &lt; 2) {</span>
+<span class='curline'><a href='../S/1686.html#L1288'>CG</a>               1288 Zend/zend_language_parser.y 		CG(parse_error) = 2;</span>
+<span class='curline'><a href='../S/1686.html#L1291'>CG</a>               1291 Zend/zend_language_parser.y 	if (CG(parse_error) % 2 == 0) {</span>
+<span class='curline'><a href='../S/1686.html#L1297'>CG</a>               1297 Zend/zend_language_parser.y 		CG(parse_error)++;</span>
+<span class='curline'><a href='../S/1687.html#L104'>CG</a>                104 Zend/zend_language_scanner.c 			CG(zend_lineno)++;													\</span>
+<span class='curline'><a href='../S/1687.html#L113'>CG</a>                113 Zend/zend_language_scanner.c 		CG(zend_lineno)++; \</span>
+<span class='curline'><a href='../S/1687.html#L181'>CG</a>                181 Zend/zend_language_scanner.c 	CG(parse_error) = 0;</span>
+<span class='curline'><a href='../S/1687.html#L182'>CG</a>                182 Zend/zend_language_scanner.c 	CG(doc_comment) = NULL;</span>
+<span class='curline'><a href='../S/1687.html#L193'>CG</a>                193 Zend/zend_language_scanner.c 	CG(parse_error) = 0;</span>
+<span class='curline'><a href='../S/1687.html#L219'>CG</a>                219 Zend/zend_language_scanner.c 	lex_state-&gt;lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1687.html#L231'>CG</a>                231 Zend/zend_language_scanner.c 	lex_state-&gt;ast = CG(ast);</span>
+<span class='curline'><a href='../S/1687.html#L232'>CG</a>                232 Zend/zend_language_scanner.c 	lex_state-&gt;ast_arena = CG(ast_arena);</span>
+<span class='curline'><a href='../S/1687.html#L253'>CG</a>                253 Zend/zend_language_scanner.c 	CG(zend_lineno) = lex_state-&gt;lineno;</span>
+<span class='curline'><a href='../S/1687.html#L270'>CG</a>                270 Zend/zend_language_scanner.c 	CG(ast) = lex_state-&gt;ast;</span>
+<span class='curline'><a href='../S/1687.html#L271'>CG</a>                271 Zend/zend_language_scanner.c 	CG(ast_arena) = lex_state-&gt;ast_arena;</span>
+<span class='curline'><a href='../S/1687.html#L278'>CG</a>                278 Zend/zend_language_scanner.c 	zend_llist_del_element(&amp;CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);</span>
+<span class='curline'><a href='../S/1687.html#L434'>CG</a>                434 Zend/zend_language_scanner.c 	if (CG(detect_unicode)) {</span>
+<span class='curline'><a href='../S/1687.html#L444'>CG</a>                444 Zend/zend_language_scanner.c 	if (!CG(script_encoding_list) || !CG(script_encoding_list_size)) {</span>
+<span class='curline'><a href='../S/1687.html#L449'>CG</a>                449 Zend/zend_language_scanner.c 	if (CG(script_encoding_list_size) &gt; 1) {</span>
+<span class='curline'><a href='../S/1687.html#L450'>CG</a>                450 Zend/zend_language_scanner.c 		return zend_multibyte_encoding_detector(LANG_SCNG(script_org), LANG_SCNG(script_org_size), CG(script_encoding_list), CG(script_encoding_list_size));</span>
+<span class='curline'><a href='../S/1687.html#L453'>CG</a>                453 Zend/zend_language_scanner.c 	return CG(script_encoding_list)[0];</span>
+<span class='curline'><a href='../S/1687.html#L504'>CG</a>                504 Zend/zend_language_scanner.c 	if (CG(start_lineno) == 2 &amp;&amp; file_handle-&gt;type == ZEND_HANDLE_FP &amp;&amp; file_handle-&gt;handle.fp) {</span>
+<span class='curline'><a href='../S/1687.html#L514'>CG</a>                514 Zend/zend_language_scanner.c 	zend_llist_add_element(&amp;CG(open_files), file_handle);</span>
+<span class='curline'><a href='../S/1687.html#L516'>CG</a>                516 Zend/zend_language_scanner.c 		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&amp;CG(open_files));</span>
+<span class='curline'><a href='../S/1687.html#L527'>CG</a>                527 Zend/zend_language_scanner.c 		if (CG(multibyte)) {</span>
+<span class='curline'><a href='../S/1687.html#L560'>CG</a>                560 Zend/zend_language_scanner.c 	if (CG(start_lineno)) {</span>
+<span class='curline'><a href='../S/1687.html#L561'>CG</a>                561 Zend/zend_language_scanner.c 		CG(zend_lineno) = CG(start_lineno);</span>
+<span class='curline'><a href='../S/1687.html#L562'>CG</a>                562 Zend/zend_language_scanner.c 		CG(start_lineno) = 0;</span>
+<span class='curline'><a href='../S/1687.html#L564'>CG</a>                564 Zend/zend_language_scanner.c 		CG(zend_lineno) = 1;</span>
+<span class='curline'><a href='../S/1687.html#L568'>CG</a>                568 Zend/zend_language_scanner.c 	CG(increment_lineno) = 0;</span>
+<span class='curline'><a href='../S/1687.html#L588'>CG</a>                588 Zend/zend_language_scanner.c 		zend_bool original_in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1687.html#L589'>CG</a>                589 Zend/zend_language_scanner.c 		CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1687.html#L591'>CG</a>                591 Zend/zend_language_scanner.c 		CG(ast) = NULL;</span>
+<span class='curline'><a href='../S/1687.html#L592'>CG</a>                592 Zend/zend_language_scanner.c 		CG(ast_arena) = zend_arena_create(1024 * 32);</span>
+<span class='curline'><a href='../S/1687.html#L597'>CG</a>                597 Zend/zend_language_scanner.c 			zend_op_array *original_active_op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1687.html#L600'>CG</a>                600 Zend/zend_language_scanner.c 			CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1687.html#L604'>CG</a>                604 Zend/zend_language_scanner.c 				zend_ast_process(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L609'>CG</a>                609 Zend/zend_language_scanner.c 			zend_compile_top_stmt(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L612'>CG</a>                612 Zend/zend_language_scanner.c 			op_array-&gt;line_end = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1687.html#L617'>CG</a>                617 Zend/zend_language_scanner.c 			CG(active_op_array) = original_active_op_array;</span>
+<span class='curline'><a href='../S/1687.html#L620'>CG</a>                620 Zend/zend_language_scanner.c 		zend_ast_destroy(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L621'>CG</a>                621 Zend/zend_language_scanner.c 		zend_arena_destroy(CG(ast_arena));</span>
+<span class='curline'><a href='../S/1687.html#L622'>CG</a>                622 Zend/zend_language_scanner.c 		CG(in_compilation) = original_in_compilation;</span>
+<span class='curline'><a href='../S/1687.html#L687'>CG</a>                687 Zend/zend_language_scanner.c 	if (CG(multibyte)) {</span>
+<span class='curline'><a href='../S/1687.html#L709'>CG</a>                709 Zend/zend_language_scanner.c 	CG(zend_lineno) = 1;</span>
+<span class='curline'><a href='../S/1687.html#L710'>CG</a>                710 Zend/zend_language_scanner.c 	CG(increment_lineno) = 0;</span>
+<span class='curline'><a href='../S/1687.html#L743'>CG</a>                743 Zend/zend_language_scanner.c 	zend_bool original_in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1687.html#L753'>CG</a>                753 Zend/zend_language_scanner.c 	CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1687.html#L756'>CG</a>                756 Zend/zend_language_scanner.c 		CG(ast) = NULL;</span>
+<span class='curline'><a href='../S/1687.html#L757'>CG</a>                757 Zend/zend_language_scanner.c 		CG(ast_arena) = zend_arena_create(1024 * 32);</span>
+<span class='curline'><a href='../S/1687.html#L763'>CG</a>                763 Zend/zend_language_scanner.c 			zend_op_array *original_active_op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/1687.html#L766'>CG</a>                766 Zend/zend_language_scanner.c 			CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1687.html#L769'>CG</a>                769 Zend/zend_language_scanner.c 				zend_ast_process(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L774'>CG</a>                774 Zend/zend_language_scanner.c 			zend_compile_top_stmt(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L777'>CG</a>                777 Zend/zend_language_scanner.c 			op_array-&gt;line_end = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1687.html#L782'>CG</a>                782 Zend/zend_language_scanner.c 			CG(active_op_array) = original_active_op_array;</span>
+<span class='curline'><a href='../S/1687.html#L785'>CG</a>                785 Zend/zend_language_scanner.c 		zend_ast_destroy(CG(ast));</span>
+<span class='curline'><a href='../S/1687.html#L786'>CG</a>                786 Zend/zend_language_scanner.c 		zend_arena_destroy(CG(ast_arena));</span>
+<span class='curline'><a href='../S/1687.html#L791'>CG</a>                791 Zend/zend_language_scanner.c 	CG(in_compilation) = original_in_compilation;</span>
+<span class='curline'><a href='../S/1687.html#L1084'>CG</a>               1084 Zend/zend_language_scanner.c 			CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1687.html#L1114'>CG</a>               1114 Zend/zend_language_scanner.c int start_line = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1687.html#L1192'>CG</a>               1192 Zend/zend_language_scanner.c 			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */</span>
+<span class='curline'><a href='../S/1687.html#L1239'>CG</a>               1239 Zend/zend_language_scanner.c 	if (CG(short_tags)) {</span>
+<span class='curline'><a href='../S/1687.html#L1867'>CG</a>               1867 Zend/zend_language_scanner.c 						CG(increment_lineno) = 1; /* For newline before label */</span>
+<span class='curline'><a href='../S/1687.html#L2815'>CG</a>               2815 Zend/zend_language_scanner.c 				CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1687.html#L2893'>CG</a>               2893 Zend/zend_language_scanner.c 			CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1687.html#L3333'>CG</a>               3333 Zend/zend_language_scanner.c 		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));</span>
+<span class='curline'><a href='../S/1687.html#L3340'>CG</a>               3340 Zend/zend_language_scanner.c 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);</span>
+<span class='curline'><a href='../S/1687.html#L3607'>CG</a>               3607 Zend/zend_language_scanner.c 	CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1687.html#L7274'>CG</a>               7274 Zend/zend_language_scanner.c 						CG(increment_lineno) = 1; /* For newline before label */</span>
+<span class='curline'><a href='../S/1696.html#L170'>CG</a>                170 Zend/zend_multibyte.c 	if (CG(script_encoding_list)) {</span>
+<span class='curline'><a href='../S/1696.html#L171'>CG</a>                171 Zend/zend_multibyte.c 		free((char*)CG(script_encoding_list));</span>
+<span class='curline'><a href='../S/1696.html#L173'>CG</a>                173 Zend/zend_multibyte.c 	CG(script_encoding_list) = encoding_list;</span>
+<span class='curline'><a href='../S/1696.html#L174'>CG</a>                174 Zend/zend_multibyte.c 	CG(script_encoding_list_size) = encoding_list_size;</span>
+<span class='curline'><a href='../S/1705.html#L182'>CG</a>                182 Zend/zend_opcode.c 		CG(static_members_table)[(zend_intptr_t)(ce-&gt;static_members_table)] = NULL;</span>
+<span class='curline'><a href='../S/1705.html#L427'>CG</a>                427 Zend/zend_opcode.c 	op-&gt;lineno = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1705.html#L436'>CG</a>                436 Zend/zend_opcode.c 	if (next_op_num &gt;= CG(context).opcodes_size) {</span>
+<span class='curline'><a href='../S/1705.html#L437'>CG</a>                437 Zend/zend_opcode.c 		CG(context).opcodes_size *= 4;</span>
+<span class='curline'><a href='../S/1705.html#L438'>CG</a>                438 Zend/zend_opcode.c 		op_array_alloc_ops(op_array, CG(context).opcodes_size);</span>
+<span class='curline'><a href='../S/1705.html#L499'>CG</a>                499 Zend/zend_opcode.c 			CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1705.html#L500'>CG</a>                500 Zend/zend_opcode.c 			CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1705.html#L501'>CG</a>                501 Zend/zend_opcode.c 			CG(zend_lineno) = op_array-&gt;opcodes[op_num].lineno;</span>
+<span class='curline'><a href='../S/1705.html#L507'>CG</a>                507 Zend/zend_opcode.c 			CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1705.html#L508'>CG</a>                508 Zend/zend_opcode.c 			CG(active_op_array) = op_array;</span>
+<span class='curline'><a href='../S/1705.html#L509'>CG</a>                509 Zend/zend_opcode.c 			CG(zend_lineno) = op_array-&gt;opcodes[op_num].lineno;</span>
+<span class='curline'><a href='../S/1705.html#L584'>CG</a>                584 Zend/zend_opcode.c 	if (CG(compiler_options) &amp; ZEND_COMPILE_EXTENDED_INFO) {</span>
+<span class='curline'><a href='../S/1705.html#L587'>CG</a>                587 Zend/zend_opcode.c 	if (CG(compiler_options) &amp; ZEND_COMPILE_HANDLE_OP_ARRAY) {</span>
+<span class='curline'><a href='../S/1705.html#L593'>CG</a>                593 Zend/zend_opcode.c 	if (CG(context).vars_size != op_array-&gt;last_var) {</span>
+<span class='curline'><a href='../S/1705.html#L595'>CG</a>                595 Zend/zend_opcode.c 		CG(context).vars_size = op_array-&gt;last_var;</span>
+<span class='curline'><a href='../S/1705.html#L597'>CG</a>                597 Zend/zend_opcode.c 	if (CG(context).opcodes_size != op_array-&gt;last) {</span>
+<span class='curline'><a href='../S/1705.html#L599'>CG</a>                599 Zend/zend_opcode.c 		CG(context).opcodes_size = op_array-&gt;last;</span>
+<span class='curline'><a href='../S/1705.html#L601'>CG</a>                601 Zend/zend_opcode.c 	if (CG(context).literals_size != op_array-&gt;last_literal) {</span>
+<span class='curline'><a href='../S/1705.html#L603'>CG</a>                603 Zend/zend_opcode.c 		CG(context).literals_size = op_array-&gt;last_literal;</span>
+<span class='curline'><a href='../S/1706.html#L518'>CG</a>                518 Zend/zend_operators.c 			if (CG(one_char_string)['1']) {</span>
+<span class='curline'><a href='../S/1706.html#L519'>CG</a>                519 Zend/zend_operators.c 				ZVAL_INTERNED_STR(op, CG(one_char_string)['1']);</span>
+<span class='curline'><a href='../S/1706.html#L815'>CG</a>                815 Zend/zend_operators.c 			if (CG(one_char_string)['1']) {</span>
+<span class='curline'><a href='../S/1706.html#L816'>CG</a>                816 Zend/zend_operators.c 				return CG(one_char_string)['1'];</span>
+<span class='curline'><a href='../S/1706.html#L1194'>CG</a>               1194 Zend/zend_operators.c 		if (EG(current_execute_data) &amp;&amp; !CG(in_compilation)) {</span>
+<span class='curline'><a href='../S/1706.html#L1304'>CG</a>               1304 Zend/zend_operators.c 				if (CG(one_char_string)[not]) {</span>
+<span class='curline'><a href='../S/1706.html#L1305'>CG</a>               1305 Zend/zend_operators.c 					ZVAL_INTERNED_STR(result, CG(one_char_string)[not]);</span>
+<span class='curline'><a href='../S/1706.html#L1350'>CG</a>               1350 Zend/zend_operators.c 				if (CG(one_char_string)[or]) {</span>
+<span class='curline'><a href='../S/1706.html#L1351'>CG</a>               1351 Zend/zend_operators.c 					ZVAL_INTERNED_STR(result, CG(one_char_string)[or]);</span>
+<span class='curline'><a href='../S/1706.html#L1417'>CG</a>               1417 Zend/zend_operators.c 				if (CG(one_char_string)[and]) {</span>
+<span class='curline'><a href='../S/1706.html#L1418'>CG</a>               1418 Zend/zend_operators.c 					ZVAL_INTERNED_STR(result, CG(one_char_string)[and]);</span>
+<span class='curline'><a href='../S/1706.html#L1484'>CG</a>               1484 Zend/zend_operators.c 				if (CG(one_char_string)[xor]) {</span>
+<span class='curline'><a href='../S/1706.html#L1485'>CG</a>               1485 Zend/zend_operators.c 					ZVAL_INTERNED_STR(result, CG(one_char_string)[xor]);</span>
+<span class='curline'><a href='../S/1706.html#L1547'>CG</a>               1547 Zend/zend_operators.c 			if (EG(current_execute_data) &amp;&amp; !CG(in_compilation)) {</span>
+<span class='curline'><a href='../S/1706.html#L1578'>CG</a>               1578 Zend/zend_operators.c 			if (EG(current_execute_data) &amp;&amp; !CG(in_compilation)) {</span>
+<span class='curline'><a href='../S/1706.html#L2154'>CG</a>               2154 Zend/zend_operators.c 		if (CG(one_char_string)['1']) {</span>
+<span class='curline'><a href='../S/1706.html#L2155'>CG</a>               2155 Zend/zend_operators.c 			ZVAL_INTERNED_STR(str, CG(one_char_string)['1']);</span>
+<span class='curline'><a href='../S/1724.html#L50'>CG</a>                 50 Zend/zend_string.c 	zend_hash_init(&amp;CG(interned_strings), 1024, NULL, _str_dtor, 1);</span>
+<span class='curline'><a href='../S/1724.html#L52'>CG</a>                 52 Zend/zend_string.c 	CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;</span>
+<span class='curline'><a href='../S/1724.html#L53'>CG</a>                 53 Zend/zend_string.c 	HT_SET_DATA_ADDR(&amp;CG(interned_strings), pemalloc(HT_SIZE(&amp;CG(interned_strings)), 1));</span>
+<span class='curline'><a href='../S/1724.html#L54'>CG</a>                 54 Zend/zend_string.c 	HT_HASH_RESET(&amp;CG(interned_strings));</span>
+<span class='curline'><a href='../S/1724.html#L55'>CG</a>                 55 Zend/zend_string.c 	CG(interned_strings).u.flags |= HASH_FLAG_INITIALIZED;</span>
+<span class='curline'><a href='../S/1724.html#L60'>CG</a>                 60 Zend/zend_string.c 	CG(empty_string) = zend_new_interned_string_int(str);</span>
+<span class='curline'><a href='../S/1724.html#L64'>CG</a>                 64 Zend/zend_string.c 	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));</span>
+<span class='curline'><a href='../S/1724.html#L74'>CG</a>                 74 Zend/zend_string.c 	zend_hash_destroy(&amp;CG(interned_strings));</span>
+<span class='curline'><a href='../S/1724.html#L91'>CG</a>                 91 Zend/zend_string.c 	nIndex = h | CG(interned_strings).nTableMask;</span>
+<span class='curline'><a href='../S/1724.html#L92'>CG</a>                 92 Zend/zend_string.c 	idx = HT_HASH(&amp;CG(interned_strings), nIndex);</span>
+<span class='curline'><a href='../S/1724.html#L94'>CG</a>                 94 Zend/zend_string.c 		p = HT_HASH_TO_BUCKET(&amp;CG(interned_strings), idx);</span>
+<span class='curline'><a href='../S/1724.html#L107'>CG</a>                107 Zend/zend_string.c 	if (CG(interned_strings).nNumUsed &gt;= CG(interned_strings).nTableSize) {</span>
+<span class='curline'><a href='../S/1724.html#L108'>CG</a>                108 Zend/zend_string.c 		if (CG(interned_strings).nTableSize &lt; HT_MAX_SIZE) {	/* Let's double the table size */</span>
+<span class='curline'><a href='../S/1724.html#L110'>CG</a>                110 Zend/zend_string.c 			void *old_data = HT_GET_DATA_ADDR(&amp;CG(interned_strings));</span>
+<span class='curline'><a href='../S/1724.html#L111'>CG</a>                111 Zend/zend_string.c 			Bucket *old_buckets = CG(interned_strings).arData;</span>
+<span class='curline'><a href='../S/1724.html#L114'>CG</a>                114 Zend/zend_string.c 			CG(interned_strings).nTableSize += CG(interned_strings).nTableSize;</span>
+<span class='curline'><a href='../S/1724.html#L115'>CG</a>                115 Zend/zend_string.c 			CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;</span>
+<span class='curline'><a href='../S/1724.html#L116'>CG</a>                116 Zend/zend_string.c 			new_data = malloc(HT_SIZE(&amp;CG(interned_strings)));</span>
+<span class='curline'><a href='../S/1724.html#L119'>CG</a>                119 Zend/zend_string.c 				HT_SET_DATA_ADDR(&amp;CG(interned_strings), new_data);</span>
+<span class='curline'><a href='../S/1724.html#L120'>CG</a>                120 Zend/zend_string.c 				memcpy(CG(interned_strings).arData, old_buckets, sizeof(Bucket) * CG(interned_strings).nNumUsed);</span>
+<span class='curline'><a href='../S/1724.html#L122'>CG</a>                122 Zend/zend_string.c 				zend_hash_rehash(&amp;CG(interned_strings));</span>
+<span class='curline'><a href='../S/1724.html#L124'>CG</a>                124 Zend/zend_string.c 				CG(interned_strings).nTableSize = CG(interned_strings).nTableSize &gt;&gt; 1;</span>
+<span class='curline'><a href='../S/1724.html#L125'>CG</a>                125 Zend/zend_string.c 				CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;</span>
+<span class='curline'><a href='../S/1724.html#L133'>CG</a>                133 Zend/zend_string.c 	idx = CG(interned_strings).nNumUsed++;</span>
+<span class='curline'><a href='../S/1724.html#L134'>CG</a>                134 Zend/zend_string.c 	CG(interned_strings).nNumOfElements++;</span>
+<span class='curline'><a href='../S/1724.html#L135'>CG</a>                135 Zend/zend_string.c 	p = CG(interned_strings).arData + idx;</span>
+<span class='curline'><a href='../S/1724.html#L140'>CG</a>                140 Zend/zend_string.c 	nIndex = h | CG(interned_strings).nTableMask;</span>
+<span class='curline'><a href='../S/1724.html#L141'>CG</a>                141 Zend/zend_string.c 	Z_NEXT(p-&gt;val) = HT_HASH(&amp;CG(interned_strings), nIndex);</span>
+<span class='curline'><a href='../S/1724.html#L142'>CG</a>                142 Zend/zend_string.c 	HT_HASH(&amp;CG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);</span>
+<span class='curline'><a href='../S/1724.html#L158'>CG</a>                158 Zend/zend_string.c 	idx = CG(interned_strings).nNumUsed;</span>
+<span class='curline'><a href='../S/1724.html#L161'>CG</a>                161 Zend/zend_string.c 		p = CG(interned_strings).arData + idx;</span>
+<span class='curline'><a href='../S/1724.html#L175'>CG</a>                175 Zend/zend_string.c 	idx = CG(interned_strings).nNumUsed;</span>
+<span class='curline'><a href='../S/1724.html#L178'>CG</a>                178 Zend/zend_string.c 		p = CG(interned_strings).arData + idx;</span>
+<span class='curline'><a href='../S/1724.html#L180'>CG</a>                180 Zend/zend_string.c 		CG(interned_strings).nNumUsed--;</span>
+<span class='curline'><a href='../S/1724.html#L181'>CG</a>                181 Zend/zend_string.c 		CG(interned_strings).nNumOfElements--;</span>
+<span class='curline'><a href='../S/1724.html#L187'>CG</a>                187 Zend/zend_string.c 		nIndex = p-&gt;h | CG(interned_strings).nTableMask;</span>
+<span class='curline'><a href='../S/1724.html#L188'>CG</a>                188 Zend/zend_string.c 		if (HT_HASH(&amp;CG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {</span>
+<span class='curline'><a href='../S/1724.html#L189'>CG</a>                189 Zend/zend_string.c 			HT_HASH(&amp;CG(interned_strings), nIndex) = Z_NEXT(p-&gt;val);</span>
+<span class='curline'><a href='../S/1724.html#L191'>CG</a>                191 Zend/zend_string.c 			uint32_t prev = HT_HASH(&amp;CG(interned_strings), nIndex);</span>
+<span class='curline'><a href='../S/1724.html#L192'>CG</a>                192 Zend/zend_string.c 			while (Z_NEXT(HT_HASH_TO_BUCKET(&amp;CG(interned_strings), prev)-&gt;val) != idx) {</span>
+<span class='curline'><a href='../S/1724.html#L193'>CG</a>                193 Zend/zend_string.c 				prev = Z_NEXT(HT_HASH_TO_BUCKET(&amp;CG(interned_strings), prev)-&gt;val);</span>
+<span class='curline'><a href='../S/1724.html#L195'>CG</a>                195 Zend/zend_string.c 			Z_NEXT(HT_HASH_TO_BUCKET(&amp;CG(interned_strings), prev)-&gt;val) = Z_NEXT(p-&gt;val);</span>
+<span class='curline'><a href='../S/1725.html#L58'>CG</a>                 58 Zend/zend_string.h #define ZSTR_EMPTY_ALLOC()				CG(empty_string)</span>
+<span class='curline'><a href='../S/458.html#L386'>CG</a>                386 ext/libxml/libxml.c 	if (CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/680.html#L1624'>CG</a>               1624 ext/mbstring/mbstring.c 		CG(compiler_options) |= ZEND_COMPILE_NO_BUILTIN_STRLEN;</span>
+<span class='curline'><a href='../S/680.html#L1696'>CG</a>               1696 ext/mbstring/mbstring.c 		CG(compiler_options) &amp;= ~ZEND_COMPILE_NO_BUILTIN_STRLEN;</span>
+<span class='curline'><a href='../S/822.html#L545'>CG</a>                545 ext/opcache/Optimizer/pass1_5.c 				} else if ((CG(compiler_options) &amp; ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &amp;&amp;</span>
+<span class='curline'><a href='../S/849.html#L499'>CG</a>                499 ext/opcache/ZendAccelerator.c 	CG(empty_string) = accel_new_interned_string(CG(empty_string));</span>
+<span class='curline'><a href='../S/849.html#L504'>CG</a>                504 ext/opcache/ZendAccelerator.c 		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0));</span>
+<span class='curline'><a href='../S/849.html#L508'>CG</a>                508 ext/opcache/ZendAccelerator.c 	for (idx = 0; idx &lt; CG(function_table)-&gt;nNumUsed; idx++) {</span>
+<span class='curline'><a href='../S/849.html#L509'>CG</a>                509 ext/opcache/ZendAccelerator.c 		p = CG(function_table)-&gt;arData + idx;</span>
+<span class='curline'><a href='../S/849.html#L520'>CG</a>                520 ext/opcache/ZendAccelerator.c 	for (idx = 0; idx &lt; CG(class_table)-&gt;nNumUsed; idx++) {</span>
+<span class='curline'><a href='../S/849.html#L523'>CG</a>                523 ext/opcache/ZendAccelerator.c 		p = CG(class_table)-&gt;arData + idx;</span>
+<span class='curline'><a href='../S/849.html#L582'>CG</a>                582 ext/opcache/ZendAccelerator.c 	for (idx = 0; idx &lt; CG(auto_globals)-&gt;nNumUsed; idx++) {</span>
+<span class='curline'><a href='../S/849.html#L585'>CG</a>                585 ext/opcache/ZendAccelerator.c 		p = CG(auto_globals)-&gt;arData + idx;</span>
+<span class='curline'><a href='../S/849.html#L1181'>CG</a>               1181 ext/opcache/ZendAccelerator.c 	ZCG(mem) = zend_arena_alloc(&amp;CG(arena), memory_used + 64);</span>
+<span class='curline'><a href='../S/849.html#L1184'>CG</a>               1184 ext/opcache/ZendAccelerator.c 	ZCG(mem) = zend_arena_alloc(&amp;CG(arena), memory_used);</span>
+<span class='curline'><a href='../S/849.html#L1473'>CG</a>               1473 ext/opcache/ZendAccelerator.c 	orig_active_op_array = CG(active_op_array);</span>
+<span class='curline'><a href='../S/849.html#L1474'>CG</a>               1474 ext/opcache/ZendAccelerator.c 	orig_function_table = CG(function_table);</span>
+<span class='curline'><a href='../S/849.html#L1475'>CG</a>               1475 ext/opcache/ZendAccelerator.c 	orig_class_table = CG(class_table);</span>
+<span class='curline'><a href='../S/849.html#L1479'>CG</a>               1479 ext/opcache/ZendAccelerator.c 	CG(function_table) = &amp;ZCG(function_table);</span>
+<span class='curline'><a href='../S/849.html#L1480'>CG</a>               1480 ext/opcache/ZendAccelerator.c 	EG(class_table) = CG(class_table) = &amp;new_persistent_script-&gt;class_table;</span>
+<span class='curline'><a href='../S/849.html#L1484'>CG</a>               1484 ext/opcache/ZendAccelerator.c 		orig_compiler_options = CG(compiler_options);</span>
+<span class='curline'><a href='../S/849.html#L1485'>CG</a>               1485 ext/opcache/ZendAccelerator.c 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;</span>
+<span class='curline'><a href='../S/849.html#L1486'>CG</a>               1486 ext/opcache/ZendAccelerator.c 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;</span>
+<span class='curline'><a href='../S/849.html#L1487'>CG</a>               1487 ext/opcache/ZendAccelerator.c 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;</span>
+<span class='curline'><a href='../S/849.html#L1488'>CG</a>               1488 ext/opcache/ZendAccelerator.c 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;</span>
+<span class='curline'><a href='../S/849.html#L1490'>CG</a>               1490 ext/opcache/ZendAccelerator.c 		CG(compiler_options) = orig_compiler_options;</span>
+<span class='curline'><a href='../S/849.html#L1494'>CG</a>               1494 ext/opcache/ZendAccelerator.c 		CG(compiler_options) = orig_compiler_options;</span>
+<span class='curline'><a href='../S/849.html#L1498'>CG</a>               1498 ext/opcache/ZendAccelerator.c 	CG(active_op_array) = orig_active_op_array;</span>
+<span class='curline'><a href='../S/849.html#L1499'>CG</a>               1499 ext/opcache/ZendAccelerator.c 	CG(function_table) = orig_function_table;</span>
+<span class='curline'><a href='../S/849.html#L1500'>CG</a>               1500 ext/opcache/ZendAccelerator.c 	EG(class_table) = CG(class_table) = orig_class_table;</span>
+<span class='curline'><a href='../S/849.html#L2011'>CG</a>               2011 ext/opcache/ZendAccelerator.c 		zend_hash_init(&amp;ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);</span>
+<span class='curline'><a href='../S/849.html#L2292'>CG</a>               2292 ext/opcache/ZendAccelerator.c 	CG(unclean_shutdown) = 1;</span>
+<span class='curline'><a href='../S/849.html#L2766'>CG</a>               2766 ext/opcache/ZendAccelerator.c 	if ((func = zend_hash_str_find_ptr(CG(function_table), "chdir", sizeof("chdir")-1)) != NULL &amp;&amp;</span>
+<span class='curline'><a href='../S/849.html#L2821'>CG</a>               2821 ext/opcache/ZendAccelerator.c 		zend_hash_clean(CG(auto_globals));</span>
+<span class='curline'><a href='../S/849.html#L2822'>CG</a>               2822 ext/opcache/ZendAccelerator.c 		zend_hash_clean(CG(function_table));</span>
+<span class='curline'><a href='../S/849.html#L2823'>CG</a>               2823 ext/opcache/ZendAccelerator.c 		zend_hash_clean(CG(class_table));</span>
+<span class='curline'><a href='../S/838.html#L404'>CG</a>                404 ext/opcache/zend_accelerator_module.c 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", sizeof("file_exists")-1)) != NULL) {</span>
+<span class='curline'><a href='../S/838.html#L408'>CG</a>                408 ext/opcache/zend_accelerator_module.c 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_file", sizeof("is_file")-1)) != NULL) {</span>
+<span class='curline'><a href='../S/838.html#L412'>CG</a>                412 ext/opcache/zend_accelerator_module.c 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_readable", sizeof("is_readable")-1)) != NULL) {</span>
+<span class='curline'><a href='../S/840.html#L151'>CG</a>                151 ext/opcache/zend_accelerator_util_funcs.c 	zend_hash_apply_with_argument(CG(function_table), (apply_func_arg_t)copy_internal_function, &amp;ZCG(function_table));</span>
+<span class='curline'><a href='../S/840.html#L553'>CG</a>                553 ext/opcache/zend_accelerator_util_funcs.c 	CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/840.html#L555'>CG</a>                555 ext/opcache/zend_accelerator_util_funcs.c 	CG(zend_lineno) = function1-&gt;op_array.opcodes[0].lineno;</span>
+<span class='curline'><a href='../S/840.html#L597'>CG</a>                597 ext/opcache/zend_accelerator_util_funcs.c 	CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/840.html#L599'>CG</a>                599 ext/opcache/zend_accelerator_util_funcs.c 	CG(zend_lineno) = function1-&gt;op_array.opcodes[0].lineno;</span>
+<span class='curline'><a href='../S/840.html#L643'>CG</a>                643 ext/opcache/zend_accelerator_util_funcs.c 	CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/840.html#L645'>CG</a>                645 ext/opcache/zend_accelerator_util_funcs.c 	CG(zend_lineno) = ce1-&gt;info.user.line_start;</span>
+<span class='curline'><a href='../S/840.html#L692'>CG</a>                692 ext/opcache/zend_accelerator_util_funcs.c 			ZCG(arena_mem) = zend_arena_alloc(&amp;CG(arena), persistent_script-&gt;arena_size + 64);</span>
+<span class='curline'><a href='../S/840.html#L696'>CG</a>                696 ext/opcache/zend_accelerator_util_funcs.c 			ZCG(arena_mem) = zend_arena_alloc(&amp;CG(arena), persistent_script-&gt;arena_size);</span>
+<span class='curline'><a href='../S/840.html#L703'>CG</a>                703 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_class_hash_copy(CG(class_table), &amp;persistent_script-&gt;class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor);</span>
+<span class='curline'><a href='../S/840.html#L708'>CG</a>                708 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_function_hash_copy_from_shm(CG(function_table), &amp;persistent_script-&gt;function_table);</span>
+<span class='curline'><a href='../S/840.html#L728'>CG</a>                728 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_function_hash_copy(CG(function_table), &amp;persistent_script-&gt;function_table);</span>
+<span class='curline'><a href='../S/840.html#L731'>CG</a>                731 ext/opcache/zend_accelerator_util_funcs.c 			zend_accel_class_hash_copy(CG(class_table), &amp;persistent_script-&gt;class_table, NULL);</span>
+<span class='curline'><a href='../S/840.html#L736'>CG</a>                736 ext/opcache/zend_accelerator_util_funcs.c 		zend_string *orig_compiled_filename = CG(compiled_filename);</span>
+<span class='curline'><a href='../S/840.html#L737'>CG</a>                737 ext/opcache/zend_accelerator_util_funcs.c 		CG(compiled_filename) = persistent_script-&gt;full_path;</span>
+<span class='curline'><a href='../S/840.html#L739'>CG</a>                739 ext/opcache/zend_accelerator_util_funcs.c 		CG(compiled_filename) = orig_compiled_filename;</span>
+<span class='curline'><a href='../S/842.html#L1274'>CG</a>               1274 ext/opcache/zend_file_cache.c 	checkpoint = zend_arena_checkpoint(CG(arena));</span>
+<span class='curline'><a href='../S/842.html#L1277'>CG</a>               1277 ext/opcache/zend_file_cache.c 	mem = zend_arena_alloc(&amp;CG(arena), info.mem_size + info.str_size + 64);</span>
+<span class='curline'><a href='../S/842.html#L1280'>CG</a>               1280 ext/opcache/zend_file_cache.c 	mem = zend_arena_alloc(&amp;CG(arena), info.mem_size + info.str_size);</span>
+<span class='curline'><a href='../S/842.html#L1288'>CG</a>               1288 ext/opcache/zend_file_cache.c 		zend_arena_release(&amp;CG(arena), checkpoint);</span>
+<span class='curline'><a href='../S/842.html#L1302'>CG</a>               1302 ext/opcache/zend_file_cache.c 		zend_arena_release(&amp;CG(arena), checkpoint);</span>
+<span class='curline'><a href='../S/842.html#L1321'>CG</a>               1321 ext/opcache/zend_file_cache.c 				zend_arena_release(&amp;CG(arena), checkpoint);</span>
+<span class='curline'><a href='../S/842.html#L1368'>CG</a>               1368 ext/opcache/zend_file_cache.c 		zend_arena_release(&amp;CG(arena), checkpoint);</span>
+<span class='curline'><a href='../S/909.html#L87'>CG</a>                 87 ext/pdo/pdo.c  			if ((pce = zend_hash_str_find_ptr(CG(class_table), "runtimeexception", sizeof("RuntimeException") - 1))) {</span>
+<span class='curline'><a href='../S/958.html#L1055'>CG</a>               1055 ext/phar/func_interceptors.c 	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \</span>
+<span class='curline'><a href='../S/958.html#L1092'>CG</a>               1092 ext/phar/func_interceptors.c 	if (PHAR_G(orig_##func) &amp;&amp; NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \</span>
+<span class='curline'><a href='../S/960.html#L3321'>CG</a>               3321 ext/phar/phar.c 		CG(zend_lineno) = 0;</span>
+<span class='curline'><a href='../S/978.html#L490'>CG</a>                490 ext/readline/readline.c 	if (call_user_function(CG(function_table), NULL, &amp;_readline_completion, &amp;_readline_array, 3, params) == SUCCESS) {</span>
+<span class='curline'><a href='../S/978.html#L552'>CG</a>                552 ext/readline/readline.c 	call_user_function(CG(function_table), NULL, &amp;_prepped_callback, &amp;dummy, 1, params);</span>
+<span class='curline'><a href='../S/979.html#L359'>CG</a>                359 ext/readline/readline_cli.c 				if ((CG(short_tags) &amp;&amp; !strncmp(code+i-1, "&lt;?", 2))</span>
+<span class='curline'><a href='../S/983.html#L1097'>CG</a>               1097 ext/reflection/php_reflection.c 		ZEND_HASH_FOREACH_PTR(CG(function_table), fptr) {</span>
+<span class='curline'><a href='../S/983.html#L5637'>CG</a>               5637 ext/reflection/php_reflection.c 	ZEND_HASH_FOREACH_PTR(CG(function_table), fptr) {</span>
+<span class='curline'><a href='../S/999.html#L201'>CG</a>                201 ext/simplexml/sxe.c 	if ((pce = zend_hash_str_find_ptr(CG(class_table), "simplexmlelement", sizeof("SimpleXMLElement") - 1)) == NULL) {</span>
+<span class='curline'><a href='../S/1007.html#L395'>CG</a>                395 ext/soap/php_http.c 			if (call_user_function(CG(function_table), (zval*)NULL, &amp;func, &amp;retval, n, params) == SUCCESS &amp;&amp;</span>
+<span class='curline'><a href='../S/1007.html#L1270'>CG</a>               1270 ext/soap/php_http.c 		if (call_user_function(CG(function_table), (zval*)NULL, &amp;func, &amp;retval, 1, params) == SUCCESS &amp;&amp;</span>
+<span class='curline'><a href='../S/1018.html#L94'>CG</a>                 94 ext/soap/soap.c 	zend_bool _old_in_compilation = CG(in_compilation); \</span>
+<span class='curline'><a href='../S/1018.html#L105'>CG</a>                105 ext/soap/soap.c 		CG(in_compilation) = _old_in_compilation; \</span>
+<span class='curline'><a href='../S/1018.html#L2133'>CG</a>               2133 ext/soap/soap.c 	_old_in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1018.html#L2195'>CG</a>               2195 ext/soap/soap.c 				CG(in_compilation) = _old_in_compilation;</span>
+<span class='curline'><a href='../S/1018.html#L2275'>CG</a>               2275 ext/soap/soap.c 			CG(in_compilation) = _old_in_compilation;</span>
+<span class='curline'><a href='../S/1060.html#L2146'>CG</a>               2146 ext/standard/array.c 					if (CG(one_char_string)[low]) {</span>
+<span class='curline'><a href='../S/1060.html#L2147'>CG</a>               2147 ext/standard/array.c 						ZVAL_INTERNED_STR(&amp;tmp, CG(one_char_string)[low]);</span>
+<span class='curline'><a href='../S/1060.html#L2166'>CG</a>               2166 ext/standard/array.c 					if (CG(one_char_string)[low]) {</span>
+<span class='curline'><a href='../S/1060.html#L2167'>CG</a>               2167 ext/standard/array.c 						ZVAL_INTERNED_STR(&amp;tmp, CG(one_char_string)[low]);</span>
+<span class='curline'><a href='../S/1060.html#L2179'>CG</a>               2179 ext/standard/array.c 			if (CG(one_char_string)[low]) {</span>
+<span class='curline'><a href='../S/1060.html#L2180'>CG</a>               2180 ext/standard/array.c 				ZVAL_INTERNED_STR(&amp;tmp, CG(one_char_string)[low]);</span>
+<span class='curline'><a href='../S/1061.html#L228'>CG</a>                228 ext/standard/assert.c 			call_user_function(CG(function_table), NULL, &amp;ASSERTG(callback), &amp;retval, 3, args);</span>
+<span class='curline'><a href='../S/1061.html#L234'>CG</a>                234 ext/standard/assert.c 			call_user_function(CG(function_table), NULL, &amp;ASSERTG(callback), &amp;retval, 4, args);</span>
+<span class='curline'><a href='../S/1178.html#L2788'>CG</a>               2788 ext/standard/string.c 	if (CG(one_char_string)[c]) {</span>
+<span class='curline'><a href='../S/1178.html#L2789'>CG</a>               2789 ext/standard/string.c 		ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);</span>
+<span class='curline'><a href='../S/1188.html#L174'>CG</a>                174 ext/standard/user_filters.c 	if (CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1190.html#L870'>CG</a>                870 ext/standard/var.c 					res = call_user_function_ex(CG(function_table), struc, &amp;fname, &amp;retval, 0, 0, 1, NULL);</span>
+<span class='curline'><a href='../S/1191.html#L472'>CG</a>                472 ext/standard/var_unserializer.c 		call_user_function_ex(CG(function_table), rval, &amp;fname, &amp;retval, 0, 0, 1, NULL);</span>
+<span class='curline'><a href='../S/1191.html#L736'>CG</a>                736 ext/standard/var_unserializer.c 		if (call_user_function_ex(CG(function_table), NULL, &amp;user_func, &amp;retval, 1, args, 0, NULL) != SUCCESS) {</span>
+<span class='curline'><a href='../S/1203.html#L133'>CG</a>                133 ext/tokenizer/tokenizer.c 			CG(zend_lineno)++;</span>
+<span class='curline'><a href='../S/1203.html#L140'>CG</a>                140 ext/tokenizer/tokenizer.c 				if (CG(increment_lineno)) {</span>
+<span class='curline'><a href='../S/1203.html#L141'>CG</a>                141 ext/tokenizer/tokenizer.c 					token_line = ++CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1203.html#L142'>CG</a>                142 ext/tokenizer/tokenizer.c 					CG(increment_lineno) = 0;</span>
+<span class='curline'><a href='../S/1203.html#L177'>CG</a>                177 ext/tokenizer/tokenizer.c 		token_line = CG(zend_lineno);</span>
+<span class='curline'><a href='../S/1203.html#L220'>CG</a>                220 ext/tokenizer/tokenizer.c 				add_next_index_long(&amp;keyword, CG(zend_lineno));</span>
+<span class='curline'><a href='../S/1203.html#L236'>CG</a>                236 ext/tokenizer/tokenizer.c 	original_in_compilation = CG(in_compilation);</span>
+<span class='curline'><a href='../S/1203.html#L237'>CG</a>                237 ext/tokenizer/tokenizer.c 	CG(in_compilation) = 1;</span>
+<span class='curline'><a href='../S/1203.html#L241'>CG</a>                241 ext/tokenizer/tokenizer.c 		CG(ast) = NULL;</span>
+<span class='curline'><a href='../S/1203.html#L242'>CG</a>                242 ext/tokenizer/tokenizer.c 		CG(ast_arena) = zend_arena_create(1024 * 32);</span>
+<span class='curline'><a href='../S/1203.html#L253'>CG</a>                253 ext/tokenizer/tokenizer.c 		zend_ast_destroy(CG(ast));</span>
+<span class='curline'><a href='../S/1203.html#L254'>CG</a>                254 ext/tokenizer/tokenizer.c 		zend_arena_destroy(CG(ast_arena));</span>
+<span class='curline'><a href='../S/1203.html#L259'>CG</a>                259 ext/tokenizer/tokenizer.c 	CG(in_compilation) = original_in_compilation;</span>
+<span class='curline'><a href='../S/1207.html#L454'>CG</a>                454 ext/wddx/wddx.c 	if (call_user_function_ex(CG(function_table), obj, &amp;fname, &amp;retval, 0, 0, 1, NULL) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1240.html#L896'>CG</a>                896 ext/xmlrpc/xmlrpc-epi-php.c 	call_user_function(CG(function_table), NULL, &amp;pData-&gt;php_function, &amp;pData-&gt;return_data, 3, callback_params);</span>
+<span class='curline'><a href='../S/1240.html#L922'>CG</a>                922 ext/xmlrpc/xmlrpc-epi-php.c 			if (call_user_function(CG(function_table), NULL, php_function, &amp;retval, 1, callback_params) == SUCCESS) {</span>
+<span class='curline'><a href='../S/1374.html#L1179'>CG</a>               1179 main/main.c    					CG(parse_error) = 0;</span>
+<span class='curline'><a href='../S/1374.html#L1741'>CG</a>               1741 main/main.c    		shutdown_memory_manager(CG(unclean_shutdown), 0);</span>
+<span class='curline'><a href='../S/1374.html#L1784'>CG</a>               1784 main/main.c    		if (CG(unclean_shutdown) &amp;&amp; PG(last_error_type) == E_ERROR &amp;&amp;</span>
+<span class='curline'><a href='../S/1374.html#L1849'>CG</a>               1849 main/main.c    		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);</span>
+<span class='curline'><a href='../S/1374.html#L2367'>CG</a>               2367 main/main.c    	shutdown_memory_manager(CG(unclean_shutdown), 1);</span>
+<span class='curline'><a href='../S/1374.html#L2478'>CG</a>               2478 main/main.c    		if (CG(start_lineno) &amp;&amp; prepend_file_p) {</span>
+<span class='curline'><a href='../S/1374.html#L2479'>CG</a>               2479 main/main.c    			int orig_start_lineno = CG(start_lineno);</span>
+<span class='curline'><a href='../S/1374.html#L2481'>CG</a>               2481 main/main.c    			CG(start_lineno) = 0;</span>
+<span class='curline'><a href='../S/1374.html#L2483'>CG</a>               2483 main/main.c    				CG(start_lineno) = orig_start_lineno;</span>
+<span class='curline'><a href='../S/1427.html#L510'>CG</a>                510 main/streams/streams.c 			if (!CG(unclean_shutdown)) {</span>
+<span class='curline'><a href='../S/1441.html#L2150'>CG</a>               2150 sapi/cgi/cgi_main.c 							CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;</span>
+<span class='curline'><a href='../S/1441.html#L2403'>CG</a>               2403 sapi/cgi/cgi_main.c 							CG(start_lineno) = 2;</span>
+<span class='curline'><a href='../S/1441.html#L2421'>CG</a>               2421 sapi/cgi/cgi_main.c 							CG(start_lineno) = 2;</span>
+<span class='curline'><a href='../S/1445.html#L669'>CG</a>                669 sapi/cli/php_cli.c 		CG(in_compilation) = 0; /* not initialized but needed for several options */</span>
+<span class='curline'><a href='../S/1445.html#L952'>CG</a>                952 sapi/cli/php_cli.c 		CG(start_lineno) = lineno;</span>
+<span class='curline'><a href='../S/1445.html#L1039'>CG</a>               1039 sapi/cli/php_cli.c 								CG(start_lineno) = lineno;</span>
+<span class='curline'><a href='../S/1445.html#L1337'>CG</a>               1337 sapi/cli/php_cli.c 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;</span>
+<span class='curline'><a href='../S/1487.html#L1820'>CG</a>               1820 sapi/fpm/fpm/fpm_main.c 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;</span>
+<span class='curline'><a href='../S/1522.html#L773'>CG</a>                773 sapi/litespeed/lsapi_main.c         CG(in_compilation) = 0; /* not initialized but needed for several options */</span>
+<span class='curline'><a href='../S/1526.html#L1789'>CG</a>               1789 sapi/phpdbg/phpdbg.c 			CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;</span>
+<span class='curline'><a href='../S/1526.html#L1863'>CG</a>               1863 sapi/phpdbg/phpdbg.c 				CG(unclean_shutdown) = 0;</span>
+<span class='curline'><a href='../S/1526.html#L1895'>CG</a>               1895 sapi/phpdbg/phpdbg.c 							CG(unclean_shutdown) = 0;</span>
+<span class='curline'><a href='../S/1526.html#L1947'>CG</a>               1947 sapi/phpdbg/phpdbg.c 			CG(unclean_shutdown) = is_exit || PHPDBG_G(unclean_eval);</span>
+<span class='curline'><a href='../S/1528.html#L805'>CG</a>                805 sapi/phpdbg/phpdbg_bp.c 	uint32_t cops = CG(compiler_options);</span>
+<span class='curline'><a href='../S/1528.html#L819'>CG</a>                819 sapi/phpdbg/phpdbg_bp.c 	cops = CG(compiler_options);</span>
+<span class='curline'><a href='../S/1528.html#L821'>CG</a>                821 sapi/phpdbg/phpdbg_bp.c 	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;</span>
+<span class='curline'><a href='../S/1528.html#L850'>CG</a>                850 sapi/phpdbg/phpdbg_bp.c 	CG(compiler_options) = cops;</span>
+<span class='curline'><a href='../S/1542.html#L189'>CG</a>                189 sapi/phpdbg/phpdbg_info.c 		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_arm_auto_global);</span>
+<span class='curline'><a href='../S/1558.html#L480'>CG</a>                480 sapi/phpdbg/phpdbg_prompt.c 						CG(start_lineno) = 2;</span>
+<span class='curline'><a href='../S/1558.html#L864'>CG</a>                864 sapi/phpdbg/phpdbg_prompt.c 	CG(unclean_shutdown) = 0;</span>
+<span class='curline'><a href='../S/1570.html#L156'>CG</a>                156 sapi/phpdbg/phpdbg_wait.c 		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_dearm_autoglobals);</span>
+</pre>
+</body>
+</html>

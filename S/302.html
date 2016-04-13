@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ext/imap/php_imap.h</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1743.html'>ext</a>/<a href='../files/1771.html'>imap</a>/php_imap.h</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='301.html#L49' title='Included from 49 in ext/imap/php_imap.c.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   | PHP Version 7                                                        |</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   | Copyright (c) 1997-2016 The PHP Group                                |</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   | This source file is subject to version 3.01 of the PHP license,      |</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   | that is bundled with this package in the file LICENSE, and is        |</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   | available through the world-wide-web at the following url:           |</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   | http://www.php.net/license/3_01.txt                                  |</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   | If you did not receive a copy of the PHP license and are unable to   |</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   | obtain it through the world-wide-web, please send a note to          |</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   | license@php.net so we can mail you a copy immediately.               |</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>   | Authors: Rex Logan           &lt;veebert@dimensional.com&gt;               |</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   |          Mark Musone         &lt;musone@afterfive.com&gt;                  |</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   |          Brian Wang          &lt;brian@vividnet.com&gt;                    |</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   |          Kaj-Michael Lang    &lt;milang@tal.org&gt;                        |</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   |          Antoni Pamies Olive &lt;toni@readysoft.net&gt;                    |</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'>   |          Rasmus Lerdorf      &lt;rasmus@php.net&gt;                        |</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>   |          Chuck Hagenbuch     &lt;chuck@horde.org&gt;                       |</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>   |          Andrew Skalski      &lt;askalski@chekinc.com&gt;                  |</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>   |          Hartmut Holzgraefe  &lt;hholzgra@php.net&gt;                      |</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>   |          Jani Taskinen       &lt;sniper@iki.fi&gt;                         |</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>   |          Daniel R. Kalowsky  &lt;kalowsky@php.net&gt;                      |</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>   | PHP 4.0 updates:  Zeev Suraski &lt;zeev@zend.com&gt;                       |</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>   +----------------------------------------------------------------------+</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> */</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='comment'>/* $Id$ */</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#ifndef</em> <a href='../S/302.html#L33' title='Defined at 33 in ext/imap/php_imap.h.'>PHP_IMAP_H</a>
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#define</em> <a href='../S/302.html#L32' title='Referred from 32 in ext/imap/php_imap.h.'>PHP_IMAP_H</a>
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#if</em> HAVE_IMAP
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/2839.html' title='Multiple used in 9 places.'>HAVE_IMAP2000</a>) || <strong class='reserved'>defined</strong>(<a href='../Y/2840.html' title='Multiple used in 9 places.'>HAVE_IMAP2001</a>)
+<a id='L38' name='L38'></a>  38  <em class='comment'>/* these are used for quota support */</em>
+<a id='L39' name='L39'></a>  39 <em class='sharp'># include</em> "c-client.h"  <em class='comment'>/* includes mail.h and rfc822.h */</em>
+<a id='L40' name='L40'></a>  40 <em class='sharp'># include</em> "imap4r1.h"   <em class='comment'>/* location of c-client quota functions */</em>
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#else</em>
+<a id='L42' name='L42'></a>  42 <em class='sharp'># include</em> "mail.h"
+<a id='L43' name='L43'></a>  43 <em class='sharp'># include</em> "rfc822.h"
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <strong class='reserved'>extern</strong> <a href='../S/1695.html#L70' title='Defined at 70 in Zend/zend_modules.h.'>zend_module_entry</a> <a href='../Y/22880.html' title='Multiple used in 3 places.'>imap_module_entry</a>;
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#define</em> <a href='../S/302.html#L233' title='Referred from 233 in ext/imap/php_imap.h.'>imap_module_ptr</a> &amp;<a href='../Y/22880.html' title='Multiple used in 3 places.'>imap_module_entry</a>
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#include</em> "<a href='1403.html'>php_version.h</a>"
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#define</em> <a href='../S/301.html#L577' title='Referred from 577 in ext/imap/php_imap.c.'>PHP_IMAP_VERSION</a> <a href='../S/1403.html#L7' title='Defined at 7 in main/php_version.h.'>PHP_VERSION</a>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <em class='comment'>/* Data types */</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='sharp'>#ifdef</em> <a href='../S/301.html#L31' title='Defined at 31 in ext/imap/php_imap.c.'>IMAP41</a>
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#define</em> <a href='../R/4027.html' title='Multiple referred from 12 places.'>LSIZE</a> <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>.<a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>
+<a id='L56' name='L56'></a>  56 <em class='sharp'>#define</em> <a href='../R/4038.html' title='Multiple referred from 22 places.'>LTEXT</a> <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>.<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#define</em> <a href='../R/1505.html' title='Multiple referred from 3 places.'>DTYPE</a> <strong class='reserved'>int</strong>
+<a id='L58' name='L58'></a>  58 <em class='sharp'>#define</em> <a href='../S/301.html#L4661' title='Referred from 4661 in ext/imap/php_imap.c.'>CONTENT_PART</a> <a href='../Y/28126.html' title='Multiple used in 33 places.'>nested</a>.<a href='../Y/31233.html' title='Multiple used in 61 places.'>part</a>
+<a id='L59' name='L59'></a>  59 <em class='sharp'>#define</em> <a href='../S/301.html#L4671' title='Referred from 4671 in ext/imap/php_imap.c.'>CONTENT_MSG_BODY</a> <a href='../Y/28126.html' title='Multiple used in 33 places.'>nested</a>.<a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>-&gt;<a href='../S/1122.html#L190' title='Defined at 190 in ext/standard/md5.c.'>body</a>
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#define</em> IMAPVER "Imap 4R1"
+<a id='L61' name='L61'></a>  61 <em class='sharp'>#else</em>
+<a id='L62' name='L62'></a>  62 <em class='sharp'>#define</em> <a href='../R/4027.html' title='Multiple referred from 12 places.'>LSIZE</a> <a href='../Y/36239.html' title='Multiple used in 2739 places.'>size</a>
+<a id='L63' name='L63'></a>  63 <em class='sharp'>#define</em> <a href='../R/4038.html' title='Multiple referred from 22 places.'>LTEXT</a> <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>
+<a id='L64' name='L64'></a>  64 <em class='sharp'>#define</em> <a href='../R/1505.html' title='Multiple referred from 3 places.'>DTYPE</a> <strong class='reserved'>char</strong>
+<a id='L65' name='L65'></a>  65 <em class='sharp'>#define</em> <a href='../S/301.html#L4661' title='Referred from 4661 in ext/imap/php_imap.c.'>CONTENT_PART</a> <a href='../Y/14368.html' title='Multiple used in 59 places.'>contents</a>.<a href='../Y/31233.html' title='Multiple used in 61 places.'>part</a>
+<a id='L66' name='L66'></a>  66 <em class='sharp'>#define</em> <a href='../S/301.html#L4671' title='Referred from 4671 in ext/imap/php_imap.c.'>CONTENT_MSG_BODY</a> <a href='../Y/14368.html' title='Multiple used in 59 places.'>contents</a>.<a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>.<a href='../S/1122.html#L190' title='Defined at 190 in ext/standard/md5.c.'>body</a>
+<a id='L67' name='L67'></a>  67 <em class='sharp'>#define</em> IMAPVER "Imap 4"
+<a id='L68' name='L68'></a>  68 <em class='sharp'>#endif</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71 <em class='comment'>/* Determines how mm_list() and mm_lsub() are to return their results. */</em>
+<a id='L72' name='L72'></a>  72 <strong class='reserved'>typedef</strong> <strong class='reserved'>enum</strong> <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73         <a href='../R/2337.html' title='Multiple referred from 5 places.'>FLIST_ARRAY</a>,
+<a id='L74' name='L74'></a>  74         <a href='../R/2338.html' title='Multiple referred from 4 places.'>FLIST_OBJECT</a>
+<a id='L75' name='L75'></a>  75 <em class='brace'>}</em> <a href='../S/302.html#L206' title='Referred from 206 in ext/imap/php_imap.h.'>folderlist_style_t</a>;
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> php_imap_le_struct <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78         <a href='../Y/3968.html' title='Multiple used in 16 places.'>MAILSTREAM</a> *<a href='../Y/22911.html' title='Multiple used in 85 places.'>imap_stream</a>;
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>long</strong> <a href='../D/21907.html' title='Multiple defined in 17 places.'>flags</a>;
+<a id='L80' name='L80'></a>  80 <em class='brace'>}</em> <a href='../R/25536.html' title='Multiple referred from 97 places.'>pils</a>;
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/302.html#L86' title='Referred from 86 in ext/imap/php_imap.h.'>php_imap_mailbox_struct</a> <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83         <a href='../Y/5650.html' title='Multiple used in 6 places.'>SIZEDTEXT</a> <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>;
+<a id='L84' name='L84'></a>  84         <a href='../D/1780.html' title='Multiple defined in 2 places.'>DTYPE</a> <a href='../Y/15531.html' title='Multiple used in 71 places.'>delimiter</a>;
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>long</strong> <a href='../Y/12110.html' title='Multiple used in 127 places.'>attributes</a>;
+<a id='L86' name='L86'></a>  86         <strong class='reserved'>struct</strong> <a href='../S/302.html#L82' title='Defined at 82 in ext/imap/php_imap.h.'>php_imap_mailbox_struct</a> *<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L87' name='L87'></a>  87 <em class='brace'>}</em> <a href='../R/2372.html' title='Multiple referred from 12 places.'>FOBJECTLIST</a>;
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/302.html#L92' title='Referred from 92 in ext/imap/php_imap.h.'>php_imap_error_struct</a> <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90         <a href='../Y/5650.html' title='Multiple used in 6 places.'>SIZEDTEXT</a> <a href='../Y/38277.html' title='Multiple used in 351 places.'>text</a>;
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>long</strong> <a href='../Y/17012.html' title='Multiple used in 7 places.'>errflg</a>;
+<a id='L92' name='L92'></a>  92         <strong class='reserved'>struct</strong> <a href='../S/302.html#L89' title='Defined at 89 in ext/imap/php_imap.h.'>php_imap_error_struct</a> *<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L93' name='L93'></a>  93 <em class='brace'>}</em> <a href='../R/1843.html' title='Multiple referred from 8 places.'>ERRORLIST</a>;
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <a href='../S/302.html#L97' title='Referred from 97 in ext/imap/php_imap.h.'>_php_imap_message_struct</a> <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/26951.html' title='Multiple used in 19 places.'>msgid</a>;
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>struct</strong> <a href='../S/302.html#L95' title='Defined at 95 in ext/imap/php_imap.h.'>_php_imap_message_struct</a> *<a href='../D/25146.html' title='Multiple defined in 2 places.'>next</a>;
+<a id='L98' name='L98'></a>  98 <em class='brace'>}</em> <a href='../R/4453.html' title='Multiple referred from 8 places.'>MESSAGELIST</a>;
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <em class='comment'>/* Functions */</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103 <a href='../D/8309.html' title='Multiple defined in 96 places.'>PHP_MINIT_FUNCTION</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>);
+<a id='L104' name='L104'></a> 104 <a href='../D/8576.html' title='Multiple defined in 29 places.'>PHP_RINIT_FUNCTION</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>);
+<a id='L105' name='L105'></a> 105 <a href='../D/8598.html' title='Multiple defined in 36 places.'>PHP_RSHUTDOWN_FUNCTION</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>);
+<a id='L106' name='L106'></a> 106 <a href='../D/8307.html' title='Multiple defined in 78 places.'>PHP_MINFO_FUNCTION</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>);
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22885.html' title='Multiple used in 3 places.'>imap_open</a>);
+<a id='L109' name='L109'></a> 109 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(imap_popen);
+<a id='L110' name='L110'></a> 110 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22893.html' title='Multiple used in 3 places.'>imap_reopen</a>);
+<a id='L111' name='L111'></a> 111 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22883.html' title='Multiple used in 3 places.'>imap_num_msg</a>);
+<a id='L112' name='L112'></a> 112 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22884.html' title='Multiple used in 3 places.'>imap_num_recent</a>);
+<a id='L113' name='L113'></a> 113 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22862.html' title='Multiple used in 3 places.'>imap_headers</a>);
+<a id='L114' name='L114'></a> 114 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22861.html' title='Multiple used in 4 places.'>imap_headerinfo</a>);
+<a id='L115' name='L115'></a> 115 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22895.html' title='Multiple used in 3 places.'>imap_rfc822_parse_headers</a>);
+<a id='L116' name='L116'></a> 116 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22826.html' title='Multiple used in 4 places.'>imap_body</a>);
+<a id='L117' name='L117'></a> 117 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22843.html' title='Multiple used in 3 places.'>imap_fetchstructure</a>);
+<a id='L118' name='L118'></a> 118 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22840.html' title='Multiple used in 3 places.'>imap_fetchbody</a>);
+<a id='L119' name='L119'></a> 119 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22842.html' title='Multiple used in 3 places.'>imap_fetchmime</a>);
+<a id='L120' name='L120'></a> 120 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22897.html' title='Multiple used in 3 places.'>imap_savebody</a>);
+<a id='L121' name='L121'></a> 121 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22850.html' title='Multiple used in 3 places.'>imap_gc</a>);
+<a id='L122' name='L122'></a> 122 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22838.html' title='Multiple used in 3 places.'>imap_expunge</a>);
+<a id='L123' name='L123'></a> 123 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22833.html' title='Multiple used in 3 places.'>imap_delete</a>);
+<a id='L124' name='L124'></a> 124 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22916.html' title='Multiple used in 3 places.'>imap_undelete</a>);
+<a id='L125' name='L125'></a> 125 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22828.html' title='Multiple used in 3 places.'>imap_check</a>);
+<a id='L126' name='L126'></a> 126 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22830.html' title='Multiple used in 3 places.'>imap_close</a>);
+<a id='L127' name='L127'></a> 127 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22874.html' title='Multiple used in 3 places.'>imap_mail_copy</a>);
+<a id='L128' name='L128'></a> 128 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22875.html' title='Multiple used in 3 places.'>imap_mail_move</a>);
+<a id='L129' name='L129'></a> 129 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22832.html' title='Multiple used in 4 places.'>imap_createmailbox</a>);
+<a id='L130' name='L130'></a> 130 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22892.html' title='Multiple used in 4 places.'>imap_renamemailbox</a>);
+<a id='L131' name='L131'></a> 131 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22834.html' title='Multiple used in 3 places.'>imap_deletemailbox</a>);
+<a id='L132' name='L132'></a> 132 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22867.html' title='Multiple used in 2 places.'>imap_listmailbox</a>);
+<a id='L133' name='L133'></a> 133 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22899.html' title='Multiple used in 2 places.'>imap_scanmailbox</a>);
+<a id='L134' name='L134'></a> 134 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22912.html' title='Multiple used in 3 places.'>imap_subscribe</a>);
+<a id='L135' name='L135'></a> 135 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22917.html' title='Multiple used in 3 places.'>imap_unsubscribe</a>);
+<a id='L136' name='L136'></a> 136 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22823.html' title='Multiple used in 3 places.'>imap_append</a>);
+<a id='L137' name='L137'></a> 137 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22887.html' title='Multiple used in 3 places.'>imap_ping</a>);
+<a id='L138' name='L138'></a> 138 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22824.html' title='Multiple used in 3 places.'>imap_base64</a>);
+<a id='L139' name='L139'></a> 139 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22890.html' title='Multiple used in 3 places.'>imap_qprint</a>);
+<a id='L140' name='L140'></a> 140 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22819.html' title='Multiple used in 3 places.'>imap_8bit</a>);
+<a id='L141' name='L141'></a> 141 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22825.html' title='Multiple used in 3 places.'>imap_binary</a>);
+<a id='L142' name='L142'></a> 142 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22876.html' title='Multiple used in 3 places.'>imap_mailboxmsginfo</a>);
+<a id='L143' name='L143'></a> 143 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22896.html' title='Multiple used in 3 places.'>imap_rfc822_write_address</a>);
+<a id='L144' name='L144'></a> 144 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22894.html' title='Multiple used in 3 places.'>imap_rfc822_parse_adrlist</a>);
+<a id='L145' name='L145'></a> 145 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22903.html' title='Multiple used in 3 places.'>imap_setflag_full</a>);
+<a id='L146' name='L146'></a> 146 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22829.html' title='Multiple used in 3 places.'>imap_clearflag_full</a>);
+<a id='L147' name='L147'></a> 147 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22909.html' title='Multiple used in 3 places.'>imap_sort</a>);
+<a id='L148' name='L148'></a> 148 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22841.html' title='Multiple used in 3 places.'>imap_fetchheader</a>);
+<a id='L149' name='L149'></a> 149 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22844.html' title='Multiple used in 2 places.'>imap_fetchtext</a>);
+<a id='L150' name='L150'></a> 150 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22915.html' title='Multiple used in 3 places.'>imap_uid</a>);
+<a id='L151' name='L151'></a> 151 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22881.html' title='Multiple used in 3 places.'>imap_msgno</a>);
+<a id='L152' name='L152'></a> 152 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22865.html' title='Multiple used in 4 places.'>imap_list</a>);
+<a id='L153' name='L153'></a> 153 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22866.html' title='Multiple used in 3 places.'>imap_list_full</a>);
+<a id='L154' name='L154'></a> 154 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22868.html' title='Multiple used in 5 places.'>imap_listscan</a>);
+<a id='L155' name='L155'></a> 155 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22870.html' title='Multiple used in 4 places.'>imap_lsub</a>);
+<a id='L156' name='L156'></a> 156 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22871.html' title='Multiple used in 3 places.'>imap_lsub_full</a>);
+<a id='L157' name='L157'></a> 157 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22831.html' title='Multiple used in 2 places.'>imap_create</a>);
+<a id='L158' name='L158'></a> 158 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22891.html' title='Multiple used in 2 places.'>imap_rename</a>);
+<a id='L159' name='L159'></a> 159 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22910.html' title='Multiple used in 3 places.'>imap_status</a>);
+<a id='L160' name='L160'></a> 160 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22827.html' title='Multiple used in 3 places.'>imap_bodystruct</a>);
+<a id='L161' name='L161'></a> 161 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22839.html' title='Multiple used in 3 places.'>imap_fetch_overview</a>);
+<a id='L162' name='L162'></a> 162 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22873.html' title='Multiple used in 3 places.'>imap_mail_compose</a>);
+<a id='L163' name='L163'></a> 163 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22821.html' title='Multiple used in 3 places.'>imap_alerts</a>);
+<a id='L164' name='L164'></a> 164 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22836.html' title='Multiple used in 3 places.'>imap_errors</a>);
+<a id='L165' name='L165'></a> 165 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22863.html' title='Multiple used in 3 places.'>imap_last_error</a>);
+<a id='L166' name='L166'></a> 166 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22872.html' title='Multiple used in 3 places.'>imap_mail</a>);
+<a id='L167' name='L167'></a> 167 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22900.html' title='Multiple used in 3 places.'>imap_search</a>);
+<a id='L168' name='L168'></a> 168 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22921.html' title='Multiple used in 3 places.'>imap_utf8</a>);
+<a id='L169' name='L169'></a> 169 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22919.html' title='Multiple used in 3 places.'>imap_utf7_decode</a>);
+<a id='L170' name='L170'></a> 170 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22920.html' title='Multiple used in 3 places.'>imap_utf7_encode</a>);
+<a id='L171' name='L171'></a> 171 <em class='sharp'>#ifdef</em> <a href='../Y/2848.html' title='Multiple used in 4 places.'>HAVE_IMAP_MUTF7</a>
+<a id='L172' name='L172'></a> 172 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22922.html' title='Multiple used in 3 places.'>imap_utf8_to_mutf7</a>);
+<a id='L173' name='L173'></a> 173 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22882.html' title='Multiple used in 3 places.'>imap_mutf7_to_utf8</a>);
+<a id='L174' name='L174'></a> 174 <em class='sharp'>#endif</em>
+<a id='L175' name='L175'></a> 175 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22879.html' title='Multiple used in 3 places.'>imap_mime_header_decode</a>);
+<a id='L176' name='L176'></a> 176 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22913.html' title='Multiple used in 3 places.'>imap_thread</a>);
+<a id='L177' name='L177'></a> 177 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22914.html' title='Multiple used in 3 places.'>imap_timeout</a>);
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/2839.html' title='Multiple used in 9 places.'>HAVE_IMAP2000</a>) || <strong class='reserved'>defined</strong>(<a href='../Y/2840.html' title='Multiple used in 9 places.'>HAVE_IMAP2001</a>)
+<a id='L180' name='L180'></a> 180 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22851.html' title='Multiple used in 3 places.'>imap_get_quota</a>);
+<a id='L181' name='L181'></a> 181 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22852.html' title='Multiple used in 3 places.'>imap_get_quotaroot</a>);
+<a id='L182' name='L182'></a> 182 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22901.html' title='Multiple used in 3 places.'>imap_set_quota</a>);
+<a id='L183' name='L183'></a> 183 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22902.html' title='Multiple used in 4 places.'>imap_setacl</a>);
+<a id='L184' name='L184'></a> 184 <a href='../D/7986.html' title='Multiple defined in 2072 places.'>PHP_FUNCTION</a>(<a href='../Y/22853.html' title='Multiple used in 4 places.'>imap_getacl</a>);
+<a id='L185' name='L185'></a> 185 <em class='sharp'>#endif</em>
+<a id='L186' name='L186'></a> 186 
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188 <a href='../D/15970.html' title='Multiple defined in 5 places.'>ZEND_BEGIN_MODULE_GLOBALS</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>)
+<a id='L189' name='L189'></a> 189         <strong class='reserved'>char</strong> *<a href='../Y/22918.html' title='Multiple used in 11 places.'>imap_user</a>;
+<a id='L190' name='L190'></a> 190         <strong class='reserved'>char</strong> *<a href='../Y/22886.html' title='Multiple used in 11 places.'>imap_password</a>;
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192         <a href='../Y/6280.html' title='Multiple used in 14 places.'>STRINGLIST</a> *<a href='../Y/22822.html' title='Multiple used in 16 places.'>imap_alertstack</a>;
+<a id='L193' name='L193'></a> 193         <a href='../S/302.html#L93' title='Defined at 93 in ext/imap/php_imap.h.'>ERRORLIST</a> *<a href='../Y/22837.html' title='Multiple used in 18 places.'>imap_errorstack</a>;
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195         <a href='../Y/6280.html' title='Multiple used in 14 places.'>STRINGLIST</a> *<a href='../Y/22847.html' title='Multiple used in 17 places.'>imap_folders</a>;
+<a id='L196' name='L196'></a> 196         <a href='../Y/6280.html' title='Multiple used in 14 places.'>STRINGLIST</a> *<a href='../Y/22848.html' title='Multiple used in 8 places.'>imap_folders_tail</a>;
+<a id='L197' name='L197'></a> 197         <a href='../Y/6280.html' title='Multiple used in 14 places.'>STRINGLIST</a> *<a href='../Y/22907.html' title='Multiple used in 12 places.'>imap_sfolders</a>;
+<a id='L198' name='L198'></a> 198         <a href='../Y/6280.html' title='Multiple used in 14 places.'>STRINGLIST</a> *<a href='../Y/22908.html' title='Multiple used in 6 places.'>imap_sfolders_tail</a>;
+<a id='L199' name='L199'></a> 199         <a href='../S/302.html#L98' title='Defined at 98 in ext/imap/php_imap.h.'>MESSAGELIST</a> *<a href='../Y/22877.html' title='Multiple used in 11 places.'>imap_messages</a>;
+<a id='L200' name='L200'></a> 200         <a href='../S/302.html#L98' title='Defined at 98 in ext/imap/php_imap.h.'>MESSAGELIST</a> *<a href='../Y/22878.html' title='Multiple used in 7 places.'>imap_messages_tail</a>;
+<a id='L201' name='L201'></a> 201         <a href='../S/302.html#L87' title='Defined at 87 in ext/imap/php_imap.h.'>FOBJECTLIST</a> *<a href='../Y/22845.html' title='Multiple used in 13 places.'>imap_folder_objects</a>;
+<a id='L202' name='L202'></a> 202         <a href='../S/302.html#L87' title='Defined at 87 in ext/imap/php_imap.h.'>FOBJECTLIST</a> *<a href='../Y/22846.html' title='Multiple used in 7 places.'>imap_folder_objects_tail</a>;
+<a id='L203' name='L203'></a> 203         <a href='../S/302.html#L87' title='Defined at 87 in ext/imap/php_imap.h.'>FOBJECTLIST</a> *<a href='../Y/22905.html' title='Multiple used in 13 places.'>imap_sfolder_objects</a>;
+<a id='L204' name='L204'></a> 204         <a href='../S/302.html#L87' title='Defined at 87 in ext/imap/php_imap.h.'>FOBJECTLIST</a> *<a href='../Y/22906.html' title='Multiple used in 7 places.'>imap_sfolder_objects_tail</a>;
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         <a href='../S/302.html#L75' title='Defined at 75 in ext/imap/php_imap.h.'>folderlist_style_t</a> <a href='../Y/18144.html' title='Multiple used in 10 places.'>folderlist_style</a>;
+<a id='L207' name='L207'></a> 207         <strong class='reserved'>long</strong> <a href='../Y/37410.html' title='Multiple used in 13 places.'>status_flags</a>;
+<a id='L208' name='L208'></a> 208         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/37412.html' title='Multiple used in 3 places.'>status_messages</a>;
+<a id='L209' name='L209'></a> 209         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/37413.html' title='Multiple used in 3 places.'>status_recent</a>;
+<a id='L210' name='L210'></a> 210         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/37417.html' title='Multiple used in 3 places.'>status_unseen</a>;
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/37415.html' title='Multiple used in 3 places.'>status_uidnext</a>;
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>unsigned</strong> <strong class='reserved'>long</strong> <a href='../Y/37416.html' title='Multiple used in 3 places.'>status_uidvalidity</a>;
+<a id='L213' name='L213'></a> 213 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/2839.html' title='Multiple used in 9 places.'>HAVE_IMAP2000</a>) || <strong class='reserved'>defined</strong>(<a href='../Y/2840.html' title='Multiple used in 9 places.'>HAVE_IMAP2001</a>)
+<a id='L214' name='L214'></a> 214         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> **<a href='../Y/33902.html' title='Multiple used in 5 places.'>quota_return</a>;
+<a id='L215' name='L215'></a> 215         <a href='../S/1731.html#L84' title='Defined at 84 in Zend/zend_types.h.'>zval</a> *<a href='../Y/22820.html' title='Multiple used in 5 places.'>imap_acl_list</a>;
+<a id='L216' name='L216'></a> 216 <em class='sharp'>#endif</em>
+<a id='L217' name='L217'></a> 217         <em class='comment'>/* php_stream for php_mail_gets() */</em>
+<a id='L218' name='L218'></a> 218         <a href='../S/1397.html#L100' title='Defined at 100 in main/php_streams.h.'>php_stream</a> *<a href='../Y/19284.html' title='Multiple used in 7 places.'>gets_stream</a>;
+<a id='L219' name='L219'></a> 219 <a href='../S/459.html#L55' title='Defined at 55 in ext/libxml/php_libxml.h.'>ZEND_END_MODULE_GLOBALS</a>(<a href='../Y/22818.html' title='Multiple used in 20 places.'>imap</a>)
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221 <em class='sharp'>#ifdef</em> <a href='../Y/7687.html' title='Multiple used in 474 places.'>ZTS</a>
+<a id='L222' name='L222'></a> 222 <em class='sharp'># define</em> <a href='../R/3250.html' title='Multiple referred from 155 places.'>IMAPG</a>(<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>) <a href='../S/1581.html#L168' title='Defined at 168 in TSRM/TSRM.h.'>TSRMG</a>(imap_globals_id, zend_imap_globals *, <a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>)
+<a id='L223' name='L223'></a> 223 <em class='sharp'>#else</em>
+<a id='L224' name='L224'></a> 224 <em class='sharp'># define</em> <a href='../R/3250.html' title='Multiple referred from 155 places.'>IMAPG</a>(<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>) (<a href='../Y/22858.html' title='Multiple used in 19 places.'>imap_globals</a>.<a href='../Y/40018.html' title='Multiple used in 3085 places.'>v</a>)
+<a id='L225' name='L225'></a> 225 <em class='sharp'>#endif</em>
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227 <em class='sharp'>#else</em>
+<a id='L228' name='L228'></a> 228 
+<a id='L229' name='L229'></a> 229 <em class='sharp'>#define</em> <a href='../S/302.html#L233' title='Referred from 233 in ext/imap/php_imap.h.'>imap_module_ptr</a> <a href='../D/5944.html' title='Multiple defined in 8 places.'>NULL</a>
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231 <em class='sharp'>#endif</em>
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233 <em class='sharp'>#define</em> phpext_imap_ptr <a href='../D/23476.html' title='Multiple defined in 2 places.'>imap_module_ptr</a>
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235 <em class='sharp'>#endif</em> <em class='comment'>/* PHP_IMAP_H */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

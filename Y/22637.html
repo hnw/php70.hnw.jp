@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>iface</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/1627.html#L166'>iface</a>             166 Zend/zend.h    	int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type); /* a class implements this interface */</span>
+<span class='curline'><a href='../S/1671.html#L666'>iface</a>             666 Zend/zend_inheritance.c static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */</span>
+<span class='curline'><a href='../S/1671.html#L668'>iface</a>             668 Zend/zend_inheritance.c 	if (!(ce-&gt;ce_flags &amp; ZEND_ACC_INTERFACE) &amp;&amp; iface-&gt;interface_gets_implemented &amp;&amp; iface-&gt;interface_gets_implemented(iface, ce) == FAILURE) {</span>
+<span class='curline'><a href='../S/1671.html#L669'>iface</a>             669 Zend/zend_inheritance.c 		zend_error_noreturn(E_CORE_ERROR, "Class %s could not implement interface %s", ZSTR_VAL(ce-&gt;name), ZSTR_VAL(iface-&gt;name));</span>
+<span class='curline'><a href='../S/1671.html#L671'>iface</a>             671 Zend/zend_inheritance.c 	if (UNEXPECTED(ce == iface)) {</span>
+<span class='curline'><a href='../S/1671.html#L677'>iface</a>             677 Zend/zend_inheritance.c ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */</span>
+<span class='curline'><a href='../S/1671.html#L680'>iface</a>             680 Zend/zend_inheritance.c 	uint32_t i, ce_num, if_num = iface-&gt;num_interfaces;</span>
+<span class='curline'><a href='../S/1671.html#L696'>iface</a>             696 Zend/zend_inheritance.c 		entry = iface-&gt;interfaces[if_num];</span>
+<span class='curline'><a href='../S/1671.html#L910'>iface</a>             910 Zend/zend_inheritance.c static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */</span>
+<span class='curline'><a href='../S/1671.html#L918'>iface</a>             918 Zend/zend_inheritance.c 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface-&gt;name));</span>
+<span class='curline'><a href='../S/1671.html#L926'>iface</a>             926 Zend/zend_inheritance.c static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */</span>
+<span class='curline'><a href='../S/1671.html#L928'>iface</a>             928 Zend/zend_inheritance.c 	if (do_inherit_constant_check(&amp;ce-&gt;constants_table, zv, name, iface)) {</span>
+<span class='curline'><a href='../S/1671.html#L930'>iface</a>             930 Zend/zend_inheritance.c 			if (iface-&gt;type == ZEND_INTERNAL_CLASS) {</span>
+<span class='curline'><a href='../S/1671.html#L945'>iface</a>             945 Zend/zend_inheritance.c ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */</span>
+<span class='curline'><a href='../S/1671.html#L958'>iface</a>             958 Zend/zend_inheritance.c 		} else if (ce-&gt;interfaces[i] == iface) {</span>
+<span class='curline'><a href='../S/1671.html#L962'>iface</a>             962 Zend/zend_inheritance.c 				zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce-&gt;name), ZSTR_VAL(iface-&gt;name));</span>
+<span class='curline'><a href='../S/1671.html#L969'>iface</a>             969 Zend/zend_inheritance.c 			do_inherit_constant_check(&amp;iface-&gt;constants_table, zv, key, iface);</span>
+<span class='curline'><a href='../S/1671.html#L979'>iface</a>             979 Zend/zend_inheritance.c 		ce-&gt;interfaces[ce-&gt;num_interfaces++] = iface;</span>
+<span class='curline'><a href='../S/1671.html#L981'>iface</a>             981 Zend/zend_inheritance.c 		ZEND_HASH_FOREACH_STR_KEY_VAL(&amp;iface-&gt;constants_table, key, zv) {</span>
+<span class='curline'><a href='../S/1671.html#L982'>iface</a>             982 Zend/zend_inheritance.c 			do_inherit_iface_constant(key, zv, ce, iface);</span>
+<span class='curline'><a href='../S/1671.html#L985'>iface</a>             985 Zend/zend_inheritance.c 		ZEND_HASH_FOREACH_STR_KEY_PTR(&amp;iface-&gt;function_table, key, func) {</span>
+<span class='curline'><a href='../S/1671.html#L993'>iface</a>             993 Zend/zend_inheritance.c 		do_implement_interface(ce, iface);</span>
+<span class='curline'><a href='../S/1671.html#L994'>iface</a>             994 Zend/zend_inheritance.c 		zend_do_inherit_interfaces(ce, iface);</span>
+<span class='curline'><a href='../S/1672.html#L27'>iface</a>              27 Zend/zend_inheritance.h ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface);</span>
+<span class='curline'><a href='../S/1672.html#L28'>iface</a>              28 Zend/zend_inheritance.h ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);</span>
+<span class='curline'><a href='../S/1737.html#L7049'>iface</a>            7049 Zend/zend_vm_def.h 	zend_class_entry *iface;</span>
+<span class='curline'><a href='../S/1737.html#L7052'>iface</a>            7052 Zend/zend_vm_def.h 	iface = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline-&gt;op2)));</span>
+<span class='curline'><a href='../S/1737.html#L7053'>iface</a>            7053 Zend/zend_vm_def.h 	if (UNEXPECTED(iface == NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L7054'>iface</a>            7054 Zend/zend_vm_def.h 		iface = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline-&gt;op2)), EX_CONSTANT(opline-&gt;op2) + 1, ZEND_FETCH_CLASS_INTERFACE);</span>
+<span class='curline'><a href='../S/1737.html#L7055'>iface</a>            7055 Zend/zend_vm_def.h 		if (UNEXPECTED(iface == NULL)) {</span>
+<span class='curline'><a href='../S/1737.html#L7058'>iface</a>            7058 Zend/zend_vm_def.h 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline-&gt;op2)), iface);</span>
+<span class='curline'><a href='../S/1737.html#L7061'>iface</a>            7061 Zend/zend_vm_def.h 	if (UNEXPECTED((iface-&gt;ce_flags &amp; ZEND_ACC_INTERFACE) == 0)) {</span>
+<span class='curline'><a href='../S/1737.html#L7062'>iface</a>            7062 Zend/zend_vm_def.h 		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce-&gt;name), ZSTR_VAL(iface-&gt;name));</span>
+<span class='curline'><a href='../S/1737.html#L7064'>iface</a>            7064 Zend/zend_vm_def.h 	zend_do_implement_interface(ce, iface);</span>
+<span class='curline'><a href='../S/1738.html#L2246'>iface</a>            2246 Zend/zend_vm_execute.h 	zend_class_entry *iface;</span>
+<span class='curline'><a href='../S/1738.html#L2249'>iface</a>            2249 Zend/zend_vm_execute.h 	iface = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline-&gt;op2)));</span>
+<span class='curline'><a href='../S/1738.html#L2250'>iface</a>            2250 Zend/zend_vm_execute.h 	if (UNEXPECTED(iface == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L2251'>iface</a>            2251 Zend/zend_vm_execute.h 		iface = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline-&gt;op2)), EX_CONSTANT(opline-&gt;op2) + 1, ZEND_FETCH_CLASS_INTERFACE);</span>
+<span class='curline'><a href='../S/1738.html#L2252'>iface</a>            2252 Zend/zend_vm_execute.h 		if (UNEXPECTED(iface == NULL)) {</span>
+<span class='curline'><a href='../S/1738.html#L2255'>iface</a>            2255 Zend/zend_vm_execute.h 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline-&gt;op2)), iface);</span>
+<span class='curline'><a href='../S/1738.html#L2258'>iface</a>            2258 Zend/zend_vm_execute.h 	if (UNEXPECTED((iface-&gt;ce_flags &amp; ZEND_ACC_INTERFACE) == 0)) {</span>
+<span class='curline'><a href='../S/1738.html#L2259'>iface</a>            2259 Zend/zend_vm_execute.h 		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce-&gt;name), ZSTR_VAL(iface-&gt;name));</span>
+<span class='curline'><a href='../S/1738.html#L2261'>iface</a>            2261 Zend/zend_vm_execute.h 	zend_do_implement_interface(ce, iface);</span>
+</pre>
+</body>
+</html>

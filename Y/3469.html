@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>ImageInfo</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<pre>
+<span class='curline'><a href='../S/156.html#L296'>ImageInfo</a>         296 ext/exif/exif.c #define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FILEEOF);</span>
+<span class='curline'><a href='../S/156.html#L297'>ImageInfo</a>         297 ext/exif/exif.c #define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_CORRUPT);</span>
+<span class='curline'><a href='../S/156.html#L298'>ImageInfo</a>         298 ext/exif/exif.c #define EXIF_ERRLOG_THUMBEOF(ImageInfo)   exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_THUMBEOF);</span>
+<span class='curline'><a href='../S/156.html#L299'>ImageInfo</a>         299 ext/exif/exif.c #define EXIF_ERRLOG_FSREALLOC(ImageInfo)  exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FSREALLOC);</span>
+<span class='curline'><a href='../S/156.html#L1558'>ImageInfo</a>        1558 ext/exif/exif.c static void exif_error_docref(const char *docref EXIFERR_DC, const image_info_type *ImageInfo, int type, const char *format, ...)</span>
+<span class='curline'><a href='../S/156.html#L1568'>ImageInfo</a>        1568 ext/exif/exif.c 		php_verror(docref, ImageInfo-&gt;FileName?ImageInfo-&gt;FileName:"", type, buf, args);</span>
+<span class='curline'><a href='../S/156.html#L1572'>ImageInfo</a>        1572 ext/exif/exif.c 	php_verror(docref, ImageInfo-&gt;FileName?ImageInfo-&gt;FileName:"", type, format, args);</span>
+<span class='curline'><a href='../S/156.html#L1592'>ImageInfo</a>        1592 ext/exif/exif.c static int exif_file_sections_add(image_info_type *ImageInfo, int type, size_t size, uchar *data)</span>
+<span class='curline'><a href='../S/156.html#L1595'>ImageInfo</a>        1595 ext/exif/exif.c 	int             count = ImageInfo-&gt;file.count;</span>
+<span class='curline'><a href='../S/156.html#L1597'>ImageInfo</a>        1597 ext/exif/exif.c 	tmp = safe_erealloc(ImageInfo-&gt;file.list, (count+1), sizeof(file_section), 0);</span>
+<span class='curline'><a href='../S/156.html#L1598'>ImageInfo</a>        1598 ext/exif/exif.c 	ImageInfo-&gt;file.list = tmp;</span>
+<span class='curline'><a href='../S/156.html#L1599'>ImageInfo</a>        1599 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].type = 0xFFFF;</span>
+<span class='curline'><a href='../S/156.html#L1600'>ImageInfo</a>        1600 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].data = NULL;</span>
+<span class='curline'><a href='../S/156.html#L1601'>ImageInfo</a>        1601 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].size = 0;</span>
+<span class='curline'><a href='../S/156.html#L1602'>ImageInfo</a>        1602 ext/exif/exif.c 	ImageInfo-&gt;file.count = count+1;</span>
+<span class='curline'><a href='../S/156.html#L1608'>ImageInfo</a>        1608 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].type = type;</span>
+<span class='curline'><a href='../S/156.html#L1609'>ImageInfo</a>        1609 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].data = data;</span>
+<span class='curline'><a href='../S/156.html#L1610'>ImageInfo</a>        1610 ext/exif/exif.c 	ImageInfo-&gt;file.list[count].size = size;</span>
+<span class='curline'><a href='../S/156.html#L1618'>ImageInfo</a>        1618 ext/exif/exif.c static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_index, size_t size)</span>
+<span class='curline'><a href='../S/156.html#L1625'>ImageInfo</a>        1625 ext/exif/exif.c 	if (section_index &gt;= ImageInfo-&gt;file.count) {</span>
+<span class='curline'><a href='../S/156.html#L1626'>ImageInfo</a>        1626 ext/exif/exif.c 		EXIF_ERRLOG_FSREALLOC(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L1629'>ImageInfo</a>        1629 ext/exif/exif.c 	tmp = safe_erealloc(ImageInfo-&gt;file.list[section_index].data, 1, size, 0);</span>
+<span class='curline'><a href='../S/156.html#L1630'>ImageInfo</a>        1630 ext/exif/exif.c 	ImageInfo-&gt;file.list[section_index].data = tmp;</span>
+<span class='curline'><a href='../S/156.html#L1631'>ImageInfo</a>        1631 ext/exif/exif.c 	ImageInfo-&gt;file.list[section_index].size = size;</span>
+<span class='curline'><a href='../S/156.html#L1639'>ImageInfo</a>        1639 ext/exif/exif.c static int exif_file_sections_free(image_info_type *ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L1643'>ImageInfo</a>        1643 ext/exif/exif.c 	if (ImageInfo-&gt;file.count) {</span>
+<span class='curline'><a href='../S/156.html#L1644'>ImageInfo</a>        1644 ext/exif/exif.c 		for (i=0; i&lt;ImageInfo-&gt;file.count; i++) {</span>
+<span class='curline'><a href='../S/156.html#L1645'>ImageInfo</a>        1645 ext/exif/exif.c 			EFREE_IF(ImageInfo-&gt;file.list[i].data);</span>
+<span class='curline'><a href='../S/156.html#L1648'>ImageInfo</a>        1648 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;file.list);</span>
+<span class='curline'><a href='../S/156.html#L1649'>ImageInfo</a>        1649 ext/exif/exif.c 	ImageInfo-&gt;file.count = 0;</span>
+<span class='curline'><a href='../S/156.html#L2270'>ImageInfo</a>        2270 ext/exif/exif.c static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index);</span>
+<span class='curline'><a href='../S/156.html#L2271'>ImageInfo</a>        2271 ext/exif/exif.c static int exif_process_IFD_TAG(    image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table);</span>
+<span class='curline'><a href='../S/156.html#L2426'>ImageInfo</a>        2426 ext/exif/exif.c static void exif_thumbnail_build(image_info_type *ImageInfo) {</span>
+<span class='curline'><a href='../S/156.html#L2437'>ImageInfo</a>        2437 ext/exif/exif.c 	if (!ImageInfo-&gt;read_thumbnail || !ImageInfo-&gt;Thumbnail.offset || !ImageInfo-&gt;Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L2441'>ImageInfo</a>        2441 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: filetype = %d", ImageInfo-&gt;Thumbnail.filetype);</span>
+<span class='curline'><a href='../S/156.html#L2443'>ImageInfo</a>        2443 ext/exif/exif.c 	switch(ImageInfo-&gt;Thumbnail.filetype) {</span>
+<span class='curline'><a href='../S/156.html#L2450'>ImageInfo</a>        2450 ext/exif/exif.c 			info_list = &amp;ImageInfo-&gt;info_list[SECTION_THUMBNAIL];</span>
+<span class='curline'><a href='../S/156.html#L2453'>ImageInfo</a>        2453 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: size of signature + directory(%d): 0x%02X", info_list-&gt;count, new_size);</span>
+<span class='curline'><a href='../S/156.html#L2464'>ImageInfo</a>        2464 ext/exif/exif.c 			new_data = safe_erealloc(ImageInfo-&gt;Thumbnail.data, 1, ImageInfo-&gt;Thumbnail.size, new_size);</span>
+<span class='curline'><a href='../S/156.html#L2465'>ImageInfo</a>        2465 ext/exif/exif.c 			ImageInfo-&gt;Thumbnail.data = new_data;</span>
+<span class='curline'><a href='../S/156.html#L2466'>ImageInfo</a>        2466 ext/exif/exif.c 			memmove(ImageInfo-&gt;Thumbnail.data + new_move, ImageInfo-&gt;Thumbnail.data, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L2467'>ImageInfo</a>        2467 ext/exif/exif.c 			ImageInfo-&gt;Thumbnail.size += new_size;</span>
+<span class='curline'><a href='../S/156.html#L2469'>ImageInfo</a>        2469 ext/exif/exif.c 			if (ImageInfo-&gt;motorola_intel) {</span>
+<span class='curline'><a href='../S/156.html#L2475'>ImageInfo</a>        2475 ext/exif/exif.c 			php_ifd_set16u(new_data, info_list-&gt;count, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2481'>ImageInfo</a>        2481 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", info_data-&gt;tag, exif_get_tagname(info_data-&gt;tag, tagname, -12, tag_table_IFD), (info_data-&gt;length&gt;1)&amp;&amp;info_data-&gt;format!=TAG_FMT_UNDEFINED&amp;&amp;info_data-&gt;format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data-&gt;format), byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2484'>ImageInfo</a>        2484 ext/exif/exif.c 					php_ifd_set16u(new_data + 0, info_data-&gt;tag,    ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2485'>ImageInfo</a>        2485 ext/exif/exif.c 					php_ifd_set16u(new_data + 2, TAG_FMT_ULONG,     ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2486'>ImageInfo</a>        2486 ext/exif/exif.c 					php_ifd_set32u(new_data + 4, 1,                 ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2487'>ImageInfo</a>        2487 ext/exif/exif.c 					php_ifd_set32u(new_data + 8, new_move,          ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2489'>ImageInfo</a>        2489 ext/exif/exif.c 					php_ifd_set16u(new_data + 0, info_data-&gt;tag,    ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2490'>ImageInfo</a>        2490 ext/exif/exif.c 					php_ifd_set16u(new_data + 2, info_data-&gt;format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2491'>ImageInfo</a>        2491 ext/exif/exif.c 					php_ifd_set32u(new_data + 4, info_data-&gt;length, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2492'>ImageInfo</a>        2492 ext/exif/exif.c 					value_ptr  = exif_ifd_make_value(info_data, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2496'>ImageInfo</a>        2496 ext/exif/exif.c 						php_ifd_set32u(new_data+8, new_value, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2498'>ImageInfo</a>        2498 ext/exif/exif.c 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: writing with value offset: 0x%04X + 0x%02X", new_value, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2500'>ImageInfo</a>        2500 ext/exif/exif.c 						memmove(ImageInfo-&gt;Thumbnail.data+new_value, value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2509'>ImageInfo</a>        2509 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: created");</span>
+<span class='curline'><a href='../S/156.html#L2518'>ImageInfo</a>        2518 ext/exif/exif.c static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, size_t length) {</span>
+<span class='curline'><a href='../S/156.html#L2519'>ImageInfo</a>        2519 ext/exif/exif.c 	if (ImageInfo-&gt;Thumbnail.data) {</span>
+<span class='curline'><a href='../S/156.html#L2520'>ImageInfo</a>        2520 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_mult_thumb" EXIFERR_CC, ImageInfo, E_WARNING, "Multiple possible thumbnails");</span>
+<span class='curline'><a href='../S/156.html#L2523'>ImageInfo</a>        2523 ext/exif/exif.c 	if (!ImageInfo-&gt;read_thumbnail)	{</span>
+<span class='curline'><a href='../S/156.html#L2527'>ImageInfo</a>        2527 ext/exif/exif.c 	if (ImageInfo-&gt;Thumbnail.size &gt;= 65536</span>
+<span class='curline'><a href='../S/156.html#L2528'>ImageInfo</a>        2528 ext/exif/exif.c 	 || ImageInfo-&gt;Thumbnail.size &lt;= 0</span>
+<span class='curline'><a href='../S/156.html#L2529'>ImageInfo</a>        2529 ext/exif/exif.c 	 || ImageInfo-&gt;Thumbnail.offset &lt;= 0</span>
+<span class='curline'><a href='../S/156.html#L2531'>ImageInfo</a>        2531 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Illegal thumbnail size/offset");</span>
+<span class='curline'><a href='../S/156.html#L2535'>ImageInfo</a>        2535 ext/exif/exif.c 	if ((ImageInfo-&gt;Thumbnail.offset + ImageInfo-&gt;Thumbnail.size) &gt; length) {</span>
+<span class='curline'><a href='../S/156.html#L2536'>ImageInfo</a>        2536 ext/exif/exif.c 		EXIF_ERRLOG_THUMBEOF(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L2539'>ImageInfo</a>        2539 ext/exif/exif.c 	ImageInfo-&gt;Thumbnail.data = estrndup(offset + ImageInfo-&gt;Thumbnail.offset, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L2540'>ImageInfo</a>        2540 ext/exif/exif.c 	exif_thumbnail_build(ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L2598'>ImageInfo</a>        2598 ext/exif/exif.c static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount)</span>
+<span class='curline'><a href='../S/156.html#L2622'>ImageInfo</a>        2622 ext/exif/exif.c 			} else if (ImageInfo-&gt;motorola_intel) {</span>
+<span class='curline'><a href='../S/156.html#L2623'>ImageInfo</a>        2623 ext/exif/exif.c 				decode = ImageInfo-&gt;decode_unicode_be;</span>
+<span class='curline'><a href='../S/156.html#L2625'>ImageInfo</a>        2625 ext/exif/exif.c 				decode = ImageInfo-&gt;decode_unicode_le;</span>
+<span class='curline'><a href='../S/156.html#L2633'>ImageInfo</a>        2633 ext/exif/exif.c 					zend_multibyte_fetch_encoding(ImageInfo-&gt;encode_unicode),</span>
+<span class='curline'><a href='../S/156.html#L2654'>ImageInfo</a>        2654 ext/exif/exif.c 					zend_multibyte_fetch_encoding(ImageInfo-&gt;encode_jis),</span>
+<span class='curline'><a href='../S/156.html#L2655'>ImageInfo</a>        2655 ext/exif/exif.c 					zend_multibyte_fetch_encoding(ImageInfo-&gt;motorola_intel ? ImageInfo-&gt;decode_jis_be : ImageInfo-&gt;decode_jis_le)</span>
+<span class='curline'><a href='../S/156.html#L2683'>ImageInfo</a>        2683 ext/exif/exif.c static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_field, int tag, char *szValuePtr, int ByteCount)</span>
+<span class='curline'><a href='../S/156.html#L2693'>ImageInfo</a>        2693 ext/exif/exif.c 			zend_multibyte_fetch_encoding(ImageInfo-&gt;encode_unicode),</span>
+<span class='curline'><a href='../S/156.html#L2694'>ImageInfo</a>        2694 ext/exif/exif.c 			zend_multibyte_fetch_encoding(ImageInfo-&gt;motorola_intel ? ImageInfo-&gt;decode_unicode_be : ImageInfo-&gt;decode_unicode_le)</span>
+<span class='curline'><a href='../S/156.html#L2704'>ImageInfo</a>        2704 ext/exif/exif.c static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement)</span>
+<span class='curline'><a href='../S/156.html#L2717'>ImageInfo</a>        2717 ext/exif/exif.c 		if (maker_note-&gt;make &amp;&amp; (!ImageInfo-&gt;make || strcmp(maker_note-&gt;make, ImageInfo-&gt;make)))</span>
+<span class='curline'><a href='../S/156.html#L2719'>ImageInfo</a>        2719 ext/exif/exif.c 		if (maker_note-&gt;model &amp;&amp; (!ImageInfo-&gt;model || strcmp(maker_note-&gt;model, ImageInfo-&gt;model)))</span>
+<span class='curline'><a href='../S/156.html#L2729'>ImageInfo</a>        2729 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+maker_note-&gt;offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (int)dir_start-(int)offset_base+maker_note-&gt;offset+displacement));</span>
+<span class='curline'><a href='../S/156.html#L2732'>ImageInfo</a>        2732 ext/exif/exif.c 	ImageInfo-&gt;sections_found |= FOUND_MAKERNOTE;</span>
+<span class='curline'><a href='../S/156.html#L2734'>ImageInfo</a>        2734 ext/exif/exif.c 	old_motorola_intel = ImageInfo-&gt;motorola_intel;</span>
+<span class='curline'><a href='../S/156.html#L2737'>ImageInfo</a>        2737 ext/exif/exif.c 			ImageInfo-&gt;motorola_intel = 0;</span>
+<span class='curline'><a href='../S/156.html#L2740'>ImageInfo</a>        2740 ext/exif/exif.c 			ImageInfo-&gt;motorola_intel = 1;</span>
+<span class='curline'><a href='../S/156.html#L2747'>ImageInfo</a>        2747 ext/exif/exif.c 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2754'>ImageInfo</a>        2754 ext/exif/exif.c 			offset_diff = 2 + NumDirEntries*12 + 4 - php_ifd_get32u(dir_start+10, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2756'>ImageInfo</a>        2756 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+maker_note-&gt;offset+displacement) + offset_diff);</span>
+<span class='curline'><a href='../S/156.html#L2766'>ImageInfo</a>        2766 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 2 + x%04X*12 = x%04X &gt; x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);</span>
+<span class='curline'><a href='../S/156.html#L2771'>ImageInfo</a>        2771 ext/exif/exif.c 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,</span>
+<span class='curline'><a href='../S/156.html#L2776'>ImageInfo</a>        2776 ext/exif/exif.c 	ImageInfo-&gt;motorola_intel = old_motorola_intel;</span>
+<span class='curline'><a href='../S/156.html#L2779'>ImageInfo</a>        2779 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Subsection %s done", exif_get_sectionname(SECTION_MAKERNOTE));</span>
+<span class='curline'><a href='../S/156.html#L2787'>ImageInfo</a>        2787 ext/exif/exif.c static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)</span>
+<span class='curline'><a href='../S/156.html#L2801'>ImageInfo</a>        2801 ext/exif/exif.c 	if (ImageInfo-&gt;ifd_nesting_level &gt; MAX_IFD_NESTING_LEVEL) {</span>
+<span class='curline'><a href='../S/156.html#L2802'>ImageInfo</a>        2802 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "corrupt EXIF header: maximum directory nesting level reached");</span>
+<span class='curline'><a href='../S/156.html#L2805'>ImageInfo</a>        2805 ext/exif/exif.c 	ImageInfo-&gt;ifd_nesting_level++;</span>
+<span class='curline'><a href='../S/156.html#L2807'>ImageInfo</a>        2807 ext/exif/exif.c 	tag = php_ifd_get16u(dir_entry, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2808'>ImageInfo</a>        2808 ext/exif/exif.c 	format = php_ifd_get16u(dir_entry+2, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2809'>ImageInfo</a>        2809 ext/exif/exif.c 	components = php_ifd_get32u(dir_entry+4, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2813'>ImageInfo</a>        2813 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname(tag, tagname, -12, tag_table), format);</span>
+<span class='curline'><a href='../S/156.html#L2819'>ImageInfo</a>        2819 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal components(%ld)", tag, exif_get_tagname(tag, tagname, -12, tag_table), components);</span>
+<span class='curline'><a href='../S/156.html#L2826'>ImageInfo</a>        2826 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count", tag, exif_get_tagname(tag, tagname, -12, tag_table));</span>
+<span class='curline'><a href='../S/156.html#L2833'>ImageInfo</a>        2833 ext/exif/exif.c 		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2845'>ImageInfo</a>        2845 ext/exif/exif.c 			if (byte_count &gt; ImageInfo-&gt;FileSize || offset_val&gt;ImageInfo-&gt;FileSize-byte_count || (ImageInfo-&gt;FileType!=IMAGE_FILETYPE_TIFF_II &amp;&amp; ImageInfo-&gt;FileType!=IMAGE_FILETYPE_TIFF_MM &amp;&amp; ImageInfo-&gt;FileType!=IMAGE_FILETYPE_JPEG)) {</span>
+<span class='curline'><a href='../S/156.html#L2849'>ImageInfo</a>        2849 ext/exif/exif.c 					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X &lt; x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val, dir_entry);</span>
+<span class='curline'><a href='../S/156.html#L2853'>ImageInfo</a>        2853 ext/exif/exif.c 					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X &gt; x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val, byte_count, offset_val+byte_count, IFDlength);</span>
+<span class='curline'><a href='../S/156.html#L2871'>ImageInfo</a>        2871 ext/exif/exif.c 			fpos = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L2872'>ImageInfo</a>        2872 ext/exif/exif.c 			php_stream_seek(ImageInfo-&gt;infile, offset_val, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L2873'>ImageInfo</a>        2873 ext/exif/exif.c 			fgot = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L2876'>ImageInfo</a>        2876 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, offset_val);</span>
+<span class='curline'><a href='../S/156.html#L2879'>ImageInfo</a>        2879 ext/exif/exif.c 			fgot = php_stream_read(ImageInfo-&gt;infile, value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2880'>ImageInfo</a>        2880 ext/exif/exif.c 			php_stream_seek(ImageInfo-&gt;infile, fpos, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L2883'>ImageInfo</a>        2883 ext/exif/exif.c 				EXIF_ERRLOG_FILEEOF(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L2893'>ImageInfo</a>        2893 ext/exif/exif.c 	ImageInfo-&gt;sections_found |= FOUND_ANY_TAG;</span>
+<span class='curline'><a href='../S/156.html#L2895'>ImageInfo</a>        2895 ext/exif/exif.c 	dump_data = exif_dump_data(&amp;dump_free, format, components, length, ImageInfo-&gt;motorola_intel, value_ptr);</span>
+<span class='curline'><a href='../S/156.html#L2896'>ImageInfo</a>        2896 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s %s", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val+displacement, byte_count, byte_count, (components&gt;1)&amp;&amp;format!=TAG_FMT_UNDEFINED&amp;&amp;format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);</span>
+<span class='curline'><a href='../S/156.html#L2903'>ImageInfo</a>        2903 ext/exif/exif.c 		if (!ImageInfo-&gt;Thumbnail.data) {</span>
+<span class='curline'><a href='../S/156.html#L2907'>ImageInfo</a>        2907 ext/exif/exif.c 					ImageInfo-&gt;Thumbnail.width = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2912'>ImageInfo</a>        2912 ext/exif/exif.c 					ImageInfo-&gt;Thumbnail.height = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2918'>ImageInfo</a>        2918 ext/exif/exif.c 					ImageInfo-&gt;Thumbnail.offset = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2922'>ImageInfo</a>        2922 ext/exif/exif.c 					if (ImageInfo-&gt;FileType == IMAGE_FILETYPE_TIFF_II || ImageInfo-&gt;FileType == IMAGE_FILETYPE_TIFF_MM) {</span>
+<span class='curline'><a href='../S/156.html#L2923'>ImageInfo</a>        2923 ext/exif/exif.c 						ImageInfo-&gt;Thumbnail.filetype = ImageInfo-&gt;FileType;</span>
+<span class='curline'><a href='../S/156.html#L2926'>ImageInfo</a>        2926 ext/exif/exif.c 						ImageInfo-&gt;Thumbnail.filetype = IMAGE_FILETYPE_TIFF_MM;</span>
+<span class='curline'><a href='../S/156.html#L2928'>ImageInfo</a>        2928 ext/exif/exif.c 					ImageInfo-&gt;Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2932'>ImageInfo</a>        2932 ext/exif/exif.c 					if (ImageInfo-&gt;Thumbnail.filetype == IMAGE_FILETYPE_UNKNOWN) {</span>
+<span class='curline'><a href='../S/156.html#L2933'>ImageInfo</a>        2933 ext/exif/exif.c 						ImageInfo-&gt;Thumbnail.filetype = IMAGE_FILETYPE_JPEG;</span>
+<span class='curline'><a href='../S/156.html#L2934'>ImageInfo</a>        2934 ext/exif/exif.c 						ImageInfo-&gt;Thumbnail.size = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2947'>ImageInfo</a>        2947 ext/exif/exif.c 						ImageInfo-&gt;CopyrightPhotographer  = estrdup(value_ptr);</span>
+<span class='curline'><a href='../S/156.html#L2948'>ImageInfo</a>        2948 ext/exif/exif.c 						ImageInfo-&gt;CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);</span>
+<span class='curline'><a href='../S/156.html#L2949'>ImageInfo</a>        2949 ext/exif/exif.c 						spprintf(&amp;ImageInfo-&gt;Copyright, 0, "%s, %s", value_ptr, value_ptr+length+1);</span>
+<span class='curline'><a href='../S/156.html#L2954'>ImageInfo</a>        2954 ext/exif/exif.c 						ImageInfo-&gt;Copyright = estrndup(value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2960'>ImageInfo</a>        2960 ext/exif/exif.c 				ImageInfo-&gt;UserCommentLength = exif_process_user_comment(ImageInfo, &amp;(ImageInfo-&gt;UserComment), &amp;(ImageInfo-&gt;UserCommentEncoding), value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2968'>ImageInfo</a>        2968 ext/exif/exif.c 				tmp_xp = (xp_field_type*)safe_erealloc(ImageInfo-&gt;xp_fields.list, (ImageInfo-&gt;xp_fields.count+1), sizeof(xp_field_type), 0);</span>
+<span class='curline'><a href='../S/156.html#L2969'>ImageInfo</a>        2969 ext/exif/exif.c 				ImageInfo-&gt;sections_found |= FOUND_WINXP;</span>
+<span class='curline'><a href='../S/156.html#L2970'>ImageInfo</a>        2970 ext/exif/exif.c 				ImageInfo-&gt;xp_fields.list = tmp_xp;</span>
+<span class='curline'><a href='../S/156.html#L2971'>ImageInfo</a>        2971 ext/exif/exif.c 				ImageInfo-&gt;xp_fields.count++;</span>
+<span class='curline'><a href='../S/156.html#L2972'>ImageInfo</a>        2972 ext/exif/exif.c 				exif_process_unicode(ImageInfo, &amp;(ImageInfo-&gt;xp_fields.list[ImageInfo-&gt;xp_fields.count-1]), tag, value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L2978'>ImageInfo</a>        2978 ext/exif/exif.c 				ImageInfo-&gt;ApertureFNumber = (float)exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L2985'>ImageInfo</a>        2985 ext/exif/exif.c 				if (ImageInfo-&gt;ApertureFNumber == 0) {</span>
+<span class='curline'><a href='../S/156.html#L2986'>ImageInfo</a>        2986 ext/exif/exif.c 					ImageInfo-&gt;ApertureFNumber</span>
+<span class='curline'><a href='../S/156.html#L2987'>ImageInfo</a>        2987 ext/exif/exif.c 						= (float)exp(exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel)*log(2)*0.5);</span>
+<span class='curline'><a href='../S/156.html#L2996'>ImageInfo</a>        2996 ext/exif/exif.c 				if (ImageInfo-&gt;ExposureTime == 0) {</span>
+<span class='curline'><a href='../S/156.html#L2997'>ImageInfo</a>        2997 ext/exif/exif.c 					ImageInfo-&gt;ExposureTime</span>
+<span class='curline'><a href='../S/156.html#L2998'>ImageInfo</a>        2998 ext/exif/exif.c 						= (float)(1/exp(exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel)*log(2)));</span>
+<span class='curline'><a href='../S/156.html#L3002'>ImageInfo</a>        3002 ext/exif/exif.c 				ImageInfo-&gt;ExposureTime = -1;</span>
+<span class='curline'><a href='../S/156.html#L3006'>ImageInfo</a>        3006 ext/exif/exif.c 				ImageInfo-&gt;ExifImageWidth = exif_convert_any_to_int(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3010'>ImageInfo</a>        3010 ext/exif/exif.c 				ImageInfo-&gt;FocalplaneXRes = exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3016'>ImageInfo</a>        3016 ext/exif/exif.c 				ImageInfo-&gt;Distance = (float)exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3020'>ImageInfo</a>        3020 ext/exif/exif.c 				switch((int)exif_convert_any_format(value_ptr, format, ImageInfo-&gt;motorola_intel)) {</span>
+<span class='curline'><a href='../S/156.html#L3021'>ImageInfo</a>        3021 ext/exif/exif.c 					case 1: ImageInfo-&gt;FocalplaneUnits = 25.4; break; /* inch */</span>
+<span class='curline'><a href='../S/156.html#L3026'>ImageInfo</a>        3026 ext/exif/exif.c 						ImageInfo-&gt;FocalplaneUnits = 25.4;</span>
+<span class='curline'><a href='../S/156.html#L3029'>ImageInfo</a>        3029 ext/exif/exif.c 					case 3: ImageInfo-&gt;FocalplaneUnits = 10;   break;  /* centimeter */</span>
+<span class='curline'><a href='../S/156.html#L3030'>ImageInfo</a>        3030 ext/exif/exif.c 					case 4: ImageInfo-&gt;FocalplaneUnits = 1;    break;  /* milimeter  */</span>
+<span class='curline'><a href='../S/156.html#L3031'>ImageInfo</a>        3031 ext/exif/exif.c 					case 5: ImageInfo-&gt;FocalplaneUnits = .001; break;  /* micrometer */</span>
+<span class='curline'><a href='../S/156.html#L3040'>ImageInfo</a>        3040 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Skip SUB IFD");</span>
+<span class='curline'><a href='../S/156.html#L3045'>ImageInfo</a>        3045 ext/exif/exif.c 				ImageInfo-&gt;make = estrndup(value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L3048'>ImageInfo</a>        3048 ext/exif/exif.c 				ImageInfo-&gt;model = estrndup(value_ptr, byte_count);</span>
+<span class='curline'><a href='../S/156.html#L3052'>ImageInfo</a>        3052 ext/exif/exif.c 				exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement);</span>
+<span class='curline'><a href='../S/156.html#L3064'>ImageInfo</a>        3064 ext/exif/exif.c 							exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Found EXIF");</span>
+<span class='curline'><a href='../S/156.html#L3066'>ImageInfo</a>        3066 ext/exif/exif.c 							ImageInfo-&gt;sections_found |= FOUND_EXIF;</span>
+<span class='curline'><a href='../S/156.html#L3071'>ImageInfo</a>        3071 ext/exif/exif.c 							exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Found GPS");</span>
+<span class='curline'><a href='../S/156.html#L3073'>ImageInfo</a>        3073 ext/exif/exif.c 							ImageInfo-&gt;sections_found |= FOUND_GPS;</span>
+<span class='curline'><a href='../S/156.html#L3078'>ImageInfo</a>        3078 ext/exif/exif.c 							exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Found INTEROPERABILITY");</span>
+<span class='curline'><a href='../S/156.html#L3080'>ImageInfo</a>        3080 ext/exif/exif.c 							ImageInfo-&gt;sections_found |= FOUND_INTEROP;</span>
+<span class='curline'><a href='../S/156.html#L3084'>ImageInfo</a>        3084 ext/exif/exif.c 					Subdir_start = offset_base + php_ifd_get32u(value_ptr, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3086'>ImageInfo</a>        3086 ext/exif/exif.c 						exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD Pointer");</span>
+<span class='curline'><a href='../S/156.html#L3089'>ImageInfo</a>        3089 ext/exif/exif.c 					if (!exif_process_IFD_in_JPEG(ImageInfo, Subdir_start, offset_base, IFDlength, displacement, sub_section_index)) {</span>
+<span class='curline'><a href='../S/156.html#L3093'>ImageInfo</a>        3093 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Subsection %s done", exif_get_sectionname(sub_section_index));</span>
+<span class='curline'><a href='../S/156.html#L3098'>ImageInfo</a>        3098 ext/exif/exif.c 	exif_iif_add_tag(ImageInfo, section_index, exif_get_tagname(tag, tagname, sizeof(tagname), tag_table), tag, format, components, value_ptr);</span>
+<span class='curline'><a href='../S/156.html#L3106'>ImageInfo</a>        3106 ext/exif/exif.c static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index)</span>
+<span class='curline'><a href='../S/156.html#L3113'>ImageInfo</a>        3113 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s (x%04X(=%d))", exif_get_sectionname(section_index), IFDlength, IFDlength);</span>
+<span class='curline'><a href='../S/156.html#L3116'>ImageInfo</a>        3116 ext/exif/exif.c 	ImageInfo-&gt;sections_found |= FOUND_IFD0;</span>
+<span class='curline'><a href='../S/156.html#L3118'>ImageInfo</a>        3118 ext/exif/exif.c 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3121'>ImageInfo</a>        3121 ext/exif/exif.c 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X &gt; x%04X", (int)((size_t)dir_start+2-(size_t)offset_base), NumDirEntries, (int)((size_t)dir_start+2+NumDirEntries*12-(size_t)offset_base), IFDlength);</span>
+<span class='curline'><a href='../S/156.html#L3126'>ImageInfo</a>        3126 ext/exif/exif.c 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,</span>
+<span class='curline'><a href='../S/156.html#L3141'>ImageInfo</a>        3141 ext/exif/exif.c 	NextDirOffset = php_ifd_get32u(dir_start+2+12*de, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3145'>ImageInfo</a>        3145 ext/exif/exif.c 			exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD offset");</span>
+<span class='curline'><a href='../S/156.html#L3150'>ImageInfo</a>        3150 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Expect next IFD to be thumbnail");</span>
+<span class='curline'><a href='../S/156.html#L3152'>ImageInfo</a>        3152 ext/exif/exif.c 		if (exif_process_IFD_in_JPEG(ImageInfo, offset_base + NextDirOffset, offset_base, IFDlength, displacement, SECTION_THUMBNAIL)) {</span>
+<span class='curline'><a href='../S/156.html#L3154'>ImageInfo</a>        3154 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail size: 0x%04X", ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L3156'>ImageInfo</a>        3156 ext/exif/exif.c 			if (ImageInfo-&gt;Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN</span>
+<span class='curline'><a href='../S/156.html#L3157'>ImageInfo</a>        3157 ext/exif/exif.c 			&amp;&amp;  ImageInfo-&gt;Thumbnail.size</span>
+<span class='curline'><a href='../S/156.html#L3158'>ImageInfo</a>        3158 ext/exif/exif.c 			&amp;&amp;  ImageInfo-&gt;Thumbnail.offset</span>
+<span class='curline'><a href='../S/156.html#L3159'>ImageInfo</a>        3159 ext/exif/exif.c 			&amp;&amp;  ImageInfo-&gt;read_thumbnail</span>
+<span class='curline'><a href='../S/156.html#L3161'>ImageInfo</a>        3161 ext/exif/exif.c 				exif_thumbnail_extract(ImageInfo, offset_base, IFDlength);</span>
+<span class='curline'><a href='../S/156.html#L3175'>ImageInfo</a>        3175 ext/exif/exif.c static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf, size_t length, size_t displacement)</span>
+<span class='curline'><a href='../S/156.html#L3181'>ImageInfo</a>        3181 ext/exif/exif.c 		ImageInfo-&gt;motorola_intel = 0;</span>
+<span class='curline'><a href='../S/156.html#L3183'>ImageInfo</a>        3183 ext/exif/exif.c 		ImageInfo-&gt;motorola_intel = 1;</span>
+<span class='curline'><a href='../S/156.html#L3185'>ImageInfo</a>        3185 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF alignment marker");</span>
+<span class='curline'><a href='../S/156.html#L3190'>ImageInfo</a>        3190 ext/exif/exif.c 	exif_value_2a = php_ifd_get16u(CharBuf+2, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3191'>ImageInfo</a>        3191 ext/exif/exif.c 	offset_of_ifd = php_ifd_get32u(CharBuf+4, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3193'>ImageInfo</a>        3193 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF start (1)");</span>
+<span class='curline'><a href='../S/156.html#L3197'>ImageInfo</a>        3197 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid IFD start");</span>
+<span class='curline'><a href='../S/156.html#L3201'>ImageInfo</a>        3201 ext/exif/exif.c 	ImageInfo-&gt;sections_found |= FOUND_IFD0;</span>
+<span class='curline'><a href='../S/156.html#L3203'>ImageInfo</a>        3203 ext/exif/exif.c 	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+offset_of_ifd, CharBuf, length/*-14*/, displacement, SECTION_IFD0);</span>
+<span class='curline'><a href='../S/156.html#L3206'>ImageInfo</a>        3206 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process TIFF in JPEG done");</span>
+<span class='curline'><a href='../S/156.html#L3210'>ImageInfo</a>        3210 ext/exif/exif.c 	if (ImageInfo-&gt;FocalplaneXRes != 0) {</span>
+<span class='curline'><a href='../S/156.html#L3211'>ImageInfo</a>        3211 ext/exif/exif.c 		ImageInfo-&gt;CCDWidth = (float)(ImageInfo-&gt;ExifImageWidth * ImageInfo-&gt;FocalplaneUnits / ImageInfo-&gt;FocalplaneXRes);</span>
+<span class='curline'><a href='../S/156.html#L3220'>ImageInfo</a>        3220 ext/exif/exif.c static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, size_t length, size_t displacement)</span>
+<span class='curline'><a href='../S/156.html#L3225'>ImageInfo</a>        3225 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Incorrect APP1 Exif Identifier Code");</span>
+<span class='curline'><a href='../S/156.html#L3228'>ImageInfo</a>        3228 ext/exif/exif.c 	exif_process_TIFF_in_JPEG(ImageInfo, CharBuf + 8, length - 8, displacement+8);</span>
+<span class='curline'><a href='../S/156.html#L3230'>ImageInfo</a>        3230 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process APP1/EXIF done");</span>
+<span class='curline'><a href='../S/156.html#L3238'>ImageInfo</a>        3238 ext/exif/exif.c static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t length)</span>
+<span class='curline'><a href='../S/156.html#L3243'>ImageInfo</a>        3243 ext/exif/exif.c 		exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2);</span>
+<span class='curline'><a href='../S/156.html#L3246'>ImageInfo</a>        3246 ext/exif/exif.c 			exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);</span>
+<span class='curline'><a href='../S/156.html#L3250'>ImageInfo</a>        3250 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process section APP12 with l1=%d, l2=%d done", l1, l2);</span>
+<span class='curline'><a href='../S/156.html#L3257'>ImageInfo</a>        3257 ext/exif/exif.c static int exif_scan_JPEG_header(image_info_type *ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3268'>ImageInfo</a>        3268 ext/exif/exif.c 		fpos = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3269'>ImageInfo</a>        3269 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Needing section %d @ 0x%08X", ImageInfo-&gt;file.count, fpos);</span>
+<span class='curline'><a href='../S/156.html#L3279'>ImageInfo</a>        3279 ext/exif/exif.c 			if ((marker = php_stream_getc(ImageInfo-&gt;infile)) == EOF) {</span>
+<span class='curline'><a href='../S/156.html#L3280'>ImageInfo</a>        3280 ext/exif/exif.c 				EXIF_ERRLOG_CORRUPT(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3293'>ImageInfo</a>        3293 ext/exif/exif.c 			exif_error_docref("exif_read_data#error_mcom" EXIFERR_CC, ImageInfo, E_NOTICE, "Image has corrupt COM section: some software set wrong length information");</span>
+<span class='curline'><a href='../S/156.html#L3298'>ImageInfo</a>        3298 ext/exif/exif.c 		fpos = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3302'>ImageInfo</a>        3302 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "To many padding bytes");</span>
+<span class='curline'><a href='../S/156.html#L3307'>ImageInfo</a>        3307 ext/exif/exif.c 		if ((lh = php_stream_getc(ImageInfo-&gt;infile)) == EOF) {</span>
+<span class='curline'><a href='../S/156.html#L3308'>ImageInfo</a>        3308 ext/exif/exif.c 			EXIF_ERRLOG_CORRUPT(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3311'>ImageInfo</a>        3311 ext/exif/exif.c 		if ((ll = php_stream_getc(ImageInfo-&gt;infile)) == EOF) {</span>
+<span class='curline'><a href='../S/156.html#L3312'>ImageInfo</a>        3312 ext/exif/exif.c 			EXIF_ERRLOG_CORRUPT(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3320'>ImageInfo</a>        3320 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s, Section length: 0x%02X%02X", EXIF_ERROR_CORRUPT, lh, ll);</span>
+<span class='curline'><a href='../S/156.html#L3322'>ImageInfo</a>        3322 ext/exif/exif.c 			EXIF_ERRLOG_CORRUPT(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3327'>ImageInfo</a>        3327 ext/exif/exif.c 		sn = exif_file_sections_add(ImageInfo, marker, itemlen+1, NULL);</span>
+<span class='curline'><a href='../S/156.html#L3328'>ImageInfo</a>        3328 ext/exif/exif.c 		Data = ImageInfo-&gt;file.list[sn].data;</span>
+<span class='curline'><a href='../S/156.html#L3334'>ImageInfo</a>        3334 ext/exif/exif.c 		got = php_stream_read(ImageInfo-&gt;infile, (char*)(Data+2), itemlen-2); /* Read the whole section. */</span>
+<span class='curline'><a href='../S/156.html#L3336'>ImageInfo</a>        3336 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)", got, got, itemlen-2, itemlen-2);</span>
+<span class='curline'><a href='../S/156.html#L3341'>ImageInfo</a>        3341 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process section(x%02X=%s) @ x%04X + x%04X(=%d)", marker, exif_get_markername(marker), fpos, itemlen, itemlen);</span>
+<span class='curline'><a href='../S/156.html#L3346'>ImageInfo</a>        3346 ext/exif/exif.c 				if (ImageInfo-&gt;read_all) {</span>
+<span class='curline'><a href='../S/156.html#L3348'>ImageInfo</a>        3348 ext/exif/exif.c 					fpos = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3349'>ImageInfo</a>        3349 ext/exif/exif.c 					size = ImageInfo-&gt;FileSize - fpos;</span>
+<span class='curline'><a href='../S/156.html#L3350'>ImageInfo</a>        3350 ext/exif/exif.c 					sn = exif_file_sections_add(ImageInfo, M_PSEUDO, size, NULL);</span>
+<span class='curline'><a href='../S/156.html#L3351'>ImageInfo</a>        3351 ext/exif/exif.c 					Data = ImageInfo-&gt;file.list[sn].data;</span>
+<span class='curline'><a href='../S/156.html#L3352'>ImageInfo</a>        3352 ext/exif/exif.c 					got = php_stream_read(ImageInfo-&gt;infile, (char*)Data, size);</span>
+<span class='curline'><a href='../S/156.html#L3354'>ImageInfo</a>        3354 ext/exif/exif.c 						EXIF_ERRLOG_FILEEOF(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3361'>ImageInfo</a>        3361 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "No image in jpeg!");</span>
+<span class='curline'><a href='../S/156.html#L3362'>ImageInfo</a>        3362 ext/exif/exif.c 				return (ImageInfo-&gt;sections_found&amp;(~FOUND_COMPUTED)) ? TRUE : FALSE;</span>
+<span class='curline'><a href='../S/156.html#L3365'>ImageInfo</a>        3365 ext/exif/exif.c 				exif_process_COM(ImageInfo, (char *)Data, itemlen);</span>
+<span class='curline'><a href='../S/156.html#L3369'>ImageInfo</a>        3369 ext/exif/exif.c 				if (!(ImageInfo-&gt;sections_found&amp;FOUND_IFD0)) {</span>
+<span class='curline'><a href='../S/156.html#L3373'>ImageInfo</a>        3373 ext/exif/exif.c 					exif_process_APP1(ImageInfo, (char *)Data, itemlen, fpos);</span>
+<span class='curline'><a href='../S/156.html#L3378'>ImageInfo</a>        3378 ext/exif/exif.c 				exif_process_APP12(ImageInfo, (char *)Data, itemlen);</span>
+<span class='curline'><a href='../S/156.html#L3400'>ImageInfo</a>        3400 ext/exif/exif.c 				ImageInfo-&gt;Width  = sof_info.width;</span>
+<span class='curline'><a href='../S/156.html#L3401'>ImageInfo</a>        3401 ext/exif/exif.c 				ImageInfo-&gt;Height = sof_info.height;</span>
+<span class='curline'><a href='../S/156.html#L3403'>ImageInfo</a>        3403 ext/exif/exif.c 					ImageInfo-&gt;IsColor = 1;</span>
+<span class='curline'><a href='../S/156.html#L3405'>ImageInfo</a>        3405 ext/exif/exif.c 					ImageInfo-&gt;IsColor = 0;</span>
+<span class='curline'><a href='../S/156.html#L3417'>ImageInfo</a>        3417 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Done");</span>
+<span class='curline'><a href='../S/156.html#L3425'>ImageInfo</a>        3425 ext/exif/exif.c static int exif_scan_thumbnail(image_info_type *ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3427'>ImageInfo</a>        3427 ext/exif/exif.c 	uchar           c, *data = (uchar*)ImageInfo-&gt;Thumbnail.data;</span>
+<span class='curline'><a href='../S/156.html#L3436'>ImageInfo</a>        3436 ext/exif/exif.c 		if (!ImageInfo-&gt;Thumbnail.width &amp;&amp; !ImageInfo-&gt;Thumbnail.height) {</span>
+<span class='curline'><a href='../S/156.html#L3437'>ImageInfo</a>        3437 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Thumbnail is not a JPEG image");</span>
+<span class='curline'><a href='../S/156.html#L3443'>ImageInfo</a>        3443 ext/exif/exif.c 		if (pos&gt;=ImageInfo-&gt;Thumbnail.size)</span>
+<span class='curline'><a href='../S/156.html#L3446'>ImageInfo</a>        3446 ext/exif/exif.c 		if (pos&gt;=ImageInfo-&gt;Thumbnail.size)</span>
+<span class='curline'><a href='../S/156.html#L3453'>ImageInfo</a>        3453 ext/exif/exif.c 			if (pos+3&gt;=ImageInfo-&gt;Thumbnail.size)</span>
+<span class='curline'><a href='../S/156.html#L3461'>ImageInfo</a>        3461 ext/exif/exif.c 		if (pos+length&gt;=ImageInfo-&gt;Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L3465'>ImageInfo</a>        3465 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: process section(x%02X=%s) @ x%04X + x%04X", marker, exif_get_markername(marker), pos, length);</span>
+<span class='curline'><a href='../S/156.html#L3483'>ImageInfo</a>        3483 ext/exif/exif.c 				ImageInfo-&gt;Thumbnail.height   = sof_info.height;</span>
+<span class='curline'><a href='../S/156.html#L3484'>ImageInfo</a>        3484 ext/exif/exif.c 				ImageInfo-&gt;Thumbnail.width    = sof_info.width;</span>
+<span class='curline'><a href='../S/156.html#L3486'>ImageInfo</a>        3486 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: size: %d * %d", sof_info.width, sof_info.height);</span>
+<span class='curline'><a href='../S/156.html#L3492'>ImageInfo</a>        3492 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Could not compute size of thumbnail");</span>
+<span class='curline'><a href='../S/156.html#L3502'>ImageInfo</a>        3502 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Could not compute size of thumbnail");</span>
+<span class='curline'><a href='../S/156.html#L3509'>ImageInfo</a>        3509 ext/exif/exif.c static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index)</span>
+<span class='curline'><a href='../S/156.html#L3518'>ImageInfo</a>        3518 ext/exif/exif.c 	if (ImageInfo-&gt;ifd_nesting_level &gt; MAX_IFD_NESTING_LEVEL) {</span>
+<span class='curline'><a href='../S/156.html#L3522'>ImageInfo</a>        3522 ext/exif/exif.c 	if (ImageInfo-&gt;FileSize &gt;= dir_offset+2) {</span>
+<span class='curline'><a href='../S/156.html#L3523'>ImageInfo</a>        3523 ext/exif/exif.c 		sn = exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL);</span>
+<span class='curline'><a href='../S/156.html#L3525'>ImageInfo</a>        3525 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo-&gt;FileSize, dir_offset, 2);</span>
+<span class='curline'><a href='../S/156.html#L3527'>ImageInfo</a>        3527 ext/exif/exif.c 		php_stream_seek(ImageInfo-&gt;infile, dir_offset, SEEK_SET); /* we do not know the order of sections */</span>
+<span class='curline'><a href='../S/156.html#L3528'>ImageInfo</a>        3528 ext/exif/exif.c 		php_stream_read(ImageInfo-&gt;infile, (char*)ImageInfo-&gt;file.list[sn].data, 2);</span>
+<span class='curline'><a href='../S/156.html#L3529'>ImageInfo</a>        3529 ext/exif/exif.c 		num_entries = php_ifd_get16u(ImageInfo-&gt;file.list[sn].data, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3531'>ImageInfo</a>        3531 ext/exif/exif.c 		if (ImageInfo-&gt;FileSize &gt;= dir_offset+dir_size) {</span>
+<span class='curline'><a href='../S/156.html#L3533'>ImageInfo</a>        3533 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X), IFD entries(%d)", ImageInfo-&gt;FileSize, dir_offset+2, dir_size-2, num_entries);</span>
+<span class='curline'><a href='../S/156.html#L3535'>ImageInfo</a>        3535 ext/exif/exif.c 			if (exif_file_sections_realloc(ImageInfo, sn, dir_size)) {</span>
+<span class='curline'><a href='../S/156.html#L3538'>ImageInfo</a>        3538 ext/exif/exif.c 			php_stream_read(ImageInfo-&gt;infile, (char*)(ImageInfo-&gt;file.list[sn].data+2), dir_size-2);</span>
+<span class='curline'><a href='../S/156.html#L3540'>ImageInfo</a>        3540 ext/exif/exif.c 			next_offset = php_ifd_get32u(ImageInfo-&gt;file.list[sn].data + dir_size - 4, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3542'>ImageInfo</a>        3542 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF done, next offset x%04X", next_offset);</span>
+<span class='curline'><a href='../S/156.html#L3547'>ImageInfo</a>        3547 ext/exif/exif.c 				dir_entry 	 = ImageInfo-&gt;file.list[sn].data+2+i*12;</span>
+<span class='curline'><a href='../S/156.html#L3548'>ImageInfo</a>        3548 ext/exif/exif.c 				entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3549'>ImageInfo</a>        3549 ext/exif/exif.c 				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3551'>ImageInfo</a>        3551 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: tag(0x%04X,%12s): Illegal format code 0x%04X, switching to BYTE", entry_tag, exif_get_tagname(entry_tag, tagname, -12, tag_table), entry_type);</span>
+<span class='curline'><a href='../S/156.html#L3559'>ImageInfo</a>        3559 ext/exif/exif.c 				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo-&gt;motorola_intel) * php_tiff_bytes_per_format[entry_type];</span>
+<span class='curline'><a href='../S/156.html#L3563'>ImageInfo</a>        3563 ext/exif/exif.c 							entry_value  = php_ifd_get16u(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3566'>ImageInfo</a>        3566 ext/exif/exif.c 							entry_value  = php_ifd_get16s(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3569'>ImageInfo</a>        3569 ext/exif/exif.c 							entry_value  = php_ifd_get32u(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3572'>ImageInfo</a>        3572 ext/exif/exif.c 							entry_value  = php_ifd_get32s(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3578'>ImageInfo</a>        3578 ext/exif/exif.c 							ImageInfo-&gt;Width  = entry_value;</span>
+<span class='curline'><a href='../S/156.html#L3582'>ImageInfo</a>        3582 ext/exif/exif.c 							ImageInfo-&gt;Height = entry_value;</span>
+<span class='curline'><a href='../S/156.html#L3589'>ImageInfo</a>        3589 ext/exif/exif.c 									ImageInfo-&gt;IsColor = 0;</span>
+<span class='curline'><a href='../S/156.html#L3596'>ImageInfo</a>        3596 ext/exif/exif.c 									ImageInfo-&gt;IsColor = 1;</span>
+<span class='curline'><a href='../S/156.html#L3602'>ImageInfo</a>        3602 ext/exif/exif.c 					entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3609'>ImageInfo</a>        3609 ext/exif/exif.c 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Resize struct: x%04X + x%04X - x%04X = x%04X", entry_offset, entry_length, dir_offset, ifd_size);</span>
+<span class='curline'><a href='../S/156.html#L3614'>ImageInfo</a>        3614 ext/exif/exif.c 			if (ImageInfo-&gt;FileSize &gt;= dir_offset + ImageInfo-&gt;file.list[sn].size) {</span>
+<span class='curline'><a href='../S/156.html#L3616'>ImageInfo</a>        3616 ext/exif/exif.c 					if (dir_offset + ifd_size &gt; ImageInfo-&gt;FileSize) {</span>
+<span class='curline'><a href='../S/156.html#L3617'>ImageInfo</a>        3617 ext/exif/exif.c 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X + x%04X)", ImageInfo-&gt;FileSize, dir_offset, ifd_size);</span>
+<span class='curline'><a href='../S/156.html#L3620'>ImageInfo</a>        3620 ext/exif/exif.c 					if (exif_file_sections_realloc(ImageInfo, sn, ifd_size)) {</span>
+<span class='curline'><a href='../S/156.html#L3625'>ImageInfo</a>        3625 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD(x%04X + x%04X)", ImageInfo-&gt;FileSize, dir_offset, ifd_size);</span>
+<span class='curline'><a href='../S/156.html#L3627'>ImageInfo</a>        3627 ext/exif/exif.c 					php_stream_read(ImageInfo-&gt;infile, (char*)(ImageInfo-&gt;file.list[sn].data+dir_size), ifd_size-dir_size);</span>
+<span class='curline'><a href='../S/156.html#L3629'>ImageInfo</a>        3629 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF, done");</span>
+<span class='curline'><a href='../S/156.html#L3634'>ImageInfo</a>        3634 ext/exif/exif.c 					dir_entry 	 = ImageInfo-&gt;file.list[sn].data+2+i*12;</span>
+<span class='curline'><a href='../S/156.html#L3635'>ImageInfo</a>        3635 ext/exif/exif.c 					entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3636'>ImageInfo</a>        3636 ext/exif/exif.c 					entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3645'>ImageInfo</a>        3645 ext/exif/exif.c 								ImageInfo-&gt;sections_found |= FOUND_EXIF;</span>
+<span class='curline'><a href='../S/156.html#L3649'>ImageInfo</a>        3649 ext/exif/exif.c 								ImageInfo-&gt;sections_found |= FOUND_GPS;</span>
+<span class='curline'><a href='../S/156.html#L3653'>ImageInfo</a>        3653 ext/exif/exif.c 								ImageInfo-&gt;sections_found |= FOUND_INTEROP;</span>
+<span class='curline'><a href='../S/156.html#L3657'>ImageInfo</a>        3657 ext/exif/exif.c 								ImageInfo-&gt;sections_found |= FOUND_THUMBNAIL;</span>
+<span class='curline'><a href='../S/156.html#L3661'>ImageInfo</a>        3661 ext/exif/exif.c 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo-&gt;motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3663'>ImageInfo</a>        3663 ext/exif/exif.c 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);</span>
+<span class='curline'><a href='../S/156.html#L3665'>ImageInfo</a>        3665 ext/exif/exif.c 						ImageInfo-&gt;ifd_nesting_level++;</span>
+<span class='curline'><a href='../S/156.html#L3666'>ImageInfo</a>        3666 ext/exif/exif.c 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index);</span>
+<span class='curline'><a href='../S/156.html#L3668'>ImageInfo</a>        3668 ext/exif/exif.c 							if (ImageInfo-&gt;Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN</span>
+<span class='curline'><a href='../S/156.html#L3669'>ImageInfo</a>        3669 ext/exif/exif.c 							&amp;&amp;  ImageInfo-&gt;Thumbnail.size</span>
+<span class='curline'><a href='../S/156.html#L3670'>ImageInfo</a>        3670 ext/exif/exif.c 							&amp;&amp;  ImageInfo-&gt;Thumbnail.offset</span>
+<span class='curline'><a href='../S/156.html#L3671'>ImageInfo</a>        3671 ext/exif/exif.c 							&amp;&amp;  ImageInfo-&gt;read_thumbnail</span>
+<span class='curline'><a href='../S/156.html#L3674'>ImageInfo</a>        3674 ext/exif/exif.c 								exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo-&gt;Thumbnail.data ? "Ignore" : "Read", ImageInfo-&gt;Thumbnail.offset, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L3676'>ImageInfo</a>        3676 ext/exif/exif.c 								if (!ImageInfo-&gt;Thumbnail.data) {</span>
+<span class='curline'><a href='../S/156.html#L3677'>ImageInfo</a>        3677 ext/exif/exif.c 									ImageInfo-&gt;Thumbnail.data = safe_emalloc(ImageInfo-&gt;Thumbnail.size, 1, 0);</span>
+<span class='curline'><a href='../S/156.html#L3678'>ImageInfo</a>        3678 ext/exif/exif.c 									php_stream_seek(ImageInfo-&gt;infile, ImageInfo-&gt;Thumbnail.offset, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L3679'>ImageInfo</a>        3679 ext/exif/exif.c 									fgot = php_stream_read(ImageInfo-&gt;infile, ImageInfo-&gt;Thumbnail.data, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L3680'>ImageInfo</a>        3680 ext/exif/exif.c 									if (fgot &lt; ImageInfo-&gt;Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L3681'>ImageInfo</a>        3681 ext/exif/exif.c 										EXIF_ERRLOG_THUMBEOF(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3683'>ImageInfo</a>        3683 ext/exif/exif.c 									exif_thumbnail_build(ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L3688'>ImageInfo</a>        3688 ext/exif/exif.c 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s done", exif_get_sectionname(sub_section_index));</span>
+<span class='curline'><a href='../S/156.html#L3691'>ImageInfo</a>        3691 ext/exif/exif.c 						if (!exif_process_IFD_TAG(ImageInfo, (char*)dir_entry,</span>
+<span class='curline'><a href='../S/156.html#L3692'>ImageInfo</a>        3692 ext/exif/exif.c 												  (char*)(ImageInfo-&gt;file.list[sn].data-dir_offset),</span>
+<span class='curline'><a href='../S/156.html#L3703'>ImageInfo</a>        3703 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) at x%04X", next_offset);</span>
+<span class='curline'><a href='../S/156.html#L3705'>ImageInfo</a>        3705 ext/exif/exif.c 					ImageInfo-&gt;ifd_nesting_level++;</span>
+<span class='curline'><a href='../S/156.html#L3706'>ImageInfo</a>        3706 ext/exif/exif.c 					exif_process_IFD_in_TIFF(ImageInfo, next_offset, SECTION_THUMBNAIL);</span>
+<span class='curline'><a href='../S/156.html#L3708'>ImageInfo</a>        3708 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo-&gt;Thumbnail.data ? "Ignore" : "Read", ImageInfo-&gt;Thumbnail.offset, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L3710'>ImageInfo</a>        3710 ext/exif/exif.c 					if (!ImageInfo-&gt;Thumbnail.data &amp;&amp; ImageInfo-&gt;Thumbnail.offset &amp;&amp; ImageInfo-&gt;Thumbnail.size &amp;&amp; ImageInfo-&gt;read_thumbnail) {</span>
+<span class='curline'><a href='../S/156.html#L3711'>ImageInfo</a>        3711 ext/exif/exif.c 						ImageInfo-&gt;Thumbnail.data = safe_emalloc(ImageInfo-&gt;Thumbnail.size, 1, 0);</span>
+<span class='curline'><a href='../S/156.html#L3712'>ImageInfo</a>        3712 ext/exif/exif.c 						php_stream_seek(ImageInfo-&gt;infile, ImageInfo-&gt;Thumbnail.offset, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L3713'>ImageInfo</a>        3713 ext/exif/exif.c 						fgot = php_stream_read(ImageInfo-&gt;infile, ImageInfo-&gt;Thumbnail.data, ImageInfo-&gt;Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L3714'>ImageInfo</a>        3714 ext/exif/exif.c 						if (fgot &lt; ImageInfo-&gt;Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L3715'>ImageInfo</a>        3715 ext/exif/exif.c 							EXIF_ERRLOG_THUMBEOF(ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3717'>ImageInfo</a>        3717 ext/exif/exif.c 						exif_thumbnail_build(ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L3720'>ImageInfo</a>        3720 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) done");</span>
+<span class='curline'><a href='../S/156.html#L3725'>ImageInfo</a>        3725 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X)", ImageInfo-&gt;FileSize, dir_offset+ImageInfo-&gt;file.list[sn].size);</span>
+<span class='curline'><a href='../S/156.html#L3729'>ImageInfo</a>        3729 ext/exif/exif.c 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD dir(x%04X)", ImageInfo-&gt;FileSize, dir_offset+dir_size);</span>
+<span class='curline'><a href='../S/156.html#L3733'>ImageInfo</a>        3733 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than start of IFD dir(x%04X)", ImageInfo-&gt;FileSize, dir_offset+2);</span>
+<span class='curline'><a href='../S/156.html#L3741'>ImageInfo</a>        3741 ext/exif/exif.c static int exif_scan_FILE_header(image_info_type *ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3746'>ImageInfo</a>        3746 ext/exif/exif.c 	ImageInfo-&gt;FileType = IMAGE_FILETYPE_UNKNOWN;</span>
+<span class='curline'><a href='../S/156.html#L3748'>ImageInfo</a>        3748 ext/exif/exif.c 	if (ImageInfo-&gt;FileSize &gt;= 2) {</span>
+<span class='curline'><a href='../S/156.html#L3749'>ImageInfo</a>        3749 ext/exif/exif.c 		php_stream_seek(ImageInfo-&gt;infile, 0, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L3750'>ImageInfo</a>        3750 ext/exif/exif.c 		if (php_stream_read(ImageInfo-&gt;infile, (char*)file_header, 2) != 2) {</span>
+<span class='curline'><a href='../S/156.html#L3754'>ImageInfo</a>        3754 ext/exif/exif.c 			ImageInfo-&gt;FileType = IMAGE_FILETYPE_JPEG;</span>
+<span class='curline'><a href='../S/156.html#L3755'>ImageInfo</a>        3755 ext/exif/exif.c 			if (exif_scan_JPEG_header(ImageInfo)) {</span>
+<span class='curline'><a href='../S/156.html#L3758'>ImageInfo</a>        3758 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid JPEG file");</span>
+<span class='curline'><a href='../S/156.html#L3760'>ImageInfo</a>        3760 ext/exif/exif.c 		} else if (ImageInfo-&gt;FileSize &gt;= 8) {</span>
+<span class='curline'><a href='../S/156.html#L3761'>ImageInfo</a>        3761 ext/exif/exif.c 			if (php_stream_read(ImageInfo-&gt;infile, (char*)(file_header+2), 6) != 6) {</span>
+<span class='curline'><a href='../S/156.html#L3765'>ImageInfo</a>        3765 ext/exif/exif.c 				ImageInfo-&gt;FileType = IMAGE_FILETYPE_TIFF_II;</span>
+<span class='curline'><a href='../S/156.html#L3766'>ImageInfo</a>        3766 ext/exif/exif.c 				ImageInfo-&gt;motorola_intel = 0;</span>
+<span class='curline'><a href='../S/156.html#L3768'>ImageInfo</a>        3768 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/II format");</span>
+<span class='curline'><a href='../S/156.html#L3770'>ImageInfo</a>        3770 ext/exif/exif.c 				ImageInfo-&gt;sections_found |= FOUND_IFD0;</span>
+<span class='curline'><a href='../S/156.html#L3771'>ImageInfo</a>        3771 ext/exif/exif.c 				if (exif_process_IFD_in_TIFF(ImageInfo,</span>
+<span class='curline'><a href='../S/156.html#L3772'>ImageInfo</a>        3772 ext/exif/exif.c 											 php_ifd_get32u(file_header + 4, ImageInfo-&gt;motorola_intel),</span>
+<span class='curline'><a href='../S/156.html#L3776'>ImageInfo</a>        3776 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");</span>
+<span class='curline'><a href='../S/156.html#L3779'>ImageInfo</a>        3779 ext/exif/exif.c 				ImageInfo-&gt;FileType = IMAGE_FILETYPE_TIFF_MM;</span>
+<span class='curline'><a href='../S/156.html#L3780'>ImageInfo</a>        3780 ext/exif/exif.c 				ImageInfo-&gt;motorola_intel = 1;</span>
+<span class='curline'><a href='../S/156.html#L3782'>ImageInfo</a>        3782 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "File has TIFF/MM format");</span>
+<span class='curline'><a href='../S/156.html#L3784'>ImageInfo</a>        3784 ext/exif/exif.c 				ImageInfo-&gt;sections_found |= FOUND_IFD0;</span>
+<span class='curline'><a href='../S/156.html#L3785'>ImageInfo</a>        3785 ext/exif/exif.c 				if (exif_process_IFD_in_TIFF(ImageInfo,</span>
+<span class='curline'><a href='../S/156.html#L3786'>ImageInfo</a>        3786 ext/exif/exif.c 											 php_ifd_get32u(file_header + 4, ImageInfo-&gt;motorola_intel),</span>
+<span class='curline'><a href='../S/156.html#L3790'>ImageInfo</a>        3790 ext/exif/exif.c 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");</span>
+<span class='curline'><a href='../S/156.html#L3793'>ImageInfo</a>        3793 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File not supported");</span>
+<span class='curline'><a href='../S/156.html#L3798'>ImageInfo</a>        3798 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%d)", ImageInfo-&gt;FileSize);</span>
+<span class='curline'><a href='../S/156.html#L3807'>ImageInfo</a>        3807 ext/exif/exif.c static int exif_discard_imageinfo(image_info_type *ImageInfo)</span>
+<span class='curline'><a href='../S/156.html#L3811'>ImageInfo</a>        3811 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;FileName);</span>
+<span class='curline'><a href='../S/156.html#L3812'>ImageInfo</a>        3812 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;UserComment);</span>
+<span class='curline'><a href='../S/156.html#L3813'>ImageInfo</a>        3813 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;UserCommentEncoding);</span>
+<span class='curline'><a href='../S/156.html#L3814'>ImageInfo</a>        3814 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;Copyright);</span>
+<span class='curline'><a href='../S/156.html#L3815'>ImageInfo</a>        3815 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;CopyrightPhotographer);</span>
+<span class='curline'><a href='../S/156.html#L3816'>ImageInfo</a>        3816 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;CopyrightEditor);</span>
+<span class='curline'><a href='../S/156.html#L3817'>ImageInfo</a>        3817 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;Thumbnail.data);</span>
+<span class='curline'><a href='../S/156.html#L3818'>ImageInfo</a>        3818 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;encode_unicode);</span>
+<span class='curline'><a href='../S/156.html#L3819'>ImageInfo</a>        3819 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;decode_unicode_be);</span>
+<span class='curline'><a href='../S/156.html#L3820'>ImageInfo</a>        3820 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;decode_unicode_le);</span>
+<span class='curline'><a href='../S/156.html#L3821'>ImageInfo</a>        3821 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;encode_jis);</span>
+<span class='curline'><a href='../S/156.html#L3822'>ImageInfo</a>        3822 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;decode_jis_be);</span>
+<span class='curline'><a href='../S/156.html#L3823'>ImageInfo</a>        3823 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;decode_jis_le);</span>
+<span class='curline'><a href='../S/156.html#L3824'>ImageInfo</a>        3824 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;make);</span>
+<span class='curline'><a href='../S/156.html#L3825'>ImageInfo</a>        3825 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;model);</span>
+<span class='curline'><a href='../S/156.html#L3826'>ImageInfo</a>        3826 ext/exif/exif.c 	for (i=0; i&lt;ImageInfo-&gt;xp_fields.count; i++) {</span>
+<span class='curline'><a href='../S/156.html#L3827'>ImageInfo</a>        3827 ext/exif/exif.c 		EFREE_IF(ImageInfo-&gt;xp_fields.list[i].value);</span>
+<span class='curline'><a href='../S/156.html#L3829'>ImageInfo</a>        3829 ext/exif/exif.c 	EFREE_IF(ImageInfo-&gt;xp_fields.list);</span>
+<span class='curline'><a href='../S/156.html#L3831'>ImageInfo</a>        3831 ext/exif/exif.c 		exif_iif_free(ImageInfo, i);</span>
+<span class='curline'><a href='../S/156.html#L3833'>ImageInfo</a>        3833 ext/exif/exif.c 	exif_file_sections_free(ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L3834'>ImageInfo</a>        3834 ext/exif/exif.c 	memset(ImageInfo, 0, sizeof(*ImageInfo));</span>
+<span class='curline'><a href='../S/156.html#L3841'>ImageInfo</a>        3841 ext/exif/exif.c static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all)</span>
+<span class='curline'><a href='../S/156.html#L3848'>ImageInfo</a>        3848 ext/exif/exif.c 	memset(ImageInfo, 0, sizeof(*ImageInfo));</span>
+<span class='curline'><a href='../S/156.html#L3850'>ImageInfo</a>        3850 ext/exif/exif.c 	ImageInfo-&gt;motorola_intel = -1; /* flag as unknown */</span>
+<span class='curline'><a href='../S/156.html#L3852'>ImageInfo</a>        3852 ext/exif/exif.c 	ImageInfo-&gt;infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH, NULL);</span>
+<span class='curline'><a href='../S/156.html#L3853'>ImageInfo</a>        3853 ext/exif/exif.c 	if (!ImageInfo-&gt;infile) {</span>
+<span class='curline'><a href='../S/156.html#L3854'>ImageInfo</a>        3854 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Unable to open file");</span>
+<span class='curline'><a href='../S/156.html#L3858'>ImageInfo</a>        3858 ext/exif/exif.c 	if (php_stream_is(ImageInfo-&gt;infile, PHP_STREAM_IS_STDIO)) {</span>
+<span class='curline'><a href='../S/156.html#L3861'>ImageInfo</a>        3861 ext/exif/exif.c 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Not a file");</span>
+<span class='curline'><a href='../S/156.html#L3862'>ImageInfo</a>        3862 ext/exif/exif.c 				php_stream_close(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3867'>ImageInfo</a>        3867 ext/exif/exif.c 			ImageInfo-&gt;FileDateTime = st.st_mtime;</span>
+<span class='curline'><a href='../S/156.html#L3868'>ImageInfo</a>        3868 ext/exif/exif.c 			ImageInfo-&gt;FileSize = st.st_size;</span>
+<span class='curline'><a href='../S/156.html#L3872'>ImageInfo</a>        3872 ext/exif/exif.c 		if (!ImageInfo-&gt;FileSize) {</span>
+<span class='curline'><a href='../S/156.html#L3873'>ImageInfo</a>        3873 ext/exif/exif.c 			php_stream_seek(ImageInfo-&gt;infile, 0, SEEK_END);</span>
+<span class='curline'><a href='../S/156.html#L3874'>ImageInfo</a>        3874 ext/exif/exif.c 			ImageInfo-&gt;FileSize = php_stream_tell(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3875'>ImageInfo</a>        3875 ext/exif/exif.c 			php_stream_seek(ImageInfo-&gt;infile, 0, SEEK_SET);</span>
+<span class='curline'><a href='../S/156.html#L3880'>ImageInfo</a>        3880 ext/exif/exif.c 	ImageInfo-&gt;FileName          = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));</span>
+<span class='curline'><a href='../S/156.html#L3882'>ImageInfo</a>        3882 ext/exif/exif.c 	ImageInfo-&gt;read_thumbnail = read_thumbnail;</span>
+<span class='curline'><a href='../S/156.html#L3883'>ImageInfo</a>        3883 ext/exif/exif.c 	ImageInfo-&gt;read_all = read_all;</span>
+<span class='curline'><a href='../S/156.html#L3884'>ImageInfo</a>        3884 ext/exif/exif.c 	ImageInfo-&gt;Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;</span>
+<span class='curline'><a href='../S/156.html#L3886'>ImageInfo</a>        3886 ext/exif/exif.c 	ImageInfo-&gt;encode_unicode    = estrdup(EXIF_G(encode_unicode));</span>
+<span class='curline'><a href='../S/156.html#L3887'>ImageInfo</a>        3887 ext/exif/exif.c 	ImageInfo-&gt;decode_unicode_be = estrdup(EXIF_G(decode_unicode_be));</span>
+<span class='curline'><a href='../S/156.html#L3888'>ImageInfo</a>        3888 ext/exif/exif.c 	ImageInfo-&gt;decode_unicode_le = estrdup(EXIF_G(decode_unicode_le));</span>
+<span class='curline'><a href='../S/156.html#L3889'>ImageInfo</a>        3889 ext/exif/exif.c 	ImageInfo-&gt;encode_jis        = estrdup(EXIF_G(encode_jis));</span>
+<span class='curline'><a href='../S/156.html#L3890'>ImageInfo</a>        3890 ext/exif/exif.c 	ImageInfo-&gt;decode_jis_be     = estrdup(EXIF_G(decode_jis_be));</span>
+<span class='curline'><a href='../S/156.html#L3891'>ImageInfo</a>        3891 ext/exif/exif.c 	ImageInfo-&gt;decode_jis_le     = estrdup(EXIF_G(decode_jis_le));</span>
+<span class='curline'><a href='../S/156.html#L3894'>ImageInfo</a>        3894 ext/exif/exif.c 	ImageInfo-&gt;ifd_nesting_level = 0;</span>
+<span class='curline'><a href='../S/156.html#L3897'>ImageInfo</a>        3897 ext/exif/exif.c 	ret = exif_scan_FILE_header(ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L3899'>ImageInfo</a>        3899 ext/exif/exif.c 	php_stream_close(ImageInfo-&gt;infile);</span>
+<span class='curline'><a href='../S/156.html#L3913'>ImageInfo</a>        3913 ext/exif/exif.c 	image_info_type ImageInfo;</span>
+<span class='curline'><a href='../S/156.html#L3920'>ImageInfo</a>        3920 ext/exif/exif.c 	memset(&amp;ImageInfo, 0, sizeof(ImageInfo));</span>
+<span class='curline'><a href='../S/156.html#L3945'>ImageInfo</a>        3945 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Sections needed: %s", sections_str[0] ? sections_str : "None");</span>
+<span class='curline'><a href='../S/156.html#L3950'>ImageInfo</a>        3950 ext/exif/exif.c 	ret = exif_read_file(&amp;ImageInfo, p_name, read_thumbnail, read_all);</span>
+<span class='curline'><a href='../S/156.html#L3951'>ImageInfo</a>        3951 ext/exif/exif.c 	sections_str = exif_get_sectionlist(ImageInfo.sections_found);</span>
+<span class='curline'><a href='../S/156.html#L3955'>ImageInfo</a>        3955 ext/exif/exif.c 		exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Sections found: %s", sections_str[0] ? sections_str : "None");</span>
+<span class='curline'><a href='../S/156.html#L3958'>ImageInfo</a>        3958 ext/exif/exif.c 	ImageInfo.sections_found |= FOUND_COMPUTED|FOUND_FILE;/* do not inform about in debug*/</span>
+<span class='curline'><a href='../S/156.html#L3960'>ImageInfo</a>        3960 ext/exif/exif.c 	if (ret == FALSE || (sections_needed &amp;&amp; !(sections_needed&amp;ImageInfo.sections_found))) {</span>
+<span class='curline'><a href='../S/156.html#L3962'>ImageInfo</a>        3962 ext/exif/exif.c 		exif_discard_imageinfo(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L3970'>ImageInfo</a>        3970 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Generate section FILE");</span>
+<span class='curline'><a href='../S/156.html#L3974'>ImageInfo</a>        3974 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_FILE, "FileName",      ImageInfo.FileName);</span>
+<span class='curline'><a href='../S/156.html#L3975'>ImageInfo</a>        3975 ext/exif/exif.c 	exif_iif_add_int(&amp;ImageInfo, SECTION_FILE, "FileDateTime",  ImageInfo.FileDateTime);</span>
+<span class='curline'><a href='../S/156.html#L3976'>ImageInfo</a>        3976 ext/exif/exif.c 	exif_iif_add_int(&amp;ImageInfo, SECTION_FILE, "FileSize",      ImageInfo.FileSize);</span>
+<span class='curline'><a href='../S/156.html#L3977'>ImageInfo</a>        3977 ext/exif/exif.c 	exif_iif_add_int(&amp;ImageInfo, SECTION_FILE, "FileType",      ImageInfo.FileType);</span>
+<span class='curline'><a href='../S/156.html#L3978'>ImageInfo</a>        3978 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_FILE, "MimeType",      (char*)php_image_type_to_mime_type(ImageInfo.FileType));</span>
+<span class='curline'><a href='../S/156.html#L3979'>ImageInfo</a>        3979 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_FILE, "SectionsFound", sections_str ? sections_str : "NONE");</span>
+<span class='curline'><a href='../S/156.html#L3982'>ImageInfo</a>        3982 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Generate section COMPUTED");</span>
+<span class='curline'><a href='../S/156.html#L3985'>ImageInfo</a>        3985 ext/exif/exif.c 	if (ImageInfo.Width&gt;0 &amp;&amp;  ImageInfo.Height&gt;0) {</span>
+<span class='curline'><a href='../S/156.html#L3986'>ImageInfo</a>        3986 ext/exif/exif.c 		exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "html"   , "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);</span>
+<span class='curline'><a href='../S/156.html#L3987'>ImageInfo</a>        3987 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "Height", ImageInfo.Height);</span>
+<span class='curline'><a href='../S/156.html#L3988'>ImageInfo</a>        3988 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "Width",  ImageInfo.Width);</span>
+<span class='curline'><a href='../S/156.html#L3990'>ImageInfo</a>        3990 ext/exif/exif.c 	exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "IsColor", ImageInfo.IsColor);</span>
+<span class='curline'><a href='../S/156.html#L3991'>ImageInfo</a>        3991 ext/exif/exif.c 	if (ImageInfo.motorola_intel != -1) {</span>
+<span class='curline'><a href='../S/156.html#L3992'>ImageInfo</a>        3992 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "ByteOrderMotorola", ImageInfo.motorola_intel);</span>
+<span class='curline'><a href='../S/156.html#L3994'>ImageInfo</a>        3994 ext/exif/exif.c 	if (ImageInfo.FocalLength) {</span>
+<span class='curline'><a href='../S/156.html#L3995'>ImageInfo</a>        3995 ext/exif/exif.c 		exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "FocalLength", "%4.1Fmm", ImageInfo.FocalLength);</span>
+<span class='curline'><a href='../S/156.html#L3996'>ImageInfo</a>        3996 ext/exif/exif.c 		if(ImageInfo.CCDWidth) {</span>
+<span class='curline'><a href='../S/156.html#L3997'>ImageInfo</a>        3997 ext/exif/exif.c 			exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "35mmFocalLength", "%dmm", (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));</span>
+<span class='curline'><a href='../S/156.html#L4000'>ImageInfo</a>        4000 ext/exif/exif.c 	if(ImageInfo.CCDWidth) {</span>
+<span class='curline'><a href='../S/156.html#L4001'>ImageInfo</a>        4001 ext/exif/exif.c 		exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "CCDWidth", "%dmm", (int)ImageInfo.CCDWidth);</span>
+<span class='curline'><a href='../S/156.html#L4003'>ImageInfo</a>        4003 ext/exif/exif.c 	if(ImageInfo.ExposureTime&gt;0) {</span>
+<span class='curline'><a href='../S/156.html#L4004'>ImageInfo</a>        4004 ext/exif/exif.c 		if(ImageInfo.ExposureTime &lt;= 0.5) {</span>
+<span class='curline'><a href='../S/156.html#L4005'>ImageInfo</a>        4005 ext/exif/exif.c 			exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s (1/%d)", ImageInfo.ExposureTime, (int)(0.5 + 1/ImageInfo.ExposureTime));</span>
+<span class='curline'><a href='../S/156.html#L4007'>ImageInfo</a>        4007 ext/exif/exif.c 			exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s", ImageInfo.ExposureTime);</span>
+<span class='curline'><a href='../S/156.html#L4010'>ImageInfo</a>        4010 ext/exif/exif.c 	if(ImageInfo.ApertureFNumber) {</span>
+<span class='curline'><a href='../S/156.html#L4011'>ImageInfo</a>        4011 ext/exif/exif.c 		exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "ApertureFNumber", "f/%.1F", ImageInfo.ApertureFNumber);</span>
+<span class='curline'><a href='../S/156.html#L4013'>ImageInfo</a>        4013 ext/exif/exif.c 	if(ImageInfo.Distance) {</span>
+<span class='curline'><a href='../S/156.html#L4014'>ImageInfo</a>        4014 ext/exif/exif.c 		if(ImageInfo.Distance&lt;0) {</span>
+<span class='curline'><a href='../S/156.html#L4015'>ImageInfo</a>        4015 ext/exif/exif.c 			exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "FocusDistance", "Infinite");</span>
+<span class='curline'><a href='../S/156.html#L4017'>ImageInfo</a>        4017 ext/exif/exif.c 			exif_iif_add_fmt(&amp;ImageInfo, SECTION_COMPUTED, "FocusDistance", "%0.2Fm", ImageInfo.Distance);</span>
+<span class='curline'><a href='../S/156.html#L4020'>ImageInfo</a>        4020 ext/exif/exif.c 	if (ImageInfo.UserComment) {</span>
+<span class='curline'><a href='../S/156.html#L4021'>ImageInfo</a>        4021 ext/exif/exif.c 		exif_iif_add_buffer(&amp;ImageInfo, SECTION_COMPUTED, "UserComment", ImageInfo.UserCommentLength, ImageInfo.UserComment);</span>
+<span class='curline'><a href='../S/156.html#L4022'>ImageInfo</a>        4022 ext/exif/exif.c 		if (ImageInfo.UserCommentEncoding &amp;&amp; strlen(ImageInfo.UserCommentEncoding)) {</span>
+<span class='curline'><a href='../S/156.html#L4023'>ImageInfo</a>        4023 ext/exif/exif.c 			exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", ImageInfo.UserCommentEncoding);</span>
+<span class='curline'><a href='../S/156.html#L4027'>ImageInfo</a>        4027 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "Copyright",              ImageInfo.Copyright);</span>
+<span class='curline'><a href='../S/156.html#L4028'>ImageInfo</a>        4028 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "Copyright.Photographer", ImageInfo.CopyrightPhotographer);</span>
+<span class='curline'><a href='../S/156.html#L4029'>ImageInfo</a>        4029 ext/exif/exif.c 	exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       ImageInfo.CopyrightEditor);</span>
+<span class='curline'><a href='../S/156.html#L4031'>ImageInfo</a>        4031 ext/exif/exif.c 	for (i=0; i&lt;ImageInfo.xp_fields.count; i++) {</span>
+<span class='curline'><a href='../S/156.html#L4032'>ImageInfo</a>        4032 ext/exif/exif.c 		exif_iif_add_str(&amp;ImageInfo, SECTION_WINXP, exif_get_tagname(ImageInfo.xp_fields.list[i].tag, NULL, 0, exif_get_tag_table(SECTION_WINXP)), ImageInfo.xp_fields.list[i].value);</span>
+<span class='curline'><a href='../S/156.html#L4034'>ImageInfo</a>        4034 ext/exif/exif.c 	if (ImageInfo.Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L4037'>ImageInfo</a>        4037 ext/exif/exif.c 			exif_iif_add_tag(&amp;ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.data);</span>
+<span class='curline'><a href='../S/156.html#L4039'>ImageInfo</a>        4039 ext/exif/exif.c 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {</span>
+<span class='curline'><a href='../S/156.html#L4041'>ImageInfo</a>        4041 ext/exif/exif.c 			exif_scan_thumbnail(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L4043'>ImageInfo</a>        4043 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "Thumbnail.FileType", ImageInfo.Thumbnail.filetype);</span>
+<span class='curline'><a href='../S/156.html#L4044'>ImageInfo</a>        4044 ext/exif/exif.c 		exif_iif_add_str(&amp;ImageInfo, SECTION_COMPUTED, "Thumbnail.MimeType", (char*)php_image_type_to_mime_type(ImageInfo.Thumbnail.filetype));</span>
+<span class='curline'><a href='../S/156.html#L4046'>ImageInfo</a>        4046 ext/exif/exif.c 	if (ImageInfo.Thumbnail.width &amp;&amp; ImageInfo.Thumbnail.height) {</span>
+<span class='curline'><a href='../S/156.html#L4047'>ImageInfo</a>        4047 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);</span>
+<span class='curline'><a href='../S/156.html#L4048'>ImageInfo</a>        4048 ext/exif/exif.c 		exif_iif_add_int(&amp;ImageInfo, SECTION_COMPUTED, "Thumbnail.Width",  ImageInfo.Thumbnail.width);</span>
+<span class='curline'><a href='../S/156.html#L4053'>ImageInfo</a>        4053 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Adding image infos");</span>
+<span class='curline'><a href='../S/156.html#L4056'>ImageInfo</a>        4056 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_FILE      );</span>
+<span class='curline'><a href='../S/156.html#L4057'>ImageInfo</a>        4057 ext/exif/exif.c 	add_assoc_image_info(return_value, 1,          &amp;ImageInfo, SECTION_COMPUTED  );</span>
+<span class='curline'><a href='../S/156.html#L4058'>ImageInfo</a>        4058 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_ANY_TAG   );</span>
+<span class='curline'><a href='../S/156.html#L4059'>ImageInfo</a>        4059 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_IFD0      );</span>
+<span class='curline'><a href='../S/156.html#L4060'>ImageInfo</a>        4060 ext/exif/exif.c 	add_assoc_image_info(return_value, 1,          &amp;ImageInfo, SECTION_THUMBNAIL );</span>
+<span class='curline'><a href='../S/156.html#L4061'>ImageInfo</a>        4061 ext/exif/exif.c 	add_assoc_image_info(return_value, 1,          &amp;ImageInfo, SECTION_COMMENT   );</span>
+<span class='curline'><a href='../S/156.html#L4062'>ImageInfo</a>        4062 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_EXIF      );</span>
+<span class='curline'><a href='../S/156.html#L4063'>ImageInfo</a>        4063 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_GPS       );</span>
+<span class='curline'><a href='../S/156.html#L4064'>ImageInfo</a>        4064 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_INTEROP   );</span>
+<span class='curline'><a href='../S/156.html#L4065'>ImageInfo</a>        4065 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_FPIX      );</span>
+<span class='curline'><a href='../S/156.html#L4066'>ImageInfo</a>        4066 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_APP12     );</span>
+<span class='curline'><a href='../S/156.html#L4067'>ImageInfo</a>        4067 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_WINXP     );</span>
+<span class='curline'><a href='../S/156.html#L4068'>ImageInfo</a>        4068 ext/exif/exif.c 	add_assoc_image_info(return_value, sub_arrays, &amp;ImageInfo, SECTION_MAKERNOTE );</span>
+<span class='curline'><a href='../S/156.html#L4071'>ImageInfo</a>        4071 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Discarding info");</span>
+<span class='curline'><a href='../S/156.html#L4074'>ImageInfo</a>        4074 ext/exif/exif.c 	exif_discard_imageinfo(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L4090'>ImageInfo</a>        4090 ext/exif/exif.c 	image_info_type ImageInfo;</span>
+<span class='curline'><a href='../S/156.html#L4092'>ImageInfo</a>        4092 ext/exif/exif.c 	memset(&amp;ImageInfo, 0, sizeof(ImageInfo));</span>
+<span class='curline'><a href='../S/156.html#L4102'>ImageInfo</a>        4102 ext/exif/exif.c 	ret = exif_read_file(&amp;ImageInfo, p_name, 1, 0);</span>
+<span class='curline'><a href='../S/156.html#L4104'>ImageInfo</a>        4104 ext/exif/exif.c 		exif_discard_imageinfo(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L4109'>ImageInfo</a>        4109 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Thumbnail data %d %d %d, %d x %d", ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.filetype, ImageInfo.Thumbnail.width, ImageInfo.Thumbnail.height);</span>
+<span class='curline'><a href='../S/156.html#L4111'>ImageInfo</a>        4111 ext/exif/exif.c 	if (!ImageInfo.Thumbnail.data || !ImageInfo.Thumbnail.size) {</span>
+<span class='curline'><a href='../S/156.html#L4112'>ImageInfo</a>        4112 ext/exif/exif.c 		exif_discard_imageinfo(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L4117'>ImageInfo</a>        4117 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Returning thumbnail(%d)", ImageInfo.Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L4120'>ImageInfo</a>        4120 ext/exif/exif.c 	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);</span>
+<span class='curline'><a href='../S/156.html#L4122'>ImageInfo</a>        4122 ext/exif/exif.c 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {</span>
+<span class='curline'><a href='../S/156.html#L4123'>ImageInfo</a>        4123 ext/exif/exif.c 			exif_scan_thumbnail(&amp;ImageInfo);</span>
+<span class='curline'><a href='../S/156.html#L4127'>ImageInfo</a>        4127 ext/exif/exif.c 		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);</span>
+<span class='curline'><a href='../S/156.html#L4128'>ImageInfo</a>        4128 ext/exif/exif.c 		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);</span>
+<span class='curline'><a href='../S/156.html#L4132'>ImageInfo</a>        4132 ext/exif/exif.c 		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);</span>
+<span class='curline'><a href='../S/156.html#L4136'>ImageInfo</a>        4136 ext/exif/exif.c 	exif_error_docref(NULL EXIFERR_CC, &amp;ImageInfo, E_NOTICE, "Discarding info");</span>
+<span class='curline'><a href='../S/156.html#L4139'>ImageInfo</a>        4139 ext/exif/exif.c 	exif_discard_imageinfo(&amp;ImageInfo);</span>
+</pre>
+</body>
+</html>

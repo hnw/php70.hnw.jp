@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>sapi/fpm/fpm/fpm_trace_mach.c</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.4' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/1861.html'>sapi</a>/<a href='../files/1866.html'>fpm</a>/<a href='../files/1867.html'>fpm</a>/fpm_trace_mach.c</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L23'>[^]</a><a href='#L83'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L23' title='Defined at 23.'>fpm_mach_vm_deallocate</a></li>
+<li><a href='#L34' title='Defined at 34.'>fpm_mach_vm_read_page</a></li>
+<li><a href='#L47' title='Defined at 47.'>fpm_trace_signal</a></li>
+<li><a href='#L57' title='Defined at 57.'>fpm_trace_ready</a></li>
+<li><a href='#L75' title='Defined at 75.'>fpm_trace_close</a></li>
+<li><a href='#L83' title='Defined at 83.'>fpm_trace_get_long</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 
+<a id='L2' name='L2'></a>   2         <em class='comment'>/* $Id: fpm_trace_mach.c,v 1.4 2008/08/26 15:09:15 anight Exp $ */</em>
+<a id='L3' name='L3'></a>   3         <em class='comment'>/* (c) 2007,2008 Andrei Nigmatulin */</em>
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='sharp'>#include</em> "<a href='1480.html'>fpm_config.h</a>"
+<a id='L6' name='L6'></a>   6 
+<a id='L7' name='L7'></a>   7 <em class='sharp'>#include</em> &lt;mach/mach.h&gt;
+<a id='L8' name='L8'></a>   8 <em class='sharp'>#include</em> &lt;mach/mach_vm.h&gt;
+<a id='L9' name='L9'></a>   9 
+<a id='L10' name='L10'></a>  10 <em class='sharp'>#include</em> &lt;<a href='1622.html'>unistd.h</a>&gt;
+<a id='L11' name='L11'></a>  11 
+<a id='L12' name='L12'></a>  12 <em class='sharp'>#include</em> "<a href='1512.html'>fpm_trace.h</a>"
+<a id='L13' name='L13'></a>  13 <em class='sharp'>#include</em> "<a href='1493.html'>fpm_process_ctl.h</a>"
+<a id='L14' name='L14'></a>  14 <em class='sharp'>#include</em> "<a href='1517.html'>fpm_unix.h</a>"
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='1521.html'>zlog.h</a>"
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>static</strong> mach_port_name_t <a href='../Y/38132.html' title='Multiple used in 838 places.'>target</a>;
+<a id='L19' name='L19'></a>  19 <strong class='reserved'>static</strong> <a href='../Y/40266.html' title='Multiple used in 4 places.'>vm_offset_t</a> <a href='../Y/38152.html' title='Multiple used in 3 places.'>target_page_base</a>;
+<a id='L20' name='L20'></a>  20 <strong class='reserved'>static</strong> <a href='../Y/40266.html' title='Multiple used in 4 places.'>vm_offset_t</a> <a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a>;
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>static</strong> mach_msg_type_number_t <a href='../Y/25297.html' title='Multiple used in 216 places.'>local_size</a>;
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/19226.html' title='Multiple referred from 2 places.'>fpm_mach_vm_deallocate</a>() <em class='comment'>/* {{{ */</em>
+<a id='L24' name='L24'></a>  24 <em class='brace'>{</em>
+<a id='L25' name='L25'></a>  25         <strong class='reserved'>if</strong> (<a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a>) <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26                 mach_vm_deallocate(<a href='../Y/25638.html' title='Multiple used in 2 places.'>mach_task_self</a>(), <a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a>, <a href='../Y/25297.html' title='Multiple used in 216 places.'>local_size</a>);
+<a id='L27' name='L27'></a>  27                 <a href='../Y/38152.html' title='Multiple used in 3 places.'>target_page_base</a> = 0;
+<a id='L28' name='L28'></a>  28                 <a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a> = 0;
+<a id='L29' name='L29'></a>  29                 <a href='../Y/25297.html' title='Multiple used in 216 places.'>local_size</a> = 0;
+<a id='L30' name='L30'></a>  30         <em class='brace'>}</em>
+<a id='L31' name='L31'></a>  31 <em class='brace'>}</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>/* }}} */</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../S/1513.html#L90' title='Referred from 90 in sapi/fpm/fpm/fpm_trace_mach.c.'>fpm_mach_vm_read_page</a>(<a href='../Y/40266.html' title='Multiple used in 4 places.'>vm_offset_t</a> <a href='../Y/31099.html' title='Multiple used in 24 places.'>page</a>) <em class='comment'>/* {{{ */</em>
+<a id='L35' name='L35'></a>  35 <em class='brace'>{</em>
+<a id='L36' name='L36'></a>  36         <a href='../Y/24434.html' title='Multiple used in 4 places.'>kern_return_t</a> <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38         <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a> = mach_vm_read(<a href='../Y/38132.html' title='Multiple used in 838 places.'>target</a>, <a href='../Y/31099.html' title='Multiple used in 24 places.'>page</a>, <a href='../Y/18273.html' title='Multiple used in 5 places.'>fpm_pagesize</a>, &amp;<a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a>, &amp;<a href='../Y/25297.html' title='Multiple used in 216 places.'>local_size</a>);
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>if</strong> (<a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a> != <a href='../Y/3667.html' title='Multiple used in 5 places.'>KERN_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L40' name='L40'></a>  40                 <a href='../S/1521.html#L10' title='Defined at 10 in sapi/fpm/fpm/zlog.h.'>zlog</a>(<a href='../S/1521.html#L35' title='Defined at 35 in sapi/fpm/fpm/zlog.h.'>ZLOG_ERROR</a>, "failed to read vm page: mach_vm_read(): %s (%d)", <a href='../Y/25634.html' title='Multiple used in 5 places.'>mach_error_string</a>(<a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>), <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>);
+<a id='L41' name='L41'></a>  41                 <strong class='reserved'>return</strong> -1;
+<a id='L42' name='L42'></a>  42         <em class='brace'>}</em>
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>return</strong> 0;
+<a id='L44' name='L44'></a>  44 <em class='brace'>}</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'>/* }}} */</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <strong class='reserved'>int</strong> <a href='../R/19330.html' title='Multiple referred from 2 places.'>fpm_trace_signal</a>(<a href='../S/1433.html#L57' title='Defined at 57 in main/win95nt.h.'>pid_t</a> <a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>) <em class='comment'>/* {{{ */</em>
+<a id='L48' name='L48'></a>  48 <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>if</strong> (0 &gt; <a href='../S/1492.html#L122' title='Defined at 122 in sapi/fpm/fpm/fpm_process_ctl.c.'>fpm_pctl_kill</a>(<a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>, <a href='../S/1493.html#L47' title='Defined at 47 in sapi/fpm/fpm/fpm_process_ctl.h.'>FPM_PCTL_STOP</a>)) <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50                 <a href='../S/1521.html#L10' title='Defined at 10 in sapi/fpm/fpm/zlog.h.'>zlog</a>(<a href='../S/1521.html#L43' title='Defined at 43 in sapi/fpm/fpm/zlog.h.'>ZLOG_SYSERROR</a>, "failed to send SIGSTOP to %d", <a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>);
+<a id='L51' name='L51'></a>  51                 <strong class='reserved'>return</strong> -1;
+<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>return</strong> 0;
+<a id='L54' name='L54'></a>  54 <em class='brace'>}</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>/* }}} */</em>
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>int</strong> <a href='../R/19329.html' title='Multiple referred from 2 places.'>fpm_trace_ready</a>(<a href='../S/1433.html#L57' title='Defined at 57 in main/win95nt.h.'>pid_t</a> <a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>) <em class='comment'>/* {{{ */</em>
+<a id='L58' name='L58'></a>  58 <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59         <a href='../Y/24434.html' title='Multiple used in 4 places.'>kern_return_t</a> <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>;
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61         <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a> = task_for_pid(<a href='../Y/25638.html' title='Multiple used in 2 places.'>mach_task_self</a>(), <a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>, &amp;<a href='../Y/38132.html' title='Multiple used in 838 places.'>target</a>);
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>if</strong> (<a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a> != <a href='../Y/3667.html' title='Multiple used in 5 places.'>KERN_SUCCESS</a>) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                 <strong class='reserved'>char</strong> *<a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a> = "";
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>if</strong> (<a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a> == KERN_FAILURE) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                         <a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a> = " It seems that master process does not have enough privileges to trace processes.";
+<a id='L67' name='L67'></a>  67                 <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68                 <a href='../S/1521.html#L10' title='Defined at 10 in sapi/fpm/fpm/zlog.h.'>zlog</a>(<a href='../S/1521.html#L35' title='Defined at 35 in sapi/fpm/fpm/zlog.h.'>ZLOG_ERROR</a>, "task_for_pid() failed: %s (%d)%s", <a href='../Y/25634.html' title='Multiple used in 5 places.'>mach_error_string</a>(<a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>), <a href='../Y/24522.html' title='Multiple used in 14 places.'>kr</a>, <a href='../Y/26917.html' title='Multiple used in 380 places.'>msg</a>);
+<a id='L69' name='L69'></a>  69                 <strong class='reserved'>return</strong> -1;
+<a id='L70' name='L70'></a>  70         <em class='brace'>}</em>
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>return</strong> 0;
+<a id='L72' name='L72'></a>  72 <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>/* }}} */</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <strong class='reserved'>int</strong> <a href='../R/19326.html' title='Multiple referred from 2 places.'>fpm_trace_close</a>(<a href='../S/1433.html#L57' title='Defined at 57 in main/win95nt.h.'>pid_t</a> <a href='../Y/32779.html' title='Multiple used in 160 places.'>pid</a>) <em class='comment'>/* {{{ */</em>
+<a id='L76' name='L76'></a>  76 <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <a href='../S/1513.html#L23' title='Defined at 23 in sapi/fpm/fpm/fpm_trace_mach.c.'>fpm_mach_vm_deallocate</a>();
+<a id='L78' name='L78'></a>  78         <a href='../Y/38132.html' title='Multiple used in 838 places.'>target</a> = 0;
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>return</strong> 0;
+<a id='L80' name='L80'></a>  80 <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>/* }}} */</em>
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>int</strong> <a href='../R/19327.html' title='Multiple referred from 14 places.'>fpm_trace_get_long</a>(<strong class='reserved'>long</strong> <a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>, <strong class='reserved'>long</strong> *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a>) <em class='comment'>/* {{{ */</em>
+<a id='L84' name='L84'></a>  84 <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85         <a href='../Y/36246.html' title='Multiple used in 4587 places.'>size_t</a> <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a> = ((<a href='../Y/39473.html' title='Multiple used in 18 places.'>uintptr_t</a>) (<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>) % <a href='../Y/18273.html' title='Multiple used in 5 places.'>fpm_pagesize</a>);
+<a id='L86' name='L86'></a>  86         <a href='../Y/40266.html' title='Multiple used in 4 places.'>vm_offset_t</a> <a href='../Y/12440.html' title='Multiple used in 526 places.'>base</a> = (<a href='../Y/39473.html' title='Multiple used in 18 places.'>uintptr_t</a>) (<a href='../Y/8854.html' title='Multiple used in 848 places.'>addr</a>) - <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>;
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         <strong class='reserved'>if</strong> (<a href='../Y/12440.html' title='Multiple used in 526 places.'>base</a> != <a href='../Y/38152.html' title='Multiple used in 3 places.'>target_page_base</a>) <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                 <a href='../S/1513.html#L23' title='Defined at 23 in sapi/fpm/fpm/fpm_trace_mach.c.'>fpm_mach_vm_deallocate</a>();
+<a id='L90' name='L90'></a>  90                 <strong class='reserved'>if</strong> (0 &gt; <a href='../S/1513.html#L34' title='Defined at 34 in sapi/fpm/fpm/fpm_trace_mach.c.'>fpm_mach_vm_read_page</a>(<a href='../Y/12440.html' title='Multiple used in 526 places.'>base</a>)) <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91                         <strong class='reserved'>return</strong> -1;
+<a id='L92' name='L92'></a>  92                 <em class='brace'>}</em>
+<a id='L93' name='L93'></a>  93         <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94         *<a href='../D/20795.html' title='Multiple defined in 7 places.'>data</a> = * (<strong class='reserved'>long</strong> *) (<a href='../Y/25295.html' title='Multiple used in 6 places.'>local_page</a> + <a href='../D/25320.html' title='Multiple defined in 3 places.'>offset</a>);
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>return</strong> 0;
+<a id='L96' name='L96'></a>  96 <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>/* }}} */</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L23'>[^]</a><a href='#L83'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>
